@@ -3,6 +3,6 @@
 #define CMake_VERSION_MAJOR 3
 #define CMake_VERSION_MINOR 11
 #define CMake_VERSION_PATCH 20180501
-#define CMake_VERSION_SUFFIX "g21c6c"
-#define CMake_VERSION_IS_DIRTY 1
-#define CMake_VERSION "3.11.20180501-g21c6c-dirty"
+#define CMake_VERSION_SUFFIX "g32c2ef"
+#define CMake_VERSION_IS_DIRTY 0
+#define CMake_VERSION "3.11.20180501-g32c2ef"
