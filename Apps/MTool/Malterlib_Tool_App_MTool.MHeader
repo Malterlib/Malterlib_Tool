@@ -35,6 +35,7 @@ Property
 	Target
 	{
 		Type "ConsoleExecutable"
+		MalterlibTargetNameType "Normal"
 		BaseName "MTool"
 		LinkWithLibraries "Iphlpapi.lib;@(Target.LinkWithLibraries)"
 		{
