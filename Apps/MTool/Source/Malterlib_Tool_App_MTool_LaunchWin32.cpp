@@ -10,6 +10,7 @@
 #include <Mib/Core/PlatformSpecific/WindowsFilePath>
 #include <Mib/Core/PlatformSpecific/WindowsString>
 #include <Mib/Core/PlatformSpecific/WindowsError>
+#include <Mib/Process/ProcessLaunch>
 
 class CTool_LaunchNSIS : public CTool
 {

@@ -64,11 +64,11 @@ public:
 				IMAGE_NT_HEADERS64 *pHeader = (IMAGE_NT_HEADERS64 *)pHeader2;
 
 				NTime::CTime RefTime = NTime::CTimeConvert::fs_CreateTime(1970);
-				CAOTime OldTime = RefTime + CAOTime::fs_GetSecondSpan(pHeader->FileHeader.TimeDateStamp);
-				DConOut("Old timestamp: {} {}" DNewLine, OldTime.f_GetAsString_DateNoLocal() << OldTime.f_GetAsString_TimeWithSeconds());
+				NTime::CTime OldTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
+				DConOut("Old timestamp: {}" DNewLine, OldTime.f_ToLocal());
 				++pHeader->FileHeader.TimeDateStamp;
-				CAOTime NewTime = RefTime + CAOTime::fs_GetSecondSpan(pHeader->FileHeader.TimeDateStamp);
-				DConOut("New timestamp: {} {}" DNewLine, NewTime.f_GetAsString_DateNoLocal() << NewTime.f_GetAsString_TimeWithSeconds());
+				NTime::CTime NewTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
+				DConOut("New timestamp: {}" DNewLine, NewTime.f_ToLocal());
 				{
 					NFile::CFile File;
 					DConOut("Writing File: {}" DNewLine, FileName);
@@ -82,11 +82,11 @@ public:
 				IMAGE_NT_HEADERS32 *pHeader = (IMAGE_NT_HEADERS32 *)pHeader2;
 
 				NTime::CTime RefTime = NTime::CTimeConvert::fs_CreateTime(1970);
-				CAOTime OldTime = RefTime + CAOTime::fs_GetSecondSpan(pHeader->FileHeader.TimeDateStamp);
-				DConOut("Old timestamp: {} {}" DNewLine, OldTime.f_GetAsString_DateNoLocal() << OldTime.f_GetAsString_TimeWithSeconds());
+				NTime::CTime OldTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
+				DConOut("Old timestamp: {}" DNewLine, OldTime.f_ToLocal());
 				++pHeader->FileHeader.TimeDateStamp;
-				CAOTime NewTime = RefTime + CAOTime::fs_GetSecondSpan(pHeader->FileHeader.TimeDateStamp);
-				DConOut("New timestamp: {} {}" DNewLine, NewTime.f_GetAsString_DateNoLocal() << NewTime.f_GetAsString_TimeWithSeconds());
+				NTime::CTime NewTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
+				DConOut("New timestamp: {}" DNewLine, NewTime.f_ToLocal());
 				{
 					NFile::CFile File;
 					DConOut("Writing File: {}" DNewLine, FileName);
