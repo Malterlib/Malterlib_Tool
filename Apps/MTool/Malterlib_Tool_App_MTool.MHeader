@@ -34,7 +34,7 @@ Property
 	}
 	Target
 	{
-		Type "Executable"
+		Type "ConsoleExecutable"
 		BaseName "MTool"
 		LinkWithLibraries "Iphlpapi.lib;@(Target.LinkWithLibraries)"
 		{
@@ -97,34 +97,7 @@ Property
 	{
 		Property
 		{
-			MalterlibBuildServerPutPath "BuildResults/@(PlatformFamily)"
-			{
-				!!PlatformFamily Windows
-			}
 			MalterlibBuildServerPutPath "BuildResults/@(PlatformFamily)/@(Architecture)"
-			{
-				!PlatformFamily Windows
-			}
-		}
-		%Group Launcher
-		{
-			!!PlatformFamily "Windows"
-			Property
-			{
-				ProductFileName "MTool"
-				ProductName "Malterlib Tool"
-				MalterlibBuildServerPutPath ""
-				{
-					&
-					{
-						!Architecture "x86"
-						!BuildArch_x86 1
-					}
-				}
-				MalterlibLauncherMalterlibTargetNameType "Normal"
-			}
-			%Target "Com_Launcher"
-			%Target "Exe_Launcher"
 		}
 		%Target "Malterlib_Tool_MTool"
 	}
