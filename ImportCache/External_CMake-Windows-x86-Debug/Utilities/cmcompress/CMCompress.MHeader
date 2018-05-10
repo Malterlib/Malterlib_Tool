@@ -1,0 +1,21 @@
+Property.CMakeOutputPath_CMCompress "@('../..'->MakeAbsolute())"
+%Target Lib_cmcompress
+{
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMCompress"
+	Target.Type StaticLibrary
+	Target.BaseName cmcompress
+	%Group Utilities
+	{
+		%File "../../../../../../External/CMake/Utilities/cmcompress/cmcompress.c"
+		{
+			Compile.Type C
+		}
+	}
+}

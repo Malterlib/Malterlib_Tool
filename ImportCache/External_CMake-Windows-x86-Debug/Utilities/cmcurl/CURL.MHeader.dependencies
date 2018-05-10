@@ -1,0 +1,7 @@
+../../../../../../External/CMake/Utilities/cmcurl/CMake/Macros.cmake
+../../../../../../External/CMake/Utilities/cmcurl/CMake/OtherTests.cmake
+../../../../../../External/CMake/Utilities/cmcurl/CMake/Platforms/WindowsCache.cmake
+../../../../../../External/CMake/Utilities/cmcurl/CMake/Utilities.cmake
+../../../../../../External/CMake/Utilities/cmcurl/CMakeLists.txt
+../../../../../../External/CMake/Utilities/cmcurl/lib/CMakeLists.txt
+../../../../../../External/CMake/Utilities/cmcurl/lib/curl_config.h.cmake

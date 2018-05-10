@@ -1,0 +1,6600 @@
+Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
+%Target Exe_cmsysTestsCxx
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmsysTestsCxx
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group kwsys
+					{
+						%File "Source/kwsys/cmsysTestsCxx.cxx"
+						{
+							Compile.Type C++
+						}
+					}
+				}
+			}
+		}
+	}
+	%Group Source
+	{
+		%Group kwsys
+		{
+			%File "../../../../External/CMake/Source/kwsys/testHashSTL.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/testIOS.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/testSystemTools.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/testCommandLineArguments.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/testCommandLineArguments1.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/testEncoding.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/testFStream.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/testConsoleBuf.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/testSystemInformation.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_USE_LONG_LONG=1;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/testDynamicLoader.cxx"
+			{
+				Compile.Type C++
+			}
+		}
+	}
+	%Dependency Lib_cmsys
+}
+%Target Lib_cmsys_c
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type StaticLibrary
+	Target.BaseName cmsys_c
+	%Group Source
+	{
+		%Group kwsys
+		{
+			%File "../../../../External/CMake/Source/kwsys/ProcessUNIX.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/Base64.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/kwsys/EncodingC.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/MD5.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/kwsys/Terminal.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/kwsys/System.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/String.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_STRING_C;@(Compile.PreprocessorDefines)"
+			}
+		}
+	}
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group cmsys
+					{
+						%File "Source/cmsys/Configure.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/SharedForward.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Process.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Base64.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Encoding.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/MD5.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Terminal.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/System.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/String.h"
+						{
+							Compile.Type None
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target Exe_cmsysTestsC
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmsysTestsC
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group kwsys
+					{
+						%File "Source/kwsys/cmsysTestsC.c"
+						{
+							Compile.Type C
+						}
+					}
+				}
+			}
+		}
+	}
+	%Group Source
+	{
+		%Group kwsys
+		{
+			%File "../../../../External/CMake/Source/kwsys/testEncode.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/kwsys/testTerminal.c"
+			{
+				Compile.Type C
+			}
+		}
+	}
+	%Dependency Lib_cmsys_c
+}
+%Target Exe_cmsysTestProcess
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmsysTestProcess
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/kwsys/testProcess.c"
+		{
+			Compile.Type C
+		}
+	}
+	%Dependency Lib_cmsys_c
+}
+%Target Exe_cmsysTestSharedForward
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmsysTestSharedForward
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group kwsys
+					{
+						%File "Source/kwsys/testSharedForward.c"
+						{
+							Compile.Type C
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency Lib_cmsys_c
+	{
+		Dependency.Link false
+	}
+}
+%Target Lib_cmsys
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type StaticLibrary
+	Target.BaseName cmsys
+	%Group Source
+	{
+		%Group kwsys
+		{
+			%File "../../../../External/CMake/Source/kwsys/ProcessUNIX.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/Base64.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/kwsys/EncodingC.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/MD5.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/kwsys/Terminal.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/kwsys/System.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/String.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_STRING_C;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/Directory.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/DynamicLoader.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/EncodingCXX.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/Glob.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/RegularExpression.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/SystemTools.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0;KWSYS_CXX_HAS_SETENV=1;KWSYS_CXX_HAS_UNSETENV=1;KWSYS_CXX_HAS_UTIMENSAT=1;KWSYS_CXX_HAS_UTIMES=1;KWSYS_CXX_STAT_HAS_ST_MTIM=0;KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=1;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/kwsys/CommandLineArguments.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/IOStream.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/FStream.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/kwsys/SystemInformation.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_CXX_HAS_ATOL=1;KWSYS_CXX_HAS_ATOLL=1;KWSYS_CXX_HAS_GETLOADAVG=1;KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE=1;KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE=1;KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP=1;KWSYS_SYS_HAS_IFADDRS_H=1;KWSYS_USE_LONG_LONG=1;SIZEOF_VOID_P=8;@(Compile.PreprocessorDefines)"
+			}
+		}
+	}
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group cmsys
+					{
+						%File "Source/cmsys/Configure.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/SharedForward.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Process.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Base64.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Encoding.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/MD5.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Terminal.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/System.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/String.h"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Directory.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/DynamicLoader.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Encoding.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Glob.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/RegularExpression.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/SystemTools.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/CommandLineArguments.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/IOStream.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/FStream.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/SystemInformation.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/ConsoleBuf.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/Configure.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/String.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/hashtable.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/hash_fun.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/hash_map.hxx"
+						{
+							Compile.Type None
+						}
+						%File "Source/cmsys/hash_set.hxx"
+						{
+							Compile.Type None
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target Exe_testConsoleBufChild
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName testConsoleBufChild
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/kwsys/testConsoleBufChild.cxx"
+		{
+			Compile.Type C++
+		}
+	}
+	%Dependency Lib_cmsys
+}
+%Target Dll_cmsysTestDynload
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;cmsysTestDynload_EXPORTS;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type DynamicLibrary
+	Target.BaseName cmsysTestDynload
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/kwsys/testDynload.c"
+		{
+			Compile.Type C
+		}
+	}
+	%Dependency Lib_cmsys
+	{
+		Dependency.Link false
+	}
+}
+%Target Exe_kwiml_test
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWIML_LANGUAGE_C;KWIML_LANGUAGE_CXX;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWIML_LANGUAGE_C;KWIML_LANGUAGE_CXX;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName kwiml_test
+	%Group Utilities
+	{
+		%Group test
+		{
+			%File "../../../../External/CMake/Utilities/KWIML/test/test.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/KWIML/test/test_abi_C.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/KWIML/test/test_int_C.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/KWIML/test/test_include_C.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/KWIML/test/test_abi_CXX.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Utilities/KWIML/test/test_int_CXX.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Utilities/KWIML/test/test_include_CXX.cxx"
+			{
+				Compile.Type C++
+			}
+		}
+	}
+}
+%Target Lib_cmlibrhash
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/librhash"
+	Target.Type StaticLibrary
+	Target.BaseName cmlibrhash
+	%Group Utilities
+	{
+		%Group librhash
+		{
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/algorithms.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/algorithms.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/byte_order.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/byte_order.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/hex.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/hex.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/md5.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/md5.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/rhash.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/rhash.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/sha1.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/sha1.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/sha256.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/sha256.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/sha3.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/sha3.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/sha512.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/sha512.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/ustd.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibrhash/librhash/util.h"
+			{
+				Compile.Type None
+			}
+		}
+	}
+}
+%Target Lib_cmzlib
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzlib'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMZLIB"
+	Target.Type StaticLibrary
+	Target.BaseName cmzlib
+	%Group Utilities
+	{
+		%Group cmzlib
+		{
+			%File "../../../../External/CMake/Utilities/cmzlib/adler32.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/compress.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/crc32.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/deflate.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/gzio.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/inffast.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/inflate.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/inftrees.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/trees.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/uncompr.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmzlib/zutil.c"
+			{
+				Compile.Type C
+			}
+		}
+	}
+}
+%Target Exe_LIBCURL
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Utilities/cmcurl/include/curl'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;HAVE_CONFIG_H;NDEBUG;USE_DARWINSSL;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CURL"
+	Target.Type ConsoleExecutable
+	Target.BaseName LIBCURL
+	%Group Utilities
+	{
+		%File "../../../../External/CMake/Utilities/cmcurl/curltest.c"
+		{
+			Compile.Type C
+		}
+	}
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+}
+%Target Lib_cmcurl
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Utilities/cmcurl/include/curl'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('Utilities/cmcurl/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('Utilities/cmcurl'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('Utilities/cmcurl/lib'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "BUILDING_LIBCURL;CURL_STATICLIB;HAVE_CONFIG_H;NDEBUG;USE_DARWINSSL;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CURL"
+	Target.Type StaticLibrary
+	Target.BaseName cmcurl
+	%Group Utilities
+	{
+		%Group lib
+		{
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/arpa_telnet.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/netrc.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/file.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/timeval.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostip.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/progress.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/formdata.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/cookie.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/sendf.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftp.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/url.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dict.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/if2ip.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/speedcheck.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/urldata.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ldap.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/escape.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/telnet.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/getinfo.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strequal.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sec.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/memdebug.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_chunks.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_fnmatch.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/wildcard.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/fileinfo.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftplistparser.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtok.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/connect.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/llist.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hash.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/content_encoding.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/share.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_md4.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_md5.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_digest.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_negotiate.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_pton.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/amigaos.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtoofft.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strerror.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_ntop.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curlx.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_memory.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_setup.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/transfer.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/select.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/easyif.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/multiif.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/parsedate.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/tftp.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/sockaddr.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/splay.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strdup.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ssh.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_base64.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rawstr.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_addrinfo.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sspi.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/slist.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/nonblock.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_memrchr.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/imap.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pop3.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/smtp.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pingpong.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rtsp.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_threads.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/warnless.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_hmac.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_rtmp.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gethostname.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/gopher.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/non-ascii.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/asyn.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_ntlm.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gssapi.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_wb.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_core.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sasl.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_multibyte.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostcheck.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/conncache.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_setup_once.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/multihandle.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/setup-vms.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pipeline.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dotdot.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http2.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/sigpipe.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/smb.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_endian.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_des.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_printf.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/system_win32.h"
+			{
+				Compile.Type None
+			}
+			%Group vauth
+			{
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/vauth.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/digest.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/ntlm.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/vauth.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/cleartext.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/cram.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/digest.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/digest_sspi.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/krb5_gssapi.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/krb5_sspi.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/ntlm.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/ntlm_sspi.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/oauth2.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/spnego_gssapi.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/spnego_sspi.c"
+				{
+					Compile.Type C
+				}
+			}
+			%Group vtls
+			{
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/openssl.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/vtls.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/gtls.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/nssg.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/polarssl.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/polarssl_threadlock.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/axtls.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/cyassl.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/schannel.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/darwinssl.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/gskit.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/openssl.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/gtls.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/vtls.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/nss.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/polarssl.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/polarssl_threadlock.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/axtls.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/cyassl.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/schannel.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/darwinssl.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/gskit.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls.c"
+				{
+					Compile.Type C
+				}
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/file.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/timeval.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/base64.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/progress.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/formdata.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/cookie.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/sendf.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftp.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/url.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dict.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/if2ip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/speedcheck.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ldap.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/version.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/getenv.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/escape.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/mprintf.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/telnet.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/netrc.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/getinfo.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/transfer.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strequal.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/easy.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/security.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_fnmatch.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/fileinfo.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftplistparser.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/wildcard.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/krb5.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/memdebug.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_chunks.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtok.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/connect.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/llist.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hash.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/multi.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/content_encoding.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/share.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_digest.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/md4.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/md5.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_negotiate.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_pton.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtoofft.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strerror.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/amigaos.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostasyn.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostip4.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostip6.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostsyn.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_ntop.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/parsedate.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/select.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/tftp.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/splay.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strdup.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ssh.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rawstr.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_addrinfo.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks_gssapi.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks_sspi.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sspi.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/slist.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/nonblock.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_memrchr.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/imap.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pop3.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/smtp.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pingpong.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rtsp.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_threads.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/warnless.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hmac.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_rtmp.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/openldap.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gethostname.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/gopher.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/idn_win32.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/non-ascii.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/asyn-ares.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/asyn-thread.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gssapi.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_ntlm.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_wb.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_core.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sasl.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_multibyte.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostcheck.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/conncache.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pipeline.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dotdot.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http2.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/smb.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_endian.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_des.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/system_win32.c"
+			{
+				Compile.Type C
+			}
+		}
+	}
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Utilities
+				{
+					%Group cmcurl
+					{
+						%Group lib
+						{
+							%File "Utilities/cmcurl/lib/curl_config.h"
+							{
+								Compile.Type None
+							}
+						}
+						%Group include
+						{
+							%Group curl
+							{
+								%File "Utilities/cmcurl/include/curl/curlbuild.h"
+								{
+									Compile.Type None
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency Lib_cmzlib
+	{
+		Dependency.Indirect true
+	}
+}
+%Target Lib_cmcompress
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMCompress"
+	Target.Type StaticLibrary
+	Target.BaseName cmcompress
+	%Group Utilities
+	{
+		%File "../../../../External/CMake/Utilities/cmcompress/cmcompress.c"
+		{
+			Compile.Type C
+		}
+	}
+}
+%Target Lib_cmexpat
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Utilities/cmexpat'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmexpat/lib'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;HAVE_EXPAT_CONFIG_H;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type StaticLibrary
+	Target.BaseName cmexpat
+	%Group Utilities
+	{
+		%Group lib
+		{
+			%File "../../../../External/CMake/Utilities/cmexpat/lib/xmlparse.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmexpat/lib/xmlrole.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmexpat/lib/xmltok.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmexpat/lib/xmltok_impl.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmexpat/lib/xmltok_ns.c"
+			{
+				Compile.Type C
+			}
+		}
+	}
+}
+%Target Lib_cmbzip2
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/bzip2"
+	Target.Type StaticLibrary
+	Target.BaseName cmbzip2
+	%Group Utilities
+	{
+		%Group cmbzip2
+		{
+			%File "../../../../External/CMake/Utilities/cmbzip2/blocksort.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmbzip2/huffman.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmbzip2/crctable.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmbzip2/randtable.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmbzip2/compress.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmbzip2/decompress.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmbzip2/bzlib.c"
+			{
+				Compile.Type C
+			}
+		}
+	}
+}
+%Target Lib_cmliblzma
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/check'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/delta'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/lz'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/rangecoder'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/simple'->MakeAbsolute());@('Utilities/cmliblzma'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMLIBLZMA"
+	Target.Type StaticLibrary
+	Target.BaseName cmliblzma
+	%Group Utilities
+	{
+		%Group cmliblzma
+		{
+			%Group common
+			{
+				%File "../../../../External/CMake/Utilities/cmliblzma/common/sysdefs.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmliblzma/common/tuklib_integer.h"
+				{
+					Compile.Type None
+				}
+			}
+			%Group liblzma
+			{
+				%Group check
+				{
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/check/check.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/check/crc32_fast.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/check/crc32_table.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/check/crc64_fast.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/check/crc64_table.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/check/sha256.c"
+					{
+						Compile.Type C
+					}
+				}
+				%Group common
+				{
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/alone_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/alone_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/auto_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_buffer_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_buffer_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_header_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_header_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_util.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/common.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_buffer_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_decoder_memusage.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_encoder_memusage.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_preset.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_buffer_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_buffer_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_common.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_flags_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_flags_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/index.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/index_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/index_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/index_hash.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_buffer_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_buffer_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_flags_common.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_flags_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_flags_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/vli_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/vli_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/common/vli_size.c"
+					{
+						Compile.Type C
+					}
+				}
+				%Group delta
+				{
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/delta/delta_common.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/delta/delta_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/delta/delta_encoder.c"
+					{
+						Compile.Type C
+					}
+				}
+				%Group lz
+				{
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lz/lz_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lz/lz_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lz/lz_encoder_mf.c"
+					{
+						Compile.Type C
+					}
+				}
+				%Group lzma
+				{
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/fastpos_table.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma2_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma2_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_encoder_optimum_fast.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_encoder_optimum_normal.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_encoder_presets.c"
+					{
+						Compile.Type C
+					}
+				}
+				%Group rangecoder
+				{
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/rangecoder/price_table.c"
+					{
+						Compile.Type C
+					}
+				}
+				%Group simple
+				{
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/arm.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/armthumb.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/ia64.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/powerpc.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/simple_coder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/simple_decoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/simple_encoder.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/sparc.c"
+					{
+						Compile.Type C
+					}
+					%File "../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/x86.c"
+					{
+						Compile.Type C
+					}
+				}
+			}
+		}
+	}
+}
+%Target Lib_cmlibarchive
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('Utilities/cmlibarchive'->MakeAbsolute());@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;HAVE_CONFIG_H;LIBARCHIVE_STATIC;LZMA_API_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/libarchive"
+	Target.Type StaticLibrary
+	Target.BaseName cmlibarchive
+	%Group Utilities
+	{
+		%Group libarchive
+		{
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_acl.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_check_magic.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_cmdline.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_cmdline_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_crc32.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_cryptor.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_cryptor_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_digest.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_digest_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_endian.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry_copy_stat.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry_link_resolver.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry_locale.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry_sparse.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry_stat.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry_strmode.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_entry_xattr.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_getdate.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_getdate.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_hmac.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_hmac_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_match.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_openssl_evp_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_openssl_hmac_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_options.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_options_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_pack_dev.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_pack_dev.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_pathmatch.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_pathmatch.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_platform.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_ppmd_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_ppmd7.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_ppmd7_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_random.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_random_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_rb.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_rb.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_add_passphrase.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_append_filter.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_data_into_fd.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_disk_entry_from_file.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_disk_posix.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_disk_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_disk_set_standard_lookup.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_extract.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_extract2.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_open_fd.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_open_file.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_open_filename.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_open_memory.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_set_format.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_set_options.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_all.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_bzip2.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_compress.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_gzip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_grzip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_lrzip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_lz4.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_lzop.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_none.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_program.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_rpm.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_uu.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_xz.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_7zip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_all.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_ar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_by_code.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_cab.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_cpio.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_empty.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_iso9660.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_lha.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_mtree.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_rar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_raw.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_tar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_warc.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_xar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_zip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_string.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_string.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_string_composition.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_string_sprintf.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_util.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_virtual.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_disk_acl.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_disk_posix.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_disk_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_disk_set_standard_lookup.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_private.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_open_fd.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_open_file.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_open_filename.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_open_memory.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_b64encode.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_by_name.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_bzip2.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_compress.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_grzip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_gzip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_lrzip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_lz4.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_lzop.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_none.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_program.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_uuencode.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_xz.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_7zip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_ar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_by_name.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_cpio.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_cpio_newc.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_filter_by_ext.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_gnutar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_iso9660.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_mtree.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_pax.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_raw.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_shar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_ustar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_v7tar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_warc.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_xar.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_zip.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_options.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_passphrase.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_xxhash.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/filter_fork_posix.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/filter_fork.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/xxhash.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive.h"
+			{
+				Compile.Type None
+			}
+		}
+	}
+	%Dependency Lib_cmliblzma
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmbzip2
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmzlib
+	{
+		Dependency.Indirect true
+	}
+}
+%Target Lib_cmjsoncpp
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmjsoncpp/include'->MakeAbsolute());@('Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/JsonCpp"
+	Target.Type StaticLibrary
+	Target.BaseName cmjsoncpp
+	%Group Utilities
+	{
+		%Group lib_json
+		{
+			%File "../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_batchallocator.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_reader.cpp"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_tool.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_value.cpp"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_valueiterator.inl"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_writer.cpp"
+			{
+				Compile.Type C++
+			}
+		}
+	}
+}
+%Target Lib_cmlibuv
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/src/unix'->MakeAbsolute());@('Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;_DARWIN_UNLIMITED_SELECT=1;_DARWIN_USE_64_BIT_INODE=1;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/libuv"
+	Target.Type StaticLibrary
+	Target.BaseName cmlibuv
+	%Group Utilities
+	{
+		%Group src
+		{
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/fs-poll.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/heap-inl.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/inet.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/queue.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/threadpool.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/uv-common.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/uv-common.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/version.c"
+			{
+				Compile.Type C
+			}
+			%Group unix
+			{
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/async.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/atomic-ops.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/core.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/dl.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/fs.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/getaddrinfo.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/getnameinfo.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/internal.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/loop-watcher.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/loop.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/pipe.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/poll.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/process.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/signal.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/spinlock.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/stream.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/tcp.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/thread.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/timer.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/tty.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/udp.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/darwin.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/darwin-proctitle.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/fsevents.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/kqueue.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/proctitle.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../External/CMake/Utilities/cmlibuv/src/unix/pthread-barrier.c"
+				{
+					Compile.Type C
+				}
+			}
+		}
+	}
+}
+%Target Lib_cmForm
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMAKE_FORM"
+	Target.Type StaticLibrary
+	Target.BaseName cmForm
+	%Group Source
+	{
+		%Group form
+		{
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_arg.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_attr.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_current.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_def.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_dup.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_ftchoice.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_ftlink.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_info.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_just.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_link.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_max.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_move.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_newftyp.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_opts.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_pad.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_page.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_stat.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_type.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fld_user.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_cursor.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_data.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_def.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_driver.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_hook.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_opts.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_page.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_post.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_req_name.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_scale.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_sub.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_user.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/frm_win.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fty_alnum.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fty_alpha.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fty_enum.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fty_int.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fty_ipv4.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fty_num.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/form/fty_regex.c"
+			{
+				Compile.Type C
+			}
+		}
+	}
+}
+%Target Exe_ccmake
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName ccmake
+	%Group Source
+	{
+		%Group CursesDialog
+		{
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesOptionsWidget.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesBoolWidget.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesCacheEntryComposite.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesDummyWidget.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesFilePathWidget.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesForm.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesLabelWidget.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesLongMessageForm.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesMainForm.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesPathWidget.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesStringWidget.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/cmCursesWidget.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CursesDialog/ccmake.cxx"
+			{
+				Compile.Type C++
+			}
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_cmForm
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Exe_cmake
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmake
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/cmakemain.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmcmd.cxx"
+		{
+			Compile.Type C++
+			Compile.PreprocessorDefines "HAVE_SERVER_MODE=1;@(Compile.PreprocessorDefines)"
+		}
+		%File "../../../../External/CMake/Source/cmcmd.h"
+		{
+			Compile.Type None
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_CMakeServerLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Lib_CPackLib
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type StaticLibrary
+	Target.BaseName CPackLib
+	%Group Source
+	{
+		%Group CPack
+		{
+			%File "../../../../External/CMake/Source/CPack/cmCPackArchiveGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackComponentGroup.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackGeneratorFactory.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackLog.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackNSISGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%Group IFW
+			{
+				%File "../../../../External/CMake/Source/CPack/IFW/cmCPackIFWPackage.cxx"
+				{
+					Compile.Type C++
+				}
+				%File "../../../../External/CMake/Source/CPack/IFW/cmCPackIFWInstaller.cxx"
+				{
+					Compile.Type C++
+				}
+				%File "../../../../External/CMake/Source/CPack/IFW/cmCPackIFWRepository.cxx"
+				{
+					Compile.Type C++
+				}
+				%File "../../../../External/CMake/Source/CPack/IFW/cmCPackIFWGenerator.cxx"
+				{
+					Compile.Type C++
+				}
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackSTGZGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackTGZGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackTXZGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackTarBZip2Generator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackTarCompressGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackZIPGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPack7zGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackDebGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackRPMGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackBundleGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackDragNDropGenerator.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "HAVE_CoreServices;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackOSXX11Generator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackPKGGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackPackageMakerGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CPack/cmCPackProductBuildGenerator.cxx"
+			{
+				Compile.Type C++
+			}
+		}
+	}
+	%Dependency Lib_CMakeLib
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibuv
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmjsoncpp
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibarchive
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmliblzma
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmbzip2
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmexpat
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmcompress
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmcurl
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmzlib
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibrhash
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmsys
+	{
+		Dependency.Indirect true
+	}
+}
+%Target Exe_ctest
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName ctest
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/ctest.cxx"
+		{
+			Compile.Type C++
+		}
+	}
+	%Dependency Lib_CTestLib
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Lib_CMakeServerLib
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type StaticLibrary
+	Target.BaseName CMakeServerLib
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/cmFileMonitor.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFileMonitor.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmServer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmServer.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmServerConnection.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmServerConnection.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmServerProtocol.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmServerProtocol.h"
+		{
+			Compile.Type None
+		}
+	}
+	%Dependency Lib_CMakeLib
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibuv
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmjsoncpp
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibarchive
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmliblzma
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmbzip2
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmexpat
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmcompress
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmcurl
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmzlib
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibrhash
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmsys
+	{
+		Dependency.Indirect true
+	}
+}
+%Target Lib_CMakeLib
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type StaticLibrary
+	Target.BaseName CMakeLib
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/cmArchiveWrite.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmBase32.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCacheManager.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCacheManager.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCLocaleEnvironmentScope.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCLocaleEnvironmentScope.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCommandArgumentLexer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCommandArgumentParser.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCommandArgumentParserHelper.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCommonTargetGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCommonTargetGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmComputeComponentGraph.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmComputeComponentGraph.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmComputeLinkDepends.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmComputeLinkDepends.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmComputeLinkInformation.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmComputeLinkInformation.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmComputeTargetDepends.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmComputeTargetDepends.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCPackPropertiesGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCPackPropertiesGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCryptoHash.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCryptoHash.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCurl.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCurl.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCustomCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCustomCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCustomCommandGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCustomCommandGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmDefinitions.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDefinitions.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmDepends.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDepends.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmDependsC.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDependsC.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmDependsFortran.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDependsFortran.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmDependsJava.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDependsJava.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmDependsJavaLexer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDependsJavaParser.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDependsJavaParserHelper.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDependsJavaParserHelper.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmDocumentation.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDocumentationFormatter.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDocumentationSection.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDynamicLoader.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDynamicLoader.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExprLexer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExprParser.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExprParserHelper.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportBuildAndroidMKGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportBuildAndroidMKGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportBuildFileGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportBuildFileGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportFileGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportFileGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportInstallAndroidMKGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportInstallAndroidMKGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportInstallFileGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportInstallFileGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportTryCompileFileGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportTryCompileFileGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportSet.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportSet.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportSetMap.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportSetMap.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExternalMakefileProjectGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExternalMakefileProjectGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExtraCodeBlocksGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExtraCodeBlocksGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExtraCodeLiteGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExtraCodeLiteGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExtraEclipseCDT4Generator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExtraEclipseCDT4Generator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExtraKateGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExtraKateGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExtraSublimeTextGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExtraSublimeTextGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExtraMalterlibGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExtraMalterlibGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMalterlibRegistry.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMalterlibRegistry.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFileLock.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFileLock.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFileLockPool.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFileLockPool.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFileLockResult.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFileLockResult.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFilePathUuid.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFilePathUuid.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFileTimeComparison.cxx"
+		{
+			Compile.Type C++
+			Compile.PreprocessorDefines "CMake_STAT_HAS_ST_MTIM=0;CMake_STAT_HAS_ST_MTIMESPEC=1;@(Compile.PreprocessorDefines)"
+		}
+		%File "../../../../External/CMake/Source/cmFileTimeComparison.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFortranLexer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFortranLexer.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFortranParser.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFortranParser.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFortranParserImpl.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratedFileStream.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionContext.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionContext.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionDAGChecker.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionDAGChecker.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionEvaluationFile.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionEvaluationFile.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionEvaluator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionEvaluator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionLexer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionLexer.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionNode.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionNode.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionParser.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpressionParser.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpression.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorExpression.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorTarget.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGeneratorTarget.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGlobalCommonGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGlobalCommonGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGlobalGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGlobalGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGlobalGeneratorFactory.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGlobalUnixMakefileGenerator3.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGlobalUnixMakefileGenerator3.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGraphAdjacencyList.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGraphVizWriter.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGraphVizWriter.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallExportGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstalledFile.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstalledFile.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallFilesGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallFilesGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallScriptGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallScriptGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallTargetGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallTargetGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallDirectoryGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallDirectoryGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLinkedTree.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLinkItem.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLinkLineComputer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLinkLineComputer.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLinkLineDeviceComputer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLinkLineDeviceComputer.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmListFileCache.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmListFileCache.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmListFileLexer.c"
+		{
+			Compile.Type C
+		}
+		%File "../../../../External/CMake/Source/cmLocalCommonGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLocalCommonGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLocalGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLocalGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmRulePlaceholderExpander.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmRulePlaceholderExpander.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLocalUnixMakefileGenerator3.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLocale.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMachO.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMachO.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMakefile.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMakefile.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMakefileTargetGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMakefileExecutableTargetGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMakefileLibraryTargetGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMakefileUtilityTargetGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMessenger.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMessenger.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMSVC60LinkLineComputer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMSVC60LinkLineComputer.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmOSXBundleGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmOSXBundleGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmOutputConverter.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmOutputConverter.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmNewLineStyle.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmNewLineStyle.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmOrderDirectories.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmOrderDirectories.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmPolicies.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmPolicies.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmProcessOutput.cxx"
+		{
+			Compile.Type C++
+			Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+		}
+		%File "../../../../External/CMake/Source/cmProcessOutput.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmProcessTools.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmProcessTools.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmProperty.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmProperty.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmPropertyDefinition.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmPropertyDefinition.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmPropertyDefinitionMap.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmPropertyDefinitionMap.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmPropertyMap.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmPropertyMap.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmQtAutoGeneratorInitializer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmQtAutoGeneratorInitializer.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmQtAutoGenerators.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmQtAutoGenerators.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmRST.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmRST.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmScriptGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmScriptGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSourceFile.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSourceFile.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSourceFileLocation.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSourceFileLocation.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSourceGroup.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSourceGroup.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmState.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmState.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmStateDirectory.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmStateDirectory.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmStateSnapshot.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmStateSnapshot.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmStateTypes.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSystemTools.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSystemTools.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTarget.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTarget.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTargetPropertyComputer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTargetPropertyComputer.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTargetExport.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTest.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTest.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTestGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTestGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmUuid.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmVariableWatch.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmVariableWatch.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmVersion.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmVersion.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmXMLParser.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmXMLParser.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmXMLSafe.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmXMLSafe.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmXMLWriter.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmXMLWriter.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmake.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmake.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCommands.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCommands.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAddCompileOptionsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAddCompileOptionsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAddCustomCommandCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAddCustomCommandCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAddCustomTargetCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAddCustomTargetCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAddDefinitionsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAddDefinitionsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAddDependenciesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAddDependenciesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAddExecutableCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAddExecutableCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAddLibraryCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAddLibraryCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAddSubDirectoryCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAddSubDirectoryCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAddTestCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAddTestCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmAuxSourceDirectoryCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmAuxSourceDirectoryCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmBreakCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmBreakCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmBuildCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmBuildCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmBuildNameCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmBuildNameCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCMakeHostSystemInformationCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCMakeHostSystemInformationCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCMakeMinimumRequired.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCMakeMinimumRequired.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCMakePolicyCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCMakePolicyCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCommandArgumentsHelper.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCommandArgumentsHelper.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmConditionEvaluator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmConditionEvaluator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmConfigureFileCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmConfigureFileCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmContinueCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmContinueCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCoreTryCompile.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCoreTryCompile.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmCreateTestSourceList.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmCreateTestSourceList.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmDefinePropertyCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmDefinePropertyCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmEnableLanguageCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmEnableLanguageCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmEnableTestingCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmEnableTestingCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExecProgramCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExecProgramCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExecuteProcessCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExecuteProcessCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExpandedCommandArgument.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExpandedCommandArgument.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmExportLibraryDependenciesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmExportLibraryDependenciesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFLTKWrapUICommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFLTKWrapUICommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFileCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFileCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFindBase.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFindBase.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFindCommon.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFindCommon.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFindFileCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFindFileCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFindLibraryCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFindLibraryCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFindPackageCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFindPackageCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFindPathCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFindPathCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFindProgramCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFindProgramCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmForEachCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmForEachCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFunctionCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFunctionCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGetCMakePropertyCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGetCMakePropertyCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGetDirectoryPropertyCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGetDirectoryPropertyCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGetFilenameComponentCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGetFilenameComponentCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGetPropertyCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGetPropertyCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGetSourceFilePropertyCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGetSourceFilePropertyCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGetTargetPropertyCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGetTargetPropertyCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGetTestPropertyCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGetTestPropertyCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmHexFileConverter.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmHexFileConverter.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmIfCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmIfCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmIncludeCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmIncludeCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmIncludeDirectoryCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmIncludeDirectoryCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmIncludeExternalMSProjectCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmIncludeExternalMSProjectCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmIncludeRegularExpressionCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmIncludeRegularExpressionCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallCommandArguments.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallCommandArguments.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallFilesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallFilesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallProgramsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallProgramsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallTargetsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmInstallTargetsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLinkDirectoriesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLinkDirectoriesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLinkLibrariesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLinkLibrariesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmListCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmListCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLoadCacheCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLoadCacheCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLoadCommandCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLoadCommandCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMacroCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMacroCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMakeDirectoryCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMakeDirectoryCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMarkAsAdvancedCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMarkAsAdvancedCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMathCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMathCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmMessageCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMessageCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmOptionCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmOptionCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmOutputRequiredFilesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmOutputRequiredFilesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmParseArgumentsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmParseArgumentsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmPathLabel.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmPathLabel.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmProjectCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmProjectCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmQTWrapCPPCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmQTWrapCPPCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmQTWrapUICommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmQTWrapUICommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmRemoveCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmRemoveCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmRemoveDefinitionsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmRemoveDefinitionsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmReturnCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmReturnCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSearchPath.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSearchPath.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSeparateArgumentsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSeparateArgumentsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSetCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSetCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSetDirectoryPropertiesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSetDirectoryPropertiesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSetPropertyCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSetPropertyCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSetSourceFilesPropertiesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSetSourceFilesPropertiesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSetTargetPropertiesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSetTargetPropertiesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSetTestsPropertiesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSetTestsPropertiesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSiteNameCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSiteNameCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSourceGroupCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSourceGroupCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmStringCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmStringCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSubdirCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSubdirCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmSubdirDependsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmSubdirDependsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTargetCompileDefinitionsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTargetCompileDefinitionsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTargetCompileFeaturesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTargetCompileFeaturesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTargetCompileOptionsCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTargetCompileOptionsCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTargetIncludeDirectoriesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTargetIncludeDirectoriesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTargetLinkLibrariesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTargetLinkLibrariesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTargetPropCommandBase.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTargetPropCommandBase.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTargetSourcesCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTargetSourcesCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTimestamp.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTimestamp.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTryCompileCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTryCompileCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmTryRunCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmTryRunCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmUnexpectedCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmUnexpectedCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmUnsetCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmUnsetCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmUseMangledMesaCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmUseMangledMesaCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmUtilitySourceCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmUtilitySourceCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmVariableRequiresCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmVariableRequiresCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmVariableWatchCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmVariableWatchCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmWhileCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmWhileCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmWriteFileCommand.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmWriteFileCommand.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cm_auto_ptr.hxx"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cm_get_date.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cm_get_date.c"
+		{
+			Compile.Type C
+		}
+		%File "../../../../External/CMake/Source/cm_utf8.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cm_utf8.c"
+		{
+			Compile.Type C
+		}
+		%File "../../../../External/CMake/Source/cm_codecvt.hxx"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cm_codecvt.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGlobalKdevelopGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmXCodeObject.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmXCode21Object.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGlobalXCodeGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGlobalXCodeGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLocalXCodeGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLocalXCodeGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGlobalNinjaGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmGlobalNinjaGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmNinjaTypes.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmLocalNinjaGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmLocalNinjaGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmNinjaTargetGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmNinjaTargetGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmNinjaNormalTargetGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmNinjaNormalTargetGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmNinjaUtilityTargetGenerator.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmNinjaUtilityTargetGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmNinjaLinkLineComputer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmNinjaLinkLineComputer.h"
+		{
+			Compile.Type None
+		}
+	}
+	%Dependency Lib_cmlibuv
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmjsoncpp
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibarchive
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmliblzma
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmbzip2
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmexpat
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmcompress
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmcurl
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmzlib
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibrhash
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmsys
+	{
+		Dependency.Indirect true
+	}
+}
+%Target Exe_OSXScriptLauncher
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName OSXScriptLauncher
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/CPack/OSXScriptLauncher.cxx"
+		{
+			Compile.Type C++
+		}
+	}
+	%Dependency Lib_cmsys
+}
+%Target Lib_CTestLib
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type StaticLibrary
+	Target.BaseName CTestLib
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/cmCTest.cxx"
+		{
+			Compile.Type C++
+		}
+		%Group CTest
+		{
+			%File "../../../../External/CMake/Source/CTest/cmProcess.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestBatchTestHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestBuildAndTestHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestBuildCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestBuildHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestConfigureCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestConfigureHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestCoverageCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestCoverageHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestCurl.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmParseMumpsCoverage.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmParseCacheCoverage.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmParseGTMCoverage.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmParseJacocoCoverage.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmParseBlanketJSCoverage.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmParsePHPCoverage.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmParseCoberturaCoverage.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmParseDelphiCoverage.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestEmptyBinaryDirectoryCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestGenericHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestHandlerCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestLaunch.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestMemCheckCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestMemCheckHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestMultiProcessHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestReadCustomFilesCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestRunScriptCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestRunTest.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestScriptHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestSleepCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestStartCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestSubmitCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestSubmitHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestTestCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestTestHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestUpdateCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestUpdateHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestUploadCommand.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestUploadHandler.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestVC.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestVC.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestGlobalVC.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestGlobalVC.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestCVS.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestCVS.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestSVN.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestSVN.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestBZR.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestBZR.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestGIT.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestGIT.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestHG.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestHG.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestP4.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestP4.h"
+			{
+				Compile.Type None
+			}
+		}
+	}
+	%Dependency Lib_CMakeLib
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibuv
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmjsoncpp
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibarchive
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmliblzma
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmbzip2
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmexpat
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmcompress
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmcurl
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmzlib
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmlibrhash
+	{
+		Dependency.Indirect true
+	}
+	%Dependency Lib_cmsys
+	{
+		Dependency.Indirect true
+	}
+}
+%Target Exe_cmakexbuild
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmakexbuild
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/cmakexbuild.cxx"
+		{
+			Compile.Type C++
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Exe_cpack
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('Utilities/cmcompress'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('Source/CursesDialog/form'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName cpack
+	%Group Source
+	{
+		%File "../../../../External/CMake/Source/CPack/cpack.cxx"
+		{
+			Compile.Type C++
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_CPackLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Exe_runcompilecommands
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName runcompilecommands
+	%Group Tests
+	{
+		%File "../../../../External/CMake/Tests/CMakeLib/run_compile_commands.cxx"
+		{
+			Compile.Type C++
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Exe_CMakeLibTests
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName CMakeLibTests
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Tests
+				{
+					%Group CMakeLib
+					{
+						%File "Tests/CMakeLib/CMakeLibTests.cxx"
+						{
+							Compile.Type C++
+						}
+					}
+				}
+			}
+		}
+	}
+	%Group Tests
+	{
+		%Group CMakeLib
+		{
+			%File "../../../../External/CMake/Tests/CMakeLib/testGeneratedFileStream.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Tests/CMakeLib/testRST.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Tests/CMakeLib/testSystemTools.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Tests/CMakeLib/testUTF8.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Tests/CMakeLib/testXMLParser.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Tests/CMakeLib/testXMLSafe.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Tests/CMakeLib/testFindPackageCommand.cxx"
+			{
+				Compile.Type C++
+			}
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Exe_testEncoding
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName testEncoding
+	%Group Tests
+	{
+		%File "../../../../External/CMake/Tests/CMakeLib/testEncoding.cxx"
+		{
+			Compile.Type C++
+		}
+	}
+	%Dependency Lib_cmsys
+}
+%Target Exe_pseudo_BC
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudo_BC
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Tests
+				{
+					%Group CMakeLib
+					{
+						%Group PseudoMemcheck
+						{
+							%File "Tests/CMakeLib/PseudoMemcheck/ret0.cxx"
+							{
+								Compile.Type C++
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Exe_pseudo_purify
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudo_purify
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Tests
+				{
+					%Group CMakeLib
+					{
+						%Group PseudoMemcheck
+						{
+							%File "Tests/CMakeLib/PseudoMemcheck/ret0.cxx"
+							{
+								Compile.Type C++
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Exe_pseudo_valgrind
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudo_valgrind
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Tests
+				{
+					%Group CMakeLib
+					{
+						%Group PseudoMemcheck
+						{
+							%File "Tests/CMakeLib/PseudoMemcheck/ret0.cxx"
+							{
+								Compile.Type C++
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Exe_memcheck_fail
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName memcheck_fail
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Tests
+				{
+					%Group CMakeLib
+					{
+						%Group PseudoMemcheck
+						{
+							%File "Tests/CMakeLib/PseudoMemcheck/ret1.cxx"
+							{
+								Compile.Type C++
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency Lib_CMakeLib
+	%Dependency Lib_cmlibuv
+	%Dependency Lib_cmjsoncpp
+	%Dependency Lib_cmlibarchive
+	%Dependency Lib_cmliblzma
+	%Dependency Lib_cmbzip2
+	%Dependency Lib_cmexpat
+	%Dependency Lib_cmcompress
+	%Dependency Lib_cmcurl
+	%Dependency Lib_cmzlib
+	%Dependency Lib_cmlibrhash
+	%Dependency Lib_cmsys
+}
+%Target Exe_pseudonl_purify
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudonl_purify
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Tests
+				{
+					%Group CMakeLib
+					{
+						%Group PseudoMemcheck
+						{
+							%Group NoLog
+							{
+								%File "Tests/CMakeLib/PseudoMemcheck/NoLog/ret0.c"
+								{
+									Compile.Type C
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target Exe_pseudonl_valgrind
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudonl_valgrind
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Tests
+				{
+					%Group CMakeLib
+					{
+						%Group PseudoMemcheck
+						{
+							%Group NoLog
+							{
+								%File "Tests/CMakeLib/PseudoMemcheck/NoLog/ret0.c"
+								{
+									Compile.Type C
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target Exe_pseudonl_BC
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudonl_BC
+	%Group OSX10.13
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Tests
+				{
+					%Group CMakeLib
+					{
+						%Group PseudoMemcheck
+						{
+							%Group NoLog
+							{
+								%File "Tests/CMakeLib/PseudoMemcheck/NoLog/ret0.c"
+								{
+									Compile.Type C
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target Exe_pseudo_emulator
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudo_emulator
+	%Group Tests
+	{
+		%File "../../../../External/CMake/Tests/RunCMake/pseudo_emulator.c"
+		{
+			Compile.Type C
+		}
+	}
+}
+%Target Exe_pseudo_tidy
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudo_tidy
+	%Group Tests
+	{
+		%File "../../../../External/CMake/Tests/RunCMake/pseudo_tidy.c"
+		{
+			Compile.Type C
+		}
+	}
+}
+%Target Exe_pseudo_iwyu
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudo_iwyu
+	%Group Tests
+	{
+		%File "../../../../External/CMake/Tests/RunCMake/pseudo_iwyu.c"
+		{
+			Compile.Type C
+		}
+	}
+}
+%Target Exe_pseudo_emulator_custom_command
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMake"
+	Target.Type ConsoleExecutable
+	Target.BaseName pseudo_emulator_custom_command
+	%Group Tests
+	{
+		%File "../../../../External/CMake/Tests/RunCMake/pseudo_emulator_custom_command.c"
+		{
+			Compile.Type C
+		}
+	}
+}

@@ -1,0 +1,66 @@
+Property.CMakeOutputPath_CMZLIB "@('../..'->MakeAbsolute())"
+%Target Lib_cmzlib
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzlib'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines ";@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/CMZLIB"
+	Target.Type StaticLibrary
+	Target.BaseName cmzlib
+	%Group Utilities
+	{
+		%Group cmzlib
+		{
+			%File "../../../../../../External/CMake/Utilities/cmzlib/adler32.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/compress.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/crc32.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/deflate.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/gzio.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/inffast.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/inflate.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/inftrees.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/trees.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/uncompr.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmzlib/zutil.c"
+			{
+				Compile.Type C
+			}
+		}
+	}
+}

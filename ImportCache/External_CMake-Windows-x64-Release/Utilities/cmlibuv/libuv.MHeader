@@ -1,0 +1,195 @@
+Property.CMakeOutputPath_libuv "@('../..'->MakeAbsolute())"
+%Target Lib_cmlibuv
+{
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src/win'->MakeAbsolute());@('../../Source'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0600;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/libuv"
+	Target.Type StaticLibrary
+	Target.BaseName cmlibuv
+	%Group Utilities
+	{
+		%Group src
+		{
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/fs-poll.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/heap-inl.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/inet.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/queue.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/threadpool.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/uv-common.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/uv-common.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/uv-data-getter-setters.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/version.c"
+			{
+				Compile.Type C
+			}
+			%Group win
+			{
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/async.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/atomicops-inl.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/core.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/detect-wakeup.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/dl.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/error.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/fs-event.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/fs.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/getaddrinfo.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/getnameinfo.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/handle.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/handle-inl.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/internal.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/loop-watcher.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/pipe.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/poll.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/process-stdio.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/process.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/req.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/req-inl.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/signal.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/snprintf.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/stream.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/stream-inl.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/tcp.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/thread.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/timer.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/tty.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/udp.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/util.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/winapi.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/winapi.h"
+				{
+					Compile.Type None
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/winsock.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/win/winsock.h"
+				{
+					Compile.Type None
+				}
+			}
+		}
+	}
+}

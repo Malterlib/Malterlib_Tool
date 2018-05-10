@@ -1,0 +1,549 @@
+Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
+%Target Exe_cmsysTestProcess
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmsysTestProcess
+	%Group Source
+	{
+		%File "../../../../../../External/CMake/Source/kwsys/testProcess.c"
+		{
+			Compile.Type C
+		}
+	}
+	%Dependency Lib_cmsys_c
+}
+%Target Exe_cmsysTestsCxx
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmsysTestsCxx
+	%Group Linux2.6
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group kwsys
+					{
+						%File "../../Source/kwsys/cmsysTestsCxx.cxx"
+						{
+							Compile.Type C++
+						}
+					}
+				}
+			}
+		}
+	}
+	%Group Source
+	{
+		%Group kwsys
+		{
+			%File "../../../../../../External/CMake/Source/kwsys/testConfigure.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testSystemTools.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testCommandLineArguments.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testCommandLineArguments1.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testDirectory.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testEncoding.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testFStream.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testConsoleBuf.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testSystemInformation.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_USE_LONG_LONG=1;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testDynamicLoader.cxx"
+			{
+				Compile.Type C++
+			}
+		}
+	}
+	%Dependency Lib_cmsys
+}
+%Target Lib_cmsys
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type StaticLibrary
+	Target.BaseName cmsys
+	%Group Source
+	{
+		%Group kwsys
+		{
+			%File "../../../../../../External/CMake/Source/kwsys/ProcessUNIX.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/Base64.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/EncodingC.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/MD5.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/Terminal.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/System.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/String.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_STRING_C;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/Directory.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/DynamicLoader.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_SUPPORTS_SHARED_LIBS=1;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/EncodingCXX.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/Glob.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/RegularExpression.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/SystemTools.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0;KWSYS_CXX_HAS_SETENV=1;KWSYS_CXX_HAS_UNSETENV=1;KWSYS_CXX_HAS_UTIMENSAT=1;KWSYS_CXX_HAS_UTIMES=1;KWSYS_CXX_STAT_HAS_ST_MTIM=1;KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=0;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/CommandLineArguments.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/IOStream.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/FStream.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/SystemInformation.cxx"
+			{
+				Compile.Type C++
+				Compile.PreprocessorDefines "KWSYS_CXX_HAS_ATOL=1;KWSYS_CXX_HAS_ATOLL=1;KWSYS_CXX_HAS_GETLOADAVG=1;KWSYS_CXX_HAS_RLIMIT64=1;KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE=1;KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE=1;KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP=1;KWSYS_SYS_HAS_IFADDRS_H=1;KWSYS_USE_LONG_LONG=1;SIZEOF_VOID_P=8;@(Compile.PreprocessorDefines)"
+			}
+		}
+	}
+	%Group Linux2.6
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group cmsys
+					{
+						%File "../../Source/cmsys/Configure.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/SharedForward.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Process.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Base64.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Encoding.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/MD5.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Terminal.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/System.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/String.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Directory.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/DynamicLoader.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Encoding.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Glob.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/RegularExpression.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/SystemTools.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/CommandLineArguments.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/IOStream.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/FStream.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/SystemInformation.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/ConsoleBuf.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Configure.hxx"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/String.hxx"
+						{
+							Compile.Type None
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target Dll_cmsysTestDynload
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;cmsysTestDynload_EXPORTS;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type DynamicLibrary
+	Target.BaseName cmsysTestDynload
+	%Group Source
+	{
+		%File "../../../../../../External/CMake/Source/kwsys/testDynload.c"
+		{
+			Compile.Type C
+		}
+	}
+	%Dependency Lib_cmsys
+	{
+		Dependency.Link false
+	}
+}
+%Target Exe_testConsoleBufChild
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName testConsoleBufChild
+	%Group Source
+	{
+		%File "../../../../../../External/CMake/Source/kwsys/testConsoleBufChild.cxx"
+		{
+			Compile.Type C++
+		}
+	}
+	%Dependency Lib_cmsys
+}
+%Target Exe_cmsysTestSharedForward
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmsysTestSharedForward
+	%Group Linux2.6
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group kwsys
+					{
+						%File "../../Source/kwsys/testSharedForward.c"
+						{
+							Compile.Type C
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency Lib_cmsys_c
+	{
+		Dependency.Link false
+	}
+}
+%Target Lib_cmsys_c
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type StaticLibrary
+	Target.BaseName cmsys_c
+	%Group Source
+	{
+		%Group kwsys
+		{
+			%File "../../../../../../External/CMake/Source/kwsys/ProcessUNIX.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/Base64.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/EncodingC.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/MD5.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/Terminal.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/System.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/String.c"
+			{
+				Compile.Type C
+				Compile.PreprocessorDefines "KWSYS_STRING_C;@(Compile.PreprocessorDefines)"
+			}
+		}
+	}
+	%Group Linux2.6
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group cmsys
+					{
+						%File "../../Source/cmsys/Configure.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/SharedForward.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Process.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Base64.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Encoding.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/MD5.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/Terminal.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/System.h"
+						{
+							Compile.Type None
+						}
+						%File "../../Source/cmsys/String.h"
+						{
+							Compile.Type None
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target Exe_cmsysTestsC
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	Target.Type ConsoleExecutable
+	Target.BaseName cmsysTestsC
+	%Group Linux2.6
+	{
+		%Group x64
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group kwsys
+					{
+						%File "../../Source/kwsys/cmsysTestsC.c"
+						{
+							Compile.Type C
+						}
+					}
+				}
+			}
+		}
+	}
+	%Group Source
+	{
+		%Group kwsys
+		{
+			%File "../../../../../../External/CMake/Source/kwsys/testEncode.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Source/kwsys/testTerminal.c"
+			{
+				Compile.Type C
+			}
+		}
+	}
+	%Dependency Lib_cmsys_c
+}

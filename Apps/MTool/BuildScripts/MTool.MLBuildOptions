@@ -1,0 +1,123 @@
+// Copyright © 2015-2018 Nonna Holding AB 
+// Distributed under the MIT license, see license text in LICENSE.Malterlib
+
+BuildTarget "Malterlib Tool"
+{
+	StaticOptions
+	{
+		MalterlibSigning 0
+	}
+	DynamicOptions
+	{
+		ProductVersionRevision Int(sl3,sf0)
+		{
+			Hide 1
+			BuildCounter 1
+		}
+		MalterlibCloud_VersionUploadHostsDefault String
+		{
+			Default ""
+		}
+		ProductVersionExtra StringChoice
+		{
+			Default TEST
+			Choices
+			{
+				TEST "Testing"
+				ALPHA "Alpha"
+				BETA "Beta"
+				RC "Release Candidate"
+				"" "Release"
+			}
+		}
+		MToolEmbeddCMake StringChoice
+		{
+			Default ""
+			Choices
+			{
+				true "Force on"
+				false "Force off"
+				"" "Default"
+			}
+		}
+		MalterlibStripSymbols StringChoice
+		{
+			Default ""
+			Choices
+			{
+				true "Force on"
+				false "Force off"
+				"" "Default"
+			}
+		}
+		MalterlibDeploySymbols StringChoice
+		{
+			Default ""
+			Choices
+			{
+				true "Force on"
+				false "Force off"
+				"" "Default"
+			}
+		}
+	}
+
+	PreStage "Pre Build Clean"
+	{
+		Command "../../../Core/BuildScripts/Prebuild.sh"
+		{
+			Platform Windows
+			Platform OSX
+			Params "Malterlib MTool"
+		}
+	}
+	
+	Stages Build
+	{
+		Stage Build
+		{
+			Command "../../../Core/BuildScripts/BuildWorkspace.sh"
+			{
+				Platform Windows
+				Params "MTool Windows x86 Release"
+			}
+			Command "../../../Core/BuildScripts/BuildWorkspace.sh"
+			{
+				Platform Windows
+				Params "MTool Windows x64 Release"
+			}
+			Command "../../../Core/BuildScripts/BuildWorkspace.sh"
+			{
+				Platform OSX
+				Params "MTool OSX10.7 x64 Release"
+			}
+			Command "../../../Core/BuildScripts/BuildWorkspace.sh"
+			{
+				Platform OSX
+				Params "MTool Linux2.6 x64 Release"
+			}
+			Command "../../../Core/BuildScripts/BuildWorkspace.sh"
+			{
+				Platform OSX
+				Params "MTool Linux2.6 x86 Release"
+			}
+		}
+		Stage "Deploy"
+		{
+			Command DeployBuild.sh
+			{
+				Platform OSX
+			}
+		}
+	}
+	
+	PostStage "Post Build Clean"
+	{
+		Command "../../../Core/BuildScripts/Postbuild.sh"
+		{
+			Platform Windows
+			Platform OSX
+			Params "MTool"
+		}
+	}
+}

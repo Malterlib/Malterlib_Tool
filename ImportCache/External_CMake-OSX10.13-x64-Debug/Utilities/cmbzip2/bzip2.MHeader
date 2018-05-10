@@ -1,0 +1,50 @@
+Property.CMakeOutputPath_bzip2 "@('../..'->MakeAbsolute())"
+%Target Lib_cmbzip2
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/bzip2"
+	Target.Type StaticLibrary
+	Target.BaseName cmbzip2
+	%Group Utilities
+	{
+		%Group cmbzip2
+		{
+			%File "../../../../../../External/CMake/Utilities/cmbzip2/blocksort.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmbzip2/huffman.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmbzip2/crctable.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmbzip2/randtable.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmbzip2/compress.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmbzip2/decompress.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmbzip2/bzlib.c"
+			{
+				Compile.Type C
+			}
+		}
+	}
+}

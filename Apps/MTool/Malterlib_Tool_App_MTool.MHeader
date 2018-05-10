@@ -1,0 +1,131 @@
+// Copyright © 2018 Nonna Holding AB
+// Distributed under the MIT license, see license text in LICENSE.Malterlib
+
+Property
+{
+	MToolEmbeddCMake true
+	{
+		!!MToolEmbeddCMake ""
+	}
+}
+Property
+{
+	!!MToolEmbeddCMake true
+	
+	MalterlibBuildSystemEmbedCMake true
+}
+
+%Target "Malterlib_Tool_MTool"
+{
+	Property
+	{
+		MalterlibPostCopyProject "MTool"
+		MalterlibDoExeFS true
+        ProductName "Malterlib Tool"
+		MalterlibTargetNameType "Normal"
+		MalterlibTargetNameType "Architectured"
+		{
+			!!PlatformFamily Windows
+		}
+		MalterlibExeFSExtraFiles "@('../../../../External/CMake/Templates'->MakeAbsolute())/^*|Templates;@('../../../../External/CMake/Modules'->MakeAbsolute())/^*|Modules;@(MalterlibExeFSExtraFiles)"
+		{
+			!!MToolEmbeddCMake true
+		}
+	}
+	Target
+	{
+		Type "Executable"
+		BaseName "MTool"
+		LinkWithLibraries "Iphlpapi.lib;@(Target.LinkWithLibraries)"
+		{
+			!!PlatformFamily Windows
+		}
+		Group Apps
+	}
+	Compile
+	{
+		!!CompileDialect C
+		SearchPath "@(CMakeOutputPath_CMake)/Utilities;@(CMakeOutputPath_CMake)/Source;@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		{
+			!!MToolEmbeddCMake true
+		}
+				
+		PreprocessorDefines "CMAKE_DISABLE_MAIN;DMToolEmbedCMake=1;@(Compile.PreprocessorDefines)"
+		{
+			!!MToolEmbeddCMake true
+		}
+
+		PreprocessorDefines "_HAS_AUTO_PTR_ETC=1;@(Compile.PreprocessorDefines)"
+		{
+			!!GeneratorFamily VisualStudio
+		}
+	}
+	Property
+	{
+		MalterlibLinkWithOpenSSL true
+	}
+	%Group BuildScripts
+	{
+		%File "BuildScripts/*"
+	}
+	%Group Source
+	{
+		%File "Source/*"
+	}
+	%Group cmake
+	{
+		!!MToolEmbeddCMake true
+		
+		%File "../../../../External/CMake/Source/cmakemain.cxx"
+		%File "../../../../External/CMake/Source/cmcmd.cxx"
+		%File "../../../../External/CMake/Source/cmcmd.h"
+	}
+	%Dependency Lib_Malterlib_Perforce
+	%Dependency Lib_Malterlib_BuildSystem
+	%Dependency Lib_Malterlib
+}
+
+%Workspace "MTool"
+{
+	Compile
+	{
+		!!CompileDialect C
+		PreprocessorDefines "CMAKE_MALTERLIB_EXEFS;@(Compile.PreprocessorDefines)"
+	}
+	Property.ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake
+	%Group "Apps"
+	{
+		Property
+		{
+			MalterlibBuildServerPutPath "BuildResults/@(PlatformFamily)"
+			{
+				!!PlatformFamily Windows
+			}
+			MalterlibBuildServerPutPath "BuildResults/@(PlatformFamily)/@(Architecture)"
+			{
+				!PlatformFamily Windows
+			}
+		}
+		%Group Launcher
+		{
+			!!PlatformFamily "Windows"
+			Property
+			{
+				ProductFileName "MTool"
+				ProductName "Malterlib Tool"
+				MalterlibBuildServerPutPath ""
+				{
+					&
+					{
+						!Architecture "x86"
+						!BuildArch_x86 1
+					}
+				}
+				MalterlibLauncherMalterlibTargetNameType "Normal"
+			}
+			%Target "Com_Launcher"
+			%Target "Exe_Launcher"
+		}
+		%Target "Malterlib_Tool_MTool"
+	}
+}
