@@ -23,10 +23,6 @@ Property
 		MalterlibDoExeFS true
         ProductName "Malterlib Tool"
 		MalterlibTargetNameType "Normal"
-		MalterlibTargetNameType "Architectured"
-		{
-			!!PlatformFamily Windows
-		}
 		MalterlibExeFSExtraFiles "@('../../../../External/CMake/Templates'->MakeAbsolute())/^*|Templates;@('../../../../External/CMake/Modules'->MakeAbsolute())/^*|Modules;@(MalterlibExeFSExtraFiles)"
 		{
 			!!MToolEmbeddCMake true
@@ -35,7 +31,6 @@ Property
 	Target
 	{
 		Type "ConsoleExecutable"
-		MalterlibTargetNameType "Normal"
 		BaseName "MTool"
 		LinkWithLibraries "Iphlpapi.lib;@(Target.LinkWithLibraries)"
 		{
