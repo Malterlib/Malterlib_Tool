@@ -279,14 +279,14 @@ public:
 										if (File.m_Timestamp != WriteTime)
 										{
 											if (bVerbose)
-												DConOut("File Timestamp ({}): {} != {}\n", File.m_Path << File.m_Timestamp << WriteTime);
+												DConOut("Dependency check: File Timestamp ({}): {} != {}\n", File.m_Path << File.m_Timestamp << WriteTime);
 											bNeedsUpdating = true;
 										}
 									}
 									catch (CExceptionFile const& _Exception)
 									{
 										if (bVerbose)
-											DConOut("Exception reading file write time({}): {}\n", File.m_Path << _Exception.f_GetErrorStr());
+											DConOut("Dependency check: Exception reading file write time({}): {}\n", File.m_Path << _Exception.f_GetErrorStr());
 										bNeedsUpdating = true;
 									}
 								}
@@ -308,7 +308,7 @@ public:
 									if (Directory.m_Timestamp != WriteTime)
 									{
 										if (bVerbose)
-											DConOut("Directory Timestamp ({}): {} != {}\n", Directory.m_Path << Directory.m_Timestamp << WriteTime);
+											DConOut("Dependency check: Directory Timestamp ({}): {} != {}\n", Directory.m_Path << Directory.m_Timestamp << WriteTime);
 										bNeedsUpdating = true;
 										break;
 									}
@@ -316,7 +316,7 @@ public:
 								catch (CExceptionFile const& _Exception)
 								{
 									if (bVerbose)
-										DConOut("Exception reading directory write time({}): {}\n", Directory.m_Path << _Exception.f_GetErrorStr());
+										DConOut("Dependency check: Exception reading directory write time({}): {}\n", Directory.m_Path << _Exception.f_GetErrorStr());
 									bNeedsUpdating = true;
 									break;
 								}
@@ -325,7 +325,7 @@ public:
 							else if (CFile::fs_FileExists(Directory.m_Path, EFileAttrib_Directory))
 							{
 								if (bVerbose)
-									DConOut("Directory does exist ({})}\n", Directory.m_Path);
+									DConOut("Dependency check: Directory does exist ({})}\n", Directory.m_Path);
 								bNeedsUpdating = true;
 								break;
 							}
@@ -348,7 +348,7 @@ public:
 							if (Files != Directory.m_FoundFiles)
 							{
 								if (bVerbose)
-									DConOut("Found files differ ({}): {} != {}\n", Directory.m_Path << Files.f_GetLen() << Directory.m_FoundFiles.f_GetLen());
+									DConOut("Dependency check: Found files differ ({}): {} != {}\n", Directory.m_Path << Files.f_GetLen() << Directory.m_FoundFiles.f_GetLen());
 								bNeedsUpdating = true;
 								break;
 							}					
@@ -367,7 +367,7 @@ public:
 		;
 		
 		if (!pOneDir)
-			DConOut("Checked dependencies {fe1} ms\n", Clock.f_GetTime() * 1000.0);
+			DConOut("Dependency check: Checked dependencies {fe1} ms\n", Clock.f_GetTime() * 1000.0);
 		
 		return 0;
 	}
