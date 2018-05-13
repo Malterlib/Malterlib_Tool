@@ -65,7 +65,6 @@ public:
 				SIGINT,
 				SIGQUIT,
 				SIGILL,
-				SIGTRAP,
 				SIGABRT,
 				SIGEMT,
 				SIGFPE,
