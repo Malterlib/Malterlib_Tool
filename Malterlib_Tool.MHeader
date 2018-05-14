@@ -123,7 +123,7 @@ Import "Apps/*/*.MHeader"
 	}
 }
 
-Property.MalterlibEnableCMakeProject "" // User: Enable generation of cmake project
+Property.MalterlibEnableCMakeProject ""
 {
 	!!MalterlibEnableCMakeProject ""
 }
