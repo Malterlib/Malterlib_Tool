@@ -33,7 +33,7 @@ public:
 
 			TCMap<CStr, CStr> Headers;
 
-			CurlActor(&CCurlActor::f_Request, CCurlActor::EMethod_GET, SourcePath, Headers, "") > Contents / [Contents](CCurlActor::CResult &&_Result)
+			CurlActor(&CCurlActor::f_Request, CCurlActor::EMethod_GET, SourcePath, Headers, CByteVector{}) > Contents / [Contents](CCurlActor::CResult &&_Result)
 				{
 					if (_Result.m_StatusCode >= 300)
 						Contents.f_SetException(DMibErrorInstance("Error status: {}: {}"_f << _Result.m_StatusCode << _Result.m_Body));
