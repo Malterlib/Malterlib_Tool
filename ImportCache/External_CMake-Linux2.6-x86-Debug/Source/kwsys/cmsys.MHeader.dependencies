@@ -23,8 +23,6 @@
 ../../../../../../External/CMake/Source/kwsys/SystemTools.hxx.in
 ../../../../../../External/CMake/Source/kwsys/Terminal.h.in
 ../../../../../../External/CMake/Source/kwsys/kwsysPlatformTests.cmake
-../../../../../../External/CMake/Source/kwsys/kwsysPlatformTestsC.c
-../../../../../../External/CMake/Source/kwsys/kwsysPlatformTestsCXX.cxx
 ../../../../../../External/CMake/Source/kwsys/kwsysPrivate.h
 ../../../../../../External/CMake/Source/kwsys/testSharedForward.c.in
 ../../../../../../External/CMake/Source/kwsys/testSystemTools.h.in
