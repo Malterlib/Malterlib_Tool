@@ -5,7 +5,7 @@ Property.CMakeOutputPath_JsonCpp "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type C++
 		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmjsoncpp/include'->MakeAbsolute());@('../../Source'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/JsonCpp"

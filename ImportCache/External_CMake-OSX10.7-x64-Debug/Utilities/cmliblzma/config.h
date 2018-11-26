@@ -29,7 +29,7 @@
 #define SIZE_OF_UNSIGNED 4
 #define SIZE_OF_UNSIGNED_LONG 8
 #define SIZE_OF_UNSIGNED_LONG_LONG 8
-#define SIZE_OF_SIZE_T 8
+#define SIZEOF_SIZE_T 8
 
 /*
  * If we lack int64_t, define it to the first of __int64, int, long, and long long
@@ -179,32 +179,6 @@ typedef uint64_t uintmax_t;
 
 
 /* #undef uintptr_t */
-
-
-#define HAVE_RESTRICT
-#define HAVE___RESTRICT
-
-#define HAVE_INLINE
-#define HAVE___INLINE
-
-#ifndef HAVE_RESTRICT
-#  ifdef HAVE___RESTRICT
-#    define LZMA_RESTRICT __restrict
-#  else
-#    define LZMA_RESTRICT
-#  endif
-#else
-#  define LZMA_RESTRICT restrict
-#endif /* HAVE_RESTRICT */
-
-#ifndef HAVE_INLINE
-#  ifdef HAVE___INLINE
-#    define inline __inline
-#  else
-#    define inline
-#  endif
-#endif /* HAVE_INLINE */
-
 
 /* #undef WORDS_BIGENDIAN */
 

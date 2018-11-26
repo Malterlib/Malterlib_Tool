@@ -6,7 +6,7 @@ Property.CMakeOutputPath_libuv "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type C
 		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src/unix'->MakeAbsolute());@('../../Source'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;NDEBUG;_DARWIN_UNLIMITED_SELECT=1;_DARWIN_USE_64_BIT_INODE=1;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "LIBARCHIVE_STATIC;NDEBUG;_DARWIN_UNLIMITED_SELECT=1;_DARWIN_USE_64_BIT_INODE=1;@(Compile.PreprocessorDefines)"
 		CLanguage GNU11
 	}
 	Property.MalterlibTargetNameType Normal

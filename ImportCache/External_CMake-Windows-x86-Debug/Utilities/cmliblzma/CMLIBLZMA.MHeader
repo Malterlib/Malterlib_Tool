@@ -5,7 +5,7 @@ Property.CMakeOutputPath_CMLIBLZMA "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type C
 		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/common'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/check'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/delta'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lz'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/rangecoder'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple'->MakeAbsolute());@('../../Utilities/cmliblzma'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMLIBLZMA"

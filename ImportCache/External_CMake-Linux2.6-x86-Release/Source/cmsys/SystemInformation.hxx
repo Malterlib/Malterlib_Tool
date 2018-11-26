@@ -20,7 +20,7 @@ class cmsys_EXPORT SystemInformation
 #elif 0
   typedef __int64 LongLong;
 #else
-#error "No Long Long"
+#  error "No Long Long"
 #endif
   friend class SystemInformationImplementation;
   SystemInformationImplementation* Implementation;

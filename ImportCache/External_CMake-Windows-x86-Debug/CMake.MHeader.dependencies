@@ -17,7 +17,6 @@
 ../../../../External/CMake/Source/CMakeVersion.cmake
 ../../../../External/CMake/Source/CMakeVersion.rc.in
 ../../../../External/CMake/Source/CMakeVersionCompute.cmake
-../../../../External/CMake/Source/CMakeVersionSource.cmake
 ../../../../External/CMake/Source/CPack/cmCPackConfigure.h.in
 ../../../../External/CMake/Source/Checks/cm_c11_thread_local.cmake
 ../../../../External/CMake/Source/Checks/cm_cxx17_check.cmake
@@ -150,6 +149,7 @@
 ../../../../External/CMake/Tests/RunCMake/CMakeLists.txt
 ../../../../External/CMake/Tests/RunCMake/CPack/7Z/Prerequirements.cmake
 ../../../../External/CMake/Tests/RunCMake/CPack/DEB/Prerequirements.cmake
+../../../../External/CMake/Tests/RunCMake/CPack/External/Prerequirements.cmake
 ../../../../External/CMake/Tests/RunCMake/CPack/RPM/Prerequirements.cmake
 ../../../../External/CMake/Tests/RunCMake/CPack/STGZ/Prerequirements.cmake
 ../../../../External/CMake/Tests/RunCMake/CPack/TBZ2/Prerequirements.cmake

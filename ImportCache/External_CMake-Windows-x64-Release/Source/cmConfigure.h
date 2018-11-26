@@ -21,7 +21,7 @@
 /* #undef CMAKE_USE_MACH_PARSER */
 #define CMake_HAVE_CXX_MAKE_UNIQUE
 #define CMAKE_BIN_DIR "/bin"
-#define CMAKE_DATA_DIR "/share/cmake-3.11"
+#define CMAKE_DATA_DIR "/share/cmake-3.13"
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 

@@ -6,7 +6,7 @@ Property.CMakeOutputPath_bzip2 "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type C
 		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 		CLanguage GNU11
 	}
 	Property.MalterlibTargetNameType Normal

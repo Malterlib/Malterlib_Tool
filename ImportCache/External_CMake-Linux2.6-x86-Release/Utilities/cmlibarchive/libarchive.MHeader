@@ -6,7 +6,7 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type C
 		SearchPath "@('../../../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('../../Utilities/cmlibarchive'->MakeAbsolute());@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;HAVE_CONFIG_H;LIBARCHIVE_STATIC;LZMA_API_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "HAVE_CONFIG_H;LIBARCHIVE_STATIC;LZMA_API_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
 		CLanguage GNU11
 	}
 	Property.MalterlibTargetNameType Normal
@@ -317,6 +317,10 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type C
 			}
+			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_filter_zstd.c"
+			{
+				Compile.Type C
+			}
 			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_7zip.c"
 			{
 				Compile.Type C
@@ -498,6 +502,10 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 				Compile.Type C
 			}
 			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_xz.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_add_filter_zstd.c"
 			{
 				Compile.Type C
 			}

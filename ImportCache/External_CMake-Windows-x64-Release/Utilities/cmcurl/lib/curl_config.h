@@ -118,6 +118,9 @@
 /* Define to 1 if bool is an available type. */
 #define HAVE_BOOL_T 1
 
+/* Define to 1 if you have the __builtin_available function. */
+/* #undef HAVE_BUILTIN_AVAILABLE */
+
 /* Define to 1 if you have the clock_gettime function and monotonic timer. */
 /* #undef HAVE_CLOCK_GETTIME_MONOTONIC */
 
@@ -225,6 +228,9 @@
 
 /* Define to 1 if you have the `getpwuid' function. */
 /* #undef HAVE_GETPWUID */
+
+/* Define to 1 if you have the `getpwuid_r' function. */
+/* #undef HAVE_GETPWUID_R */
 
 /* Define to 1 if you have the `getrlimit' function. */
 /* #undef HAVE_GETRLIMIT */
@@ -388,6 +394,9 @@
 
 /* if zlib is available */
 /* #undef HAVE_LIBZ */
+
+/* if brotli is available */
+/* #undef HAVE_BROTLI */
 
 /* if your compiler supports LL */
 #define HAVE_LL 1
@@ -873,6 +882,12 @@
 /* The size of `long', as computed by sizeof. */
 #define SIZEOF_LONG 4
 
+/* The size of `long long', as computed by sizeof. */
+#define SIZEOF_LONG_LONG 8
+
+/* The size of `__int64', as computed by sizeof. */
+#define SIZEOF___INT64 8
+
 /* The size of `off_t', as computed by sizeof. */
 #define SIZEOF_OFF_T 4
 
@@ -947,6 +962,9 @@
 
 /* to enable Windows SSL  */
 #define USE_SCHANNEL 1
+
+/* enable multiple SSL backends */
+/* #undef CURL_WITH_MULTI_SSL */
 
 /* Define to 1 if using yaSSL in OpenSSL compatibility mode. */
 /* #undef USE_YASSLEMUL */

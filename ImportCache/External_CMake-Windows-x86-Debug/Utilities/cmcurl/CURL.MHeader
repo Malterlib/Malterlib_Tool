@@ -1,5 +1,5 @@
 Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
-%Target Exe_LIBCURL
+%Target Exe_curltest
 {
 	Compile
 	{
@@ -10,7 +10,7 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CURL"
 	Target.Type ConsoleExecutable
-	Target.BaseName LIBCURL
+	Target.BaseName curltest
 	%Group Utilities
 	{
 		%File "../../../../../../External/CMake/Utilities/cmcurl/curltest.c"
@@ -27,7 +27,7 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type C
 		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../Utilities/cmcurl/include/curl'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../Utilities/cmcurl/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('../../Utilities/cmcurl'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('../../Utilities/cmcurl/lib'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "BUILDING_LIBCURL;CURL_STATICLIB;HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0600;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "BUILDING_LIBCURL;HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0600;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CURL"
@@ -449,6 +449,26 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type None
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ctype.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_range.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/psl.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/doh.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urlapi-int.h"
+			{
+				Compile.Type None
+			}
 			%Group vauth
 			{
 				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/vauth.h"
@@ -562,6 +582,10 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 				{
 					Compile.Type None
 				}
+				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/mesalink.h"
+				{
+					Compile.Type None
+				}
 				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/openssl.c"
 				{
 					Compile.Type C
@@ -598,6 +622,10 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 				{
 					Compile.Type C
 				}
+				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/schannel_verify.c"
+				{
+					Compile.Type C
+				}
 				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/darwinssl.c"
 				{
 					Compile.Type C
@@ -607,6 +635,10 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 					Compile.Type C
 				}
 				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/mesalink.c"
 				{
 					Compile.Type C
 				}
@@ -1032,6 +1064,26 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 				Compile.Type C
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_path.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ctype.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_range.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/psl.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/doh.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urlapi.c"
 			{
 				Compile.Type C
 			}

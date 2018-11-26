@@ -10,11 +10,12 @@
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
    these macros after making changes to the interface.  */
 #if !defined(KWSYS_NAMESPACE)
-#define kwsys_ns(x) cmsys##x
-#define kwsysEXPORT cmsys_EXPORT
+#  define kwsys_ns(x) cmsys##x
+#  define kwsysEXPORT cmsys_EXPORT
 #endif
 #if !cmsys_NAME_IS_KWSYS
-#define kwsysSystem_Parse_CommandForUnix kwsys_ns(System_Parse_CommandForUnix)
+#  define kwsysSystem_Parse_CommandForUnix                                    \
+    kwsys_ns(System_Parse_CommandForUnix)
 #endif
 
 #if defined(__cplusplus)
@@ -49,11 +50,11 @@ kwsysEXPORT char** kwsysSystem_Parse_CommandForUnix(const char* command,
 /* If we are building a kwsys .c or .cxx file, let it use these macros.
    Otherwise, undefine them to keep the namespace clean.  */
 #if !defined(KWSYS_NAMESPACE)
-#undef kwsys_ns
-#undef kwsysEXPORT
-#if !defined(KWSYS_NAMESPACE) && !cmsys_NAME_IS_KWSYS
-#undef kwsysSystem_Parse_CommandForUnix
-#endif
+#  undef kwsys_ns
+#  undef kwsysEXPORT
+#  if !defined(KWSYS_NAMESPACE) && !cmsys_NAME_IS_KWSYS
+#    undef kwsysSystem_Parse_CommandForUnix
+#  endif
 #endif
 
 #endif
