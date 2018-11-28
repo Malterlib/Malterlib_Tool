@@ -46,7 +46,7 @@ Property
 			!!MToolEmbeddCMake true
 		}
 				
-		PreprocessorDefines "CMAKE_DISABLE_MAIN;DMToolEmbedCMake=1;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;CMAKE_DISABLE_MAIN;DMToolEmbedCMake=1;@(Compile.PreprocessorDefines)"
 		{
 			!!MToolEmbeddCMake true
 		}
@@ -67,14 +67,14 @@ Property
 	%Group Source
 	{
 		%File "Source/*"
-	}
-	%Group cmake
-	{
-		!!MToolEmbeddCMake true
-		
-		%File "../../../../External/CMake/Source/cmakemain.cxx"
-		%File "../../../../External/CMake/Source/cmcmd.cxx"
-		%File "../../../../External/CMake/Source/cmcmd.h"
+		%Group CMake
+		{
+			!!MToolEmbeddCMake true
+
+			%File "../../../../External/CMake/Source/cmakemain.cxx"
+			%File "../../../../External/CMake/Source/cmcmd.cxx"
+			%File "../../../../External/CMake/Source/cmcmd.h"
+		}
 	}
 	%Dependency Lib_Malterlib_Perforce
 	%Dependency Lib_Malterlib_BuildSystem

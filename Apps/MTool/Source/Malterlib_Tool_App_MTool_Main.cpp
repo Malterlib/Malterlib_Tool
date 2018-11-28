@@ -4,13 +4,71 @@
 #include "PCH.h"
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include <Mib/Core/Application>
-#ifdef DEnableKBHit
-#ifdef DPlatformFamily_Windows
 
-#include "conio.h"
+DMibRuntimeClass(NMib::NConcurrency::CDistributedTool, CTool);
 
-#endif
-#endif
+bool fg_IsCMake()
+{
+	static bool bIsCmake = CFile::fs_GetFileNoExt(CFile::fs_GetProgramPath()) == "MToolCMake";
+	return bIsCmake;
+}
+
+bool fg_IsMalterlib()
+{
+	static bool bIsMalterlb = fg_GetSys()->f_GetProtectedEnvironmentVariable("MToolIsMalterlib", "false") == "true" || CFile::fs_GetFileNoExt(CFile::fs_GetProgramPath()) == "mib";
+	return bIsMalterlb;
+}
+
+void CTool::f_Register
+	(
+		TCActor<CDistributedToolAppActor> const &_ToolActor
+		, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+		, CDistributedAppCommandLineSpecification &o_CommandLine
+	 	, NStr::CStr const &_ClassName
+	)
+{
+	if (fg_IsCMake() || fg_IsMalterlib())
+		return;
+
+	CStr ClassName = _ClassName;
+	if (ClassName.f_StartsWith("CTool_"))
+		ClassName = ClassName.f_Extract(6);
+
+	o_ToolsSection.f_RegisterDirectCommand
+		(
+			{
+				"Names"_= {ClassName}
+				, "Description"_= "Runs {} command.\n"_f << ClassName
+				, "Parameters"_=
+				{
+					"Params...?"_=
+					{
+						"Type"_= {""}
+						, "Description"_= "The params the command take."
+					}
+				}
+				, "ErrorOnCommandAsParameter"_= false
+				, "ErrorOnOptionAsParameter"_= false
+			}
+			, [this](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+		 	{
+				NRegistry::CRegistry_CStr Params;
+				mint iOut = 0;
+
+				if (auto pParams = _Params.f_GetMember("Params"))
+				{
+					for (auto &Param : pParams->f_Array())
+					{
+						Params.f_SetValue(CStr::fs_ToStr(iOut), Param.f_String());
+						++iOut;
+					}
+				}
+
+				return f_Run(Params);
+			}
+		)
+	;
+}
 
 CStr CTool2::f_GetOption(TCMap<CStr, CStr> const &_Params, CStr const &_Option, CStr const &_Default) const
 {
@@ -99,130 +157,23 @@ public:
 			}
 		;
 #endif		
-		
-		auto Checkout = fg_GetSys()->f_MemoryManager_Checkout();
-
-		try
-		{
-			// Read executable path to enable tracking of file accesses to detect new tool compiled
-			CFile Test;
-			Test.f_Open(CFile::fs_GetProgramPath(), EFileOpen_ReadAttribs | EFileOpen_ShareAll);
-			Test.f_GetAttributes();
-		}
-		catch (NException::CException const &_Exception)
-		{
-			DConErrOut("Exception reading exe attributes: {}" DNewLine, _Exception.f_GetErrorStr());
-		}
-
-		TCVector<CStr> Args;
-		NSys::fg_Process_GetCommandLineArgs(Args);
-		Args.f_Remove(0);
-		int nArgs = Args.f_GetLen();
-		//DConErrOut("{}\n", f_CommandLineParameters());
-		if (nArgs >= 1)
-		{
-			NStr::CStr Class;
-		l_Retry:
-			int iStart = 0;
-			for (int i = iStart; i < nArgs; ++i)
-			{
-				NStr::CStr Param = Args[i];
-				
-				if (Param == "--ToolClass")
+		return fg_RunApp
+			(
+				[]
 				{
-					Class = Args[i + 1];
-					break;
+					auto Settings = CDistributedToolSettings("MTool")
+						.f_RootDirectory(NFile::CFile::fs_GetUserHomeDirectory() / ".Malterlib/MTool")
+					;
+
+					if (fg_IsCMake())
+						fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_None);
+					else
+						fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_AllNoDistributedComputing);
+
+					return fg_ConstructActor<CDistributedToolAppActor>(fg_Move(Settings));
 				}
-			}
-			
-			if (Class.f_IsEmpty())
-			{
-				Class = Args[0];
-				if (Class[0] == '-')
-					Class = Class.f_Extract(1);
-				++iStart;
-			}
-			
-			if (Class == "-x86")
-			{
-				++iStart;
-				Class = Args[1];
-			}			
-			
-			
-			NRegistry::CRegistry_CStr Params;
-			mint iOut = 0;
-			for (int i = iStart; i < nArgs; ++i)
-			{
-				NStr::CStr Param = Args[i];
-				
-				if (Param == "--ToolClass")
-				{
-					++i;
-					continue;
-				}
-				Params.f_SetValue(CStr::fs_ToStr(iOut), Param);
-				++iOut;
-			}
-
-			CTool *pTool = fg_CreateRuntimeType<CTool>(NMib::NStr::CStr("CTool_") + Class);
-
-			if (!pTool)
-			{
-				if (Class != "CMake")
-				{
-					Class = "CMake";
-					Params.f_Clear();
-					goto l_Retry;
-				}
-				else
-				{
-					DConErrOut("Could not create tool class: CTool_{}" DNewLine, Class);
-	#ifdef DEnableKBHit
-					while (!_kbhit())
-						NMib::NSys::fg_Thread_SmallestSleep();
-	#endif
-					return 1;
-				}
-			}
-
-			aint Ret;
-			try
-			{
-				Ret = pTool->f_Run(Params);
-			}
-			catch (NException::CException &_Exception)
-			{
-				CStr ErrorStr = _Exception.f_GetErrorStr();
-				if (ErrorStr.f_Find("error:") >= 0)
-				{
-					DConErrOut("{}" DNewLine, _Exception.f_GetErrorStr());
-					DConErrOut("note: Tool command line: {}" DNewLine, f_CommandLineParameters());
-				}
-				else
-				{
-					DConErrOut("{}" DNewLine, _Exception.f_GetErrorStr());
-					DConErrOut2("error: Running tool '{}': {}{\n}", Class, f_CommandLineParameters());
-				}
-				delete pTool;
-#ifdef DEnableKBHit
-				while (!_kbhit())
-					NMib::NSys::fg_Thread_SmallestSleep();
-#endif
-				return 1;
-			}
-
-			delete pTool;
-
-#ifdef DEnableKBHit
-				while (!_kbhit())
-					NMib::NSys::fg_Thread_SmallestSleep();
-#endif
-			return Ret;
-
-		}
-
-		return 0;
+			)
+		;
 	}
 };
 

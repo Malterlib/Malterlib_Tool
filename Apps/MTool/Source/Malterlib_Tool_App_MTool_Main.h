@@ -4,11 +4,26 @@
 #pragma once
 
 #include <Mib/Core/RuntimeType>
+#include <Mib/Concurrency/DistributedTool>
+#include <Mib/Encoding/JSONShortcuts>
 
-class CTool
+bool fg_IsCMake();
+bool fg_IsMalterlib();
+
+class CTool : public CDistributedTool
 {
 public:
 	virtual ~CTool() {}
+
+	virtual void f_Register
+		(
+			TCActor<CDistributedToolAppActor> const &_ToolActor
+			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+			, CDistributedAppCommandLineSpecification &o_CommandLine
+		 	, NStr::CStr const &_ClassName
+		) override
+	;
+
 	virtual aint f_Run(NRegistry::CRegistry_CStr &_Params) = 0;
 	virtual void f_RequestStop() {};
 };
