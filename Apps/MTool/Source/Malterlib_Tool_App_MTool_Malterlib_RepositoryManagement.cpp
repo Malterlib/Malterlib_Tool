@@ -208,6 +208,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						"GitParameters...?"_=
 						{
 							"Type"_= {""}
+							, "Default"_= _[_]
 							, "Description"_= "The parameters to send to git.\n"
 						}
 					}
@@ -393,6 +394,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					"Remotes...?"_=
 					{
 						"Type"_= {""}
+						, "Default"_= _[_]
 						, "Description"_= "The remotes to push to. By default pushes to all remotes.\n"
 					}
 				}
