@@ -398,8 +398,7 @@ public:
 					;
 					
 					Params.m_bMergeEnvironment = true;
-					Params.m_Environment["PATH"] = "/opt/local/bin:" + CStr(fg_GetSys()->f_GetEnvironmentVariable("PATH"));
-					
+
 					Handler.f_AddLaunch(Params, false);
 				}
 				
@@ -481,8 +480,7 @@ public:
 			
 			Params.m_bMergeEnvironment = true;
 			Params.m_bAllowExecutableLocate = true;
-			Params.m_Environment["PATH"] = "/opt/local/bin:" + CStr(fg_GetSys()->f_GetEnvironmentVariable("PATH"));
-			
+
 			Handler.f_AddLaunch(Params, false);
 		}
 		
