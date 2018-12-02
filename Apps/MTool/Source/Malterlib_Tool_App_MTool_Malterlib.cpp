@@ -102,6 +102,8 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJSON const 
 	if (!_Params["UseUserSettings"].f_Boolean())
 		GenerateSettings.m_GenerationFlags |= EGenerationFlag_DisableUserSettings;
 
+	GenerateOptions.m_GitFetchTimeout = _Params["GitFetchTimeout"].f_Integer();
+
 	GenerateOptions.m_bSkipUpdate = _Params["SkipUpdate"].f_Boolean();
 	GenerateOptions.f_ParseReconcileActions(_Params);
 

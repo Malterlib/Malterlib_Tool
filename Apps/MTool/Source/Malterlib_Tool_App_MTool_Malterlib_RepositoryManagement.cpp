@@ -36,6 +36,14 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		}
 	;
 
+	auto Filter_Branch = "RepoBranch?"_=
+		{
+			"Names"_= {"--repo-branch"}
+			, "Default"_= ""
+			, "Description"_= "Only run command on repositories that are currently on specified branch."
+		}
+	;
+
 	auto fFilter_Type = [](CStr const &_Default)
 		{
 			return "RepoType?"_=
@@ -67,7 +75,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					"Names"_= {"--repo-only-changed", "-c"}
 					, "Default"_= _bDefault
 					, "Description"_= "Only run command on repositories that have changes.\n"
-					"The repository is deemed changed if the branch is not the default branch, or if any files have been changed, added or removed (git status -s).\n"
+					"The repository is deemed changed if the branch is not the default branch, if any files have been changed"
+					", added or removed (git status -s), or if changes needs to be pushed.\n"
 				}
 			;
 		}
@@ -139,6 +148,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Name
 					, fFilter_Type("")
 					, Filter_Tags
+					, Filter_Branch
 					, fFilter_OnlyChanged(false)
 					, fs_CachedEnvironmentOption(true)
 				}
@@ -198,8 +208,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							, "Description"_= "Run all git commands synchronously. By default all git invocations will bu run in parallel.\n"
 						}
 						, Filter_Name
-						, fFilter_Type("Malterlib")
+						, fFilter_Type("")
 						, Filter_Tags
+						, Filter_Branch
 						, fFilter_OnlyChanged(false)
 						, fs_CachedEnvironmentOption(true)
 					}
@@ -244,7 +255,13 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, "Category"_= "Repository management"
 					, "Options"_=
 					{
-						fFilter_Type("Malterlib")
+						"Pretend?"_=
+						{
+							"Names"_= {"--pretend", "-p"}
+							, "Default"_= false
+							, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
+						}
+						, fFilter_Type("")
 						, fFilter_OnlyChanged(true)
 						, fs_CachedEnvironmentOption(true)
 					}
@@ -252,7 +269,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					{
 						"Branch"_=
 						{
-							"Type"_= {""}
+							"Type"_= ""
 							, "Description"_= "The branch to checkout.\n"
 						}
 					}
@@ -265,11 +282,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					if (Branch.f_IsEmpty())
 						DMibError("Branch cannot be empty, use unbranch to checkout default branch");
 
+					CBuildSystem::ERepoBranchFlag Flags = CBuildSystem::ERepoBranchFlag_None;
+
+					if (_Params["Pretend"].f_Boolean())
+						Flags |= CBuildSystem::ERepoBranchFlag_Pretend;
+
 					return f_RunBuildSystem
 						(
 							[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
 							{
-								return _BuildSystem.f_Action_Repository_Branch(GenerateOptions, RepoFilter, Branch);
+								return _BuildSystem.f_Action_Repository_Branch(GenerateOptions, RepoFilter, Branch, Flags);
 							}
 						)
 					;
@@ -286,7 +308,13 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				, "Category"_= "Repository management"
 				, "Options"_=
 				{
-					fFilter_Type("Malterlib")
+					"Pretend?"_=
+					{
+						"Names"_= {"--pretend", "-p"}
+						, "Default"_= false
+						, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
+					}
+					, fFilter_Type("")
 					, fFilter_OnlyChanged(true)
 					, fs_CachedEnvironmentOption(true)
 				}
@@ -295,11 +323,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			{
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
+				CBuildSystem::ERepoBranchFlag Flags = CBuildSystem::ERepoBranchFlag_None;
+
+				if (_Params["Pretend"].f_Boolean())
+					Flags |= CBuildSystem::ERepoBranchFlag_Pretend;
+
 				return f_RunBuildSystem
 					(
 						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
 						{
-							return _BuildSystem.f_Action_Repository_Unbranch(GenerateOptions, RepoFilter);
+							return _BuildSystem.f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
 						}
 					)
 				;
@@ -321,17 +354,45 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_= false
 						, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
 					}
-					, "Remote?"_=
+					, "AllRemotes?"_=
 					{
-						"Names"_= {"--remote", "-r"}
+						"Names"_= {"--all-remotes", "-a"}
 						, "Default"_= false
-						, "Description"_= "Also delete branches on remote.\n"
+						, "Description"_= "Also delete branches on remotes specified as writable.\n"
+					}
+					, "UpdateRemotes?"_=
+					{
+						"Names"_= {"--update-remotes", "-r"}
+						, "Default"_= false
+						, "Description"_= "Fetch all remotes before determining what to delete.\n"
+					}
+					, "Verbose?"_=
+					{
+						"Names"_= {"--verbose", "-v"}
+						, "Default"_= false
+						, "Description"_= "List branches that are not deleted and why.\n"
+					}
+					, "Force?"_=
+					{
+						"Names"_= {"--force", "-f"}
+						, "Default"_= false
+						, "Description"_= "Delete branches even though they are not merged to $(remote)/$(default_branch).\n"
 					}
 					, Filter_Name
-					, fFilter_Type("Malterlib")
+					, fFilter_Type("")
 					, Filter_Tags
+					, Filter_Branch
 					, fFilter_OnlyChanged(false)
 					, fs_CachedEnvironmentOption(true)
+				}
+				, "Parameters"_=
+				{
+					"Branches...?"_=
+					{
+						"Type"_= {""}
+						, "Default"_= _[_]
+						, "Description"_= "The branches to clean up. Uses wildcards. Leave empty to clean up all branches.\n"
+					}
 				}
 			}
 			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
@@ -340,16 +401,114 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 
 				CBuildSystem::ERepoCleanupBranchesFlag Flags = CBuildSystem::ERepoCleanupBranchesFlag_None;
 
+				TCVector<CStr> Branches;
+				for (auto &BranchJSON : _Params["Branches"].f_Array())
+					Branches.f_Insert(BranchJSON.f_String());
+
 				if (_Params["Pretend"].f_Boolean())
 					Flags |= CBuildSystem::ERepoCleanupBranchesFlag_Pretend;
-				if (_Params["Remote"].f_Boolean())
-					Flags |= CBuildSystem::ERepoCleanupBranchesFlag_Remote;
+				if (_Params["AllRemotes"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCleanupBranchesFlag_AllRemotes;
+				if (_Params["UpdateRemotes"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCleanupBranchesFlag_UpdateRemotes;
+				if (_Params["Verbose"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCleanupBranchesFlag_Verbose;
+				if (_Params["Force"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCleanupBranchesFlag_Force;
 
 				return f_RunBuildSystem
 					(
 						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
 						{
-							return _BuildSystem.f_Action_Repository_CleanupBranches(GenerateOptions, RepoFilter, Flags);
+							return _BuildSystem.f_Action_Repository_CleanupBranches(GenerateOptions, RepoFilter, Flags, Branches);
+						}
+					)
+				;
+			}
+		)
+	;
+
+	o_ToolsSection.f_RegisterDirectCommand
+		(
+			{
+				"Names"_= {"cleanup-tags"}
+				, "Description"_= "Clean up tags that are ancestors of the default branch.\n"
+				, "Category"_= "Repository management"
+				, "Options"_=
+				{
+					"Pretend?"_=
+					{
+						"Names"_= {"--pretend", "-p"}
+						, "Default"_= false
+						, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
+					}
+					, "AllRemotes?"_=
+					{
+						"Names"_= {"--all-remotes", "-a"}
+						, "Default"_= false
+						, "Description"_= "Also delete tags on remotes specified as writable.\n"
+					}
+					, "UpdateRemotes?"_=
+					{
+						"Names"_= {"--update-remotes", "-r"}
+						, "Default"_= false
+						, "Description"_= "Fetch all remotes before determining what to delete.\n"
+					}
+					, "Verbose?"_=
+					{
+						"Names"_= {"--verbose", "-v"}
+						, "Default"_= false
+						, "Description"_= "List tags that are not deleted and why.\n"
+					}
+					, "Force?"_=
+					{
+						"Names"_= {"--force", "-f"}
+						, "Default"_= false
+						, "Description"_= "Delete tags even though they are not ancestors of $(remote)/$(default_branch).\n"
+					}
+					, Filter_Name
+					, fFilter_Type("")
+					, Filter_Tags
+					, Filter_Branch
+					, fFilter_OnlyChanged(false)
+					, fs_CachedEnvironmentOption(true)
+				}
+				, "Parameters"_=
+				{
+					"Tags...?"_=
+					{
+						"Type"_= {""}
+						, "Default"_= _[_]
+						, "Description"_= "The tags to clean up. Leave empty to clean up all tags. Uses wildcards.\n"
+					}
+				}
+			}
+			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			{
+				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+
+				CBuildSystem::ERepoCleanupTagsFlag Flags = CBuildSystem::ERepoCleanupTagsFlag_None;
+
+				TCVector<CStr> Tags;
+				for (auto &TagJSON : _Params["Tags"].f_Array())
+					Tags.f_Insert(TagJSON.f_String());
+
+				if (_Params["Pretend"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCleanupTagsFlag_Pretend;
+				if (_Params["AllRemotes"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCleanupTagsFlag_AllRemotes;
+				if (_Params["UpdateRemotes"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCleanupTagsFlag_UpdateRemotes;
+				if (_Params["Verbose"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCleanupTagsFlag_Verbose;
+				if (_Params["Force"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCleanupTagsFlag_Force;
+
+				return f_RunBuildSystem
+					(
+						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+						{
+							return _BuildSystem.f_Action_Repository_CleanupTags(GenerateOptions, RepoFilter, Flags, Tags);
 						}
 					)
 				;
@@ -384,8 +543,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Description"_= "When on a non-default branch, push to all remotes, not just origin.\n"
 					}
 					, Filter_Name
-					, fFilter_Type("Malterlib")
+					, fFilter_Type("")
 					, Filter_Tags
+					, Filter_Branch
 					, fFilter_OnlyChanged(false)
 					, fs_CachedEnvironmentOption(true)
 				}
@@ -476,6 +636,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Name
 					, fFilter_Type("")
 					, Filter_Tags
+					, Filter_Branch
 					, fFilter_OnlyChanged(false)
 					, fs_CachedEnvironmentOption(true)
 				}

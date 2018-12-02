@@ -61,6 +61,12 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_SkipUpdate", "false") == "true"
 					, "Description"_= "Skip repository updates."
 				}
+				, "GitFetchTimeout?"_=
+				{
+					"Names"_= {"--fetch-timeout"}
+					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_GitFetchTimeout", "5").f_ToInt()
+					, "Description"_= "The number of seconds to wait before timing out git fetches."
+				}
 				, "Reconcile?"_=
 				{
 					"Names"_= {"--reconcile"}
