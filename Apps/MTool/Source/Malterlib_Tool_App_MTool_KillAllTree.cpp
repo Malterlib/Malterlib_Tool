@@ -198,7 +198,7 @@ RestartSearch:
 
 	}
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		TCVector<CStr> ProcessNames;
 		aint iParam = 0;

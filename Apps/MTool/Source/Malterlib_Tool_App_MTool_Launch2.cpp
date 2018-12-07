@@ -10,7 +10,7 @@ class CTool_Launch : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		TCVector<CStr> lArgs;
 
@@ -565,7 +565,7 @@ private:
 						{
 							if (pProc->m_StdOutRedir.f_GetPosition() == 0)
 							{
-								TCVector<uint8> Vector;
+								CByteVector Vector;
 								CFile::fs_WriteStringToVector(Vector, _Output, true);
 								pProc->m_StdOutRedir.f_FeedBytes(Vector.f_GetArray(), Vector.f_GetLen());
 							}

@@ -49,7 +49,7 @@ public:
 		}
 	}
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr SymbolDir = _Params.f_GetValue("0", "NotExist:/");
 		CStr FileName = _Params.f_GetValue("1", "NotExist.file");
@@ -64,7 +64,7 @@ public:
 
 		DConOut("Deploying: {}" DNewLine, FileName);
 
-		auto ExecutableInfo = NTools::fg_GetWindowsExecutableInfo(FileName);
+		auto ExecutableInfo = NTool::fg_GetWindowsExecutableInfo(FileName);
 
 		{
 			CStr SymServName = NFile::CFile::fs_GetFile(FileName);

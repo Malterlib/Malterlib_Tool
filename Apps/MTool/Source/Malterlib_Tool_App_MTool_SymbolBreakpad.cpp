@@ -8,7 +8,7 @@ class CTool_SymbolBreakpad : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr SymbolDir = _Params.f_GetValue("0", "NotExist:/");
 		CStr FileName = _Params.f_GetValue("1", "NotExist.file");

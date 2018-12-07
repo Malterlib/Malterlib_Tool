@@ -5,12 +5,12 @@
 
 #include "Malterlib_Tool_App_MTool_WindowsSymbols.h"
 
-namespace NMib::NTools
+namespace NMib::NTool
 {
 	CWindowsExecutableInfo fg_GetWindowsExecutableInfo(CStr const &_Path)
 	{
 		CWindowsExecutableInfo ReturnInfo;
-		TCVector<uint8> Mem;
+		CByteVector Mem;
 		NFile::CFile File;
 		File.f_Open(_Path, EFileOpen_Read | EFileOpen_ShareAll);
 		CFilePos FLen;

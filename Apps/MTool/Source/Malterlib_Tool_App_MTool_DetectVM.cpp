@@ -8,7 +8,7 @@ class CTool_DetectVM : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		bint bSilent = false;
 

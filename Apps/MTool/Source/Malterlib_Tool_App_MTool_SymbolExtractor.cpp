@@ -211,7 +211,7 @@ public:
 
 	CTime f_GetExecutableTimestamp(CStr const &_Path, CStr &o_PDBFile)
 	{
-		NTools::CWindowsExecutableInfo ExecutableInfo = NTools::fg_GetWindowsExecutableInfo(_Path);
+		NTool::CWindowsExecutableInfo ExecutableInfo = NTool::fg_GetWindowsExecutableInfo(_Path);
 		o_PDBFile = ExecutableInfo.m_PDBGuid;
 		return ExecutableInfo.m_Timestamp;
 	}
@@ -252,7 +252,7 @@ public:
 
 		unz_file_info64 FileInfo;
 		CStr FileName;
-		TCVector<uint8> ExtraField; 
+		CByteVector ExtraField; 
 		ExtraField.f_SetLen(65536);
 		CStr Comment;
 		fs_CheckUnzipError

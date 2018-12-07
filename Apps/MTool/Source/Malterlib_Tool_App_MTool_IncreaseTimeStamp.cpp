@@ -21,7 +21,7 @@ class CTool_IncreaseTimeStamp : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "NotExist.file");
 		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
@@ -29,7 +29,7 @@ public:
 			DError("File does not exist");
 		}
 
-		TCVector<uint8> Mem;
+		CByteVector Mem;
 		CFilePos FLen;
 		{
 			NFile::CFile File;
@@ -113,7 +113,7 @@ class CTool_SetImageOsVersion : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "NotExist.file");
 		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
@@ -130,7 +130,7 @@ public:
 		if (MajorVersion < 0 || MinorVersion < 0)
 			DError("No or incorrect version specified");
 
-		TCVector<uint8> Mem;
+		CByteVector Mem;
 		CFilePos FLen;
 		{
 			NFile::CFile File;

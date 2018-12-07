@@ -16,7 +16,7 @@ class CTool_LaunchNSIS : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
 		if (FileName == "012301231023Error")
@@ -95,7 +95,7 @@ class CTool_LaunchWithNamedPipes : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		aint iParam = 4;
 		TCVector<CStr> Params;

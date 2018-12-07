@@ -12,7 +12,7 @@ class CTool_ReadWindowsRegistry : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr Root = _Params.f_GetValue("0", "012301231023Error");
 

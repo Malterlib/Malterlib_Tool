@@ -28,7 +28,7 @@ public:
 		}
 	}
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr Pattern = _Params.f_GetValue("0", "NotExist");
 		CStr Dir = NFile::CFile::fs_GetPath(Pattern);
@@ -50,7 +50,7 @@ class CTool_TouchOrCreate : public CTool
 {
 	public:
 	
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr File = _Params.f_GetValue("0", "NotExist");
 		
@@ -71,7 +71,7 @@ class CTool_CopyWriteTime : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
 		CStr DestFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
@@ -111,7 +111,7 @@ class CTool_CopyWriteTimeIfNewer : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
 		CStr DestFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
@@ -179,7 +179,7 @@ class CTool_DiffCopy : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		DScopeConOutTimer("DiffCopy");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
@@ -285,7 +285,7 @@ class CTool_DiffReplace : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		DScopeConOutTimer("DiffReplace");
 		CStr Search = _Params.f_GetValue("0", "NotExist");
@@ -325,7 +325,7 @@ public:
 
 			CStr SourceData = NFile::CFile::fs_ReadStringFromFile(CStr(FilePath));
 			CStr DestData = SourceData.f_Replace(Search, Replace);
-			TCVector<uint8> Data;
+			CByteVector Data;
 			NFile::CFile::fs_WriteStringToVector(Data, DestData, bAddBom);
 			if (!NFile::CFile::fs_IsFileWritable(FileDest))
 				NFile::CFile::fs_MakeFileWritable(FileDest);
@@ -371,7 +371,7 @@ class CTool_DeleteDirectoryRecursive : public CTool
 {
 public:
 	
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		DScopeConOutTimer("DeleteDirectoryRecursive");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
@@ -392,7 +392,7 @@ class CTool_DeleteRecursive : public CTool
 {
 public:
 	
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		DScopeConOutTimer("DeleteRecursive");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
@@ -419,9 +419,9 @@ class CTool_TestOutput : public CTool
 {
 public:
 	
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
-		CStr Test = NMib::NDataProcessing::fg_GetRandomUuidString();
+		CStr Test = NMib::NCryptography::fg_GetRandomUuidString();
 		DConOut(str_utf16("*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯{\n}"), 0);
 		for (int i = 0; i < 16; ++i)
 		{

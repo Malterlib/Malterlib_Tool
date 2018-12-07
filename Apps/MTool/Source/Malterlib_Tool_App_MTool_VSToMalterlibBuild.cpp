@@ -9,7 +9,7 @@ class CTool_VSToMalterlibBuild : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr SourcePath = _Params.f_GetValue("0", "NotExist");
 		

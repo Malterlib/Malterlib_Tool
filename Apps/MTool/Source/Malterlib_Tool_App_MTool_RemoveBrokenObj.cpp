@@ -25,7 +25,7 @@ public:
 			{
 				try
 				{
-					TCVector<uint8> Test;
+					CByteVector Test;
 					CFile File;
 					File.f_Open(Files[i], EFileOpen_Read|EFileOpen_ShareAll);
 					mint ToRead = fg_Min(File.f_GetLength(), 16);
@@ -54,7 +54,7 @@ public:
 		}
 	}
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr Dir = _Params.f_GetValue("0", "NotExist");
 		CStr Dir2 = _Params.f_GetValue("1", "NotExist");

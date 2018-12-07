@@ -28,7 +28,7 @@ public:
 		}
 	}
 	
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr ConfigFile;
 		CStr SourceFile;
@@ -332,7 +332,7 @@ public:
 		if (Registry != OriginalRegistry)
 		{
 			CStr NewRegistry = Registry.f_GenerateStr();
-			TCVector<uint8> Temp;
+			CByteVector Temp;
 			CFile::fs_WriteStringToVector(Temp, NewRegistry);
 			
 			CFile::fs_CreateDirectory(CFile::fs_GetPath(ConfigFile));

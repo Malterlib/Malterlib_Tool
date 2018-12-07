@@ -274,7 +274,7 @@ public:
 			DConOut("{} -> {}{\n}", Mapping.m_From << Mapping.m_To);
 		}
 		
-		CStr MappingName = fg_Format("Temp_{}", NDataProcessing::fg_GetRandomUuidString());
+		CStr MappingName = fg_Format("Temp_{}", NCryptography::fg_GetRandomUuidString());
 		
 		pClient->f_CreateBranch(MappingName, Branch);
 		auto Cleanup

@@ -3,7 +3,7 @@
 
 #include <Mib/Core/Core>
 
-namespace NMib::NTools
+namespace NMib::NTool
 {
 	enum EPEImageFileMachine : uint16
 	{

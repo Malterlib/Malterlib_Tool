@@ -485,7 +485,7 @@ public:
 				if (Mapping.m_bNegative)
 					Branch.m_View.f_Insert(Mapping);
 			}
-			CStr BranchName = fg_Format("Temp_{}", NDataProcessing::fg_GetRandomUuidString());
+			CStr BranchName = fg_Format("Temp_{}", NCryptography::fg_GetRandomUuidString());
 			_Functions.f_GetClient().f_CreateBranch(BranchName, Branch);
 			auto Cleanup
 				= fg_OnScopeExit

@@ -26,7 +26,7 @@ public:
 		}
 	}
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr Dir = _Params.f_GetValue("0", "NotExist");
 		if (!NFile::CFile::fs_FileExists(Dir, EFileAttrib_Directory))

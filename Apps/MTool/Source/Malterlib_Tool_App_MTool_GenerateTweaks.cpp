@@ -33,7 +33,7 @@ class CTool_GenerateTweaks : public CTool
 	};
 
 public:
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 
 		bint bRet = true;
@@ -216,7 +216,7 @@ private:
 
 		if (_bOnlyWriteIfChanged)
 		{
-			TCVector<uint8> FileData;
+			CByteVector FileData;
 			CFile::fs_WriteStringToVector(FileData, CStr(ResultStr));
 			CFile::fs_CopyFileDiff(FileData, CStr(_DestFilePath), CTime::fs_NowUTC());
 		}
@@ -366,7 +366,7 @@ private:
 		NFile::CFile::fs_CreateDirectory(DestPath);
 		if (_bOnlyWriteIfChanged)
 		{
-			TCVector<uint8> FileData;
+			CByteVector FileData;
 			CFile::fs_WriteStringToVector(FileData, CStr(Out));
 			CFile::fs_CopyFileDiff(FileData, CStr(DestFilePath), CTime::fs_NowUTC());
 		}

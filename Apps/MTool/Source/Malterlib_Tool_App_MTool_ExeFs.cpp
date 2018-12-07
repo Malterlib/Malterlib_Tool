@@ -23,7 +23,7 @@ public:
 		EAction_List,			// Lists files
 	};
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{		
 		
 		static char const* sc_pHelpText = 

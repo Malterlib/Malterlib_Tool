@@ -52,7 +52,7 @@ void CTool::f_Register
 			}
 			, [this](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 		 	{
-				NRegistry::CRegistry_CStr Params;
+				NContainer::CRegistry_CStr Params;
 				mint iOut = 0;
 
 				if (auto pParams = _Params.f_GetMember("Params"))
@@ -87,7 +87,7 @@ CStr CTool2::f_GetOption(TCMap<CStr, CStr> const &_Params, CStr const &_Option) 
 	DError(CStr::CFormat("You have to specify '{}'") << _Option);
 }
 
-aint CTool2::f_Run(NRegistry::CRegistry_CStr &_Params)
+aint CTool2::f_Run(NContainer::CRegistry_CStr &_Params)
 {
 	TCMap<CStr, CStr> Params;
 

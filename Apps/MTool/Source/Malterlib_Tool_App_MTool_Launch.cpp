@@ -9,7 +9,7 @@ class CTool_LaunchTimed : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
 		if (FileName == "012301231023Error")
@@ -138,7 +138,7 @@ class CTool_LaunchParallell : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		DScopeConOutTimer("LaunchParallell");
 		struct CProgram
@@ -351,7 +351,7 @@ class CTool_TestStdOut : public CTool
 {
 public:
 	
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		fp64 Sleep = fg_GetRandomFloat();
 		DConOut("Testing standard out {}" DNewLine, Sleep);

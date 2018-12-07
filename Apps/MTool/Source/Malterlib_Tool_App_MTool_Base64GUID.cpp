@@ -9,11 +9,11 @@ class CTool_Base64ToGUID : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr Base64 = _Params.f_GetValue("0", "");
 		
-		TCVector<uint8> Data;
+		CByteVector Data;
 		fg_Base64Decode(Base64, Data);
 		
 		uint32 First = 0;

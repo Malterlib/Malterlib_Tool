@@ -9,7 +9,7 @@ class CTool_GenerateOSXLicence : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr SourcePath = _Params.f_GetValue("0", "");
 		CStr ReplacementTextPath = _Params.f_GetValue("1", "");
@@ -32,7 +32,7 @@ public:
 		{
 			CAnsiStr SourceFileContents;
 			{
-				NContainer::TCVector<uint8> FileContents = NFile::CFile::fs_ReadFile(SourcePath);
+				NContainer::CByteVector FileContents = NFile::CFile::fs_ReadFile(SourcePath);
 				SourceFileContents.f_AddStr((ch8 const *)FileContents.f_GetArray(), FileContents.f_GetLen());
 			}
 			CAnsiStr ReplacementTextAnsi;

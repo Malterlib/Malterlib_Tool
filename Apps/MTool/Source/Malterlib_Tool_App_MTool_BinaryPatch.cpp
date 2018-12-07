@@ -8,7 +8,7 @@
 
 struct CTool_BinaryPatch : public CTool
 {
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr Original = _Params.f_GetValue("0", "");
 		CStr Patch = _Params.f_GetValue("1", "");
@@ -21,7 +21,7 @@ struct CTool_BinaryPatch : public CTool
 		if (Output.f_IsEmpty())
 			DMibError("You need to specify output file: MTool BinaryPatch Original Patch Output");
 
-		TCVector<uint8> PatchData = NFile::fg_MalterlibPatchDecode(NFile::CFile::fs_ReadFile(Original), NFile::CFile::fs_ReadFile(Patch));
+		CByteVector PatchData = NFile::fg_MalterlibPatchDecode(NFile::CFile::fs_ReadFile(Original), NFile::CFile::fs_ReadFile(Patch));
 		if (Output == "-")
 			NSys::fg_ConsoleOutputBinary(PatchData);
 		else
@@ -35,7 +35,7 @@ DMibRuntimeClass(CTool, CTool_BinaryPatch);
 
 struct CTool_BinaryDiff : public CTool
 {
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr Original = _Params.f_GetValue("0", "");
 		CStr Changed = _Params.f_GetValue("1", "");
@@ -48,7 +48,7 @@ struct CTool_BinaryDiff : public CTool
 		if (Output.f_IsEmpty())
 			DMibError("You need to specify output file: MTool BinaryDiff Original Changed Output");
 
-		TCVector<uint8> NewData = NFile::fg_MalterlibPatchEncode(NFile::CFile::fs_ReadFile(Original), NFile::CFile::fs_ReadFile(Changed));
+		CByteVector NewData = NFile::fg_MalterlibPatchEncode(NFile::CFile::fs_ReadFile(Original), NFile::CFile::fs_ReadFile(Changed));
 		if (Output == "-")
 			NSys::fg_ConsoleOutputBinary(NewData);
 		else

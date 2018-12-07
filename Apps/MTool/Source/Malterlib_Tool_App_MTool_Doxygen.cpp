@@ -7,7 +7,7 @@
 
 namespace
 {
-	CRegistry_CStr fg_ExtractOptions(NRegistry::CRegistry_CStr &_Params)
+	CRegistry_CStr fg_ExtractOptions(NContainer::CRegistry_CStr &_Params)
 	{
 		CRegistry_CStr Registry;
 		
@@ -49,7 +49,7 @@ class CTool_DoxygenCompile : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CRegistry_CStr Registry = fg_ExtractOptions(_Params);
 
@@ -78,7 +78,7 @@ class CTool_DoxygenLibTool : public CTool
 {
 public:
 
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CRegistry_CStr Registry = fg_ExtractOptions(_Params);
 
@@ -503,7 +503,7 @@ public:
 		 }
 	}
 	
-	aint f_Run(NRegistry::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CRegistry_CStr Registry = fg_ExtractOptions(_Params);
 		
