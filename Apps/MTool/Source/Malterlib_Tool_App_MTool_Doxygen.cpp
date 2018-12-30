@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -31,7 +31,23 @@ namespace
 			else
 			{
 				if (LastOption.f_IsEmpty())
-					Registry.f_CreateChild("Files")->f_CreateChildNoPath(Value, true);
+				{
+					auto pFilesReg = Registry.f_CreateChild("Files");
+					if (CFile::fs_GetExtension(Value).f_CmpNoCase("a") == 0)
+					{
+						CRegistry_CStr LibraryContents;
+						LibraryContents.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(Value)), Value);
+
+						auto pFiles = LibraryContents.f_GetChildNoPath("Files");
+						if (pFiles)
+						{
+							for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
+								pFilesReg->f_CreateChildNoPath(iFile->f_GetName(), true);
+						}
+					}
+					else
+						pFilesReg->f_CreateChildNoPath(Value, true);
+				}
 				else
 					Registry.f_SetValueNoPath(LastOption, Value);
 				
@@ -93,6 +109,18 @@ public:
 				CStr FileName = fg_GetStrLineSep(FileContents);
 				if (CFile::fs_GetExtension(FileName).f_CmpNoCase("o") == 0)
 					pFilesReg->f_CreateChildNoPath(FileName, true);
+				else if (CFile::fs_GetExtension(FileName).f_CmpNoCase("a") == 0)
+				{
+					CRegistry_CStr LibraryContents;
+					LibraryContents.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
+
+					auto pFiles = LibraryContents.f_GetChildNoPath("Files");
+					if (pFiles)
+					{
+						for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
+							pFilesReg->f_CreateChildNoPath(iFile->f_GetName(), true);
+					}
+				}
 			}
 		}
 
@@ -137,10 +165,6 @@ public:
 		TCMap<CStr, CStr> m_ClangOptions;
 		TCSet<CStr> m_Inputs;
 		TCSet<CStr> m_Images;
-		CStr m_DocsetFeedname;
-		CStr m_DocsetBundleID;
-		CStr m_DocsetPublisherID;
-		CStr m_DocsetPublisherName;
 	};
 
 	TCMap<CStr, CModule> m_Modules;
@@ -155,15 +179,13 @@ public:
 			{
 				CRegistry_CStr const &ObjectRegistry = *iFile;
 				
-				CStr ModuleName = ObjectRegistry.f_GetValue("--documentation-module");
+				CStr ModuleName = ObjectRegistry.f_GetValue("--documentation-module", "");
+
+				if (ModuleName.f_IsEmpty())
+					DMibError("Library '{}' File '{}' has no module specified"_f << Library.f_GetName() << iFile->f_GetName());
 				
 				auto &Module = m_Modules[ModuleName];
 				
-				Module.m_DocsetFeedname = ObjectRegistry.f_GetValue("--documentation-docset-feedname", "");
-				Module.m_DocsetBundleID = ObjectRegistry.f_GetValue("--documentation-docset-bundle-id", "");
-				Module.m_DocsetPublisherID = ObjectRegistry.f_GetValue("--documentation-docset-publisher-id", "");
-				Module.m_DocsetPublisherName = ObjectRegistry.f_GetValue("--documentation-docset-publisher-name", "");
-
 				bool bValid = false;
 				auto *pFiles = ObjectRegistry.f_GetChild("Files");
 				if (pFiles)
@@ -234,8 +256,7 @@ public:
 		CMutual OutputLock;
 		TCAtomic<uint32> ExitCode(0);
 
-		auto fAddModules
-			= [&](bool _bGenerateDocset)
+		auto fAddModules = [&]()
 			{
 				for (auto &Module : m_Modules)
 				{
@@ -260,15 +281,11 @@ public:
 						DoxygenFileContents += CStr::CFormat("PROJECT_NAME = {}\n") << LibraryName;
 						
 						CStr OutputDir = m_OutputDir + "/" + LibraryName;
-						if (_bGenerateDocset)
-							OutputDir = CFile::fs_GetPath(m_OutputDir) + "/DocSetsTemp/" + LibraryName;
-						
+
 						CFile::fs_CreateDirectory(OutputDir);
 
 						CStr DoxygenConfigFile = CFile::fs_GetPath(m_OutputDir) + "/" + LibraryName + ".doxygen";
-						if (_bGenerateDocset)
-							DoxygenConfigFile = CFile::fs_GetPath(m_OutputDir) + "/" + LibraryName + "Docset.doxygen";
-						
+
 						DoxygenFileContents += CStr::CFormat("OUTPUT_DIRECTORY={}\n") << OutputDir;
 						if (_bGenerateTags)
 						{
@@ -292,27 +309,7 @@ public:
 							DoxygenFileContents += CStr::CFormat("STRIP_FROM_INC_PATH = {}\n") << m_DoxygenRoot;
 							DoxygenFileContents += CStr::CFormat("STRIP_FROM_PATH = {}\n") << m_DoxygenRoot;
 						}
-								
-						if (!Module.m_DocsetBundleID.f_IsEmpty())
-						{
-							if (_bGenerateDocset)
-							{
-								DoxygenFileContents += "GENERATE_DOCSET   = YES\n";
-								DoxygenFileContents += "DISABLE_INDEX   = YES\n";
-								DoxygenFileContents += "SEARCHENGINE   = NO\n";
-								DoxygenFileContents += "GENERATE_TREEVIEW   = NO\n";
-								DoxygenFileContents += CStr::CFormat("DOCSET_BUNDLE_ID = {}\n") << Module.m_DocsetBundleID;
-								if (!Module.m_DocsetFeedname.f_IsEmpty())
-									DoxygenFileContents += CStr::CFormat("DOCSET_FEEDNAME = {}\n") << Module.m_DocsetFeedname;
-								if (!Module.m_DocsetPublisherID.f_IsEmpty())
-									DoxygenFileContents += CStr::CFormat("DOCSET_PUBLISHER_ID = {}\n") << Module.m_DocsetPublisherID;
-								if (!Module.m_DocsetPublisherName.f_IsEmpty())
-									DoxygenFileContents += CStr::CFormat("DOCSET_PUBLISHER_NAME = {}\n") << Module.m_DocsetPublisherName;
-							}
-						}
-						else if (_bGenerateDocset)
-							continue;
-						
+
 						CStr ImagePath = CFile::fs_GetPath(m_OutputDir) + "/Images";
 						CFile::fs_CreateDirectory(ImagePath);
 						DoxygenFileContents += CStr::CFormat("IMAGE_PATH	= {}\n") << ImagePath;
@@ -398,6 +395,7 @@ public:
 					;
 					
 					Params.m_bMergeEnvironment = true;
+					Params.m_Environment["PATH"] = "/opt/local/bin:{}"_f << fg_GetSys()->f_GetEnvironmentVariable("PATH");
 
 					Handler.f_AddLaunch(Params, false);
 				}
@@ -405,104 +403,14 @@ public:
 			}
 		;
 		
-		fAddModules(false);
-		fAddModules(true);
-		
+		fAddModules();
+
 		Handler.f_BlockOnExit();
 
 		if (ExitCode.f_Load())
 			DError(fg_Format("doxygen exited with code: {}", ExitCode.f_Load()));
 	}
 
-	void f_GenerateDocsets()
-	{
-		CProcessLaunchHandler Handler;
-		
-		CMutual OutputLock;
-		TCAtomic<uint32> ExitCode(0);
-
-		for (auto &Module : m_Modules)
-		{
-			if (Module.m_DocsetBundleID.f_IsEmpty())
-				continue;
-			
-			TCVector<CStr> LaunchParams;
-			
-			struct CState
-			{
-				CStr m_StdOut;
-				CStr m_StdErr;
-			};
-			
-			TCSharedPointer<CState> pState = fg_Construct();
-
-			CStr LibraryName = m_Modules.fs_GetKey(Module);
-			CStr OutputDir = CFile::fs_GetPath(m_OutputDir) + "/DocSetsTemp/" + LibraryName;
-
-			DConOut("Launching make from: {}\n", OutputDir);
-			
-			CProcessLaunchParams Params = CProcessLaunchParams::fs_LaunchExecutable
-				(
-					"make"
-					, LaunchParams
-					, OutputDir
-					, [&, pState](CProcessLaunchStateChangeVariant const &_State, fp64 _TimeSinceStart)
-					{
-						if (_State.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
-						{
-							DConErrOut("Error launching make: {}\n", _State.f_Get<EProcessLaunchState_LaunchFailed>());
-						}
-						else if (_State.f_GetTypeID() == EProcessLaunchState_Exited)
-						{
-							uint32 ThisExit = _State.f_Get<EProcessLaunchState_Exited>();
-							if (ThisExit)
-								ExitCode.f_Exchange(ThisExit);
-
-							{
-								DLock(OutputLock);
-								DConErrOutRaw(pState->m_StdErr);
-							}
-						}
-					}
-				)
-			;
-			
-			Params.m_fOnOutput = [&, pState](EProcessLaunchOutputType _OutputType, NMib::NStr::CStr const &_Output)
-				{
-					DLock(OutputLock);
-					if (_OutputType == EProcessLaunchOutputType_StdOut)
-						DConOutRaw(_Output);
-					else
-						pState->m_StdErr += _Output;
-			
-				}
-			;
-			
-			Params.m_bMergeEnvironment = true;
-			Params.m_bAllowExecutableLocate = true;
-
-			Handler.f_AddLaunch(Params, false);
-		}
-		
-		Handler.f_BlockOnExit();
-
-		if (ExitCode.f_Load())
-			DError(fg_Format("make exited with code: {}", ExitCode.f_Load()));
-		
-		for (auto &Module : m_Modules)
-		{
-			if (Module.m_DocsetBundleID.f_IsEmpty())
-				continue;
-			
-			CStr LibraryName = m_Modules.fs_GetKey(Module);
-			CStr OutputDir = CFile::fs_GetPath(m_OutputDir) + "/DocSetsTemp/" + LibraryName;
-			CStr OutputDirDest = m_OutputDir + "/" + LibraryName;
-			CStr DocSetName = Module.m_DocsetBundleID + ".docset";
-
-			CFile::fs_DiffCopyFileOrDirectory(OutputDir + "/" + DocSetName, OutputDirDest + "/" + DocSetName, fg_Default());
-		 }
-	}
-	
 	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CRegistry_CStr Registry = fg_ExtractOptions(_Params);
@@ -535,7 +443,7 @@ public:
 			for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
 				Files[iFile->f_GetName()];
 		}
-		
+
 		for (auto &FileName : Files)
 		{
 			CStr Extension = CFile::fs_GetExtension(FileName);
@@ -590,8 +498,7 @@ public:
 		
 		f_LaunchModules(true, m_DoxygenTagInclude);
 		f_LaunchModules(false, m_DoxygenInclude);
-		f_GenerateDocsets();
-		
+
 		return 0;
 	}
 };
