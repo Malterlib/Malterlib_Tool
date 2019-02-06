@@ -24,7 +24,7 @@ public:
 		auto WorkActor = fg_ConcurrentActor();
 		CCurrentActorScope ActorScope{WorkActor};
 
-		TCContinuation<CStr> Contents;
+		TCPromise<CStr> Contents;
 		TCActor<CCurlActor> CurlActor;
 
 		if (SourcePath.f_StartsWith("https://") || SourcePath.f_StartsWith("http://"))
