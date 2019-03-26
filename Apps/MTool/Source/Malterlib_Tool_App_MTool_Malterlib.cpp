@@ -72,7 +72,20 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 	return "Xcode{}"_f << Version;
 
 #elif defined(DPlatformFamily_Windows)
-	return "VisualStudio2017";
+	CStr RepoConfigFile = _RootPath / "Repo.conf";
+	CStr Version = "2019";
+
+	if (CFile::fs_FileExists(RepoConfigFile))
+	{
+		for (auto Line : CFile::fs_ReadStringFromFile(RepoConfigFile).f_SplitLine())
+		{
+			CStr Key = fg_GetStrSep(Line, " ");
+			if (Key == "VisualStudioVersion")
+				Version = Line;
+		}
+	}
+
+	return "VisualStudio{}"_f << Version;
 #else
 	return "Xcode";
 #endif
