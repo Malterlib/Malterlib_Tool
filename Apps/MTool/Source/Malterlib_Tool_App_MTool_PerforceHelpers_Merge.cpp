@@ -607,7 +607,7 @@ public:
 							
 							CClock Clock;
 							Clock.f_Start();
-							TCAtomic<fp32> LastDisplay(fp32(Clock.f_GetTime()));
+							TCAtomic<pfp32> LastDisplay(Clock.f_GetTime().f_Get());
 							
 							struct CToProcess
 							{
@@ -682,8 +682,8 @@ public:
 										//	DConOut("\t\t{} - EXCLUDED - {}\n", IntegrateFrom << pClient->f_NoThrow().f_GetLastError().f_Replace(IntegrateFrom, ""));
 										
 										++nDoneIntegrations;
-										fp32 LastDisplayValue = LastDisplay.f_Load();
-										fp32 CurrentTime = Clock.f_GetTime();
+										pfp32 LastDisplayValue = LastDisplay.f_Load();
+										pfp32 CurrentTime = Clock.f_GetTime().f_Get();
 										if (CurrentTime - LastDisplayValue > 2.0)
 										{
 											if (LastDisplay.f_CompareExchangeStrong(LastDisplayValue, CurrentTime))

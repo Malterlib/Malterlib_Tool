@@ -23,7 +23,7 @@ struct CTool_BinaryPatch : public CTool
 
 		CByteVector PatchData = NFile::fg_MalterlibPatchDecode(NFile::CFile::fs_ReadFile(Original), NFile::CFile::fs_ReadFile(Patch));
 		if (Output == "-")
-			NSys::fg_ConsoleOutputBinary(PatchData);
+			NSys::fg_ConsoleOutputBinary(PatchData.f_ToSecure());
 		else
 			CFile::fs_WriteFile(PatchData, Output);
 
@@ -50,7 +50,7 @@ struct CTool_BinaryDiff : public CTool
 
 		CByteVector NewData = NFile::fg_MalterlibPatchEncode(NFile::CFile::fs_ReadFile(Original), NFile::CFile::fs_ReadFile(Changed));
 		if (Output == "-")
-			NSys::fg_ConsoleOutputBinary(NewData);
+			NSys::fg_ConsoleOutputBinary(NewData.f_ToSecure());
 		else
 			CFile::fs_WriteFile(NewData, Output);
 
