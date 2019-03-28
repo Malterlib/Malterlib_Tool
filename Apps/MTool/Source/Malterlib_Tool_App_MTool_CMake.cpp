@@ -7,11 +7,7 @@
 
 #ifdef DMToolEmbedCMake
 
-int do_cmake(int ac, char const* const* av);
-int do_command(int ac, char const* const* av);
-int do_build(int ac, char const* const* av);
-int do_open(int ac, char const* const* av);
-void prepare_cmake(char const *exe_path);
+int cmake_main(int ac, char const* const* av);
 
 class CTool_CMake : public CDistributedTool
 {
@@ -48,25 +44,14 @@ public:
 				{
 					TCVector<CStr> Commands;
 					TCVector<const ch8 *> ArgV;
-					ArgV.f_Insert(Commands.f_Insert("cmake").f_GetStr());
+					ArgV.f_Insert(Commands.f_Insert(CFile::fs_GetProgramPath()).f_GetStr());
 					if (auto pParams = _Params.f_GetMember("Params"))
 					{
 						for (auto &Param : pParams->f_Array())
 							ArgV.f_Insert(Commands.f_Insert(Param.f_String()).f_GetStr());
 					}
 
-					prepare_cmake(CFile::fs_GetProgramPath());
-
-					if (Commands.f_GetLen() >= 2)
-					{
-						if (Commands[1] == "--build")
-							return do_build(ArgV.f_GetLen(), ArgV.f_GetArray());
-						else if (Commands[1] == "--open")
-							return do_open(ArgV.f_GetLen(), ArgV.f_GetArray());
-						else if (Commands[1] == "-E")
-							return do_command(ArgV.f_GetLen(), ArgV.f_GetArray());
-					}
-					return do_cmake(ArgV.f_GetLen(), ArgV.f_GetArray());
+					return cmake_main(ArgV.f_GetLen(), ArgV.f_GetArray());
 				}
 			)
 		;
