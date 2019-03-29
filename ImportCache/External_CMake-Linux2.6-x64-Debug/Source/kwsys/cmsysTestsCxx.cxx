@@ -30,8 +30,8 @@ int testDynamicLoader(int, char*[]);
 
 /* Create map.  */
 
-typedef int (*MainFuncPointer)(int, char* []);
-typedef struct
+typedef int (*MainFuncPointer)(int, char* []); /* NOLINT */
+typedef struct /* NOLINT */
 {
   const char* name;
   MainFuncPointer func;
@@ -98,7 +98,7 @@ static char* lowercase(const char* string)
   if (new_string == NULL) { /* NOLINT */
     return NULL;            /* NOLINT */
   }
-  strncpy(new_string, string, stringSize);
+  strcpy(new_string, string);
   for (p = new_string; *p != 0; ++p) {
     *p = CM_CAST(char, tolower(*p));
   }
