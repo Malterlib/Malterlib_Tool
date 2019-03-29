@@ -74,7 +74,7 @@
 /* #undef EGD_SOCKET */
 
 /* Define if you want to enable IPv6 support */
-/* #undef ENABLE_IPV6 */
+#define ENABLE_IPV6 1
 
 /* Define to the type qualifier of arg 1 for getnameinfo. */
 /* #undef GETNAMEINFO_QUAL_ARG1 */
@@ -173,7 +173,7 @@
 /* #undef HAVE_FTRUNCATE */
 
 /* Define to 1 if you have a working getaddrinfo function. */
-/* #undef HAVE_GETADDRINFO */
+#define HAVE_GETADDRINFO 1
 
 /* Define to 1 if you have the `geteuid' function. */
 /* #undef HAVE_GETEUID */

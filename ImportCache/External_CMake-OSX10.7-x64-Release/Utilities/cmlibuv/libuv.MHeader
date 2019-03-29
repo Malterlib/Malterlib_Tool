@@ -25,6 +25,14 @@ Property.CMakeOutputPath_libuv "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type None
 			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/idna.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/idna.h"
+			{
+				Compile.Type None
+			}
 			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/inet.c"
 			{
 				Compile.Type C
@@ -33,7 +41,19 @@ Property.CMakeOutputPath_libuv "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type None
 			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/strscpy.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/strscpy.h"
+			{
+				Compile.Type None
+			}
 			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/threadpool.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/timer.c"
 			{
 				Compile.Type C
 			}
@@ -124,10 +144,6 @@ Property.CMakeOutputPath_libuv "@('../..'->MakeAbsolute())"
 					Compile.Type C
 				}
 				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/thread.c"
-				{
-					Compile.Type C
-				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/timer.c"
 				{
 					Compile.Type C
 				}

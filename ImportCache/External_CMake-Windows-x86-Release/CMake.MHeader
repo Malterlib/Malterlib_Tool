@@ -3003,6 +3003,14 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type None
 			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/idna.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/idna.h"
+			{
+				Compile.Type None
+			}
 			%File "../../../../External/CMake/Utilities/cmlibuv/src/inet.c"
 			{
 				Compile.Type C
@@ -3011,7 +3019,19 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type None
 			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/strscpy.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/strscpy.h"
+			{
+				Compile.Type None
+			}
 			%File "../../../../External/CMake/Utilities/cmlibuv/src/threadpool.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../External/CMake/Utilities/cmlibuv/src/timer.c"
 			{
 				Compile.Type C
 			}
@@ -3105,10 +3125,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				{
 					Compile.Type C
 				}
-				%File "../../../../External/CMake/Utilities/cmlibuv/src/win/req.c"
-				{
-					Compile.Type C
-				}
 				%File "../../../../External/CMake/Utilities/cmlibuv/src/win/req-inl.h"
 				{
 					Compile.Type None
@@ -3134,10 +3150,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 					Compile.Type C
 				}
 				%File "../../../../External/CMake/Utilities/cmlibuv/src/win/thread.c"
-				{
-					Compile.Type C
-				}
-				%File "../../../../External/CMake/Utilities/cmlibuv/src/win/timer.c"
 				{
 					Compile.Type C
 				}
@@ -3659,6 +3671,38 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		{
 			Compile.Type None
 		}
+		%File "../../../../External/CMake/Source/cmFileAPI.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFileAPI.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFileAPICache.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFileAPICache.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFileAPICodemodel.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFileAPICodemodel.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmFileAPICMakeFiles.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmFileAPICMakeFiles.h"
+		{
+			Compile.Type None
+		}
 		%File "../../../../External/CMake/Source/cmExtraMalterlibGenerator.cxx"
 		{
 			Compile.Type C++
@@ -3888,6 +3932,14 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		{
 			Compile.Type C++
 		}
+		%File "../../../../External/CMake/Source/cmInstallSubdirectoryGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmInstallSubdirectoryGenerator.cxx"
+		{
+			Compile.Type C++
+		}
 		%File "../../../../External/CMake/Source/cmInstallTargetGenerator.h"
 		{
 			Compile.Type None
@@ -3995,6 +4047,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		%File "../../../../External/CMake/Source/cmMakefileUtilityTargetGenerator.cxx"
 		{
 			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmMessageType.h"
+		{
+			Compile.Type None
 		}
 		%File "../../../../External/CMake/Source/cmMessenger.cxx"
 		{
@@ -4114,6 +4170,14 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type C++
 		}
 		%File "../../../../External/CMake/Source/cmQtAutoGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmQtAutoGenGlobalInitializer.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmQtAutoGenGlobalInitializer.h"
 		{
 			Compile.Type None
 		}
@@ -4327,6 +4391,18 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.PreprocessorDefines "CMAKE_USE_WMAKE;@(Compile.PreprocessorDefines)"
 		}
 		%File "../../../../External/CMake/Source/cmake.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cm_string_view.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cm_string_view.hxx"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cm_static_string_view.hxx"
 		{
 			Compile.Type None
 		}
@@ -5090,6 +5166,14 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		{
 			Compile.Type None
 		}
+		%File "../../../../External/CMake/Source/cmString.cxx"
+		{
+			Compile.Type C++
+		}
+		%File "../../../../External/CMake/Source/cmString.hxx"
+		{
+			Compile.Type None
+		}
 		%File "../../../../External/CMake/Source/cmStringReplaceHelper.cxx"
 		{
 			Compile.Type C++
@@ -5454,14 +5538,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		{
 			Compile.Type C++
 		}
-		%File "../../../../External/CMake/Source/cmGlobalVisualStudio15Generator.h"
-		{
-			Compile.Type None
-		}
-		%File "../../../../External/CMake/Source/cmGlobalVisualStudio15Generator.cxx"
-		{
-			Compile.Type C++
-		}
 		%File "../../../../External/CMake/Source/cmGlobalVisualStudioGenerator.cxx"
 		{
 			Compile.Type C++
@@ -5469,6 +5545,14 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		%File "../../../../External/CMake/Source/cmGlobalVisualStudioGenerator.h"
 		{
 			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGlobalVisualStudioVersionedGenerator.h"
+		{
+			Compile.Type None
+		}
+		%File "../../../../External/CMake/Source/cmGlobalVisualStudioVersionedGenerator.cxx"
+		{
+			Compile.Type C++
 		}
 		%File "../../../../External/CMake/Source/cmIDEFlagTable.h"
 		{
@@ -6593,6 +6677,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				Compile.Type C++
 			}
 			%File "../../../../External/CMake/Tests/CMakeLib/testRST.cxx"
+			{
+				Compile.Type C++
+			}
+			%File "../../../../External/CMake/Tests/CMakeLib/testString.cxx"
 			{
 				Compile.Type C++
 			}
