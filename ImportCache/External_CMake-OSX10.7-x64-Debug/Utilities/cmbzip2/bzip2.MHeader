@@ -11,6 +11,9 @@ Property.CMakeOutputPath_bzip2 "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/bzip2"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmbzip2
 	%Group Utilities

@@ -11,6 +11,9 @@ Property.CMakeOutputPath_CMZLIB "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMZLIB"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmzlib
 	%Group Utilities

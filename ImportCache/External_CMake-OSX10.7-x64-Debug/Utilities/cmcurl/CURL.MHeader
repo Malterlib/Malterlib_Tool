@@ -11,6 +11,9 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CURL"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName curltest
 	%Group Utilities
@@ -35,6 +38,9 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CURL"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmcurl
 	%Group Utilities

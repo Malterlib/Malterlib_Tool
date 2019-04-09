@@ -11,6 +11,9 @@ Property.CMakeOutputPath_CMLIBLZMA "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMLIBLZMA"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmliblzma
 	%Group Utilities

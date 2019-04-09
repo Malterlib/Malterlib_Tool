@@ -15,6 +15,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmsys
 	%Group Source
@@ -212,6 +215,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmsys_c
 	%Group Source
@@ -313,6 +319,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cmsysTestSharedForward
 	%Group Windows
@@ -349,6 +358,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cmsysTestsCxx
 	%Group Windows
@@ -430,6 +442,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cmsysTestsC
 	%Group Windows
@@ -477,6 +492,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName testConsoleBufChild
 	%Group Source
@@ -498,6 +516,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cmsysTestProcess
 	%Group Source
@@ -519,6 +540,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type DynamicLibrary
 	Target.BaseName cmsysTestDynload
 	%Group Source

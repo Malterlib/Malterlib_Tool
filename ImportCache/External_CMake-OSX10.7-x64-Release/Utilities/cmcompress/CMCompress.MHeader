@@ -11,6 +11,9 @@ Property.CMakeOutputPath_CMCompress "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMCompress"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmcompress
 	%Group Utilities

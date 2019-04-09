@@ -9,6 +9,9 @@ Property.CMakeOutputPath_JsonCpp "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/JsonCpp"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmjsoncpp
 	%Group Utilities

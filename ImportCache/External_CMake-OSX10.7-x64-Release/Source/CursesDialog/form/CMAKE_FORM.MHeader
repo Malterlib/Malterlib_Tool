@@ -11,6 +11,9 @@ Property.CMakeOutputPath_CMAKE_FORM "@('../../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMAKE_FORM"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmForm
 	%Group Source

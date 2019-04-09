@@ -9,6 +9,9 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/libarchive"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmlibarchive
 	%Group Utilities

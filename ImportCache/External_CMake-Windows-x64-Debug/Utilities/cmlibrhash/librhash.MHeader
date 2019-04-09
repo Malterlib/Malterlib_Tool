@@ -9,6 +9,9 @@ Property.CMakeOutputPath_librhash "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/librhash"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmlibrhash
 	%Group Utilities

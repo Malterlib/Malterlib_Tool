@@ -11,6 +11,9 @@ Property.CMakeOutputPath_libuv "@('../..'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/libuv"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmlibuv
 	%Group Utilities

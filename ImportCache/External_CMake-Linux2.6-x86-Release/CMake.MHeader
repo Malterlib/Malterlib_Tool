@@ -11,6 +11,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cmsysTestProcess
 	%Group Source
@@ -32,6 +35,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cmsysTestsCxx
 	%Group Linux2.6
@@ -121,6 +127,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmsys
 	%Group Source
@@ -321,6 +330,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type DynamicLibrary
 	Target.BaseName cmsysTestDynload
 	%Group Source
@@ -345,6 +357,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName testConsoleBufChild
 	%Group Source
@@ -368,6 +383,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cmsysTestSharedForward
 	%Group Linux2.6
@@ -406,6 +424,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmsys_c
 	%Group Source
@@ -510,6 +531,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cmsysTestsC
 	%Group Linux2.6
@@ -565,6 +589,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName kwiml_test
 	%Group Utilities
@@ -614,6 +641,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/librhash"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmlibrhash
 	%Group Utilities
@@ -715,6 +745,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMZLIB"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmzlib
 	%Group Utilities
@@ -780,6 +813,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CURL"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName curltest
 	%Group Utilities
@@ -804,6 +840,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CURL"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmcurl
 	%Group Utilities
@@ -1901,6 +1940,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMCompress"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmcompress
 	%Group Utilities
@@ -1923,6 +1965,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmexpat
 	%Group Utilities
@@ -1968,6 +2013,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/bzip2"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmbzip2
 	%Group Utilities
@@ -2017,6 +2065,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMLIBLZMA"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmliblzma
 	%Group Utilities
@@ -2341,6 +2392,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/libarchive"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmlibarchive
 	%Group Utilities
@@ -2964,6 +3018,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/JsonCpp"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmjsoncpp
 	%Group Utilities
@@ -3001,6 +3058,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/libuv"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName cmlibuv
 	%Group Utilities
@@ -3191,6 +3251,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName CMakeServerLib
 	%Group Source
@@ -3315,6 +3378,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName ctest
 	%Group Source
@@ -3356,6 +3422,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName CMakeLib
 	%Group Source
@@ -5618,6 +5687,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName CPackLib
 	%Group Source
@@ -5796,6 +5868,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cpack
 	%Group Source
@@ -5829,6 +5904,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName cmake
 	%Group Source
@@ -5870,6 +5948,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type StaticLibrary
 	Target.BaseName CTestLib
 	%Group Source
@@ -6157,6 +6238,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName testEncoding
 	%Group Tests
@@ -6178,6 +6262,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName CMakeLibTests
 	%Group Linux2.6
@@ -6264,6 +6351,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName testAffinity
 	%Group Tests
@@ -6296,6 +6386,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName runcompilecommands
 	%Group Tests
@@ -6328,6 +6421,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudo_BC
 	%Group Linux2.6
@@ -6375,6 +6471,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudo_purify
 	%Group Linux2.6
@@ -6422,6 +6521,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName memcheck_fail
 	%Group Linux2.6
@@ -6469,6 +6571,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudo_valgrind
 	%Group Linux2.6
@@ -6518,6 +6623,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudonl_purify
 	%Group Linux2.6
@@ -6558,6 +6666,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudonl_BC
 	%Group Linux2.6
@@ -6598,6 +6709,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudonl_valgrind
 	%Group Linux2.6
@@ -6636,6 +6750,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName CMakeServerLibTests
 	%Group Linux2.6
@@ -6690,6 +6807,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudo_cppcheck
 	%Group Tests
@@ -6712,6 +6832,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudo_iwyu
 	%Group Tests
@@ -6734,6 +6857,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName print_stdin
 	%Group Tests
@@ -6756,6 +6882,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudo_cpplint
 	%Group Tests
@@ -6778,6 +6907,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudo_emulator_custom_command
 	%Group Tests
@@ -6800,6 +6932,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudo_tidy
 	%Group Tests
@@ -6822,6 +6957,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName exit_code
 	%Group Tests
@@ -6844,6 +6982,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
 	Target.Type ConsoleExecutable
 	Target.BaseName pseudo_emulator
 	%Group Tests
