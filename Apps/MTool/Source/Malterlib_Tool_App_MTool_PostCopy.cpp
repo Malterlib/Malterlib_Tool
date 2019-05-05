@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -13,12 +13,12 @@ public:
 	void fr_DeleteEmptyDirs(CStr _Path)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
-		
+
 		for (mint i = 0; i < Files.f_GetLen(); ++i)
 		{
 			fr_DeleteEmptyDirs(Files[i]);
 		}
-		
+
 		Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory|EFileAttrib_File, false);
 		if (Files.f_GetLen() == 0)
 		{
@@ -27,17 +27,17 @@ public:
 			return;
 		}
 	}
-	
+
 	aint f_Run(NContainer::CRegistry_CStr &_Params)
 	{
 		CStr ConfigFile;
 		CStr SourceFile;
 		CStr DestinationProject;
 		CStr DestinationFolder;
-		
+
 		bool bVerbose = false;
 		bool bHash = false;
-		
+
 		for (mint i = 0; true; ++i)
 		{
 			CStr Value = _Params.f_GetValue(CStr::fs_ToStr(i), "");
@@ -51,7 +51,7 @@ public:
 				continue;
 			}
 			CStr Key = fg_GetStrSep(Value, "=");
-			
+
 			if (Key == "Project")
 				DestinationProject = Value;
 			else if (Key == "OutFolder")
@@ -65,16 +65,16 @@ public:
 			else
 				DError(CStr(CStr::CFormat("Unknown setting: {}") << Key));
 		}
-		
+
 		if (ConfigFile.f_IsEmpty())
 			DError("No config file specified");
-		
+
 		if (SourceFile.f_IsEmpty())
 			DError("No source file specified");
 
 		if (DestinationProject.f_IsEmpty())
 			DError("No destination project specified");
-		
+
 		CRegistryPreserveAndOrder_CStr Registry;
 		TCSet<CStr> SourceFiles;
 		NBuildSystem::CFindCache FindCache;
@@ -84,8 +84,18 @@ public:
 			NBuildSystem::CBuildSystemPreprocessor Preprocessor(Registry, SourceFiles, FindCache, Environment);
 			Preprocessor.f_ReadFile(ConfigFile);
 		}
-		
+
 		CRegistryPreserveAndOrder_CStr OriginalRegistry = Registry;
+
+		TCVector<CStr> ExcludePatterns;
+
+		if (auto pValue = Registry.f_GetChild("ExcludePatterns"))
+			ExcludePatterns = pValue->f_GetThisValue().f_Split(";");
+		else
+		{
+			ExcludePatterns = {"*/.git", "*/.DS_Store"};
+			Registry.f_SetValue("ExcludePatterns", CStr::fs_Join(ExcludePatterns, ";"));
+		}
 
 		auto pProjects = Registry.f_CreateChild("Projects");
 		auto pTags = Registry.f_CreateChild("Tags");
@@ -117,12 +127,12 @@ public:
 			{
 				if (!CFile::fs_FileExists(_SourceFile))
 					DError(CStr(CStr::CFormat("Source file does not exist: {}") << _SourceFile));
-				
+
 				CStr SourceFileName = CFile::fs_GetFile(_SourceFile);
 				for (auto iDest = pProject->f_GetChildIterator("Destination"); iDest && iDest->f_GetName() == "Destination"; ++iDest)
 				{
 					CHashCache HashCache(CStr(), false, false);
-					
+
 					bool bTagFound = false;
 					bool bTagMatched = false;
 					for (auto iTag = iDest->f_GetChildIterator("Tag"); iTag && iTag->f_GetName() == "Tag"; ++iTag)
@@ -136,7 +146,7 @@ public:
 					}
 					if (bTagFound && !bTagMatched)
 						continue;
-					
+
 					bool bEnabledIf = true;
 					for (auto iEnableIf = iDest->f_GetChildIterator("EnableIf"); iEnableIf && iEnableIf->f_GetName() == "EnableIf"; ++iEnableIf)
 					{
@@ -146,25 +156,25 @@ public:
 							break;
 						}
 					}
-					
+
 					if (!bEnabledIf)
-						continue;			
-					
+						continue;
+
 					CStr NewFileName = iDest->f_GetValue("Rename", SourceFileName);
-					
+
 					CStr Destination = iDest->f_GetThisValue();
 					CStr FullDestination;
-					
+
 					TCUniquePointer<CHashCache> pOldHashCache;
 					if (bHash)
 						pOldHashCache = fg_Construct(Destination + "/Files.hashes", false, false);
-					
+
 					CStr FullDestinationFolder;
 					if (DestinationFolder.f_IsEmpty())
 						FullDestinationFolder = _SubPath;
 					else
 						FullDestinationFolder = CFile::fs_AppendPath(DestinationFolder, _SubPath);
-					
+
 					if (FullDestinationFolder.f_IsEmpty())
 						FullDestination = CFile::fs_AppendPath(Destination, NewFileName);
 					else
@@ -193,7 +203,7 @@ public:
 									case CFile::EDiffCopyChange_FileChanged:
 										{
 											EFileAttrib Attributes = CFile::fs_GetAttributes(_Destination);
-											
+
 											if ((Attributes & EFileAttrib_ReadOnly) || (!(Attributes & EFileAttrib_UserWrite) && (SupportedAttributes & EFileAttrib_UserWrite)))
 											{
 												bool bSuccess = false;
@@ -273,6 +283,7 @@ public:
 									}
 									return CFile::EDiffCopyChangeAction_Perform;
 								}
+							 	, ExcludePatterns
 							)
 						)
 					{
@@ -283,14 +294,14 @@ public:
 				}
 			}
 		;
-		
+
 		CStr SourceFileName = CFile::fs_GetFile(SourceFile);
 
 		if (CFile::fs_GetFile(SourceFile).f_FindChars("~^*?") >= 0)
 		{
 			CStr BasePath = CFile::fs_GetPath(SourceFile);
 			mint BasePathLen = BasePath.f_GetLen() + 1;
-			
+
 			bool bDirectory = false;
 			if (SourceFileName.f_StartsWith("~"))
 			{
@@ -308,33 +319,36 @@ public:
 			SourceFile = CFile::fs_AppendPath(BasePath, SourceFileName);
 
 			NMib::NFile::CFile::CFindFilesOptions FindOptions{SourceFile, bRecursive};
+
+			FindOptions.m_ExcludePatterns = ExcludePatterns;
+
 			if (bDirectory)
 				FindOptions.m_AttribMask = EFileAttrib_Directory;
 			else
 				FindOptions.m_AttribMask = EFileAttrib_File;
-			
+
 			auto Files = CFile::fs_FindFiles(FindOptions);
 			if (Files.f_IsEmpty())
 				DError(fg_Format("No files found for pattern '{}'", SourceFile));
-			
+
 			for (auto &FoundFile : Files)
 			{
 				CStr SubPath = CFile::fs_GetPath(FoundFile.m_Path.f_Extract(BasePathLen));
 				if (bVerbose)
 					DConOut("Wildcard found : {} in {}" DNewLine, FoundFile.m_Path << SubPath);
-				
+
 				fCopySourceFile(FoundFile.m_Path, SubPath);
 			}
 		}
 		else
 			fCopySourceFile(SourceFile, "");
-		
+
 		if (Registry != OriginalRegistry)
 		{
 			CStr NewRegistry = Registry.f_GenerateStr();
 			CByteVector Temp;
 			CFile::fs_WriteStringToVector(Temp, NewRegistry);
-			
+
 			CFile::fs_CreateDirectory(CFile::fs_GetPath(ConfigFile));
 			if (CFile::fs_CopyFileDiff(Temp, ConfigFile, CTime::fs_NowUTC()))
 			{
