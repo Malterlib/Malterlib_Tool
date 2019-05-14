@@ -43,16 +43,12 @@ Import "Apps/*/*.MHeader"
 		}
 	}
 	Import.CMake_Variables "ARCHIVE_CRYPTO_RMD160_OPENSSL=0;@(Import.CMake_Variables)"
-	{
-		!!MalterlibSSLLibrary BoringSSL
-	}
-	
+
 	Target.ExtraGroups "~Automatic/DependBoringSSL;@(Target.ExtraGroups)"
 	{
 		&
 		{
 			TargetIsExecutable true
-			MalterlibSSLLibrary BoringSSL
 		}
 	}
 	Target.LinkerGroup "CMake"
