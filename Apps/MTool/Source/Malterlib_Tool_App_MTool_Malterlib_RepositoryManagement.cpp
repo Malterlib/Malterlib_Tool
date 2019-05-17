@@ -608,6 +608,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_= false
 						, "Description"_= "If possible, make size columns to fit content.\n"
 					}
+					, "ChangeLog?"_=
+					{
+						"Names"_= {"--changelog"}
+						, "Default"_= false
+						, "Description"_= "List all commits sorted by date.\n"
+					}
 					, "Columns?"_=
 					{
 						"Names"_= {"--columns"}
@@ -632,6 +638,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						"Names"_= {"--max-commits-main"}
 						, "Default"_= 500
 						, "Description"_= "Max commits to display for main repository.\n"
+					}
+					, "MaxMessageWidth?"_=
+					{
+						"Names"_= {"--max-message-width"}
+						, "Default"_= 60
+						, "Description"_= "Max width of the message column.\n"
 					}
 					, Filter_Name
 					, fFilter_Type("")
@@ -673,6 +685,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					Flags |= CBuildSystem::ERepoListCommitsFlag_UpdateRemotes;
 				if (_Params["Compact"].f_Boolean())
 					Flags |= CBuildSystem::ERepoListCommitsFlag_Compact;
+				if (_Params["ChangeLog"].f_Boolean())
+					Flags |= CBuildSystem::ERepoListCommitsFlag_Changelog;
+
 
 				TCVector<CBuildSystem::CWildcardColumn> WildcardColumns;
 				for (auto &Column : _Params["Columns"].f_String().f_Split(";"))
@@ -686,12 +701,26 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 
 				uint32 MaxCommits = _Params["MaxCommits"].f_Integer();
 				uint32 MaxCommitsMain = _Params["MaxCommitsMain"].f_Integer();
+				uint32 MaxMessageWidth = _Params["MaxMessageWidth"].f_Integer();
 
 				return f_RunBuildSystem
 					(
 						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
 						{
-							return _BuildSystem.f_Action_Repository_ListCommits(GenerateOptions, RepoFilter, FromRef, ToRef, Flags, WildcardColumns, Prefix, MaxCommitsMain, MaxCommits);
+							return _BuildSystem.f_Action_Repository_ListCommits
+								(
+								 	GenerateOptions
+								 	, RepoFilter
+								 	, FromRef
+								 	, ToRef
+								 	, Flags
+								 	, WildcardColumns
+								 	, Prefix
+								 	, MaxCommitsMain
+								 	, MaxCommits
+								 	, MaxMessageWidth
+								)
+							;
 						}
 					)
 				;
