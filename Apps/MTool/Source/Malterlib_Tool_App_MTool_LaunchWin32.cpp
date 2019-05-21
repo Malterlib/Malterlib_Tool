@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -16,7 +16,7 @@ class CTool_LaunchNSIS : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
 		if (FileName == "012301231023Error")
@@ -25,7 +25,7 @@ public:
 		}
 
 		NMib::NPlatform::CWin32_Registry Registry;
-		CStr MakeNSIS = Registry.f_Read_Str("SOFTWARE\\Classes\\NSIS.Script\\DefaultIcon", "");		
+		CStr MakeNSIS = Registry.f_Read_Str("SOFTWARE\\Classes\\NSIS.Script\\DefaultIcon", "");
 		MakeNSIS = NFile::CFile::fs_GetPath(MakeNSIS.f_Left(MakeNSIS.f_FindReverse(","))) + "/makensis.exe";
 //		MakeNSIS = MakeNSIS.f_Left(MakeNSIS.f_FindReverse(","));
 
@@ -64,8 +64,8 @@ public:
 				}
 			)
 		;
-		
-		LaunchParams.m_fOnOutput 
+
+		LaunchParams.m_fOnOutput
 			= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				switch (_OutputType)
@@ -95,7 +95,7 @@ class CTool_LaunchWithNamedPipes : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		aint iParam = 4;
 		TCVector<CStr> Params;
@@ -186,7 +186,7 @@ public:
 					nullptr, nullptr,
 					TRUE,
 					CREATE_NEW_CONSOLE | CREATE_UNICODE_ENVIRONMENT,
-					nullptr, 
+					nullptr,
 					NFile::NPlatform::fg_ConvertToWindowsPath(WorkingDir, true),
 					&si,
 					&pi))
@@ -213,7 +213,7 @@ public:
 
 			CloseHandle(pi.hProcess);
 		}
-		
+
 		return ExitCode;
 	}
 };

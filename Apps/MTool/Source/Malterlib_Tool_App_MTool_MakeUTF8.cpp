@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -8,10 +8,10 @@ class CTool_MakeUTF8 : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourcePath = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"), true);
-		
+
 		auto Files = CFile::fs_FindFiles(SourcePath, EFileAttrib_File, true);
 
 		if (Files.f_IsEmpty())

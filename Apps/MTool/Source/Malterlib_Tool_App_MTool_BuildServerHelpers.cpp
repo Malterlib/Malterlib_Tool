@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -10,7 +10,7 @@ namespace
 {
 	struct CBuildServerIPC
 	{
-		CRegistry_CStr f_RunCommand(CStr const &_Command, CStr const &_Params, TCVector<CStr> const &_ParamsList)
+		CRegistry f_RunCommand(CStr const &_Command, CStr const &_Params, TCVector<CStr> const &_ParamsList)
 		{
 			CUniversallyUniqueIdentifier UniqueID(EUniversallyUniqueIdentifierGenerate_Random);
 			CStr Prefix = UniqueID.f_GetAsString(EUniversallyUniqueIdentifierFormat_AlphaNum);
@@ -20,11 +20,11 @@ namespace
 			if (TempDir.f_IsEmpty())
 				TempDir = CFile::fs_GetTemporaryDirectory() + "/Slave";
 			TempDir += "/IPC";
-			
+
 			uint64 LaunchID = fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildServerLaunchID").f_ToInt(uint64(0));
 			if (LaunchID == 0)
 				LaunchID = fg_GetSys()->f_GetEnvironmentVariable("IdsBuildServerLaunchID").f_ToInt(uint64(0));
-			
+
 			CFile::fs_CreateDirectory(TempDir);
 			CStr TempFile = CFile::fs_AppendPath(TempDir, Prefix + ".ipc");
 			CStr InputFile = CFile::fs_AppendPath(TempDir, Prefix + ".ipc.input");
@@ -33,12 +33,12 @@ namespace
 
 			CStr FileData;
 			fg_AppendFormat(FileData, "{}\r\n", LaunchID);
-			
+
 			fg_AppendFormat(FileData, "{}-Start-{};{};{}\r\n", Prefix, TempFile, _Command, _Params);
 			for (auto iFile = _ParamsList.f_GetIterator(); iFile; ++iFile)
 				fg_AppendFormat(FileData, "{}-Param-{}\r\n", Prefix, *iFile);
 			fg_AppendFormat(FileData, "{}-End\r\n", Prefix);
-			
+
 			CFile::fs_WriteStringToFile(CStr(InputTempFile), FileData);
 
 			// Create sync file
@@ -62,12 +62,12 @@ namespace
 			CStr Output = CFile::fs_ReadStringFromFile(CStr(OutputFile));
 			CFile::fs_DeleteFile(OutputFile);
 
-			CRegistry_CStr Registry;
+			CRegistry Registry;
 			Registry.f_ParseStr(Output, OutputFile);
 
 			return Registry;
 		}
-		void f_HandleResults(CRegistry_CStr const &_Registry)
+		void f_HandleResults(CRegistry const &_Registry)
 		{
 			CStr Error;
 			for (auto iError = _Registry.f_GetChildIterator("Error"); iError && iError->f_GetName() == "Error"; ++iError)
@@ -108,12 +108,12 @@ namespace
 
 			auto Results = f_RunCommand("BuildServerGet", CStr(), Params);
 			f_HandleResults(Results);
-			
+
 			TCMap<CStr, CStr> FilesCopied;
-			
+
 			for (auto iFile = Results.f_GetChildIterator("File"); iFile && iFile->f_GetName() == "File"; ++iFile)
 				FilesCopied[iFile->f_GetThisValue()] = iFile->f_GetValue("To");
-			
+
 			return FilesCopied;
 		}
 		void f_DeleteFiles(TCVector<CStr> const &_Files)
@@ -124,7 +124,7 @@ namespace
 			auto Results = f_RunCommand("BuildServerDelete", CStr(), Params);
 			f_HandleResults(Results);
 		}
-		CRegistry_CStr f_RunTool(CStr const &_Command, TCVector<CStr> const &_Params)
+		CRegistry f_RunTool(CStr const &_Command, TCVector<CStr> const &_Params)
 		{
 			return f_RunCommand("RunTool", _Command, _Params);
 		}
@@ -141,7 +141,7 @@ public:
 	{
 		if (fg_GetSys()->f_GetEnvironmentVariable("BUILDSERVER") == "")
 			DError("You are not running under a build server slave, so BuildServerPut is not supported");
-		
+
 		if (!_Files.f_IsEmpty())
 			DError("Free arguments not allowed (Use X=Y form)");
 
@@ -193,18 +193,18 @@ public:
 					OutputDir = CFile::fs_AppendPath(Dir, FileName);
 				else
 					OutputDir = CFile::fs_AppendPath(Dir + "/" + ExtraDir, FileName);
-					
+
 				RemoteFile.m_RemoteFiles.f_Insert(OutputDir);
-				
+
 				DConOut("Put on build server store: {} -> {}" DNewLine, *iFile << OutputDir);
 			}
-			
+
 		}
-		
+
 		CBuildServerIPC BuildServer;
 
 		BuildServer.f_PutFiles(RemoteFiles);
-			
+
 		return 0;
 	}
 };
@@ -219,7 +219,7 @@ public:
 	{
 		if (fg_GetSys()->f_GetEnvironmentVariable("BUILDSERVER") == "")
 			DError("You are not running under a build server slave, so BuildServerGet is not supported");
-		
+
 		if (!_Files.f_IsEmpty())
 			DError("Free arguments not allowed (Use X=Y form)");
 
@@ -242,12 +242,12 @@ public:
 		CBuildServerIPC BuildServer;
 
 		TCMap<CStr, CStr> FilesCopied = BuildServer.f_GetFiles(Source, DestinationDir, bRecursive);
-		
+
 		for (auto iFile = FilesCopied.f_GetIterator(); iFile; ++iFile)
 		{
 			DConOut("Get from build server store: {} -> {}" DNewLine, iFile.f_GetKey() << *iFile);
 		}
-			
+
 		return 0;
 	}
 };
@@ -261,7 +261,7 @@ public:
 	{
 		if (!_Params.f_FindEqual("Tool"))
 			DError("Tool not specified");
-		
+
 		if (fg_GetSys()->f_GetEnvironmentVariable("BUILDSERVER") == "")
 			DError("You are not running under a build server slave, so BuildServerTool is not supported");
 
@@ -301,7 +301,7 @@ public:
 		TCVector<CStr> Params;
 		TCVector<CStr> ExtraToUpload;
 		TCVector<CStr> ToDelete;
-		
+
 		// Upload Files to build server
 		{
 			TCVector<CBuildServerIPC::CRemoteFile> RemoteFiles;
@@ -354,7 +354,7 @@ public:
 						RemoteFile.m_LocalFile = *iFile;
 						CStr RemoteFileName = CFile::fs_AppendPath(DestinationDir, iFile->f_Extract(SourceDir.f_GetLen() + 1));
 						RemoteFile.m_RemoteFiles.f_Insert(RemoteFileName);
-				
+
 						if (!bQuiet)
 							DConOut("Put on build server store (Tool): {} -> {}" DNewLine, *iFile << RemoteFileName);
 
@@ -381,7 +381,7 @@ public:
 						CStr RemoteFileName = CFile::fs_AppendPath(DestinationDir, OriginalParam.f_Extract(SourceDir.f_GetLen() + 1));
 						RemoteFile.m_RemoteFiles.f_Insert(RemoteFileName);
 					}
-				
+
 					Param = CFile::fs_AppendPath(DestinationDir, CFile::fs_GetFile(OriginalParam));
 					auto &Uploaded = UploadedFiles[Param];
 					Uploaded.m_Path = OriginalParam;
@@ -404,7 +404,7 @@ public:
 		TCVector<CStr> AllParams = ExtraToUpload;
 		AllParams.f_Insert(Params);
 
-		CRegistry_CStr Results = BuildServer.f_RunTool(CStr::CFormat("{};{}") << ExtraToUpload.f_GetLen() << Tool, AllParams);
+		CRegistry Results = BuildServer.f_RunTool(CStr::CFormat("{};{}") << ExtraToUpload.f_GetLen() << Tool, AllParams);
 		CStr StdOut = Results.f_GetValue("StdOut", "");
 		CStr StdErr = Results.f_GetValue("StdErr", "");
 		uint32 ExitCode = Results.f_GetValue("ExitCode", "255").f_ToInt(uint32(255));
@@ -444,7 +444,7 @@ public:
 					continue;
 				CStr TempPath = CFile::fs_GetPath(FullPath);
 				DConOut("Getting changed files from build server: {} -> {}" DNewLine, iFile.f_GetKey() << TempPath);
-				
+
 				TCMap<CStr, CStr> FilesCopied = BuildServer.f_GetFiles(iFile.f_GetKey(), TempPath, false);
 				Cleanups.f_Insert
 					(
@@ -473,7 +473,7 @@ public:
 							{
 								if (bVerbose)
 									fg_LogVerbose(_Change, _Source, _Destination, _Link);
-								
+
 								return CFile::EDiffCopyChangeAction_Perform;
 							}
 						)

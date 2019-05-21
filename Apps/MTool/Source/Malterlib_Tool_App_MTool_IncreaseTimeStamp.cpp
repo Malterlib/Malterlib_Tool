@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -11,17 +11,17 @@
 
 struct CV_INFO_PDB70
 {
-	DWORD      CvSignature; 
-	GUID       Signature;       // unique identifier 
-	DWORD      Age;             // an always-incrementing value 
-	ch8       PdbFileName[1];  // zero terminated string with the name of the PDB file 
+	DWORD      CvSignature;
+	GUID       Signature;       // unique identifier
+	DWORD      Age;             // an always-incrementing value
+	ch8       PdbFileName[1];  // zero terminated string with the name of the PDB file
 };
 
 class CTool_IncreaseTimeStamp : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "NotExist.file");
 		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
@@ -46,7 +46,7 @@ public:
 		uint32 *pData = (uint32 *)Mem.f_GetArray();
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
 		for (int i = 0; i < FLen; i += 4, pData += 1)
-		{				
+		{
 			if (*pData == Find)
 			{
 				pHeader = (IMAGE_NT_HEADERS *)pData;
@@ -57,7 +57,7 @@ public:
 		IMAGE_NT_HEADERS *pHeader2 = pHeader;
 		if (pHeader)
 		{
-			bool bFound = false; 
+			bool bFound = false;
 
 			if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 || pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_IA64)
 			{
@@ -113,7 +113,7 @@ class CTool_SetImageOsVersion : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "NotExist.file");
 		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
@@ -149,7 +149,7 @@ public:
 		uint32 *pData = (uint32 *)Mem.f_GetArray();
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
 		for (int i = 0; i < FLen; i += 4, pData += 1)
-		{				
+		{
 			if (*pData == Find)
 			{
 				pHeader = (IMAGE_NT_HEADERS *)pData;
@@ -160,7 +160,7 @@ public:
 		IMAGE_NT_HEADERS *pHeader2 = pHeader;
 		if (pHeader)
 		{
-			bool bFound = false; 
+			bool bFound = false;
 
 			if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 || pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_IA64)
 			{
@@ -170,8 +170,8 @@ public:
 				DConOut
 					(
 						"Old version: {}.{} ({}.{})" DNewLine
-						, pHeader->OptionalHeader.MajorOperatingSystemVersion 
-						<< pHeader->OptionalHeader.MinorOperatingSystemVersion 
+						, pHeader->OptionalHeader.MajorOperatingSystemVersion
+						<< pHeader->OptionalHeader.MinorOperatingSystemVersion
 						<< pHeader->OptionalHeader.MajorSubsystemVersion
 						<< pHeader->OptionalHeader.MinorSubsystemVersion
 					)
@@ -185,8 +185,8 @@ public:
 				DConOut
 					(
 						"New version: {}.{} ({}.{})" DNewLine
-						, pHeader->OptionalHeader.MajorOperatingSystemVersion 
-						<< pHeader->OptionalHeader.MinorOperatingSystemVersion 
+						, pHeader->OptionalHeader.MajorOperatingSystemVersion
+						<< pHeader->OptionalHeader.MinorOperatingSystemVersion
 						<< pHeader->OptionalHeader.MajorSubsystemVersion
 						<< pHeader->OptionalHeader.MinorSubsystemVersion
 					)
@@ -208,8 +208,8 @@ public:
 				DConOut
 					(
 						"Old version: {}.{} ({}.{})" DNewLine
-						, pHeader->OptionalHeader.MajorOperatingSystemVersion 
-						<< pHeader->OptionalHeader.MinorOperatingSystemVersion 
+						, pHeader->OptionalHeader.MajorOperatingSystemVersion
+						<< pHeader->OptionalHeader.MinorOperatingSystemVersion
 						<< pHeader->OptionalHeader.MajorSubsystemVersion
 						<< pHeader->OptionalHeader.MinorSubsystemVersion
 					)
@@ -223,8 +223,8 @@ public:
 				DConOut
 					(
 						"New version: {}.{} ({}.{})" DNewLine
-						, pHeader->OptionalHeader.MajorOperatingSystemVersion 
-						<< pHeader->OptionalHeader.MinorOperatingSystemVersion 
+						, pHeader->OptionalHeader.MajorOperatingSystemVersion
+						<< pHeader->OptionalHeader.MinorOperatingSystemVersion
 						<< pHeader->OptionalHeader.MajorSubsystemVersion
 						<< pHeader->OptionalHeader.MinorSubsystemVersion
 					)

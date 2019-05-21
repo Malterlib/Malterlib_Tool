@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -10,7 +10,7 @@
 struct CCOFFObject
 {
 
-	struct IMAGE_FILE_HEADER 
+	struct IMAGE_FILE_HEADER
 	{
 		IMAGE_FILE_HEADER()
 		{
@@ -76,10 +76,10 @@ struct CCOFFObject
 		{
 			fg_MemClear(*this);
 		}
-		union 
+		union
 		{
 			uint8 m_ShortName[8];
-			struct 
+			struct
 			{
 				uint32 m_Short;     // if 0, use LongName
 				uint32 m_Long;      // offset into string table
@@ -253,13 +253,13 @@ public:
 		return File.f_GetWriteTime();
 	}
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
-	{		
-		
-		static char const* sc_pHelpText = 
+	aint f_Run(NContainer::CRegistry &_Params)
+	{
+
+		static char const* sc_pHelpText =
 			"Usage:" DNewLine
 			"MTool VirtualFS <Flags> <SourceFile>" DNewLine
-			DNewLine 
+			DNewLine
 			"Where:" DNewLine
 			"  <Flags> is made up of:" DNewLine
 			"      -o <TargetFile> - Specify the target file to be written" DNewLine
@@ -281,8 +281,8 @@ public:
 			"      -symbol <Name>  - The name of the exported symbol (decorated)" DNewLine
 			"  <SourceFile> is the name of a registry file specifying the files to add" DNewLine;
 
-			 			
-			
+
+
 
 		bint bVerbose = false;
 		ETargetFormat TargetFormat = ETargetFormat_CPP;
@@ -300,7 +300,7 @@ public:
 		{
 			return CStr::CFormat("{}") << _Val;
 		};
-		
+
 		int iCurArg = 0;
 		CStr CurArg;
 		CStr SymbolName = "gc_VFS_Bytes";
@@ -323,7 +323,7 @@ public:
 					TargetFormat = ETargetFormat_COFF;
 				else if (CurArg.f_CmpNoCase("-asm") == 0)
 					TargetFormat = ETargetFormat_ASM;
-				else if ( 		(CurArg.f_CmpNoCase("-o") == 0) 
+				else if ( 		(CurArg.f_CmpNoCase("-o") == 0)
 							|| 	(CurArg.f_CmpNoCase("-output") == 0) )
 				{
 					++iCurArg;
@@ -401,8 +401,8 @@ public:
 						return -1;
 					}
 				}
-				
-				
+
+
 				else
 				{
 					DConOut("VirtualFS: Unrecognised flag: {}" DNewLine, CurArg);
@@ -427,27 +427,27 @@ public:
 			DConOutRaw(sc_pHelpText);
 			return -1;
 		}
-		
+
 		SourceFilename = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 		++iCurArg;
-			
+
 		TargetFilename = TargetFilename.f_ReplaceChar('\\', '/');
 		TargetFilenameCpp = TargetFilenameCpp.f_ReplaceChar('\\', '/');
 		SourceFilename = SourceFilename.f_ReplaceChar('\\', '/');
-		
+
 		if (!NFile::CFile::fs_FileExists(SourceFilename, EFileAttrib_File))
 		{
 			DConOut("Source file {} does not exist." DNewLine, SourceFilename);
 			return 1;
 		}
-		
+
 		MalterlibDependencyTracker.f_AddOutputFile(TargetFilename);
 		if (!TargetFilenameCpp.f_IsEmpty())
 			MalterlibDependencyTracker.f_AddOutputFile(TargetFilenameCpp);
-		
+
 		DependencyContents += CStr::CFormat("dependencies: \\\n  {}") << SourceFilename;
 
-		CRegistryPreserveAndOrder_CStr Source;
+		CRegistryPreserveAll Source;
 		try
 		{
 			CStr SourceString;
@@ -477,7 +477,7 @@ public:
 		{
 			if (IncludeIter->f_GetName().f_CmpNoCase("Include") == 0)
 			{
-				CRegistryPreserveAndOrder_CStr* pIncludeReg = IncludeIter;
+				CRegistryPreserveAll* pIncludeReg = IncludeIter;
 
 				CInclude Inc;
 				Inc.m_Pattern = pIncludeReg->f_GetValue("Pattern", "");
@@ -500,10 +500,10 @@ public:
 		NFile::TCBinaryStreamFile<> TargetFileStream;
 		CBinaryStreamMemory<> TargetMemoryStream;
 		NMib::NFile::CVirtualFS VirtualFS;
-	
+
 		if (TargetFormat == ETargetFormat_Binary)
 		{
-			EFileOpen FileMode = EFileOpen_Read | EFileOpen_ShareAll | EFileOpen_Write;		
+			EFileOpen FileMode = EFileOpen_Read | EFileOpen_ShareAll | EFileOpen_Write;
 			TargetFileStream.f_Open(TargetFilename, FileMode);
 			pActiveTargetStream = &TargetFileStream;
 		}
@@ -520,7 +520,7 @@ public:
 
 		int32 const GrowSize = 1024;
 		int32 const ClusterSize = 1024;
-		VirtualFS.f_Create(pActiveTargetStream, ClusterSize, GrowSize, GrowSize);			
+		VirtualFS.f_Create(pActiveTargetStream, ClusterSize, GrowSize, GrowSize);
 
 #if defined(DPlatformFamily_Windows)
 		CStr TLogFileName = CStr::CFormat("{}/{}.read.1.appendtlog") << CFile::fs_GetPath(TargetFilename) << CFile::fs_GetFileNoExt(CFile::fs_GetProgramPath());
@@ -541,7 +541,7 @@ public:
 #endif
 
 		TCSet<CStr> DependentDirectories;
-		
+
 		CFileSystemInterface_Disk DiskSystem;
 
 		mint nFilesAdded = 0;
@@ -553,7 +553,7 @@ public:
 				DConOut("{}{}" DNewLine, CurInclude->m_Pattern << (CurInclude->m_bRecurse ? " (Recursive)" : ""));
 
 			TCVector<CStr> lSourceFiles = NFile::CFile::fs_FindFiles(CurInclude->m_Pattern, EFileAttrib_File | EFileAttrib_Link, CurInclude->m_bRecurse, false);
-			
+
 			if (lSourceFiles.f_IsEmpty() && !CurInclude->m_bRecurse && CurInclude->m_Pattern.f_FindChars("*?") < 0)
 			{
 				DConOut(DMibPFileLineFormat " error: No files found for pattern '{}'{\n}", CurInclude->m_File << CurInclude->m_Line << CurInclude->m_Pattern);
@@ -561,9 +561,9 @@ public:
 			}
 
 			CStr BasePath = NFile::CFile::fs_GetPath(CurInclude->m_Pattern);
-			
+
 			MalterlibDependencyTracker.f_AddFind(CurInclude->m_Pattern, CurInclude->m_bRecurse, false, EFileAttrib_File | EFileAttrib_Link, lSourceFiles);
-			
+
 			{
 				CStr BaseDepend = BasePath;
 				while (!BaseDepend.f_IsEmpty() && !CFile::fs_FileExists(BaseDepend, EFileAttrib_Directory))
@@ -581,13 +581,13 @@ public:
 			}
 
 			{
-				TCVector<CStr> BaseFiles = NFile::CFile::fs_FindFiles(BasePath, EFileAttrib_Directory, false);			
+				TCVector<CStr> BaseFiles = NFile::CFile::fs_FindFiles(BasePath, EFileAttrib_Directory, false);
 				if (BaseFiles.f_GetLen())
 					BasePath = BaseFiles[0];
 			}
-			
+
 			mint Len = BasePath.f_GetLen();
-			
+
 			for (mint i = 0; i < lSourceFiles.f_GetLen(); ++i)
 			{
 				auto & SourceFile = lSourceFiles[i];
@@ -603,22 +603,22 @@ public:
 					continue;
 				if (CFile::fs_GetFile(SourceName) == ".DS_Store")
 					continue;
-				
+
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(CurInclude->m_Destination, SourceName);
-				
+
 				if (bVerbose)
 					DConOut("Adding '{}' as '{}'" DNewLine, SourceFile << AddPath);
-				
+
 				++nFilesAdded;
-				
+
 				CStr Dir = NFile::CFile::fs_GetPath(AddPath);
 				if (!Dir.f_IsEmpty())
 					VirtualFS.f_CreateDirectory(Dir);
 
 				MalterlibDependencyTracker.f_AddInputFile(SourceFile);
-				
+
 				DependencyContents += CStr::CFormat(" \\\n  {}") << SourceFile;
-				
+
 				VirtualFS.f_CopyFileToFS(SourceFile, AddPath);
 			}
 		}
@@ -641,13 +641,13 @@ public:
 #endif
 //					DependencyContents += CStr::CFormat(" \\\n  {}") << DependDir;
 				}
-					
+
 			}
 			catch (NException::CException const &_Exception)
 			{
 				DConOut("Exception reading depend path: {}" DNewLine, _Exception.f_GetErrorStr());
 			}
-		}	
+		}
 
 		VirtualFS.f_Close();
 
@@ -672,7 +672,7 @@ public:
 						DNewLine
 						"int const gc_VFS_{1}_nBytes = {2};" DNewLine
 						"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];" DNewLine DNewLine
-					) 
+					)
 					<< SourceFilename
 					<< UniqueName
 					<< lData.f_GetLen();
@@ -731,7 +731,7 @@ public:
 						DNewLine
 						"int const gc_VFS_{1}_nBytes = {2};" DNewLine
 						"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];" DNewLine DNewLine
-					) 
+					)
 					<< SourceFilename
 					<< UniqueName
 					<< lData.f_GetLen();
@@ -775,7 +775,7 @@ public:
 
 			try
 			{
-			
+
 				CStr ASMOutput;
 				if (Platform == "OSX")
 				{
@@ -786,7 +786,7 @@ public:
 							"	.static_const{\n}"
 							"_gc_VFS_{0}_Bytes:{\n}"
 							"	.incbin \"{1}\"{\n}"
-						) 
+						)
 						<< UniqueName
 						<< BinFileName
 					;
@@ -800,7 +800,7 @@ public:
 							"	.section .rodata{\n}"
 							"gc_VFS_{0}_Bytes:{\n}"
 							"	.incbin \"{1}\"{\n}"
-						) 
+						)
 						<< UniqueName
 						<< BinFileName
 					;
@@ -826,7 +826,7 @@ public:
 						DNewLine
 						"int const gc_VFS_nBytes = {};" DNewLine
 						"unsigned char const gc_VFS_Bytes[] = {{" DNewLine
-					) 
+					)
 					<< SourceFilename
 //					<< NTime::fg_GetFullTimeStr(NTime::CTime::fs_NowLocal())
 					<< lData.f_GetLen();
@@ -836,9 +836,9 @@ public:
 
 			uint8 Input[16];
 			Formatter
-					<< Input[0]  << Input[1]  << Input[2]  << Input[3] 
-					<< Input[4]  << Input[5]  << Input[6]  << Input[7] 
-					<< Input[8]  << Input[9]  << Input[10] << Input[11] 
+					<< Input[0]  << Input[1]  << Input[2]  << Input[3]
+					<< Input[4]  << Input[5]  << Input[6]  << Input[7]
+					<< Input[8]  << Input[9]  << Input[10] << Input[11]
 					<< Input[12] << Input[13] << Input[14] << Input[15];
 			ByteFormatter << Input[0];
 
@@ -861,7 +861,7 @@ public:
 				for (;nBytesLeft;--nBytesLeft)
 				{
 					Input[0] = *DataIter;
-					CppOutput += ByteFormatter;					
+					CppOutput += ByteFormatter;
 					++DataIter;
 				}
 				CppOutput += DNewLine;
@@ -887,7 +887,7 @@ public:
 				return 1;
 			}
 		}
-		
+
 		if (!DependencyFile.f_IsEmpty())
 		{
 			try

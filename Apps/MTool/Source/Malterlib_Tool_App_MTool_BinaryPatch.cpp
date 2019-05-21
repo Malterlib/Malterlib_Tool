@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -8,7 +8,7 @@
 
 struct CTool_BinaryPatch : public CTool
 {
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Original = _Params.f_GetValue("0", "");
 		CStr Patch = _Params.f_GetValue("1", "");
@@ -35,7 +35,7 @@ DMibRuntimeClass(CTool, CTool_BinaryPatch);
 
 struct CTool_BinaryDiff : public CTool
 {
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Original = _Params.f_GetValue("0", "");
 		CStr Changed = _Params.f_GetValue("1", "");

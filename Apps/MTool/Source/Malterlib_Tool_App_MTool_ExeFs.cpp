@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -14,7 +14,7 @@ public:
 		ETarget_File,		// Operates on a vfs file
 		ETarget_Exe,		// Operates on a exe file
 	};
-	
+
 	enum EAction
 	{
 		EAction_Add,			// Adds files to an existing VFS
@@ -23,13 +23,13 @@ public:
 		EAction_List,			// Lists files
 	};
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
-	{		
-		
-		static char const* sc_pHelpText = 
+	aint f_Run(NContainer::CRegistry &_Params)
+	{
+
+		static char const* sc_pHelpText =
 			"Usage:" DNewLine
 			"MTool <Flags> TargetFile [ SourcePattern [DestPath] ]" DNewLine
-			DNewLine 
+			DNewLine
 			"Where <Flags> is made up of:" DNewLine
 			"	Either:" DNewLine
 			"		-exe		- TargetFile specifies an exe" DNewLine
@@ -43,16 +43,16 @@ public:
 			"	-extract		- Files in TargetFile matching SourcePattern are extracted" DNewLine
 			"or" DNewLine
 			"	-list			- Files in TargetFile are listed." DNewLine;
-			 	 
+
 		bint bVerbose = false;
 		ETarget TargetType = ETarget_Exe;
-		EAction Action = EAction_Add; 
-		
+		EAction Action = EAction_Add;
+
 		auto f_IntToStr = [](int _Val) -> CStr
 		{
 			return CStr::CFormat("{}") << _Val;
 		};
-		
+
 		int iCurArg = 0;
 		CStr CurArg;
 		for (;(CurArg = _Params.f_GetValue(f_IntToStr(iCurArg), "")); ++iCurArg)
@@ -87,34 +87,34 @@ public:
 			else
 				break;
 		}
-		
+
 		CStr TargetFilename = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 		++iCurArg;
-		
+
 		CStr SourcePattern = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 		++iCurArg;
-		
+
 		CStr DestPath = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 		++iCurArg;
 
 		TargetFilename = TargetFilename.f_ReplaceChar('\\', '/');
 		SourcePattern = SourcePattern.f_ReplaceChar('\\', '/');
-		
+
 		bint bTargetExists = NFile::CFile::fs_FileExists(TargetFilename, EFileAttrib_File);
-		
+
 		if (TargetType == ETarget_Exe && !bTargetExists)
 		{
 			DError("File does not exist");
 		}
 
-		NFile::TCBinaryStreamFile<> TargetFile;		
+		NFile::TCBinaryStreamFile<> TargetFile;
 		EFileOpen FileMode = EFileOpen_Read | EFileOpen_ShareAll;
-		
+
 		switch(Action)
 		{
 			case EAction_Add:
 				FileMode |= EFileOpen_Write;
-				FileMode |= EFileOpen_DontTruncate;				
+				FileMode |= EFileOpen_DontTruncate;
 				break;
 			case EAction_Create:
 				FileMode |= EFileOpen_Write;
@@ -123,46 +123,46 @@ public:
 			case EAction_List:
 			break;
 		}
-		
+
 		TargetFile.f_Open(TargetFilename, FileMode);
-		
+
 		bint bExistingFS = false;
-		
+
 		NStream::CBinaryStreamSubStream<> SubStream;
 		NMib::NFile::CVirtualFS VirtualFS;
-		
-		const ch8 *pSigReversed = "SFEXESDI";			
+
+		const ch8 *pSigReversed = "SFEXESDI";
 		CStr Sig = CStr(pSigReversed).f_Reverse();
-		const ch8 *pSig = Sig;		
+		const ch8 *pSig = Sig;
 
 		int32 const GrowSize = 64*1024;
 		int32 const ClusterSize = 1024;
-		
+
 		int64 MalterlibFsFilePos;
-		
+
 		if (TargetType == ETarget_Exe)
 		{
 			CMibFilePos FileSize = TargetFile.f_GetLength() -(sizeof(int64) + 8);
-			
+
 			TargetFile.f_SetPosition(FileSize);
-						
-			MalterlibFsFilePos = fg_AlignUp(FileSize, ClusterSize);											
-			
-			{				
+
+			MalterlibFsFilePos = fg_AlignUp(FileSize, ClusterSize);
+
+			{
 				int32 nClustersToSearch = 1024;
 				CMibFilePos FileSize = fg_AlignDown(TargetFile.f_GetLength() -(sizeof(int64) + 8), ClusterSize);
-				
+
 				const mint SigSize = 8;
 				ch8 Signature[SigSize+1];
 				Signature[SigSize] = 0;
-				
+
 				while (nClustersToSearch && FileSize > 0)
 				{
 					--nClustersToSearch;
 					TargetFile.f_SetPosition(FileSize);
-					
+
 					TargetFile.f_ConsumeBytes(Signature, SigSize);
-					
+
 					if (fg_StrCmp(Signature, pSig) == 0)
 					{
 						// We have an existing file system
@@ -178,7 +178,7 @@ public:
 					}
 				}
 			}
-			
+
 			if (!bExistingFS)
 			{
 				// No file system lets create one
@@ -190,52 +190,52 @@ public:
 					--ToWrite;
 				}
 				SubStream.f_Open(&TargetFile, MalterlibFsFilePos);
-				VirtualFS.f_Create(&SubStream, ClusterSize, GrowSize, GrowSize);			
+				VirtualFS.f_Create(&SubStream, ClusterSize, GrowSize, GrowSize);
 			}
 		}
 		else if (TargetType == ETarget_File)
 		{
 			bExistingFS = bTargetExists;
-			
-			if (	(bExistingFS && Action == EAction_Add) 
+
+			if (	(bExistingFS && Action == EAction_Add)
 				||	Action == EAction_List
 				||	Action == EAction_Extract)
 				VirtualFS.f_Open(&TargetFile);
-			else 
-				VirtualFS.f_Create(&TargetFile, ClusterSize, GrowSize, GrowSize);			
+			else
+				VirtualFS.f_Create(&TargetFile, ClusterSize, GrowSize, GrowSize);
 		}
-		
+
 		if (Action == EAction_Add || Action == EAction_Create)
 		{
 			TCVector<CStr> lSourceFiles = NFile::CFile::fs_FindFiles(SourcePattern, EFileAttrib_File, true);
-			
+
 			CStr BasePath = NFile::CFile::fs_GetPath(SourcePattern);
 			{
-				TCVector<CStr> BaseFiles = NFile::CFile::fs_FindFiles(BasePath, EFileAttrib_Directory, false);			
+				TCVector<CStr> BaseFiles = NFile::CFile::fs_FindFiles(BasePath, EFileAttrib_Directory, false);
 				if (BaseFiles.f_GetLen())
 					BasePath = BaseFiles[0];
 			}
-			
+
 			mint Len = BasePath.f_GetLen();
-			
+
 			mint nFileAdded = 0;
 			for (mint i = 0; i < lSourceFiles.f_GetLen(); ++i)
 			{
 				CStr SourceName = lSourceFiles[i].f_Extract(Len+1);
 				if (SourceName[0] == '.')
 					continue;
-				
+
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(DestPath, SourceName);
-				
+
 				if (bVerbose)
 					DConOut("Adding '{}' as '{}'" DNewLine, lSourceFiles[i] << AddPath);
-				
+
 				++nFileAdded;
-				
+
 				CStr Dir = NFile::CFile::fs_GetPath(AddPath);
 				if (!Dir.f_IsEmpty())
 					VirtualFS.f_CreateDirectory(Dir);
-				
+
 				VirtualFS.f_CopyFileToFS(lSourceFiles[i], AddPath);
 			}
 			if (bExistingFS)
@@ -251,14 +251,14 @@ public:
 				TargetFile.f_SetPositionFromEnd(0);
 				TargetFile.f_FeedBytes(pSig, SigSize);
 				TargetFile << MalterlibFsFilePos;
-			}		
+			}
 		}
 		else if (Action == EAction_List)
 		{
 			TCVector<CStr> Files = VirtualFS.f_FindFiles(SourcePattern, EFileAttrib_File, true);
 			CStr BasePath = NFile::CFile::fs_GetPath(SourcePattern);
 			mint Len = BasePath.f_GetLen();
-			
+
 			for (mint i = 0; i < Files.f_GetLen(); ++i)
 			{
 				CStr SourceName;
@@ -266,18 +266,18 @@ public:
 					SourceName = Files[i];
 				else
 					SourceName = Files[i].f_Extract(Len+1);
-				
-				DConOut("\t{}" DNewLine, SourceName);						
+
+				DConOut("\t{}" DNewLine, SourceName);
 			}
 			// Close
-			VirtualFS.f_Close();		
+			VirtualFS.f_Close();
 		}
 		else if (Action == EAction_Extract)
 		{
 			TCVector<CStr> Files = VirtualFS.f_FindFiles(SourcePattern, EFileAttrib_File, true);
 			CStr BasePath = NFile::CFile::fs_GetPath(SourcePattern);
 			mint Len = BasePath.f_GetLen();
-			
+
 			for (mint i = 0; i < Files.f_GetLen(); ++i)
 			{
 				CStr SourceName;
@@ -285,11 +285,11 @@ public:
 					SourceName = Files[i];
 				else
 					SourceName = Files[i].f_Extract(Len+1);
-				
+
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(DestPath, SourceName);
-				
+
 				DConOut("File '{}' Extracted as '{}'" DNewLine, Files[i] << AddPath);
-				
+
 				CStr Dir = NFile::CFile::fs_GetPath(AddPath);
 				if (!Dir.f_IsEmpty())
 					NFile::CFile::fs_CreateDirectory(Dir);

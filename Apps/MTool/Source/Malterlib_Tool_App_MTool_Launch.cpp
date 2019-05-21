@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -9,7 +9,7 @@ class CTool_LaunchTimed : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
 		if (FileName == "012301231023Error")
@@ -48,8 +48,8 @@ public:
 				}
 			)
 		;
-		
-		LaunchParams.m_fOnOutput 
+
+		LaunchParams.m_fOnOutput
 			= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				switch (_OutputType)
@@ -138,7 +138,7 @@ class CTool_LaunchParallell : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimer("LaunchParallell");
 		struct CProgram
@@ -183,7 +183,7 @@ public:
 				{
 					pCurrentProgram = &Programs.f_Insert();
 					pCurrentProgram->m_bFilterP4 = bNextFilterP4;
-					pCurrentProgram->m_bSandboxed = bNextSandboxed;				
+					pCurrentProgram->m_bSandboxed = bNextSandboxed;
 					bNextFilterP4 = false;
 					bNextSandboxed = false;
 				}
@@ -224,7 +224,7 @@ public:
 			else if (Param.f_StartsWith("extrasucess="))
 			{
 				iExtraErrorSuccess = Param.f_Extract(12).f_ToInt(uint32(0));
-			}			
+			}
 			else
 			{
 				DError("Invalid () secquence");
@@ -298,7 +298,7 @@ public:
 						)
 					;
 
-					LaunchParams.m_fOnOutput 
+					LaunchParams.m_fOnOutput
 						= [&, Program, pStdOutBuffer, pStdErrBuffer](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 						{
 							switch (_OutputType)
@@ -350,8 +350,8 @@ DMibRuntimeClass(CTool, CTool_LaunchParallell);
 class CTool_TestStdOut : public CTool
 {
 public:
-	
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		fp64 Sleep = fg_GetRandomFloat();
 		DConOut("Testing standard out {}" DNewLine, Sleep);
@@ -365,7 +365,7 @@ public:
 		DConErrOut("Sleep {}" DNewLine, Sleep);
 //		NSys::fg_ConsoleErrorOutputFlush();
 		NSys::fg_Thread_Sleep(Sleep);
-		
+
 		return 0;
 	}
 };
@@ -395,7 +395,7 @@ public:
 			}
 		}
 
-		int Ret = 0;	
+		int Ret = 0;
 
 		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
 			(
@@ -423,7 +423,7 @@ public:
 
 		{
 			int iRoot = 0;
-			
+
 			for (
 					auto RIter = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot))
 				;	RIter
@@ -442,7 +442,7 @@ public:
 		}
 
 
-		LaunchParams.m_fOnOutput 
+		LaunchParams.m_fOnOutput
 			= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				switch (_OutputType)

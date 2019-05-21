@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -54,7 +54,7 @@ public:
 		}
 	}
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Dir = _Params.f_GetValue("0", "NotExist");
 		CStr Dir2 = _Params.f_GetValue("1", "NotExist");

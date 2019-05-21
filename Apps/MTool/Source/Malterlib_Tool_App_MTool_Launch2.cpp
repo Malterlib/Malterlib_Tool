@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -10,7 +10,7 @@ class CTool_Launch : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		TCVector<CStr> lArgs;
 
@@ -74,7 +74,7 @@ private:
 
 		CLaunchOptions()
 			: m_Fields(EField_None)
-			, m_iLaunch(0)			
+			, m_iLaunch(0)
 			, m_bTime(false)
 			, m_bStats(false)
 			, m_LimitConcurrency(false)
@@ -90,7 +90,7 @@ private:
 
 		CLaunchOptions(CLaunchOptions&& _ToMove)
 			: m_Fields(_ToMove.m_Fields)
-			, m_iLaunch(_ToMove.m_iLaunch)			
+			, m_iLaunch(_ToMove.m_iLaunch)
 			, m_bTime(_ToMove.m_bTime)
 			, m_bStats(_ToMove.m_bStats)
 			, m_LimitConcurrency(_ToMove.m_LimitConcurrency)
@@ -146,7 +146,7 @@ private:
 		void f_SetAttributeOutput(bint _bValue) { m_Fields |= EField_AttributeOutput; m_bAttributeOutput = _bValue; }
 
 		void f_ApplyDefaults(CLaunchOptions const& _Defaults)
-		{			
+		{
 			EField DefFields = _Defaults.m_Fields;
 
 			#define ApplyField(_FieldName, _VarName) \
@@ -186,7 +186,7 @@ private:
 
 
 	struct CProcessInfo
-	{		
+	{
 		CLaunchOptions const& m_Options;
 
 		CStr m_StdOutBuffer;
@@ -196,11 +196,11 @@ private:
 		zuint32 m_ReturnValue;
 		zbool m_bEchoedCommand;
 		zbool m_bFinished;
-		
+
 		CProcessLaunchHandler::CLaunchInfo * m_pProcessLaunchInfo;
-		
+
 		NMib::NProcess::CProcessStatistics m_SampledMemoryStats;
-		
+
 		CProcessInfo(CLaunchOptions const &_Options)
 			: m_Options(_Options)
 			, m_pProcessLaunchInfo(nullptr)
@@ -359,18 +359,18 @@ private:
 				DConErrOutRaw(ToSend);
 			else
 				DConOutRaw(ToSend);
-		}		
+		}
 	}
-	
+
 	mint fp_DisplayStatsGetMaxLen(NMib::NProcess::CProcessStatistics const &_Stats)
 	{
 		mint Len = 0;
 		for (auto Iter = _Stats.m_Statistics.f_GetIterator(); Iter; ++Iter)
 			Len = fg_Max(Len, mint(Iter.f_GetKey().f_GetLen()));
-		
+
 		return Len;
 	}
-	
+
 	void fp_DisplayStats(NMib::NProcess::CProcessStatistics const &_Stats, mint _NameLen)
 	{
 		for (auto Iter = _Stats.m_Statistics.f_GetIterator(); Iter; ++Iter)
@@ -460,16 +460,16 @@ private:
 			}
 		}
 	}
-	
+
 	TCSharedPointer<CProcessInfo> fp_CreateProcess(CLaunchOptions const& _Options, CProcessLaunchHandler& _Handler)
 	{
 		TCSharedPointer<CProcessInfo> pProc = fg_Construct(_Options);
-		
+
 		if (!_Options.m_RedirectStdOut.f_IsEmpty())
 			pProc->m_StdOutRedir.f_Open(_Options.m_RedirectStdOut, EFileOpen_Write | EFileOpen_ShareAll);
 
 		CStr Params = CProcessLaunchParams::fs_GetParams(_Options.m_lParams);
-		
+
 		auto fl_EchoCommand
 			= [pProc, Params]
 			{
@@ -479,13 +479,13 @@ private:
 					pProc->m_bEchoedCommand = true;
 					DConOut("\n<-------------------\n{} {}\n\n", Options.m_Target << Params);
 				}
-				
+
 			}
 		;
 
 		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
 			(
-					_Options.m_Target 
+					_Options.m_Target
 				, 	Params
 				,	CFile::fs_GetCurrentDirectory()
 				, 	[this, pProc, fl_EchoCommand](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
@@ -499,7 +499,7 @@ private:
 							pProc->m_ReturnValue = 255u;
 						}
 						else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
-						{							
+						{
 							DLock(m_ConOutLock);
 
 							fl_EchoCommand();
@@ -510,17 +510,17 @@ private:
 							{
 								DConOut("Launch #{} {} took {} seconds to run." DNewLine, Options.m_iLaunch << Options.m_Target << _TimeSinceLaunch);
 							}
-							
+
 							if (Options.m_bStats)
 							{
 								NMib::NProcess::CProcessStatistics MemoryStats = pProc->m_pProcessLaunchInfo->f_GetProcessLaunch()->f_GetOverallMemoryStatistics();
 								NMib::NProcess::CProcessStatistics ExecutionStats = pProc->m_pProcessLaunchInfo->f_GetProcessLaunch()->f_GetOverallExecutionStatistics();
-								
+
 								mint MaxLen = 0;
 								MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(MemoryStats), MaxLen);
 								MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(ExecutionStats), MaxLen);
 								MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(pProc->m_SampledMemoryStats), MaxLen);
-								
+
 								fp_DisplayStats(MemoryStats, MaxLen);
 								fp_DisplayStats(ExecutionStats, MaxLen);
 								fp_DisplayStats(pProc->m_SampledMemoryStats, MaxLen);
@@ -542,8 +542,8 @@ private:
 					}
 			)
 		;
-		
-		LaunchParams.m_fOnOutput 
+
+		LaunchParams.m_fOnOutput
 			= [this, pProc, fl_EchoCommand](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				CLaunchOptions const& Options = pProc->m_Options;
@@ -582,7 +582,7 @@ private:
 							fl_EchoCommand();
 							fp_OutputWholeLines(pProc->m_StdOutBuffer, EProcessLaunchOutputType_StdOut, Options, false);
 						}
-						
+
 					}
 					break;
 				}
@@ -676,7 +676,7 @@ private:
 					bSubmitCurTarget = false;
 					bInTarget = false;
 				}
-			}	
+			}
 
 		}
 
@@ -706,7 +706,7 @@ private:
 			DConOut("\tVerbose: {}" DNewLine, (GlobalOptions.m_bVerbose ? "Yes" : "No"));
 			DConOut("\tLockFile: {}" DNewLine, GlobalOptions.m_LockFile);
 
-			auto fl_DumpOptions = 
+			auto fl_DumpOptions =
 				[](CLaunchOptions const& _CurLaunch)
 				{
 					DConOut("\tTarget: {}" DNewLine, _CurLaunch.m_Target);
@@ -784,9 +784,9 @@ private:
 			mint nMaxLaunchProcesses = TCLimitsInt<mint>::mc_Max;
 			if (GlobalOptions.m_Defaults.m_LimitConcurrency)
 				nMaxLaunchProcesses = GlobalOptions.m_Defaults.m_LimitConcurrency;
-			
+
 			TCLinkedList<TCFunction<void ()>> ToLaunchQueue;
-			
+
 			int iLaunch = 0;
 			for (auto LIter = lLaunchOptions.f_GetIterator()
 				;LIter
@@ -803,7 +803,7 @@ private:
 				;
 				++iLaunch;
 			}
-			
+
 			auto fl_LaunchOutstanding
 				= [&]
 				{
@@ -814,7 +814,7 @@ private:
 					}
 				}
 			;
-			
+
 			fl_LaunchOutstanding();
 
 			if (bOneHasStats || GlobalOptions.m_Defaults.m_LimitConcurrency)
@@ -825,15 +825,15 @@ private:
 					{
 						if (!*iProcessInfo)
 							continue; // Not launched yet
-						
+
 						auto &ProcessInfo = **iProcessInfo;
-			
+
 						if (!ProcessInfo.m_bFinished && !ProcessInfo.m_pProcessLaunchInfo->f_GetProcessLaunch()->f_IsRunning())
 						{
 							ProcessInfo.m_bFinished = true;
 							--nLaunchProcesses; // Allow another process to launch
 						}
-						
+
 						if (ProcessInfo.m_Options.m_bStats)
 							fg_UpdateSampledStats(*(*iProcessInfo));
 					}
@@ -857,7 +857,7 @@ private:
 			{
 				ReturnValue = fg_Max(ReturnValue, (*PIter)->m_ReturnValue);
 			}
-		}		
+		}
 		return ReturnValue;
 	}
 

@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -9,13 +9,13 @@ class CTool_Base64ToGUID : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Base64 = _Params.f_GetValue("0", "");
-		
+
 		CByteVector Data;
 		fg_Base64Decode(Base64, Data);
-		
+
 		uint32 First = 0;
 		uint16 Second = 0;
 		uint16 Third = 0;
@@ -24,13 +24,13 @@ public:
 
 		CBinaryStreamMemoryPtr<> Stream;
 		Stream.f_OpenRead(Data);
-		
+
 		Stream >> First;
 		Stream >> Second;
 		Stream >> Third;
 		uint64 Last;
 		Stream >> Last;
-		
+
 		Forth = (fg_ByteSwap(Last) << 48) & uint64(0xFFFF);
 		Fifth = fg_ByteSwap(Last) & uint64(0xFFFFFFFFFFFFull);
 

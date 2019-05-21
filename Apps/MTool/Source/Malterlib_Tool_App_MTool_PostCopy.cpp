@@ -6,6 +6,7 @@
 
 #include <Mib/BuildSystem/BuildSystemPreprocessor>
 #include <Mib/Perforce/Wrapper>
+#include <Mib/Cryptography/MD5Cache>
 
 class CTool_PostCopy : public CTool
 {
@@ -28,7 +29,7 @@ public:
 		}
 	}
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr ConfigFile;
 		CStr SourceFile;
@@ -75,7 +76,7 @@ public:
 		if (DestinationProject.f_IsEmpty())
 			DError("No destination project specified");
 
-		CRegistryPreserveAndOrder_CStr Registry;
+		CRegistryPreserveAll Registry;
 		TCSet<CStr> SourceFiles;
 		NBuildSystem::CFindCache FindCache;
 		if (CFile::fs_FileExists(ConfigFile))
@@ -85,7 +86,7 @@ public:
 			Preprocessor.f_ReadFile(ConfigFile);
 		}
 
-		CRegistryPreserveAndOrder_CStr OriginalRegistry = Registry;
+		CRegistryPreserveAll OriginalRegistry = Registry;
 
 		TCVector<CStr> ExcludePatterns;
 

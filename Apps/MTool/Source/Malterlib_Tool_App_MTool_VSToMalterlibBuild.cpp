@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -9,10 +9,10 @@ class CTool_VSToMalterlibBuild : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourcePath = _Params.f_GetValue("0", "NotExist");
-		
+
 		auto Files = CFile::fs_FindFiles(SourcePath, EFileAttrib_File, true);
 
 		if (Files.f_IsEmpty())
@@ -30,11 +30,11 @@ public:
 			auto pProject = XMLFile.f_GetChildNode(XMLFile.f_GetRootNode(), "Project");
 			auto pFiltersProject = XMLFiltersFile.f_GetChildNode(XMLFiltersFile.f_GetRootNode(), "Project");
 
-			CRegistryPreserveAndOrder_CStr OutRegistry;
+			CRegistryPreserveAll OutRegistry;
 			auto pTarget = OutRegistry.f_SetValue("%Target", ProjectName);
 
 			TCMap<CStr, CStr> Files;
-			TCMap<CStr, CRegistryPreserveAndOrder_CStr *> Groups;
+			TCMap<CStr, CRegistryPreserveAll *> Groups;
 
 			{
 				CXMLNode const *pChild = nullptr;
@@ -94,7 +94,7 @@ public:
 												while (!GroupIter.f_IsEmpty())
 												{
 													CStr Name = fg_GetStrSep(GroupIter, "\\");
-													CRegistryPreserveAndOrder_CStr *pGroup = nullptr;
+													CRegistryPreserveAll *pGroup = nullptr;
 													for (auto iChild = pParent->f_GetChildIterator(); iChild; ++iChild)
 													{
 														if (iChild->f_GetName() == "%Group" && iChild->f_GetThisValue() == Name)

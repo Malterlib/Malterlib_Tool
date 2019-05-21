@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -33,7 +33,7 @@ class CTool_GenerateTweaks : public CTool
 	};
 
 public:
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 
 		bint bRet = true;
@@ -68,7 +68,7 @@ public:
 				bMergeMode = true;
 			}
 			else if (ArgValue.f_CmpNoCase("-c") == 0)
-			{ 
+			{
 				bOnlyWriteIfChanged = false;
 			}
 
@@ -92,11 +92,11 @@ public:
 			DestFilePath += NFile::CFile::fs_GetFileNoExt(SourceFilePath);
 			DestFilePath += ".cpp";
 		}
-		
-		CRegistry_CStr Source;
+
+		CRegistry Source;
 		{
 			// Read source file.
-			CStr Contents;		
+			CStr Contents;
 			Contents = NFile::CFile::fs_ReadStringFromFile(SourceFilePath);
 
 			try
@@ -132,7 +132,7 @@ public:
 
 				CStr DestFilename = NFile::CFile::fs_GetFile(DestFilePath);
 				CStr OutDir = NFile::CFile::fs_GetPath(DestFilePath);
-				if (!OutDir.f_IsEmpty()) 
+				if (!OutDir.f_IsEmpty())
 					OutDir += "/";
 
 				DestFilename += ".h";
@@ -149,14 +149,14 @@ public:
 	}
 
 private:
-	
-	bint fp_MergeFile(CRegistry_CStr & _Source, CStr const& _DestFilePath, bool _bOnlyWriteIfChanged)
+
+	bint fp_MergeFile(CRegistry & _Source, CStr const& _DestFilePath, bool _bOnlyWriteIfChanged)
 	{
-		CRegistry_CStr Dest;
+		CRegistry Dest;
 		if (NFile::CFile::fs_FileExists(_DestFilePath))
 		{
 			// Read source file.
-			CStr Contents;		
+			CStr Contents;
 			Contents = NFile::CFile::fs_ReadStringFromFile(CStr(_DestFilePath));
 
 			try
@@ -270,7 +270,7 @@ private:
 		{
 			if (A != 255)
 				return CStr(CStr::CFormat("rgba({}, {}, {}, {})") << R << G << B << A);
-			else 
+			else
 				return CStr(CStr::CFormat("rgb({}, {}, {})") << R << G << B);
 		}
 
@@ -304,7 +304,7 @@ private:
 		}
 	}
 
-	void fp_ConditionTweaks(CRegistry_CStr& _Tweaks, EType _PureType)
+	void fp_ConditionTweaks(CRegistry& _Tweaks, EType _PureType)
 	{
 		if (_PureType == EType_Color)
 		{
@@ -333,16 +333,16 @@ private:
 	}
 
 
-	bint fp_GenerateFile(CRegistry_CStr const& _Source, CStr const& _DestFilePath, bint _bHeader, bool _bOnlyWriteIfChanged)
+	bint fp_GenerateFile(CRegistry const& _Source, CStr const& _DestFilePath, bint _bHeader, bool _bOnlyWriteIfChanged)
 	{
 		CStr DestFilename = NFile::CFile::fs_GetFileNoExt(_DestFilePath);
 		CStr OutDir = NFile::CFile::fs_GetPath(_DestFilePath);
-		if (!OutDir.f_IsEmpty()) 
+		if (!OutDir.f_IsEmpty())
 			OutDir += "/";
 
 		if (_bHeader)
 			DestFilename += ".h";
-		else 
+		else
 			DestFilename += ".cpp";
 		CStr DestFilePath = OutDir + DestFilename;
 
@@ -430,7 +430,7 @@ private:
 		return true;
 	}
 
-	bint fp_GenerateCode(CStr& _Out, EType _MasterType, CRegistry_CStr const& _Reg, CStr const& _DestFileName, bint _bHeader)
+	bint fp_GenerateCode(CStr& _Out, EType _MasterType, CRegistry const& _Reg, CStr const& _DestFileName, bint _bHeader)
 	{
 		EType Type;
 		CStr ValueStr, TypeStr;
@@ -459,38 +459,38 @@ private:
 			case EType_Int:
 				if (_bHeader)
 					_Out += CStr::CFormat("\t\textern int m_Int_{};" DNewLine) << RIter->f_GetName();
-				else 
+				else
 					_Out += CStr::CFormat("\t\tint m_Int_{};" DNewLine) << RIter->f_GetName();
 				break;
 			case EType_Float:
 				if (_bHeader)
 					_Out += CStr::CFormat("\t\textern float m_Float_{};" DNewLine) << RIter->f_GetName();
-				else 
+				else
 					_Out += CStr::CFormat("\t\tfloat m_Float_{};" DNewLine) << RIter->f_GetName();
 				break;
 			case EType_Color:
 				if (_bHeader)
 					_Out += CStr::CFormat("\t\textern QColor m_Color_{};" DNewLine) << RIter->f_GetName();
-				else 
+				else
 					_Out += CStr::CFormat("\t\tQColor m_Color_{};" DNewLine) << RIter->f_GetName();
 				break;
 			case EType_Font:
 				if (_bHeader)
 					_Out += CStr::CFormat("\t\textern NMib::NStorage::TCLazyInit<QFont, NMib::NThread::CSpinLock> m_Font_{};" DNewLine) << RIter->f_GetName();
-				else 
+				else
 					_Out += CStr::CFormat("\t\tNMib::NStorage::TCLazyInit<QFont, NMib::NThread::CSpinLock> m_Font_{};" DNewLine) << RIter->f_GetName();
 				break;
 			case EType_PMetricInt:
 				if (_bHeader)
 					_Out += CStr::CFormat("\t\textern CPMetricInt m_PMetricInt_{};" DNewLine) << RIter->f_GetName();
-				else 
+				else
 					_Out += CStr::CFormat("\t\tCPMetricInt m_PMetricInt_{};" DNewLine) << RIter->f_GetName();
 				break;
 
 			case EType_PMetricFloat:
 				if (_bHeader)
 					_Out += CStr::CFormat("\t\textern CPMetricFloat m_PMetricFloat_{};" DNewLine) << RIter->f_GetName();
-				else 
+				else
 					_Out += CStr::CFormat("\t\tCPMetricFloat m_PMetricFloat_{};" DNewLine) << RIter->f_GetName();
 				break;
 			}
@@ -514,7 +514,7 @@ private:
 			_Out += "\t\t\tParams.m_Platform = _Platform;" DNewLine;
 			_Out += "\t\t\tParams.m_PlatformVersion = _PlatformVersion;" DNewLine;
 			_Out += "\t\t\t{" DNewLine;
-			_Out += "\t\t\t\tCStr Contents;" DNewLine;	
+			_Out += "\t\t\t\tCStr Contents;" DNewLine;
 
 			_Out += "\t\t\t\tQFile File(_Path);" DNewLine;
 			_Out += "\t\t\t\tif (File.open(QIODevice::ReadOnly))" DNewLine;
@@ -577,15 +577,15 @@ private:
 					pType = "PMetricFloat";
 					break;
 				}
-				
+
 				ch8 const *pLazyLoad = (Type == EType_Font) ? "*" : "";
-				
-				_Out 
+
+				_Out
 					+= CStr::CFormat("\t\t\tNAOQT::fg_ReadValue({}m_{}_{}, \"{}\", Params, {}, bFailed);" DNewLine)
 					<< pLazyLoad
-					<< pType 
-					<< RIter->f_GetName() 
-					<< RIter->f_GetName() 
+					<< pType
+					<< RIter->f_GetName()
+					<< RIter->f_GetName()
 					<< (_MasterType != EType_Unknown ? "true" : "false")
 				;
 			}
@@ -599,10 +599,10 @@ private:
 	}
 
 
-	EType fp_GetUsedTypes(CRegistry_CStr const& _Reg, bint& _bPure)
+	EType fp_GetUsedTypes(CRegistry const& _Reg, bint& _bPure)
 	{
 
-		CRegistry_CStr const* pKey = _Reg.f_GetChild("__Type");
+		CRegistry const* pKey = _Reg.f_GetChild("__Type");
 		if (pKey)
 		{
 			_bPure = true;
@@ -638,7 +638,7 @@ private:
 			return EType_PMetricInt;
 		else if (_Name.f_CmpNoCase("CPMetricFloat") == 0)
 			return EType_PMetricFloat;
-		else 
+		else
 			return EType_Unknown;
 	}
 

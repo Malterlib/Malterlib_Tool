@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -28,7 +28,7 @@ public:
 		}
 	}
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Pattern = _Params.f_GetValue("0", "NotExist");
 		CStr Dir = NFile::CFile::fs_GetPath(Pattern);
@@ -49,18 +49,18 @@ DMibRuntimeClass(CTool, CTool_Touch);
 class CTool_TouchOrCreate : public CTool
 {
 	public:
-	
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr File = _Params.f_GetValue("0", "NotExist");
-		
+
 		NTime::CTime Now = NTime::CTime::fs_NowUTC();
-		
+
 		CFile::fs_CreateDirectory(CFile::fs_GetPath(File));
 		NFile::CFile Temp;
 		Temp.f_Open(File, EFileOpen_Read | EFileOpen_Write | EFileOpen_ShareAll | EFileOpen_DontTruncate);
-		Temp.f_SetWriteTime(Now);		
-		
+		Temp.f_SetWriteTime(Now);
+
 		return 0;
 	}
 };
@@ -71,7 +71,7 @@ class CTool_CopyWriteTime : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
 		CStr DestFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
@@ -111,7 +111,7 @@ class CTool_CopyWriteTimeIfNewer : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
 		CStr DestFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
@@ -179,7 +179,7 @@ class CTool_DiffCopy : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimer("DiffCopy");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
@@ -222,7 +222,7 @@ public:
 			}
 			return 0;
         }
-		
+
 		EFileAttrib Attribs = EFileAttrib_File | EFileAttrib_Link;
 		if (bDirectory)
 			Attribs = EFileAttrib_Directory;
@@ -285,7 +285,7 @@ class CTool_DiffReplace : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimer("DiffReplace");
 		CStr Search = _Params.f_GetValue("0", "NotExist");
@@ -329,7 +329,7 @@ public:
 			NFile::CFile::fs_WriteStringToVector(Data, DestData, bAddBom);
 			if (!NFile::CFile::fs_IsFileWritable(FileDest))
 				NFile::CFile::fs_MakeFileWritable(FileDest);
-			
+
 			if (NFile::CFile::fs_CopyFileDiff(Data, FileDest, NTime::CTime::fs_NowUTC()))
 			{
 				if (!bQuiet)
@@ -370,8 +370,8 @@ DMibRuntimeClass(CTool, CTool_DiffTouchCopy);
 class CTool_DeleteDirectoryRecursive : public CTool
 {
 public:
-	
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimer("DeleteDirectoryRecursive");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
@@ -379,9 +379,9 @@ public:
 
         if (!CFile::fs_FileExists(SourcePattern, EFileAttrib_Directory))
 			DError(CStr::CFormat("Directory '{}' does not exist") << SourcePattern);
-        
+
 		CFile::fs_DeleteDirectoryRecursive(SourcePattern, bRemoveWriteProtection);
-		
+
 		return 0;
 	}
 };
@@ -391,15 +391,15 @@ DMibRuntimeClass(CTool, CTool_DeleteDirectoryRecursive);
 class CTool_DeleteRecursive : public CTool
 {
 public:
-	
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimer("DeleteRecursive");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
-		
+
 		CStr Pattern = CFile::fs_GetFile(SourcePattern);
 		TCVector<CFile::CFoundFile> Files = NFile::CFile::fs_FindFilesEx(SourcePattern, EFileAttrib_File | EFileAttrib_Directory, true, false);
-		
+
 		for (auto iFile = Files.f_GetIterator(); iFile; ++iFile)
 		{
 			if (CFile::fs_FileExists(iFile->m_Path) && fg_StrMatchWildcard(CFile::fs_GetFile(CStr(iFile->m_Path)).f_GetStr(), Pattern.f_GetStr()) == EMatchWildcardResult_WholeStringMatchedAndPatternExhausted)
@@ -408,7 +408,7 @@ public:
 				CFile::fs_DeleteDirectoryRecursive(iFile->m_Path, true);
 			}
 		}
-		
+
 		return 0;
 	}
 };
@@ -418,8 +418,8 @@ DMibRuntimeClass(CTool, CTool_DeleteRecursive);
 class CTool_TestOutput : public CTool
 {
 public:
-	
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Test = NMib::NCryptography::fg_GetRandomUuidString();
 		DConOut(str_utf16("*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯{\n}"), 0);
@@ -429,8 +429,8 @@ public:
 			DConOut("Out: {}{\n}", Test);
 			DConErrOut("Err: {}{\n}", Test);
 		}
-			
-		
+
+
 		return 0;
 	}
 };

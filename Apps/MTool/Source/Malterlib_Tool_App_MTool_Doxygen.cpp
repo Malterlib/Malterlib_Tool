@@ -7,9 +7,9 @@
 
 namespace
 {
-	CRegistry_CStr fg_ExtractOptions(NContainer::CRegistry_CStr &_Params)
+	CRegistry fg_ExtractOptions(NContainer::CRegistry &_Params)
 	{
-		CRegistry_CStr Registry;
+		CRegistry Registry;
 
 		CStr LastOption;
 
@@ -35,7 +35,7 @@ namespace
 					auto pFilesReg = Registry.f_CreateChild("Files");
 					if (CFile::fs_GetExtension(Value).f_CmpNoCase("a") == 0)
 					{
-						CRegistry_CStr LibraryContents;
+						CRegistry LibraryContents;
 						LibraryContents.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(Value)), Value);
 
 						auto pFiles = LibraryContents.f_GetChildNoPath("Files");
@@ -65,9 +65,9 @@ class CTool_DoxygenCompile : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		CRegistry_CStr Registry = fg_ExtractOptions(_Params);
+		CRegistry Registry = fg_ExtractOptions(_Params);
 
 		auto pFile = Registry.f_GetChild("-c");
 		if (pFile)
@@ -94,9 +94,9 @@ class CTool_DoxygenLibTool : public CTool
 {
 public:
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		CRegistry_CStr Registry = fg_ExtractOptions(_Params);
+		CRegistry Registry = fg_ExtractOptions(_Params);
 
 		auto pFilesReg = Registry.f_CreateChild("Files");
 
@@ -111,7 +111,7 @@ public:
 					pFilesReg->f_CreateChildNoPath(FileName, true);
 				else if (CFile::fs_GetExtension(FileName).f_CmpNoCase("a") == 0)
 				{
-					CRegistry_CStr LibraryContents;
+					CRegistry LibraryContents;
 					LibraryContents.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
 
 					auto pFiles = LibraryContents.f_GetChildNoPath("Files");
@@ -155,7 +155,7 @@ public:
 	CStr m_OutputDir;
 	bool m_bDoxygenEnableClang = false;
 
-	TCLinkedList<CRegistry_CStr> m_Libraries;
+	TCLinkedList<CRegistry> m_Libraries;
 	TCMap<CStr, CStr> m_Tags;
 
 	struct CModule
@@ -177,7 +177,7 @@ public:
 
 			for (auto iFile = pFilesReg->f_GetChildIterator(); iFile; ++iFile)
 			{
-				CRegistry_CStr const &ObjectRegistry = *iFile;
+				CRegistry const &ObjectRegistry = *iFile;
 
 				CStr ModuleName = ObjectRegistry.f_GetValue("--documentation-module", "");
 
@@ -411,9 +411,9 @@ public:
 			DError(fg_Format("doxygen exited with code: {}", ExitCode.f_Load()));
 	}
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		CRegistry_CStr Registry = fg_ExtractOptions(_Params);
+		CRegistry Registry = fg_ExtractOptions(_Params);
 
 		CStr OutputFile = Registry.f_GetValue("-o", "");
 		if (OutputFile.f_IsEmpty())

@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -52,7 +52,7 @@ void CTool::f_Register
 			}
 			, [this](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 		 	{
-				NContainer::CRegistry_CStr Params;
+				NContainer::CRegistry Params;
 				mint iOut = 0;
 
 				if (auto pParams = _Params.f_GetMember("Params"))
@@ -83,11 +83,11 @@ CStr CTool2::f_GetOption(TCMap<CStr, CStr> const &_Params, CStr const &_Option) 
 	auto pOption = _Params.f_FindEqual(_Option);
 	if (pOption)
 		return *pOption;
-	
+
 	DError(CStr::CFormat("You have to specify '{}'") << _Option);
 }
 
-aint CTool2::f_Run(NContainer::CRegistry_CStr &_Params)
+aint CTool2::f_Run(NContainer::CRegistry &_Params)
 {
 	TCMap<CStr, CStr> Params;
 
@@ -116,8 +116,8 @@ public:
 	aint f_Main()
 	{
 #ifdef DPlatformFamily_OSX
-		
-		int Signals[] = 
+
+		int Signals[] =
 			{
 				SIGHUP,
 				SIGINT,
@@ -137,26 +137,26 @@ public:
 				SIGCONT
 			}
 		;
-		
+
 		auto fSignalHandler = [](int _Signal)
 			{
 				DConOut("Ignored signal: {}\n", _Signal);
 			}
 		;
-		
+
 		TCMap<int, void (*)(int)> OldSignals;
-		
+
 		for (auto &Signal : Signals)
 			OldSignals[Signal] = signal(Signal, fSignalHandler);
-		
-		auto Cleanup 
+
+		auto Cleanup
 			= g_OnScopeExit > [&]
 			{
 				for (auto iOldSignal = OldSignals.f_GetIterator(); iOldSignal; ++iOldSignal)
 					signal(iOldSignal.f_GetKey(), *iOldSignal);
 			}
 		;
-#endif		
+#endif
 		return fg_RunApp
 			(
 				[]

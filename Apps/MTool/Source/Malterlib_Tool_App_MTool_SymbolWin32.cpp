@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -32,11 +32,11 @@ public:
 			CFile::fs_CreateDirectory(TempDir);
 			CStr TempFile = CFile::fs_AppendPath(TempDir, fg_RandomID()) + "." + CFile::fs_GetExtension(_Destination);
 			CStr TempFileCompressed = TempFile + "_";
-			
+
 			CFile::fs_CopyFile(_Source, TempFile);
-			
+
 			CProcessLaunch::fs_LaunchTool("mscompress", fg_CreateVector(TempFile), LaunchParams);
-			
+
 			CFile::fs_CopyFile(TempFileCompressed, DestinationCompressed);
 			CFile::fs_DeleteFile(TempFileCompressed);
 			CFile::fs_DeleteFile(TempFile);
@@ -49,7 +49,7 @@ public:
 		}
 	}
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SymbolDir = _Params.f_GetValue("0", "NotExist:/");
 		CStr FileName = _Params.f_GetValue("1", "NotExist.file");
@@ -83,7 +83,7 @@ public:
 			{
 				CStr AlternatePdbFile = CFile::fs_AppendPath(CFile::fs_GetPath(FileName), CFile::fs_GetFileNoExt(FileName) + ".pdb");
 				if (CFile::fs_FileExists(AlternatePdbFile))
-					ExecutableInfo.m_PDBFile = AlternatePdbFile; 
+					ExecutableInfo.m_PDBFile = AlternatePdbFile;
 			}
 
 			fs_CompressOrCopy(ExecutableInfo.m_PDBFile, OutPath + "/" + SymServName);

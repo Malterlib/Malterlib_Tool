@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "PCH.h"
@@ -110,7 +110,7 @@ public:
 						break;
 					}
 				}
-				
+
 				if (bFound)
 				{
 					TerminateProcess(hProcess, 44);
@@ -159,9 +159,9 @@ public:
 				{
 					do
 					{
-						
+
 						RootProcess.f_MapProcess(pe32.th32ProcessID, pe32.th32ParentProcessID, pe32.szExeFile);
-					} 
+					}
 					while( Process32Next( hProcessSnap, &pe32 ) );
 				}
 
@@ -185,7 +185,7 @@ RestartSearch:
 							break;
 						}
 					}
-					
+
 					if (bFound)
 					{
 						Iter->f_KillTree(0, _ProcessNames);
@@ -198,7 +198,7 @@ RestartSearch:
 
 	}
 
-	aint f_Run(NContainer::CRegistry_CStr &_Params)
+	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		TCVector<CStr> ProcessNames;
 		aint iParam = 0;
