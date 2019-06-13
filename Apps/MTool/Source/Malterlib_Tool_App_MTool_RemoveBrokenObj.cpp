@@ -33,7 +33,7 @@ public:
 					File.f_Read(Test.f_GetArray(), Test.f_GetLen());
 
 					mint Len = Test.f_GetLen();
-					bint bOnly0 = true;
+					bool bOnly0 = true;
 					{
 						for (mint i = 0; i < Len; ++i)
 						{

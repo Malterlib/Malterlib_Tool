@@ -284,7 +284,7 @@ public:
 
 
 
-		bint bVerbose = false;
+		bool bVerbose = false;
 		ETargetFormat TargetFormat = ETargetFormat_CPP;
 		CStr SourceFilename;
 		CStr TargetFilename;
@@ -465,7 +465,7 @@ public:
 		{
 			CStr m_Pattern;
 			CStr m_Destination;
-			bint m_bRecurse;
+			bool m_bRecurse;
 			CStr m_File;
 			uint32 m_Line = 0;
 		};

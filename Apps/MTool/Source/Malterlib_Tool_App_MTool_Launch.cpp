@@ -150,8 +150,8 @@ public:
 			}
 
 			TCVector<CStr> m_Params;
-			bint m_bFilterP4;
-			bint m_bSandboxed;
+			bool m_bFilterP4;
+			bool m_bSandboxed;
 			CStr m_LockFile;
 
 			CStr f_GetParams() const
@@ -168,10 +168,10 @@ public:
 		int32 iParam = 0;
 		int32 iNestedParam = 0;
 		uint32 iExtraErrorSuccess = 0;
-		bint bNextFilterP4 = false;
-		bint bNextSandboxed = false;
-		bint bDelayOutput = false;
-		bint bSeparateStdErr = false;
+		bool bNextFilterP4 = false;
+		bool bNextSandboxed = false;
+		bool bDelayOutput = false;
+		bool bSeparateStdErr = false;
 		CProgram *pCurrentProgram = nullptr;
 		CStr Param;
 		while ((Param = _Params.f_GetValue(CStr::fs_ToStr(iParam), "012301231023Error")) != "012301231023Error")

@@ -36,12 +36,12 @@ public:
 		DLinkDS_List(CProcessEntry, m_LinkAll) m_AllProcess;
 		typedef DLinkDS_Iter(CProcessEntry, m_LinkAll) CAllIter;
 
-		bint operator == (uint32 _Process) const
+		bool operator == (uint32 _Process) const
 		{
 			return m_Process == _Process;
 		}
 
-		bint operator == (const CStr &_Process) const
+		bool operator == (const CStr &_Process) const
 		{
 			return m_FileName == _Process;
 		}
@@ -86,7 +86,7 @@ public:
 				m_Children.f_Insert(pEntry);
 		}
 
-		bint f_FindParent(uint32 _Parent)
+		bool f_FindParent(uint32 _Parent)
 		{
 			if (m_ParentID == _Parent)
 				return true;
@@ -101,7 +101,7 @@ public:
 			if (hProcess)
 			{
 				mint nProcesses = _ProcessNames.f_GetLen();
-				bint bFound = false;
+				bool bFound = false;
 				for (mint i = 0; i < nProcesses; ++i)
 				{
 					if (m_FileName.f_CmpNoCase(_ProcessNames[i]) == 0)
@@ -173,7 +173,7 @@ RestartSearch:
 				CProcessEntry::CAllIter Iter = RootProcess.m_AllProcess;
 				while (Iter)
 				{
-					bint bFound = false;
+					bool bFound = false;
 
 					mint nProces = _ProcessNames.f_GetLen();
 

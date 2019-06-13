@@ -52,16 +52,16 @@ private:
 	public:
 		int m_iLaunch;
 
-		bint m_bTime;
-		bint m_bStats;
-		bint m_bPerforceParsing;
-		bint m_bSeparateStdErr;
-		bint m_bDelayOutput;
-		bint m_bAttributeOutput;
-		bint m_bEchoCommand;
+		bool m_bTime;
+		bool m_bStats;
+		bool m_bPerforceParsing;
+		bool m_bSeparateStdErr;
+		bool m_bDelayOutput;
+		bool m_bAttributeOutput;
+		bool m_bEchoCommand;
 
-		bint m_bSandbox;
-		bint m_bSandboxCopyRoot;
+		bool m_bSandbox;
+		bool m_bSandboxCopyRoot;
 		TCMap<CStr, CStr> m_SandboxRoots;
 
 		fp32 m_CPUUsage;
@@ -132,18 +132,18 @@ private:
 			return *this;
 		}
 
-		void f_SetTime(bint _bValue) { m_Fields |= EField_Time; m_bTime = _bValue; }
-		void f_SetStats(bint _bValue) { m_Fields |= EField_Stats; m_bStats = _bValue; }
+		void f_SetTime(bool _bValue) { m_Fields |= EField_Time; m_bTime = _bValue; }
+		void f_SetStats(bool _bValue) { m_Fields |= EField_Stats; m_bStats = _bValue; }
 		void f_SetLimitConcurrency(mint _Value) { m_Fields |= EField_LimitConcurrency; m_LimitConcurrency = _Value; }
-		void f_SetPerforceParsing(bint _bValue) { m_Fields |= EField_PerforceParsing; m_bPerforceParsing = _bValue; }
-		void f_SetSeparateStdErr(bint _bValue) { m_Fields |= EField_SeparateStdErr; m_bSeparateStdErr = _bValue; }
-		void f_SetEchoCommand(bint _bValue) { m_Fields |= EField_EchoCommand; m_bEchoCommand = _bValue; }
-		void f_SetDelayOutput(bint _bValue) { m_Fields |= EField_DelayOutput; m_bDelayOutput = _bValue; }
-		void f_SetSandbox(bint _bValue) { m_Fields |= EField_Sandbox; m_bSandbox = _bValue; }
-		void f_SetSandboxCopyRoot(bint _bValue) { m_Fields |= EField_SandboxCopyRoot; m_bSandboxCopyRoot = _bValue; }
+		void f_SetPerforceParsing(bool _bValue) { m_Fields |= EField_PerforceParsing; m_bPerforceParsing = _bValue; }
+		void f_SetSeparateStdErr(bool _bValue) { m_Fields |= EField_SeparateStdErr; m_bSeparateStdErr = _bValue; }
+		void f_SetEchoCommand(bool _bValue) { m_Fields |= EField_EchoCommand; m_bEchoCommand = _bValue; }
+		void f_SetDelayOutput(bool _bValue) { m_Fields |= EField_DelayOutput; m_bDelayOutput = _bValue; }
+		void f_SetSandbox(bool _bValue) { m_Fields |= EField_Sandbox; m_bSandbox = _bValue; }
+		void f_SetSandboxCopyRoot(bool _bValue) { m_Fields |= EField_SandboxCopyRoot; m_bSandboxCopyRoot = _bValue; }
 		void f_SetCPUUsage(fp32 _Value) { m_Fields |= EField_CPUUsage; m_CPUUsage = _Value; }
 		void f_SetRedirectStdOut(CStr const &_Value) { m_Fields |= EField_RedirectStdOut; m_RedirectStdOut = _Value; }
-		void f_SetAttributeOutput(bint _bValue) { m_Fields |= EField_AttributeOutput; m_bAttributeOutput = _bValue; }
+		void f_SetAttributeOutput(bool _bValue) { m_Fields |= EField_AttributeOutput; m_bAttributeOutput = _bValue; }
 
 		void f_ApplyDefaults(CLaunchOptions const& _Defaults)
 		{
@@ -178,7 +178,7 @@ private:
 
 	struct CGlobalOptions
 	{
-		zbint m_bVerbose;
+		bool m_bVerbose = false;
 		CStr m_LockFile;
 
 		CLaunchOptions m_Defaults;
@@ -213,12 +213,12 @@ private:
 
 private:
 
-	bint fp_ParseBool(CStr const& _Value)
+	bool fp_ParseBool(CStr const& _Value)
 	{
 		return _Value.f_CmpNoCase("Yes") == 0;
 	}
 
-	bint fp_ProcessArg(CStr& _Arg, CLaunchOptions& _CurLaunch, CGlobalOptions& _GlobalObjects, bint& _bInTarget)
+	bool fp_ProcessArg(CStr& _Arg, CLaunchOptions& _CurLaunch, CGlobalOptions& _GlobalObjects, bool& _bInTarget)
 	{
 		if (_Arg.f_StartsWith("("))
 		{
@@ -316,7 +316,7 @@ private:
 		ch8 const *pLineStart = Buffer;
 		ch8 const* pLineEnd = pLineStart;
 
-		bint bPerforceParsing = _Options.m_bPerforceParsing;
+		bool bPerforceParsing = _Options.m_bPerforceParsing;
 
 		while(*pLineStart)
 		{
@@ -613,14 +613,14 @@ private:
 		{
 			CLaunchOptions CurLaunch;
 
-			bint bInTarget = false;
+			bool bInTarget = false;
 			int iLaunch = 0;
 
 			for (auto AIter = _Args.f_GetIterator()
 				;AIter
 				;++AIter)
 			{
-				bint bSubmitCurTarget = false;
+				bool bSubmitCurTarget = false;
 
 				if (bInTarget)
 				{

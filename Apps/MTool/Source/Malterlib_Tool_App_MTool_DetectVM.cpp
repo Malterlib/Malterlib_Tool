@@ -10,7 +10,7 @@ public:
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		bint bSilent = false;
+		bool bSilent = false;
 
 		CStr Arg0 = _Params.f_GetValue("0", "");
 		bSilent = (Arg0 == "-s") || (Arg0 == "--silent");

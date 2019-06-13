@@ -44,7 +44,7 @@ public:
 			"or" DNewLine
 			"	-list			- Files in TargetFile are listed." DNewLine;
 
-		bint bVerbose = false;
+		bool bVerbose = false;
 		ETarget TargetType = ETarget_Exe;
 		EAction Action = EAction_Add;
 
@@ -100,7 +100,7 @@ public:
 		TargetFilename = TargetFilename.f_ReplaceChar('\\', '/');
 		SourcePattern = SourcePattern.f_ReplaceChar('\\', '/');
 
-		bint bTargetExists = NFile::CFile::fs_FileExists(TargetFilename, EFileAttrib_File);
+		bool bTargetExists = NFile::CFile::fs_FileExists(TargetFilename, EFileAttrib_File);
 
 		if (TargetType == ETarget_Exe && !bTargetExists)
 		{
@@ -126,7 +126,7 @@ public:
 
 		TargetFile.f_Open(TargetFilename, FileMode);
 
-		bint bExistingFS = false;
+		bool bExistingFS = false;
 
 		NStream::CBinaryStreamSubStream<> SubStream;
 		NMib::NFile::CVirtualFS VirtualFS;

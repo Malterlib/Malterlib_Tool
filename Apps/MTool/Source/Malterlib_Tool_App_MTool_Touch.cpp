@@ -9,7 +9,7 @@ class CTool_Touch : public CTool
 {
 public:
 
-	void fr_Touch(CStr _Path, CStr _Pattern, const NTime::CTime &_Time, bint _bRecursive)
+	void fr_Touch(CStr _Path, CStr _Pattern, const NTime::CTime &_Time, bool _bRecursive)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/" + _Pattern, EFileAttrib_File, _bRecursive);
 		for (mint i = 0; i < Files.f_GetLen(); ++i)
@@ -33,7 +33,7 @@ public:
 		CStr Pattern = _Params.f_GetValue("0", "NotExist");
 		CStr Dir = NFile::CFile::fs_GetPath(Pattern);
 		Pattern = NFile::CFile::fs_GetFile(Pattern);
-		bint bRecursive = false;
+		bool bRecursive = false;
 		if (_Params.f_GetValue("1", "NotExist").f_CmpNoCase("-R") == 0)
 			bRecursive = true;
 
@@ -186,11 +186,11 @@ public:
         CStr SourceDir = fg_ForceStrUTF8(NFile::CFile::fs_GetPath(SourcePattern));
 		CStr DestPath = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
 		CStr Touch = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("2", ""));
-        bint bRecursive = _Params.f_GetValue("3", "1").f_ToInt() != 0;
-		bint bQuiet = _Params.f_GetValue("4", "0").f_ToInt() != 0;
-		bint bDirectory = _Params.f_GetValue("5", "0").f_ToInt() != 0;
-		bint bDestinationIsFile = _Params.f_GetValue("6", "0").f_ToInt() != 0;
-		bint bCopied = false;
+        bool bRecursive = _Params.f_GetValue("3", "1").f_ToInt() != 0;
+		bool bQuiet = _Params.f_GetValue("4", "0").f_ToInt() != 0;
+		bool bDirectory = _Params.f_GetValue("5", "0").f_ToInt() != 0;
+		bool bDestinationIsFile = _Params.f_GetValue("6", "0").f_ToInt() != 0;
+		bool bCopied = false;
 		bool bVerbose = false;
 
         if (NFile::CFile::fs_FileExists(SourcePattern, EFileAttrib_Directory))
@@ -293,15 +293,15 @@ public:
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("2", "NotExist"));
 		CStr DestPath = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("3", "NotExist"));
 		CStr Touch = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("4", ""));
-		bint bRecursive = _Params.f_GetValue("5", "0").f_ToInt() != 0;
-		bint bAddBom = _Params.f_GetValue("6", "0").f_ToInt() != 0;
-		bint bQuiet = _Params.f_GetValue("7", "0").f_ToInt() != 0;
+		bool bRecursive = _Params.f_GetValue("5", "0").f_ToInt() != 0;
+		bool bAddBom = _Params.f_GetValue("6", "0").f_ToInt() != 0;
+		bool bQuiet = _Params.f_GetValue("7", "0").f_ToInt() != 0;
 		CStr SourceDir = fg_ForceStrUTF8(NFile::CFile::fs_GetPath(SourcePattern));
 
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(SourcePattern, EFileAttrib_File, bRecursive);
 
 		mint nFiles = Files.f_GetLen();
-		bint bCopied = false;
+		bool bCopied = false;
 		for (mint i = 0; i < nFiles; ++i)
 		{
 			CStr FilePath = fg_ForceStrUTF8(Files[i]);

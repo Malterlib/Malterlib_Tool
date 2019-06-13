@@ -36,14 +36,14 @@ public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 
-		bint bRet = true;
+		bool bRet = true;
 
 		CStr DestFilePath;
 
 		int iArg = 0;
 		CStr ArgStr = CStr(CStr(CStr::CFormat("{}") << iArg));
 		CStr ArgValue;
-		bint bMergeMode = false;
+		bool bMergeMode = false;
 		bool bOnlyWriteIfChanged = true;
 
 		while (_Params.f_GetValueIfExists(ArgStr, ArgValue))
@@ -150,7 +150,7 @@ public:
 
 private:
 
-	bint fp_MergeFile(CRegistry & _Source, CStr const& _DestFilePath, bool _bOnlyWriteIfChanged)
+	bool fp_MergeFile(CRegistry & _Source, CStr const& _DestFilePath, bool _bOnlyWriteIfChanged)
 	{
 		CRegistry Dest;
 		if (NFile::CFile::fs_FileExists(_DestFilePath))
@@ -170,7 +170,7 @@ private:
 			}
 		}
 
-		bint bSourcePure, bDestPure;
+		bool bSourcePure, bDestPure;
 
 		EType SourceTypesUsed = fp_GetUsedTypes(_Source, bSourcePure);
 		EType DestTypesUsed = fp_GetUsedTypes(Dest, bDestPure);
@@ -238,7 +238,7 @@ private:
 			return 0;
 	}
 
-	CStr fp_ConvertColor(CStr const& _Color, bint _bForCode = false)
+	CStr fp_ConvertColor(CStr const& _Color, bool _bForCode = false)
 	{
 		mint nChars = _Color.f_GetLen();
 
@@ -333,7 +333,7 @@ private:
 	}
 
 
-	bint fp_GenerateFile(CRegistry const& _Source, CStr const& _DestFilePath, bint _bHeader, bool _bOnlyWriteIfChanged)
+	bool fp_GenerateFile(CRegistry const& _Source, CStr const& _DestFilePath, bool _bHeader, bool _bOnlyWriteIfChanged)
 	{
 		CStr DestFilename = NFile::CFile::fs_GetFileNoExt(_DestFilePath);
 		CStr OutDir = NFile::CFile::fs_GetPath(_DestFilePath);
@@ -346,14 +346,14 @@ private:
 			DestFilename += ".cpp";
 		CStr DestFilePath = OutDir + DestFilename;
 
-		bint bPure;
+		bool bPure;
 		EType UsedTypes = fp_GetUsedTypes(_Source, bPure);
 
 		CStr Out;
 
 		DConOut("Writing: {}" DNewLine, DestFilePath);
 
-		bint bRet = fp_GenerateHeader(Out, UsedTypes, DestFilename, _bHeader);;
+		bool bRet = fp_GenerateHeader(Out, UsedTypes, DestFilename, _bHeader);;
 		bRet = bRet && fp_GenerateCode(Out, bPure ? UsedTypes : EType_Unknown, _Source, DestFilename, _bHeader);
 		bRet = bRet && fp_GenerateFooter(Out, UsedTypes, DestFilename, _bHeader);
 
@@ -377,7 +377,7 @@ private:
 		return bRet;
 	}
 
-	bint fp_GenerateHeader(CStr& _Out, EType _UsedTypes, CStr const& _DestFilename, bint _bHeader)
+	bool fp_GenerateHeader(CStr& _Out, EType _UsedTypes, CStr const& _DestFilename, bool _bHeader)
 	{
 		if (_bHeader)
 		{
@@ -420,7 +420,7 @@ private:
 		return true;
 	}
 
-	bint fp_GenerateFooter(CStr& _Out, EType _UsedTypes, CStr const& _DestFilename, bint _bHeader)
+	bool fp_GenerateFooter(CStr& _Out, EType _UsedTypes, CStr const& _DestFilename, bool _bHeader)
 	{
 		_Out += DNewLine;
 
@@ -430,12 +430,12 @@ private:
 		return true;
 	}
 
-	bint fp_GenerateCode(CStr& _Out, EType _MasterType, CRegistry const& _Reg, CStr const& _DestFileName, bint _bHeader)
+	bool fp_GenerateCode(CStr& _Out, EType _MasterType, CRegistry const& _Reg, CStr const& _DestFileName, bool _bHeader)
 	{
 		EType Type;
 		CStr ValueStr, TypeStr;
 
-		bint bFirst = true;
+		bool bFirst = true;
 
 		CStr Filename = NFile::CFile::fs_GetFileNoExt(_DestFileName);
 
@@ -599,7 +599,7 @@ private:
 	}
 
 
-	EType fp_GetUsedTypes(CRegistry const& _Reg, bint& _bPure)
+	EType fp_GetUsedTypes(CRegistry const& _Reg, bool& _bPure)
 	{
 
 		CRegistry const* pKey = _Reg.f_GetChild("__Type");
