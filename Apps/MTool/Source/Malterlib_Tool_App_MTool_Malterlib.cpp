@@ -134,12 +134,12 @@ CEJSON::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefault)
 	;
 }
 
-uint32 CTool_Malterlib::f_RunBuildSystem(TCFunction<CBuildSystem::ERetry (NBuildSystem::CBuildSystem &_BuildSystem)> &&_fCommand)
+uint32 CTool_Malterlib::f_RunBuildSystem(TCFunction<CBuildSystem::ERetry (NBuildSystem::CBuildSystem &_BuildSystem)> &&_fCommand, EAnsiEncodingFlag _AnsiFlags)
 {
 	CBuildSystem::ERetry Retry = CBuildSystem::ERetry_Again;
 	while (Retry != CBuildSystem::ERetry_None)
 	{
-		NBuildSystem::CBuildSystem BuildSystem;
+		NBuildSystem::CBuildSystem BuildSystem(_AnsiFlags);
 		if (Retry == CBuildSystem::ERetry_Again_NoReconcileOptions)
 			BuildSystem.f_NoReconcileOptions();
 

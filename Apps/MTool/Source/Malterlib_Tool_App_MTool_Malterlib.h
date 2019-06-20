@@ -5,24 +5,22 @@
 
 #include <Mib/BuildSystem/BuildSystem>
 #include <Mib/Encoding/EJSON>
-
-using namespace NMib::NBuildSystem;
+#include <Mib/CommandLine/AnsiEncoding>
 
 class CTool_Malterlib : public CDistributedTool
 {
 public:
-	static CStr fs_GetFileNameOrEmpty(NEncoding::CEJSON const &_Param, CStr const &_CurrentDirectory);
+	static CStr fs_GetFileNameOrEmpty(CEJSON const &_Param, CStr const &_CurrentDirectory);
 	static CStr fs_DefaultGenerator(CStr const &_RootPath);
-	static CGenerateOptions fs_ParseSharedOptions(NEncoding::CEJSON const &_Params);
+	static CGenerateOptions fs_ParseSharedOptions(CEJSON const &_Params);
 	static CEJSON::CKeyValue fs_CachedEnvironmentOption(bool _bDefault);
 
-	uint32 f_RunBuildSystem(TCFunction<CBuildSystem::ERetry (NBuildSystem::CBuildSystem &_BuildSystem)> &&_fCommand);
+	uint32 f_RunBuildSystem(TCFunction<CBuildSystem::ERetry (CBuildSystem &_BuildSystem)> &&_fCommand, EAnsiEncodingFlag _AnsiFlags);
 
 	void f_Register_SharedOptions(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
 	void f_Register_DummyCommands(CDistributedAppCommandLineSpecification &o_CommandLine);
 	void f_Register_Core(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
 	void f_Register_RepositoryManagement(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
-
 
 	void f_Register
 		(

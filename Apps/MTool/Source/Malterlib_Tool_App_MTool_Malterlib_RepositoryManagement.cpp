@@ -22,6 +22,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						{
 							return _BuildSystem.f_Action_Repository_Update(GenerateOptions);
 						}
+					 	, _CommandLineClient.f_AnsiEncodingFlags()
 					)
 				;
 			}
@@ -184,6 +185,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						{
 							return _BuildSystem.f_Action_Repository_Status(GenerateOptions, RepoFilter, Flags);
 						}
+					 	, _CommandLineClient.f_AnsiEncodingFlags()
 					)
 				;
 			}
@@ -239,6 +241,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							{
 								return _BuildSystem.f_Action_Repository_ForEachRepo(GenerateOptions, RepoFilter, bParallel, GitParameters);
 							}
+						 	, _CommandLineClient.f_AnsiEncodingFlags()
 						)
 					;
 				}
@@ -293,6 +296,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							{
 								return _BuildSystem.f_Action_Repository_Branch(GenerateOptions, RepoFilter, Branch, Flags);
 							}
+						 	, _CommandLineClient.f_AnsiEncodingFlags()
 						)
 					;
 				}
@@ -334,6 +338,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						{
 							return _BuildSystem.f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
 						}
+						, _CommandLineClient.f_AnsiEncodingFlags()
 					)
 				;
 			}
@@ -422,6 +427,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						{
 							return _BuildSystem.f_Action_Repository_CleanupBranches(GenerateOptions, RepoFilter, Flags, Branches);
 						}
+					 	, _CommandLineClient.f_AnsiEncodingFlags()
 					)
 				;
 			}
@@ -510,6 +516,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						{
 							return _BuildSystem.f_Action_Repository_CleanupTags(GenerateOptions, RepoFilter, Flags, Tags);
 						}
+					 	, _CommandLineClient.f_AnsiEncodingFlags()
 					)
 				;
 			}
@@ -582,6 +589,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						{
 							return _BuildSystem.f_Action_Repository_Push(GenerateOptions, RepoFilter, Remotes, Flags);
 						}
+					 	, _CommandLineClient.f_AnsiEncodingFlags()
 					)
 				;
 			}
@@ -679,15 +687,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					DMibError("ToReference must be specified");
 
 				CBuildSystem::ERepoListCommitsFlag Flags = CBuildSystem::ERepoListCommitsFlag_None;
-				if (_CommandLineClient.f_ColorEnabled())
-					Flags |= CBuildSystem::ERepoListCommitsFlag_Color;
 				if (!_Params["Local"].f_Boolean())
 					Flags |= CBuildSystem::ERepoListCommitsFlag_UpdateRemotes;
 				if (_Params["Compact"].f_Boolean())
 					Flags |= CBuildSystem::ERepoListCommitsFlag_Compact;
 				if (_Params["ChangeLog"].f_Boolean())
 					Flags |= CBuildSystem::ERepoListCommitsFlag_Changelog;
-
 
 				TCVector<CBuildSystem::CWildcardColumn> WildcardColumns;
 				for (auto &Column : _Params["Columns"].f_String().f_Split(";"))
@@ -722,6 +727,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								)
 							;
 						}
+					 	, _CommandLineClient.f_AnsiEncodingFlags()
 					)
 				;
 			}
