@@ -44,7 +44,7 @@ public:
 		else
 			Contents.f_SetResult(CFile::fs_ReadStringFromFile(CFile::fs_GetExpandedPath(SourcePath, true)));
 
-		CEJSON JSON = CEJSON::fs_FromString(Contents.f_CallSync(60.0));
+		CEJSON JSON = CEJSON::fs_FromString(Contents.f_MoveFuture().f_CallSync(60.0));
 
 		if (Params.f_IsEmpty())
 		{
