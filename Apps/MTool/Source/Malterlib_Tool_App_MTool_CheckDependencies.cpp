@@ -98,6 +98,19 @@ public:
 		
 		bool bVerbose = pVerbose ? *pVerbose == "true" : false;
 
+		CStr const *pRelative = _Params.f_FindEqual("Relative");
+		bool bRelative = pRelative? *pRelative == "true" : false;
+
+		CStr CurrentDir = CFile::fs_GetCurrentDirectory();
+
+		auto fConvertPath = [&](CStr const &_Path)
+			{
+				if (bRelative)
+					return CFile::fs_MakePathRelative(_Path, CurrentDir);
+				return _Path;
+			}
+		;
+
 		TCVector<CStr> Directories;
 		
 		if (pOneDir)
@@ -288,7 +301,7 @@ public:
 		fg_ParallellForEach
 			(
 				Dependencies
-				, [this, bVerbose, bUsesDigest](CDependency const& _Dependency)
+				, [this, bVerbose, bUsesDigest, &fConvertPath](CDependency const& _Dependency)
 				{
 					CDependency const& Dependency = _Dependency;
 					TCAtomic<bool> bNeedsUpdating(false);
@@ -376,8 +389,8 @@ public:
 							TCVector<CStr> Files;
 							
 							for (auto File : FoundFiles)
-								Files.f_Insert(File.m_Path);
-							
+								Files.f_Insert(fConvertPath(File.m_Path));
+
 							Files.f_Sort();
 							
 							if (Files != Directory.m_FoundFiles)
