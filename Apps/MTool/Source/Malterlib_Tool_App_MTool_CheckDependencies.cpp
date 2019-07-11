@@ -49,6 +49,8 @@ public:
 	{
 		CStr m_Path;
 		CTime m_Timestamp;
+		CHashDigest_MD5 m_Digest;
+		bool m_bDigest = false;
 	};
 	
 	struct CDependency
@@ -131,13 +133,15 @@ public:
 				Files.f_Insert(File);
 			}
 		}
-		
+
+		TCAtomic<bool> UsesDigest;
+
 		CMutual DependenciesLock;
 		TCVector<CDependency> Dependencies;
 		fg_ParallellForEach
 			(
 				Files
-				, [&Dependencies, &DependenciesLock](CStr const& _File)
+				, [&Dependencies, &DependenciesLock, &UsesDigest](CStr const& _File)
 				{
 					CStr const& File = _File;
 					
@@ -190,9 +194,7 @@ public:
 									
 									Dependency.m_Outputs.f_Insert(Path);
 								}
-								
-								
-								if (Line.f_StartsWith("Directory "))
+								else if (Line.f_StartsWith("Directory "))
 								{
 									auto &Directory = Dependency.m_Directories.f_Insert();
 									pLastDirectory = &Directory;
@@ -219,7 +221,31 @@ public:
 									Directory.m_Timestamp.f_SetSecondsNoFraction(Seconds);
 									Directory.m_Timestamp.f_SetFractionInt(Fraction);
 								}
-								if (Line.f_StartsWith("File "))
+								else if (Line.f_StartsWith("FileDigest "))
+								{
+									auto &File = Dependency.m_Files.f_Insert();
+
+									aint nParsed = 0;
+									uint64 Seconds;
+									uint64 Fraction;
+									CStr Digest;
+									aint nChars = (CStr::CParse("FileDigest {nfh} {nfh} {} ") >> Seconds >> Fraction >> Digest).f_Parse(Line, nParsed);
+
+									if (nParsed != 3)
+										DError("Invalid 'FileDigest' entry in dependency file");
+
+
+									CStr Path;
+									Path.f_AddStr(Line.f_GetStr() + nChars, Line.f_GetLen() - nChars);
+
+									File.m_Path = fg_GetStrSepEscaped<'\"'>(Path, " ");
+									File.m_Timestamp.f_SetSecondsNoFraction(Seconds);
+									File.m_Timestamp.f_SetFractionInt(Fraction);
+									File.m_Digest = CHashDigest_MD5::fs_FromString(Digest);
+									File.m_bDigest = true;
+									UsesDigest.f_Exchange(true);
+								}
+								else if (Line.f_StartsWith("File "))
 								{
 									auto &File = Dependency.m_Files.f_Insert();
 
@@ -230,7 +256,8 @@ public:
 									
 									if (nParsed != 2)
 										DError("Invalid 'File' entry in dependency file");
-									
+
+
 									CStr Path;
 									Path.f_AddStr(Line.f_GetStr() + nChars, Line.f_GetLen() - nChars);
 
@@ -255,11 +282,13 @@ public:
 				}
 			)
 		;
+
+		bool bUsesDigest = UsesDigest.f_Load();
 		
 		fg_ParallellForEach
 			(
 				Dependencies
-				, [this, bVerbose](CDependency const& _Dependency)
+				, [this, bVerbose, bUsesDigest](CDependency const& _Dependency)
 				{
 					CDependency const& Dependency = _Dependency;
 					TCAtomic<bool> bNeedsUpdating(false);
@@ -275,8 +304,12 @@ public:
 									try
 									{
 										CTime WriteTime = f_GetWriteTime(File.m_Path);
-										
-										if (File.m_Timestamp != WriteTime)
+
+										bool bChanged = File.m_Timestamp != WriteTime;
+										if (bChanged && File.m_bDigest)
+											bChanged = CFile::fs_GetFileChecksum(File.m_Path) != File.m_Digest;
+
+										if (bChanged)
 										{
 											if (bVerbose)
 												DConOut("Dependency check: File Timestamp ({}): {} != {}\n", File.m_Path << File.m_Timestamp << WriteTime);
@@ -292,42 +325,44 @@ public:
 								}
 							)
 						;
-						
-						
+
 						if (bNeedsUpdating)
 							break;
 
 						for (auto & Directory : Dependency.m_Directories)
 						{
-							if (Directory.m_Timestamp.f_IsValid())
+							if (!bUsesDigest)
 							{
-								try
+								if (Directory.m_Timestamp.f_IsValid())
 								{
-									CTime WriteTime = f_GetWriteTime(Directory.m_Path);
-									
-									if (Directory.m_Timestamp != WriteTime)
+									try
+									{
+										CTime WriteTime = f_GetWriteTime(Directory.m_Path);
+
+										if (Directory.m_Timestamp != WriteTime)
+										{
+											if (bVerbose)
+												DConOut("Dependency check: Directory Timestamp ({}): {} != {}\n", Directory.m_Path << Directory.m_Timestamp << WriteTime);
+											bNeedsUpdating = true;
+											break;
+										}
+									}
+									catch (CExceptionFile const& _Exception)
 									{
 										if (bVerbose)
-											DConOut("Dependency check: Directory Timestamp ({}): {} != {}\n", Directory.m_Path << Directory.m_Timestamp << WriteTime);
+											DConOut("Dependency check: Exception reading directory write time({}): {}\n", Directory.m_Path << _Exception.f_GetErrorStr());
 										bNeedsUpdating = true;
 										break;
 									}
+
 								}
-								catch (CExceptionFile const& _Exception)
+								else if (CFile::fs_FileExists(Directory.m_Path, EFileAttrib_Directory))
 								{
 									if (bVerbose)
-										DConOut("Dependency check: Exception reading directory write time({}): {}\n", Directory.m_Path << _Exception.f_GetErrorStr());
+										DConOut("Dependency check: Directory does exist ({})}\n", Directory.m_Path);
 									bNeedsUpdating = true;
 									break;
 								}
-								
-							}
-							else if (CFile::fs_FileExists(Directory.m_Path, EFileAttrib_Directory))
-							{
-								if (bVerbose)
-									DConOut("Dependency check: Directory does exist ({})}\n", Directory.m_Path);
-								bNeedsUpdating = true;
-								break;
 							}
 
 							CFile::CFindFilesOptions Options(CFile::fs_AppendPath(Directory.m_Path, Directory.m_Pattern), Directory.m_bRecursive);

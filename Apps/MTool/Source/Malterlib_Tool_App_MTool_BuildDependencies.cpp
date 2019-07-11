@@ -20,16 +20,35 @@ public:
 		if (!pOutputFile)
 			DError("No OutputFile specified");
 
-		CMalterlibDependencyTracker DependencyTracker;
+		bool bUseHash = false;
+		bool bRelative = false;
+
+		if (CStr const *pUseHash = _Params.f_FindEqual("UseHash"))
+			bUseHash = *pUseHash == "true";
+
+		if (CStr const *pRelative = _Params.f_FindEqual("Relative"))
+			bRelative = *pRelative == "true";
+
+		CStr CurrentDir = CFile::fs_GetCurrentDirectory();
+
+		auto fConvertPath = [&](CStr const &_Path)
+			{
+				if (bRelative)
+					return CFile::fs_MakePathRelative(_Path, CurrentDir);
+				return _Path;
+			}
+		;
+
+		CMalterlibDependencyTracker DependencyTracker(bUseHash);
 
 		for (auto CommandContents : _Files)
 		{
 			CStr Command = fg_GetStrSep(CommandContents, ":");
 
 			if (Command == "Input")
-				DependencyTracker.f_AddInputFile(CommandContents);
+				DependencyTracker.f_AddInputFile(fConvertPath(CommandContents));
 			else if (Command == "Output")
-				DependencyTracker.f_AddOutputFile(CommandContents);
+				DependencyTracker.f_AddOutputFile(fConvertPath(CommandContents));
 			else if (Command == "Find")
 			{
 				// Find:/Test/Test.*;RF;33;*/Test/*;*Test2.???
@@ -82,12 +101,14 @@ public:
 
 				for (auto const &File : FoundFiles)
 				{
-					Results.f_Insert(File.m_Path);
+					CStr Path = fConvertPath(File.m_Path);
+
+					Results.f_Insert(Path);
 					if (bUseAsInput)
-						DependencyTracker.f_AddInputFile(File.m_Path);
+						DependencyTracker.f_AddInputFile(Path);
 				}
 
-				DependencyTracker.f_AddFind(SearchPattern, bRecurse, bFollowLinks, Attribs, Results, Excluded);
+				DependencyTracker.f_AddFind(fConvertPath(SearchPattern), bRecurse, bFollowLinks, Attribs, Results, Excluded);
 			}
 		}
 
