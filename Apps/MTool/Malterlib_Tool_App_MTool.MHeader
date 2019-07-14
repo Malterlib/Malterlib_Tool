@@ -27,6 +27,7 @@ Property
 		{
 			!!MToolEmbeddCMake true
 		}
+		MalterlibCloudTarBinDirectory "."
 	}
 	Target
 	{
@@ -37,6 +38,7 @@ Property
 			!!PlatformFamily Windows
 		}
 		Group Apps
+		ExtraGroups "{Malterlib}/{CloudTarBinaries};@(Target.ExtraGroups)"
 	}
 	Compile
 	{
@@ -89,6 +91,13 @@ Property
 		PreprocessorDefines "CMAKE_MALTERLIB_EXEFS;@(Compile.PreprocessorDefines)"
 	}
 	Property.ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake
+	%Group "ExternalBinaries"
+	{
+		Property
+		{
+			MalterlibBuildServerPutPath "BuildResults/@(PlatformFamily)/@(Architecture)"
+		}
+	}
 	%Group "Apps"
 	{
 		Property
