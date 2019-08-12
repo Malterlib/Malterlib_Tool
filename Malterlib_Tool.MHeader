@@ -44,6 +44,11 @@ Import "Apps/*/*.MHeader"
 	}
 	Import.CMake_Variables "ARCHIVE_CRYPTO_RMD160_OPENSSL=0;@(Import.CMake_Variables)"
 
+	Import.CMake_Variables "HAVE_ARC4RANDOM_BUF=0;HAVE__CTIME64_S=0;@(Import.CMake_Variables)"
+	{
+		!!PlatformFamily Linux
+	}
+
 	Target.ExtraGroups "~Automatic/DependBoringSSL;@(Target.ExtraGroups)"
 	{
 		&

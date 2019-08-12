@@ -396,7 +396,7 @@ typedef uint64_t uintmax_t;
 #define HAVE_CTYPE_H 1
 
 /* Define to 1 if you have the `cygwin_conv_path' function. */
-/* #undef HAVE_CYGWIN_CONV_PATH */
+#define HAVE_CYGWIN_CONV_PATH 1
 
 /* Define to 1 if you have the declaration of `ACE_GETACL', and to 0 if you
    don't. */
@@ -630,7 +630,7 @@ typedef uint64_t uintmax_t;
 #define HAVE_GETPWUID_R 1
 
 /* Define to 1 if you have the `getvfsbyname' function. */
-/* #undef HAVE_GETVFSBYNAME */
+#define HAVE_GETVFSBYNAME 1
 
 /* Define to 1 if you have the `getxattr' function. */
 /* #undef HAVE_GETXATTR */
@@ -657,7 +657,7 @@ typedef uint64_t uintmax_t;
 #define HAVE_LANGINFO_H 1
 
 /* Define to 1 if you have the `lchflags' function. */
-/* #undef HAVE_LCHFLAGS */
+#define HAVE_LCHFLAGS 1
 
 /* Define to 1 if you have the `lchmod' function. */
 /* #undef HAVE_LCHMOD */
@@ -907,7 +907,7 @@ typedef uint64_t uintmax_t;
 #define HAVE_READLINKAT 1
 
 /* Define to 1 if you have the `readpassphrase' function. */
-/* #undef HAVE_READPASSPHRASE */
+#define HAVE_READPASSPHRASE 1
 
 /* Define to 1 if you have the <readpassphrase.h> header file. */
 /* #undef HAVE_READPASSPHRASE_H */
@@ -1199,16 +1199,16 @@ typedef uint64_t uintmax_t;
 /* #undef HAVE__CTIME64_S */
 
 /* Define to 1 if you have the `_fseeki64' function. */
-/* #undef HAVE__FSEEKI64 */
+#define HAVE__FSEEKI64 1
 
 /* Define to 1 if you have the `_get_timezone' function. */
-/* #undef HAVE__GET_TIMEZONE */
+#define HAVE__GET_TIMEZONE 1
 
 /* Define to 1 if you have the `_localtime64_s' function. */
-/* #undef HAVE__LOCALTIME64_S */
+#define HAVE__LOCALTIME64_S 1
 
 /* Define to 1 if you have the `_mkgmtime64' function. */
-/* #undef HAVE__MKGMTIME64 */
+#define HAVE__MKGMTIME64 1
 
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST 

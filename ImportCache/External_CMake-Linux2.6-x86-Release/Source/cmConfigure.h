@@ -19,7 +19,7 @@
 #define HAVE_UNSETENV
 #define CMAKE_USE_ELF_PARSER
 /* #undef CMAKE_USE_MACH_PARSER */
-/* #undef CMake_HAVE_CXX_MAKE_UNIQUE */
+#define CMake_HAVE_CXX_MAKE_UNIQUE
 #define CMake_DEFAULT_RECURSION_LIMIT 1000
 #define CMAKE_BIN_DIR "/bin"
 #define CMAKE_DATA_DIR "/share/cmake-3.14"

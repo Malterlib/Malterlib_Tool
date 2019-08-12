@@ -122,7 +122,7 @@
 #define HAVE_BUILTIN_AVAILABLE 1
 
 /* Define to 1 if you have the clock_gettime function and monotonic timer. */
-/* #undef HAVE_CLOCK_GETTIME_MONOTONIC */
+#define HAVE_CLOCK_GETTIME_MONOTONIC 1
 
 /* Define to 1 if you have the `closesocket' function. */
 /* #undef HAVE_CLOSESOCKET */
@@ -308,7 +308,7 @@
 /* #undef HAVE_IOCTLSOCKET */
 
 /* Define to 1 if you have the IoctlSocket camel case function. */
-/* #undef HAVE_IOCTLSOCKET_CAMEL */
+#define HAVE_IOCTLSOCKET_CAMEL 1
 
 /* Define to 1 if you have a working IoctlSocket camel case FIONBIO function.
    */
@@ -366,7 +366,7 @@
 /* #undef HAVE_LIBRESOLVE */
 
 /* Define to 1 if you have the `socket' library (-lsocket). */
-/* #undef HAVE_LIBSOCKET */
+#define HAVE_LIBSOCKET 1
 
 /* Define to 1 if you have the `ssh2' library (-lssh2). */
 /* #undef HAVE_LIBSSH2 */
@@ -474,7 +474,7 @@
 #define HAVE_POLL 1
 
 /* If you have a fine poll */
-#define HAVE_POLL_FINE 1
+/* #undef HAVE_POLL_FINE */
 
 /* Define to 1 if you have the <poll.h> header file. */
 #define HAVE_POLL_H 1
@@ -612,7 +612,7 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the strlcat function. */
-/* #undef HAVE_STRLCAT */
+#define HAVE_STRLCAT 1
 
 /* Define to 1 if you have the `strlcpy' function. */
 /* #undef HAVE_STRLCPY */
@@ -1015,4 +1015,4 @@
 #endif
 
 /* Define to 1 if you have the mach_absolute_time function. */
-/* #undef HAVE_MACH_ABSOLUTE_TIME */
+#define HAVE_MACH_ABSOLUTE_TIME 1
