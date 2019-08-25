@@ -37,7 +37,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 		{
 			XcodePath = CFile::fs_GetPath(CFile::fs_ResolveSymbolicLink("/private/var/db/xcode_select_link"));
 		}
-		catch (CException const &_Exception)
+		catch (CException const &)
 		{
 		}
 
@@ -63,7 +63,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 						bNextIsVersion = true;
 				}
 			}
-			catch (CException const &_Exception)
+			catch (CException const &)
 			{
 			}
 		}
