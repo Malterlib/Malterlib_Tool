@@ -1,7 +1,6 @@
 // Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
-#include "PCH.h"
 #include "Malterlib_Tool_App_MTool_Main.h"
 
 #include <Mib/BuildSystem/BuildSystemPreprocessor>
@@ -109,11 +108,17 @@ public:
 			}
 		}
 
+		CStr DefaultRootDefault = fg_GetSys()->f_GetEnvironmentVariable("MalterlibDeployRoot");
+
 #if DPlatform_Windows
-		CStr DefaultRoot = Registry.f_GetValue("DefaultRoot", "X:/Deploy");
+		if (!DefaultRootDefault)
+			DefaultRootDefault = "X:/Deploy";
 #else
-		CStr DefaultRoot = Registry.f_GetValue("DefaultRoot", "/Deploy");
+		if (!DefaultRootDefault)
+			DefaultRootDefault = "/opt/Deploy";
 #endif
+
+		CStr DefaultRoot = Registry.f_GetValue("DefaultRoot", DefaultRootDefault);
 
 		auto pProject = pProjects->f_GetChild(DestinationProject);
 		if (!pProject)

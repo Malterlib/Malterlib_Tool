@@ -1,4 +1,3 @@
-#include "PCH.h"
 #include "Malterlib_Tool_App_MTool_Main.h"
 
 #include <Mib/BuildSystem/BuildSystemDependency>

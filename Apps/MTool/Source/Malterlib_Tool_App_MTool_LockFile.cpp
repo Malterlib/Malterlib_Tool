@@ -1,7 +1,6 @@
 // Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
-#include "PCH.h"
 #include "Malterlib_Tool_App_MTool_Main.h"
 
 class CTool_LockFile : public CTool
