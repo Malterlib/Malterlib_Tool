@@ -5,7 +5,7 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type C
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../Utilities/cmcurl/include/curl'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;HAVE_CONFIG_H;@(Compile.PreprocessorDefines)"
 		CLanguage GNU11
 	}
@@ -32,7 +32,7 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type C
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../Utilities/cmcurl/include/curl'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../Utilities/cmcurl/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('../../Utilities/cmcurl'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('../../Utilities/cmcurl/lib'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../Utilities/cmcurl/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('../../Utilities/cmcurl'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('../../Utilities/cmcurl/lib'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "BUILDING_LIBCURL;HAVE_CONFIG_H;@(Compile.PreprocessorDefines)"
 		CLanguage GNU11
 	}
@@ -399,10 +399,6 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type None
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/pipeline.h"
-			{
-				Compile.Type None
-			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dotdot.h"
 			{
 				Compile.Type None
@@ -476,6 +472,14 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 				Compile.Type None
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urlapi-int.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_get_line.h"
+			{
+				Compile.Type None
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/altsvc.h"
 			{
 				Compile.Type None
 			}
@@ -568,10 +572,6 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 				{
 					Compile.Type None
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/axtls.h"
-				{
-					Compile.Type None
-				}
 				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/cyassl.h"
 				{
 					Compile.Type None
@@ -580,7 +580,7 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 				{
 					Compile.Type None
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/darwinssl.h"
+				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/sectransp.h"
 				{
 					Compile.Type None
 				}
@@ -620,10 +620,6 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 				{
 					Compile.Type C
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/axtls.c"
-				{
-					Compile.Type C
-				}
 				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/cyassl.c"
 				{
 					Compile.Type C
@@ -636,7 +632,7 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 				{
 					Compile.Type C
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/darwinssl.c"
+				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/sectransp.c"
 				{
 					Compile.Type C
 				}
@@ -1029,10 +1025,6 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type C
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/pipeline.c"
-			{
-				Compile.Type C
-			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dotdot.c"
 			{
 				Compile.Type C
@@ -1094,6 +1086,14 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 				Compile.Type C
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urlapi.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_get_line.c"
+			{
+				Compile.Type C
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/altsvc.c"
 			{
 				Compile.Type C
 			}

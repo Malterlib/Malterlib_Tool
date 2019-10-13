@@ -1,0 +1,152 @@
+Property.CMakeOutputPath_zstd "@('../..'->MakeAbsolute())"
+%Target Lib_cmzstd
+{
+	Target.CLanguage GNU11
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd/lib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd/lib/common'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "DYNAMIC_BMI2=0;@(Compile.PreprocessorDefines)"
+		CLanguage GNU11
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/zstd"
+	{
+		!!Target.Group ""
+	}
+	Target.Type StaticLibrary
+	Target.BaseName cmzstd
+	%Group Utilities
+	{
+		%Group lib
+		{
+			%Group common
+			{
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/entropy_common.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/error_private.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/fse_decompress.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/pool.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/threading.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/xxhash.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/zstd_common.c"
+				{
+					Compile.Type C
+				}
+			}
+			%Group compress
+			{
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/fse_compress.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/hist.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/huf_compress.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_double_fast.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_fast.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_lazy.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_ldm.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstdmt_compress.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_opt.c"
+				{
+					Compile.Type C
+				}
+			}
+			%Group decompress
+			{
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/decompress/huf_decompress.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/decompress/zstd_ddict.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/decompress/zstd_decompress_block.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/decompress/zstd_decompress.c"
+				{
+					Compile.Type C
+				}
+			}
+			%Group deprecated
+			{
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/deprecated/zbuff_common.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/deprecated/zbuff_compress.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/deprecated/zbuff_decompress.c"
+				{
+					Compile.Type C
+				}
+			}
+			%Group dictBuilder
+			{
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/dictBuilder/cover.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/dictBuilder/divsufsort.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/dictBuilder/fastcover.c"
+				{
+					Compile.Type C
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/dictBuilder/zdict.c"
+				{
+					Compile.Type C
+				}
+			}
+		}
+	}
+}

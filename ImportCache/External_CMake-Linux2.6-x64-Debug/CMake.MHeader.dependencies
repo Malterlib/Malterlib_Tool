@@ -131,6 +131,7 @@
 ../../../../External/CMake/Tests/CTestUpdateGIT.cmake.in
 ../../../../External/CMake/Tests/CTestUpdateSVN.cmake.in
 ../../../../External/CMake/Tests/CheckFortran.cmake
+../../../../External/CMake/Tests/CheckSwift.cmake
 ../../../../External/CMake/Tests/CoberturaCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/CoberturaCoverage/coverage.xml.in
 ../../../../External/CMake/Tests/DelphiCoverage/DartConfiguration.tcl.in
@@ -167,7 +168,6 @@
 ../../../../External/CMake/Utilities/Sphinx/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmThirdParty.h.in
 ../../../../External/CMake/Utilities/cmbzip2/CMakeLists.txt
-../../../../External/CMake/Utilities/cmcompress/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmcurl/CMake/CurlTests.c
 ../../../../External/CMake/Utilities/cmcurl/CMake/Macros.cmake
 ../../../../External/CMake/Utilities/cmcurl/CMake/OtherTests.cmake
@@ -199,4 +199,5 @@
 ../../../../External/CMake/Utilities/cmzlib/zconf.h
 ../../../../External/CMake/Utilities/cmzlib/zlib.h
 ../../../../External/CMake/Utilities/cmzlib/zlibDllConfig.h.in
+../../../../External/CMake/Utilities/cmzstd/CMakeLists.txt
 ../../../../External/CMake/cmake_uninstall.cmake.in

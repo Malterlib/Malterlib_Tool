@@ -28,43 +28,6 @@
 /* Whether kwsys namespace is "kwsys".  */
 #define cmsys_NAME_IS_KWSYS 0
 
-/* Whether Large File Support is requested.  */
-#define cmsys_LFS_REQUESTED 1
-
-/* Whether Large File Support is available.  */
-#if cmsys_LFS_REQUESTED
-#  define cmsys_LFS_AVAILABLE 0
-#endif
-
-/* Setup Large File Support if requested.  */
-#if cmsys_LFS_REQUESTED
-/* Since LFS is requested this header must be included before system
-   headers whether or not LFS is available. */
-#  if 0 && (defined(_SYS_TYPES_H) || defined(_SYS_TYPES_INCLUDED))
-#    error "cmsys/Configure.h must be included before sys/types.h"
-#  endif
-/* Enable the large file API if it is available.  */
-#  if cmsys_LFS_AVAILABLE &&                                      \
-    !defined(cmsys_LFS_NO_DEFINES)
-#    if !defined(_LARGEFILE_SOURCE) &&                                        \
-      !defined(cmsys_LFS_NO_DEFINE_LARGEFILE_SOURCE)
-#      define _LARGEFILE_SOURCE
-#    endif
-#    if !defined(_LARGEFILE64_SOURCE) &&                                      \
-      !defined(cmsys_LFS_NO_DEFINE_LARGEFILE64_SOURCE)
-#      define _LARGEFILE64_SOURCE
-#    endif
-#    if !defined(_LARGE_FILES) &&                                             \
-      !defined(cmsys_LFS_NO_DEFINE_LARGE_FILES)
-#      define _LARGE_FILES
-#    endif
-#    if !defined(_FILE_OFFSET_BITS) &&                                        \
-      !defined(cmsys_LFS_NO_DEFINE_FILE_OFFSET_BITS)
-#      define _FILE_OFFSET_BITS 64
-#    endif
-#  endif
-#endif
-
 /* Setup the export macro.  */
 #if 0
 #  if defined(_WIN32) || defined(__CYGWIN__)

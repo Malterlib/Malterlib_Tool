@@ -226,6 +226,12 @@
 /* Define to 1 if you have the `getprotobyname' function. */
 #define HAVE_GETPROTOBYNAME 1
 
+/* Define to 1 if you have the `getpeername' function. */
+#define HAVE_GETPEERNAME 1
+
+/* Define to 1 if you have the `getsockname' function. */
+#define HAVE_GETSOCKNAME 1
+
 /* Define to 1 if you have the `getpwuid' function. */
 #define HAVE_GETPWUID 1
 
@@ -714,10 +720,10 @@
 #define HAVE_UTIME_H 1
 
 /* Define to 1 if compiler supports C99 variadic macro style. */
-/* #undef HAVE_VARIADIC_MACROS_C99 */
+#define HAVE_VARIADIC_MACROS_C99 1
 
 /* Define to 1 if compiler supports old gcc variadic macro style. */
-/* #undef HAVE_VARIADIC_MACROS_GCC */
+#define HAVE_VARIADIC_MACROS_GCC 1
 
 /* Define to 1 if you have the winber.h header file. */
 /* #undef HAVE_WINBER_H */
@@ -930,8 +936,8 @@
 /* if PolarSSL is enabled */
 /* #undef USE_POLARSSL */
 
-/* if DarwinSSL is enabled */
-/* #undef USE_DARWINSSL */
+/* if Secure Transport is enabled */
+/* #undef USE_SECTRANSP */
 
 /* if mbedTLS is enabled */
 /* #undef USE_MBEDTLS */
