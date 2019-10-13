@@ -710,7 +710,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 
 				return f_RunBuildSystem
 					(
-						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+						[&, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
 						{
 							return _BuildSystem.f_Action_Repository_ListCommits
 								(
@@ -724,6 +724,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								 	, MaxCommitsMain
 								 	, MaxCommits
 								 	, MaxMessageWidth
+									, _CommandLineClient
 								)
 							;
 						}
