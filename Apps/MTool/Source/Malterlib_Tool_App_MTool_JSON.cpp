@@ -55,7 +55,7 @@ public:
 		{
 			CEJSON const *pValue = &JSON;
 			CStr CurrentPath;
-			for (auto &Path : Param.f_Split("."))
+			for (auto &Path : Param.f_Split<true>("."))
 			{
 				pValue = pValue->f_GetMember(Path);
 				fg_AddStrSep(CurrentPath, ".", Path);

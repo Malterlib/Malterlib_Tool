@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "Malterlib_Tool_App_MTool_Main.h"
@@ -20,7 +20,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 
 	if (CFile::fs_FileExists(RepoConfigFile))
 	{
-		for (auto Line : CFile::fs_ReadStringFromFile(RepoConfigFile).f_SplitLine())
+		for (auto Line : CFile::fs_ReadStringFromFile(RepoConfigFile).f_SplitLine<true>())
 		{
 			CStr Key = fg_GetStrSep(Line, " ");
 			if (Key == "XcodeVersion")
@@ -48,7 +48,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 				CStr StringContents = CFile::fs_ReadStringFromFile(XcodePath / "version.plist", true);
 
 				bool bNextIsVersion = false;
-				for (auto &Line : StringContents.f_SplitLine())
+				for (auto &Line : StringContents.f_SplitLine<true>())
 				{
 					if (bNextIsVersion)
 					{
@@ -77,7 +77,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 
 	if (CFile::fs_FileExists(RepoConfigFile))
 	{
-		for (auto Line : CFile::fs_ReadStringFromFile(RepoConfigFile).f_SplitLine())
+		for (auto Line : CFile::fs_ReadStringFromFile(RepoConfigFile).f_SplitLine<true>())
 		{
 			CStr Key = fg_GetStrSep(Line, " ");
 			if (Key == "VisualStudioVersion")

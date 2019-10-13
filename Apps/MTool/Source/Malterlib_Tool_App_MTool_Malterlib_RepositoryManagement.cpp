@@ -695,7 +695,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					Flags |= CBuildSystem::ERepoListCommitsFlag_Changelog;
 
 				TCVector<CBuildSystem::CWildcardColumn> WildcardColumns;
-				for (auto &Column : _Params["Columns"].f_String().f_Split(";"))
+				for (auto &Column : _Params["Columns"].f_String().f_Split<true>(";"))
 				{
 					CStr Wildcard = Column;
 					CStr Name = fg_GetStrSep(Wildcard, ":");

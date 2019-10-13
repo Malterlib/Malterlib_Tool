@@ -90,7 +90,7 @@ public:
 		TCVector<CStr> ExcludePatterns;
 
 		if (auto pValue = Registry.f_GetChild("ExcludePatterns"))
-			ExcludePatterns = pValue->f_GetThisValue().f_Split(";");
+			ExcludePatterns = pValue->f_GetThisValue().f_Split<true>(";");
 		else
 		{
 			ExcludePatterns = {"*/.git", "*/.DS_Store"};
