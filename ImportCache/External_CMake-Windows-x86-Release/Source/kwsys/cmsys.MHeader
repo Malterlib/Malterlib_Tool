@@ -205,6 +205,45 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 		}
 	}
 }
+%Target Exe_cmsysTestSharedForward
+{
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
+	Target.Type ConsoleExecutable
+	Target.BaseName cmsysTestSharedForward
+	%Group Windows
+	{
+		%Group x86
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group Source
+				{
+					%Group kwsys
+					{
+						%File "../../Source/kwsys/testSharedForward.c"
+						{
+							Compile.Type C
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency Lib_cmsys_c
+	{
+		Dependency.Link false
+	}
+}
 %Target Lib_cmsys_c
 {
 	Compile
@@ -307,45 +346,6 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 				}
 			}
 		}
-	}
-}
-%Target Exe_cmsysTestSharedForward
-{
-	Compile
-	{
-		!!Compile.Type C
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
-	}
-	Property.MalterlibTargetNameType Normal
-	Target.Group "External/cmsys"
-	{
-		!!Target.Group ""
-	}
-	Target.Type ConsoleExecutable
-	Target.BaseName cmsysTestSharedForward
-	%Group Windows
-	{
-		%Group x86
-		{
-			%Group "@(FullConfiguration)"
-			{
-				%Group Source
-				{
-					%Group kwsys
-					{
-						%File "../../Source/kwsys/testSharedForward.c"
-						{
-							Compile.Type C
-						}
-					}
-				}
-			}
-		}
-	}
-	%Dependency Lib_cmsys_c
-	{
-		Dependency.Link false
 	}
 }
 %Target Exe_cmsysTestsCxx
@@ -482,29 +482,33 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	%Dependency Lib_cmsys_c
 }
-%Target Exe_testConsoleBufChild
+%Target Dll_cmsysTestDynloadUse
 {
 	Compile
 	{
-		!!Compile.Type C++
+		!!Compile.Type C
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;cmsysTestDynloadUse_EXPORTS;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType Normal
 	Target.Group "External/cmsys"
 	{
 		!!Target.Group ""
 	}
-	Target.Type ConsoleExecutable
-	Target.BaseName testConsoleBufChild
+	Target.Type DynamicLibrary
+	Target.BaseName cmsysTestDynloadUse
 	%Group Source
 	{
-		%File "../../../../../../External/CMake/Source/kwsys/testConsoleBufChild.cxx"
+		%File "../../../../../../External/CMake/Source/kwsys/testDynloadUse.c"
 		{
-			Compile.Type C++
+			Compile.Type C
 		}
 	}
+	%Dependency Dll_cmsysTestDynloadImpl
 	%Dependency Lib_cmsys
+	{
+		Dependency.Link false
+	}
 }
 %Target Exe_cmsysTestProcess
 {
@@ -530,6 +534,30 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	}
 	%Dependency Lib_cmsys_c
 }
+%Target Exe_testConsoleBufChild
+{
+	Compile
+	{
+		!!Compile.Type C++
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
+	Target.Type ConsoleExecutable
+	Target.BaseName testConsoleBufChild
+	%Group Source
+	{
+		%File "../../../../../../External/CMake/Source/kwsys/testConsoleBufChild.cxx"
+		{
+			Compile.Type C++
+		}
+	}
+	%Dependency Lib_cmsys
+}
 %Target Dll_cmsysTestDynload
 {
 	Compile
@@ -548,6 +576,33 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	%Group Source
 	{
 		%File "../../../../../../External/CMake/Source/kwsys/testDynload.c"
+		{
+			Compile.Type C
+		}
+	}
+	%Dependency Lib_cmsys
+	{
+		Dependency.Link false
+	}
+}
+%Target Dll_cmsysTestDynloadImpl
+{
+	Compile
+	{
+		!!Compile.Type C
+		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "BUILDING_TestDynloadImpl;KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType Normal
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group ""
+	}
+	Target.Type SharedDynamicLibrary
+	Target.BaseName cmsysTestDynloadImpl
+	%Group Source
+	{
+		%File "../../../../../../External/CMake/Source/kwsys/testDynloadImpl.c"
 		{
 			Compile.Type C
 		}

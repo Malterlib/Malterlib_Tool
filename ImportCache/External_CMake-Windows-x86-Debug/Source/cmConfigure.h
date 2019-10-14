@@ -22,7 +22,7 @@
 #define CMake_HAVE_CXX_MAKE_UNIQUE
 #define CMake_DEFAULT_RECURSION_LIMIT 1000
 #define CMAKE_BIN_DIR "/bin"
-#define CMAKE_DATA_DIR "/share/cmake-3.14"
+#define CMAKE_DATA_DIR "/share/cmake-3.15"
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 

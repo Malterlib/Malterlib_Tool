@@ -11,6 +11,9 @@
 /* Whether <ext/stdio_filebuf.h> is available. */
 #define cmsys_CXX_HAS_EXT_STDIO_FILEBUF_H                         \
   0
+/* Whether the translation map is available or not. */
+#define cmsys_SYSTEMTOOLS_USE_TRANSLATION_MAP                     \
+  1
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC > 0x5130 && defined(__has_attribute)
 #  define cmsys__has_cpp_attribute(x) __has_attribute(x)
@@ -56,6 +59,8 @@
     cmsys_CXX_HAS_EXT_STDIO_FILEBUF_H
 #  define KWSYS_FALLTHROUGH cmsys_FALLTHROUGH
 #  define KWSYS_NULLPTR cmsys_NULLPTR
+#  define KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP                               \
+    cmsys_SYSTEMTOOLS_USE_TRANSLATION_MAP
 #endif
 
 #endif

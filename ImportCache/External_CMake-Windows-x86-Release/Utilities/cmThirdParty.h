@@ -15,5 +15,6 @@
 /* #undef CMAKE_USE_SYSTEM_JSONCPP */
 /* #undef CMAKE_USE_SYSTEM_LIBRHASH */
 /* #undef CMAKE_USE_SYSTEM_LIBUV */
+/* #undef CMAKE_USE_SYSTEM_ZSTD */
 
 #endif
