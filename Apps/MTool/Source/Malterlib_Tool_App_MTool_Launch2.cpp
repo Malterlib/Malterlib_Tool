@@ -584,6 +584,9 @@ private:
 
 					}
 					break;
+				case EProcessLaunchOutputType_Max:
+					DMibNeverGetHere;
+					break;
 				}
 			}
 		;

@@ -549,6 +549,8 @@ public:
 								case CPerforceClient::EAction_Integrate:
 									MustSync.f_Insert(iResult->m_To);
 									break;
+								default:
+									break;
 								}
 							}
 

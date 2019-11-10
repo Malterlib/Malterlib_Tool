@@ -61,6 +61,9 @@ public:
 				case EProcessLaunchOutputType_StdOut:
 					DConOutRaw(_Output);
 					break;
+				case EProcessLaunchOutputType_Max:
+					DMibNeverGetHere;
+					break;
 				}
 			}
 		;
@@ -318,6 +321,9 @@ public:
 									fg_OutputWholeLines(*pStdOutBuffer, EProcessLaunchOutputType_StdOut, Program.m_bFilterP4, false);
 								}
 								break;
+							case EProcessLaunchOutputType_Max:
+								DMibNeverGetHere;
+								break;
 							}
 						}
 					;
@@ -453,6 +459,9 @@ public:
 					break;
 				case EProcessLaunchOutputType_StdOut:
 					DConOutRaw(_Output);
+					break;
+ 				case EProcessLaunchOutputType_Max:
+					DMibNeverGetHere;
 					break;
 				}
 			}

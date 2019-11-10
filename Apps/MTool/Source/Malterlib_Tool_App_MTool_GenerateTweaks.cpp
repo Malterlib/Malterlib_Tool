@@ -485,12 +485,14 @@ private:
 				else
 					_Out += CStr::CFormat("\t\tCPMetricInt m_PMetricInt_{};" DNewLine) << RIter->f_GetName();
 				break;
-
 			case EType_PMetricFloat:
 				if (_bHeader)
 					_Out += CStr::CFormat("\t\textern CPMetricFloat m_PMetricFloat_{};" DNewLine) << RIter->f_GetName();
 				else
 					_Out += CStr::CFormat("\t\tCPMetricFloat m_PMetricFloat_{};" DNewLine) << RIter->f_GetName();
+				break;
+			case EType_Unknown:
+				DMibNeverGetHere;
 				break;
 			}
 
@@ -574,6 +576,9 @@ private:
 					break;
 				case EType_PMetricFloat:
 					pType = "PMetricFloat";
+					break;
+				case EType_Unknown:
+					DMibNeverGetHere;
 					break;
 				}
 

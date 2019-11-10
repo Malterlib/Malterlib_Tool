@@ -171,6 +171,8 @@ void fg_LogVerbose(CFile::EDiffCopyChange _Change, CStr const &_Source, CStr con
 	case CFile::EDiffCopyChange_LinkCreated:
 		DConOut("Link created: {} -> {} = {}" DNewLine, _Source << _Destination << _Link);
 		break;
+	case CFile::EDiffCopyChange_NoChange:
+		break;
 	}
 }
 

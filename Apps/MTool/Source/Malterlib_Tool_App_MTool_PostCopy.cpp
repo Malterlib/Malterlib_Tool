@@ -239,6 +239,8 @@ public:
 											}
 										}
 										break;
+									default:
+										break;
 									}
 									if (bHash)
 									{
@@ -257,6 +259,8 @@ public:
 												HashCache.f_SetHash(_Source, pOldHashCache->f_GetHash(_Source));
 												HashCache.f_SetHash(_Destination, pOldHashCache->f_GetHash(_Destination, _Source));
 											}
+											break;
+										default:
 											break;
 										}
 									}
@@ -284,6 +288,8 @@ public:
 											break;
 										case CFile::EDiffCopyChange_LinkCreated:
 											DConOut("Link created: {} -> {} = {}" DNewLine, _Source << _Destination << _Link);
+											break;
+										case CFile::EDiffCopyChange_NoChange:
 											break;
 										}
 									}
