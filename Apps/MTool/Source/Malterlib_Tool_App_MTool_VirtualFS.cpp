@@ -482,12 +482,12 @@ public:
 				Inc.m_Pattern = pIncludeReg->f_GetValue("Pattern", "");
 				Inc.m_Destination = pIncludeReg->f_GetValue("Destination", "");
 				Inc.m_bRecurse = pIncludeReg->f_GetValue("Recurse", "1").f_ToInt(1);
-				Inc.m_File = pIncludeReg->f_GetFile();
-				Inc.m_Line = pIncludeReg->f_GetLine();
+				Inc.m_File = pIncludeReg->f_GetLocation().m_File;
+				Inc.m_Line = pIncludeReg->f_GetLocation().m_Line;
 
 				if (Inc.m_Pattern.f_IsEmpty())
 				{
-					DConOut(DMibPFileLineFormat " error: No Pattern specified in include block{\n}", pIncludeReg->f_GetFile() << pIncludeReg->f_GetLine());
+					DConOut(DMibPFileLineFormat " error: No Pattern specified in include block{\n}", Inc.m_File << Inc.m_Line);
 					return 1;
 				}
 
