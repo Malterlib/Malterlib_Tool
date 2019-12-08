@@ -35,14 +35,14 @@ Property
 		BaseName "MTool"
 		LinkWithLibraries "Iphlpapi.lib;@(Target.LinkWithLibraries)"
 		{
-			!!PlatformFamily Windows
+			!!PlatformFamily "Windows"
 		}
-		Group Apps
+		Group "Apps"
 		ExtraGroups "{Malterlib}/{CloudTarBinaries};@(Target.ExtraGroups)"
 	}
 	Compile
 	{
-		!!CompileDialect C
+		!!CompileDialect "C"
 		SearchPath "@(CMakeOutputPath_CMake)/Utilities;@(CMakeOutputPath_CMake)/Source;@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
 		{
 			!!MToolEmbeddCMake true
@@ -55,21 +55,21 @@ Property
 
 		PreprocessorDefines "_HAS_AUTO_PTR_ETC=1;@(Compile.PreprocessorDefines)"
 		{
-			!!GeneratorFamily VisualStudio
+			!!GeneratorFamily "VisualStudio"
 		}
 	}
 	Property
 	{
 		MalterlibLinkWithOpenSSL true
 	}
-	%Group BuildScripts
+	%Group "BuildScripts"
 	{
 		%File "BuildScripts/*"
 	}
-	%Group Source
+	%Group "Source"
 	{
 		%File "Source/*"
-		%Group CMake
+		%Group "CMake"
 		{
 			!!MToolEmbeddCMake true
 
@@ -78,16 +78,16 @@ Property
 			%File "../../../../External/CMake/Source/cmcmd.h"
 		}
 	}
-	%Dependency Lib_Malterlib_Perforce
-	%Dependency Lib_Malterlib_BuildSystem
-	%Dependency Lib_Malterlib
+	%Dependency "Lib_Malterlib_Perforce"
+	%Dependency "Lib_Malterlib_BuildSystem"
+	%Dependency "Lib_Malterlib"
 }
 
 %Workspace "MTool"
 {
 	Compile
 	{
-		!!CompileDialect C
+		!!CompileDialect "C"
 		PreprocessorDefines "CMAKE_MALTERLIB_EXEFS;@(Compile.PreprocessorDefines)"
 	}
 	Property.ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake

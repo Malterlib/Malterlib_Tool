@@ -8,7 +8,7 @@ Import "Apps/*/*.MHeader"
 {
 	Repository
 	{
-		Type External
+		Type "External"
 		Remotes "upstream=https://github.com/Kitware/CMake.git;@(Repository.Remotes)"
 	}
 }
@@ -20,7 +20,7 @@ Import "Apps/*/*.MHeader"
 	Import.CMake_FullRebuildVersion 20
 	Import.CMake_Variables "CMAKE_CXX_FLAGS=-stdlib=libc++;@(Import.CMake_Variables)"
 	{
-		!!PlatformFamily OSX
+		!!PlatformFamily "OSX"
 	}
 
 	Import.CMake_Variables "HAVE_OPENSSL_ENGINE_H=0;@(Import.CMake_Variables)"
@@ -29,24 +29,24 @@ Import "Apps/*/*.MHeader"
 	{
 		&
 		{
-			PlatformFamily Linux
-			!HostPlatformFamily Linux 
+			PlatformFamily "Linux"
+			!HostPlatformFamily "Linux" 
 		}
 	}
 	Import.CMake_Variables "FIND_LIBRARY_USE_LIB32_PATHS=1;@(Import.CMake_Variables)"
 	{
 		&
 		{
-			PlatformFamily Linux
-			Architecture x86
-			!HostPlatformFamily Linux 
+			PlatformFamily "Linux"
+			Architecture "x86"
+			!HostPlatformFamily "Linux" 
 		}
 	}
 	Import.CMake_Variables "ARCHIVE_CRYPTO_RMD160_OPENSSL=0;@(Import.CMake_Variables)"
 
 	Import.CMake_Variables "HAVE_ARC4RANDOM_BUF=0;HAVE__CTIME64_S=0;@(Import.CMake_Variables)"
 	{
-		!!PlatformFamily Linux
+		!!PlatformFamily "Linux"
 	}
 
 	Target.ExtraGroups "~Automatic/DependBoringSSL;@(Target.ExtraGroups)"
@@ -66,15 +66,15 @@ Import "Apps/*/*.MHeader"
 	}
 	Compile
 	{
-		!!CompileDialect C
+		!!CompileDialect "C"
 		DynamicTypeInfo true
 	}
 	Compile
 	{
 		&
 		{
-			CompileDialect C
-			GeneratorFamily Xcode
+			CompileDialect "C"
+			GeneratorFamily "Xcode"
 		}
 		Warnings_UnusedFunction false
 		Warnings_VarArgs false
@@ -87,8 +87,8 @@ Import "Apps/*/*.MHeader"
 	{
 		&
 		{
-			CompileDialect C
-			PlatformFamily Windows
+			CompileDialect "C"
+			PlatformFamily "Windows"
 		}
 		PreprocessorDefines "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;@(Compile.PreprocessorDefines)"
 	}
@@ -96,8 +96,8 @@ Import "Apps/*/*.MHeader"
 	{
 		&
 		{
-			CompileDialect C
-			GeneratorFamily VisualStudio
+			CompileDialect "C"
+			GeneratorFamily "VisualStudio"
 		}
 		PreprocessorDefines "_HAS_AUTO_PTR_ETC=1;@(Compile.PreprocessorDefines)"
 
@@ -110,15 +110,15 @@ Import "Apps/*/*.MHeader"
 			}
 		}
 	}
-	%Target Lib_cmlibarchive
+	%Target "Lib_cmlibarchive"
 	{
 		Compile
 		{
-			!!CompileDialect C
+			!!CompileDialect "C"
 			PrefixHeader ""
 		}
 	}
-	%Target Lib_cmcompress
+	%Target "Lib_cmcompress"
 	{
 		Property.MalterlibNeedLanguage_Cxx true
 	}
@@ -129,18 +129,18 @@ Property.MalterlibEnableCMakeProject ""
 	!!MalterlibEnableCMakeProject ""
 }
 
-%Workspace CMake
+%Workspace "CMake"
 {
 	!!MalterlibEnableCMakeProject true
 
 	Compile
 	{
-		!!CompileDialect C
+		!!CompileDialect "C"
 		PreprocessorDefines "CMAKE_MALTERLIB_EXEFS;@(Compile.PreprocessorDefines)"
 	}
-	%Target Exe_cmake
+	%Target "Exe_cmake"
 	{
-		%Dependency Lib_Malterlib
+		%Dependency "Lib_Malterlib"
 		Property
 		{
 			MalterlibPostCopyProject "cmake"
@@ -149,7 +149,7 @@ Property.MalterlibEnableCMakeProject ""
 		}
 		Target.LinkWithLibraries "Userenv.lib;Iphlpapi.lib;@(Target.LinkWithLibraries)"
 		{
-			!!PlatformFamily Windows
+			!!PlatformFamily "Windows"
 		}
 	}
 }
@@ -177,7 +177,7 @@ Property.MalterlibEnableCMakeProject ""
 		}
 	}
 
-	%Group Apps
+	%Group "Apps"
 	{
 		%Target "@(Malterlib_Tool_App_Targets)"
 	}
