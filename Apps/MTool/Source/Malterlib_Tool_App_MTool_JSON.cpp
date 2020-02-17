@@ -28,15 +28,29 @@ public:
 
 		if (SourcePath.f_StartsWith("https://") || SourcePath.f_StartsWith("http://"))
 		{
+			TCMap<CStr, CStr> Cookies;
+			if (auto pCookies = _Params.f_FindEqual("Cookies"))
+			{
+				for (auto &Cookie : pCookies->f_Split("&"))
+				{
+					auto ToSet = Cookie.f_Split("=");
+					if (ToSet.f_GetLen() != 2)
+						DMibError("Expected format: x=y not '{}'"_f << Cookie);
+
+					Cookies[ToSet[0]] = ToSet[1];
+				}
+			}
+
 			CurlActor = fg_Construct(fg_Construct(), "Curl Reader");
 
 			TCMap<CStr, CStr> Headers;
 
-			CurlActor(&CCurlActor::f_Request, CCurlActor::EMethod_GET, SourcePath, Headers, CByteVector{}, TCMap<CStr, CStr>{}) > Contents / [Contents](CCurlActor::CResult &&_Result)
+			CurlActor(&CCurlActor::f_Request, CCurlActor::EMethod_GET, SourcePath, Headers, CByteVector{}, Cookies) > Contents / [Contents](CCurlActor::CResult &&_Result)
 				{
 					if (_Result.m_StatusCode >= 300)
 						Contents.f_SetException(DMibErrorInstance("Error status: {}: {}"_f << _Result.m_StatusCode << _Result.m_Body));
-					Contents.f_SetResult(_Result.m_Body);
+					else
+						Contents.f_SetResult(_Result.m_Body);
 				}
 			;
 		}
