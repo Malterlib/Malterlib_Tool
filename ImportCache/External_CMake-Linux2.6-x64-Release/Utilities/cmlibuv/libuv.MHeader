@@ -5,7 +5,7 @@ Property.CMakeOutputPath_libuv "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type C
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src/unix'->MakeAbsolute());@('../../Source'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src/unix'->MakeAbsolute());@('../../Source'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;NDEBUG;_GNU_SOURCE;@(Compile.PreprocessorDefines)"
 		CLanguage GNU11
 	}

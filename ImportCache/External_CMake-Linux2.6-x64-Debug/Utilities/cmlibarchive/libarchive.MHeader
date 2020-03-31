@@ -5,7 +5,7 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type C
-		SearchPath "@('../../../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('../../Utilities/cmlibarchive'->MakeAbsolute());@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('../../Utilities/cmlibarchive'->MakeAbsolute());@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "HAVE_CONFIG_H;LIBARCHIVE_STATIC;LZMA_API_STATIC;@(Compile.PreprocessorDefines)"
 		CLanguage GNU11
 	}

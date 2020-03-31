@@ -14,7 +14,6 @@
 ../../../../External/CMake/Source/CMakeLists.txt
 ../../../../External/CMake/Source/CMakeSourceDir.txt.in
 ../../../../External/CMake/Source/CMakeVersion.cmake
-../../../../External/CMake/Source/CMakeVersionCompute.cmake
 ../../../../External/CMake/Source/CPack/cmCPackConfigure.h.in
 ../../../../External/CMake/Source/Checks/Curses.cmake
 ../../../../External/CMake/Source/Checks/cm_c11_thread_local.cmake
@@ -22,6 +21,7 @@
 ../../../../External/CMake/Source/Checks/cm_cxx17_check.cpp
 ../../../../External/CMake/Source/Checks/cm_cxx_features.cmake
 ../../../../External/CMake/Source/Checks/cm_cxx_make_unique.cxx
+../../../../External/CMake/Source/Checks/cm_message_checks_compat.cmake
 ../../../../External/CMake/Source/Modules/OverrideC.cmake
 ../../../../External/CMake/Source/Modules/OverrideCXX.cmake
 ../../../../External/CMake/Source/cmConfigure.cmake.h.in
@@ -177,7 +177,6 @@
 ../../../../External/CMake/Utilities/cmcurl/lib/curl_config.h.cmake
 ../../../../External/CMake/Utilities/cmexpat/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmexpat/ConfigureChecks.cmake
-../../../../External/CMake/Utilities/cmexpat/expat_config.h.cmake
 ../../../../External/CMake/Utilities/cmjsoncpp/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmlibarchive/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmlibarchive/CTestConfig.cmake
@@ -200,4 +199,5 @@
 ../../../../External/CMake/Utilities/cmzlib/zlib.h
 ../../../../External/CMake/Utilities/cmzlib/zlibDllConfig.h.in
 ../../../../External/CMake/Utilities/cmzstd/CMakeLists.txt
+../../../../External/CMake/Utilities/std/CMakeLists.txt
 ../../../../External/CMake/cmake_uninstall.cmake.in

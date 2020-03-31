@@ -5,7 +5,7 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type C
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;HAVE_CONFIG_H;@(Compile.PreprocessorDefines)"
 		CLanguage GNU11
 	}
@@ -32,7 +32,7 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type C
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../Utilities/cmcurl/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('../../Utilities/cmcurl'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('../../Utilities/cmcurl/lib'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../Utilities/cmcurl/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('../../Utilities/cmcurl'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('../../Utilities/cmcurl/lib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "BUILDING_LIBCURL;HAVE_CONFIG_H;@(Compile.PreprocessorDefines)"
 		CLanguage GNU11
 	}

@@ -43,7 +43,7 @@ Property
 	Compile
 	{
 		!!CompileDialect "C"
-		SearchPath "@(CMakeOutputPath_CMake)/Utilities;@(CMakeOutputPath_CMake)/Source;@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@(CMakeOutputPath_CMake)/Utilities;@(CMakeOutputPath_CMake)/Source;@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
 		{
 			!!MToolEmbeddCMake true
 		}

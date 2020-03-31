@@ -4,7 +4,7 @@ Property.CMakeOutputPath_JsonCpp "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type C++
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmjsoncpp/include'->MakeAbsolute());@('../../Source'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmjsoncpp/include'->MakeAbsolute());@('../../Source'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType Normal
