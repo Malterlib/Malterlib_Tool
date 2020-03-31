@@ -58,7 +58,6 @@
 #  define KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H                                   \
     cmsys_CXX_HAS_EXT_STDIO_FILEBUF_H
 #  define KWSYS_FALLTHROUGH cmsys_FALLTHROUGH
-#  define KWSYS_NULLPTR cmsys_NULLPTR
 #  define KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP                               \
     cmsys_SYSTEMTOOLS_USE_TRANSLATION_MAP
 #endif
