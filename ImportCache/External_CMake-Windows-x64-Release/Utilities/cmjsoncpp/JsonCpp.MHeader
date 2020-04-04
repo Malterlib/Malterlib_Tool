@@ -1,38 +1,38 @@
 Property.CMakeOutputPath_JsonCpp "@('../..'->MakeAbsolute())"
-%Target Lib_cmjsoncpp
+%Target "Lib_cmjsoncpp"
 {
 	Compile
 	{
-		!!Compile.Type C++
+		!!Compile.Type "C++"
 		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmjsoncpp/include'->MakeAbsolute());@('../../Source'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
-	Property.MalterlibTargetNameType Normal
+	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/JsonCpp"
 	{
 		!!Target.Group ""
 	}
-	Target.Type StaticLibrary
-	Target.BaseName cmjsoncpp
-	%Group Utilities
+	Target.Type "StaticLibrary"
+	Target.BaseName "cmjsoncpp"
+	%Group "Utilities"
 	{
-		%Group lib_json
+		%Group "lib_json"
 		{
 			%File "../../../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_reader.cpp"
 			{
-				Compile.Type C++
+				Compile.Type "C++"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_tool.h"
 			{
-				Compile.Type None
+				Compile.Type "None"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_value.cpp"
 			{
-				Compile.Type C++
+				Compile.Type "C++"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_writer.cpp"
 			{
-				Compile.Type C++
+				Compile.Type "C++"
 			}
 		}
 	}
