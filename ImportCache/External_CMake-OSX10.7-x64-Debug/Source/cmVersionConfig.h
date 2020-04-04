@@ -3,6 +3,6 @@
 #define CMake_VERSION_MAJOR 3
 #define CMake_VERSION_MINOR 17
 #define CMake_VERSION_PATCH 0
-#define CMake_VERSION_SUFFIX "g994bb33"
+#define CMake_VERSION_SUFFIX "gadd1296"
 #define CMake_VERSION_IS_DIRTY 0
-#define CMake_VERSION "3.17.0-g994bb33"
+#define CMake_VERSION "3.17.0-gadd1296"
