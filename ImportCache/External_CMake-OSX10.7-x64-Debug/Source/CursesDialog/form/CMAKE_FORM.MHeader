@@ -1,180 +1,180 @@
 Property.CMakeOutputPath_CMAKE_FORM "@('../../..'->MakeAbsolute())"
-%Target Lib_cmForm
+%Target "Lib_cmForm"
 {
-	Target.CLanguage GNU11
+	Target.CLanguage "GNU11"
 	Compile
 	{
-		!!Compile.Type C
+		!!Compile.Type "C"
 		SearchPath "@('../../../Utilities'->MakeAbsolute());@('../../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../Source/CursesDialog/form'->MakeAbsolute());@('../../../../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('../../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;@(Compile.PreprocessorDefines)"
-		CLanguage GNU11
+		CLanguage "GNU11"
 	}
-	Property.MalterlibTargetNameType Normal
+	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMAKE_FORM"
 	{
 		!!Target.Group ""
 	}
-	Target.Type StaticLibrary
-	Target.BaseName cmForm
-	%Group Source
+	Target.Type "StaticLibrary"
+	Target.BaseName "cmForm"
+	%Group "Source"
 	{
-		%Group form
+		%Group "form"
 		{
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_arg.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_attr.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_current.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_def.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_dup.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_ftchoice.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_ftlink.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_info.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_just.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_link.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_max.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_move.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_newftyp.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_opts.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_pad.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_page.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_stat.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_type.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fld_user.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_cursor.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_data.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_def.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_driver.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_hook.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_opts.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_page.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_post.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_req_name.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_scale.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_sub.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_user.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/frm_win.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fty_alnum.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fty_alpha.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fty_enum.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fty_int.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fty_ipv4.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fty_num.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 			%File "../../../../../../../External/CMake/Source/CursesDialog/form/fty_regex.c"
 			{
-				Compile.Type C
+				Compile.Type "C"
 			}
 		}
 	}

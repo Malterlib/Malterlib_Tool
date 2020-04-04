@@ -1,325 +1,325 @@
 Property.CMakeOutputPath_CMLIBLZMA "@('../..'->MakeAbsolute())"
-%Target Lib_cmliblzma
+%Target "Lib_cmliblzma"
 {
-	Target.CLanguage GNU11
+	Target.CLanguage "GNU11"
 	Compile
 	{
-		!!Compile.Type C
+		!!Compile.Type "C"
 		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/common'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/check'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/delta'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lz'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/rangecoder'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple'->MakeAbsolute());@('../../Utilities/cmliblzma'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines ";@(Compile.PreprocessorDefines)"
-		CLanguage GNU11
+		CLanguage "GNU11"
 	}
-	Property.MalterlibTargetNameType Normal
+	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMLIBLZMA"
 	{
 		!!Target.Group ""
 	}
-	Target.Type StaticLibrary
-	Target.BaseName cmliblzma
-	%Group Utilities
+	Target.Type "StaticLibrary"
+	Target.BaseName "cmliblzma"
+	%Group "Utilities"
 	{
-		%Group cmliblzma
+		%Group "cmliblzma"
 		{
-			%Group common
+			%Group "common"
 			{
 				%File "../../../../../../External/CMake/Utilities/cmliblzma/common/sysdefs.h"
 				{
-					Compile.Type None
+					Compile.Type "None"
 				}
 				%File "../../../../../../External/CMake/Utilities/cmliblzma/common/tuklib_integer.h"
 				{
-					Compile.Type None
+					Compile.Type "None"
 				}
 			}
-			%Group liblzma
+			%Group "liblzma"
 			{
-				%Group check
+				%Group "check"
 				{
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/check/check.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/check/crc32_fast.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/check/crc32_table.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/check/crc64_fast.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/check/crc64_table.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/check/sha256.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 				}
-				%Group common
+				%Group "common"
 				{
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/alone_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/alone_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/auto_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_buffer_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_buffer_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_header_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_header_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/block_util.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/common.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_buffer_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_decoder_memusage.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_encoder_memusage.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/easy_preset.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_buffer_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_buffer_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_common.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_flags_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/filter_flags_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/index.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/index_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/index_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/index_hash.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_buffer_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_buffer_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_flags_common.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_flags_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/stream_flags_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/vli_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/vli_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/common/vli_size.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 				}
-				%Group delta
+				%Group "delta"
 				{
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/delta/delta_common.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/delta/delta_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/delta/delta_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 				}
-				%Group lz
+				%Group "lz"
 				{
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lz/lz_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lz/lz_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lz/lz_encoder_mf.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 				}
-				%Group lzma
+				%Group "lzma"
 				{
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/fastpos_table.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma2_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma2_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_encoder_optimum_fast.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_encoder_optimum_normal.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma/lzma_encoder_presets.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 				}
-				%Group rangecoder
+				%Group "rangecoder"
 				{
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/rangecoder/price_table.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 				}
-				%Group simple
+				%Group "simple"
 				{
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/arm.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/armthumb.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/ia64.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/powerpc.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/simple_coder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/simple_decoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/simple_encoder.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/sparc.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 					%File "../../../../../../External/CMake/Utilities/cmliblzma/liblzma/simple/x86.c"
 					{
-						Compile.Type C
+						Compile.Type "C"
 					}
 				}
 			}
