@@ -61,6 +61,12 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_SkipUpdate", "false") == "true"
 					, "Description"_= "Skip repository updates."
 				}
+				, "ForceUpdateRemotes?"_=
+				{
+					"Names"_= {"--force-update-remotes"}
+					, "Default"_= true
+					, "Description"_= "Force update local tags when updating remotes.\n"
+				}
 				, "GitFetchTimeout?"_=
 				{
 					"Names"_= {"--fetch-timeout"}

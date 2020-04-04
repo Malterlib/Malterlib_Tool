@@ -118,6 +118,7 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJSON const 
 	GenerateOptions.m_GitFetchTimeout = _Params["GitFetchTimeout"].f_Integer();
 
 	GenerateOptions.m_bSkipUpdate = _Params["SkipUpdate"].f_Boolean();
+	GenerateOptions.m_bForceUpdateRemotes = _Params["ForceUpdateRemotes"].f_Boolean();
 	GenerateOptions.f_ParseReconcileActions(_Params);
 
 	return GenerateOptions;
