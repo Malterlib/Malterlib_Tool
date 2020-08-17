@@ -5,7 +5,7 @@ Property.CMakeOutputPath_CMZLIB "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzlib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzlib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "NDEBUG;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}

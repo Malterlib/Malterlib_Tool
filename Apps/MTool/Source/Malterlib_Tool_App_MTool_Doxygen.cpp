@@ -394,7 +394,7 @@ public:
 					;
 
 					Params.m_bMergeEnvironment = true;
-					Params.m_Environment["PATH"] = "/usr/local/sbin:/usr/local/bin:{}"_f << fg_GetSys()->f_GetEnvironmentVariable("PATH");
+					Params.m_Environment["PATH"] = "/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:/usr/local/bin:{}"_f << fg_GetSys()->f_GetEnvironmentVariable("PATH");
 
 					Handler.f_AddLaunch(Params, false);
 				}

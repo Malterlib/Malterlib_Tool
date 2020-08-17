@@ -3,7 +3,7 @@
 #ifndef cmsys_testSystemtools_h
 #define cmsys_testSystemtools_h
 
-#define EXECUTABLE_OUTPUT_PATH "../../Source/kwsys"
+#define RUNTIME_OUTPUT_DIRECTORY "../../Source/kwsys"
 
 #define TEST_SYSTEMTOOLS_SOURCE_DIR "../../../../../../External/CMake/Source/kwsys"
 #define TEST_SYSTEMTOOLS_BINARY_DIR "../../Source/kwsys"

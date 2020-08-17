@@ -86,10 +86,6 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type "C++"
 			}
-			%File "../../../../../../External/CMake/Source/kwsys/IOStream.cxx"
-			{
-				Compile.Type "C++"
-			}
 			%File "../../../../../../External/CMake/Source/kwsys/FStream.cxx"
 			{
 				Compile.Type "C++"
@@ -97,7 +93,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/SystemInformation.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_CXX_HAS_ATOL=1;KWSYS_CXX_HAS_ATOLL=1;KWSYS_CXX_HAS__ATOI64=1;KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_IOS_HAS_OSTREAM___INT64=1;KWSYS_SYS_HAS_PSAPI=1;KWSYS_USE_LONG_LONG=1;SIZEOF_VOID_P=4;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines "KWSYS_SYS_HAS_PSAPI=1;SIZEOF_VOID_P=4;@(Compile.PreprocessorDefines)"
 			}
 		}
 	}
@@ -172,10 +168,6 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 							Compile.Type "None"
 						}
 						%File "../../Source/cmsys/CommandLineArguments.hxx"
-						{
-							Compile.Type "None"
-						}
-						%File "../../Source/cmsys/IOStream.hxx"
 						{
 							Compile.Type "None"
 						}
@@ -422,7 +414,6 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/testSystemInformation.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_IOS_HAS_OSTREAM___INT64=1;KWSYS_USE_LONG_LONG=1;@(Compile.PreprocessorDefines)"
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/testDynamicLoader.cxx"
 			{

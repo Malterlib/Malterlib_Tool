@@ -1,4 +1,27 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.haxx.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ ***************************************************************************/
 /* lib/curl_config.h.in.  Generated somehow by cmake.  */
+
+#include <cm3p/kwiml/abi.h>
 
 /* when building libcurl itself */
 /* #undef BUILDING_LIBCURL */
@@ -33,6 +56,9 @@
 /* to disable LDAPS */
 #define CURL_DISABLE_LDAPS 1
 
+/* to enable MQTT */
+#undef CURL_ENABLE_MQTT
+
 /* to disable POP3 */
 #define CURL_DISABLE_POP3 1
 
@@ -63,6 +89,9 @@
 #ifndef CURL_EXTERN_SYMBOL
 #define CURL_EXTERN_SYMBOL
 #endif
+
+/* Allow SMB to work on Windows */
+/* #undef USE_WIN32_CRYPTO */
 
 /* Use Windows LDAP implementation */
 /* #undef USE_WIN32_LDAP */
@@ -133,14 +162,8 @@
 /* Define to 1 if you have the <crypto.h> header file. */
 /* #undef HAVE_CRYPTO_H */
 
-/* Define to 1 if you have the <des.h> header file. */
-/* #undef HAVE_DES_H */
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
-
-/* Define to 1 if you have the `ENGINE_load_builtin_engines' function. */
-/* #undef HAVE_ENGINE_LOAD_BUILTIN_ENGINES */
 
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
@@ -231,6 +254,9 @@
 
 /* Define to 1 if you have the `getsockname' function. */
 #define HAVE_GETSOCKNAME 1
+
+/* Define to 1 if you have the `if_nametoindex' function. */
+#define HAVE_IF_NAMETOINDEX 1
 
 /* Define to 1 if you have the `getpwuid' function. */
 #define HAVE_GETPWUID 1
@@ -395,8 +421,8 @@
 /* Define to 1 if you have the <libssh2.h> header file. */
 /* #undef HAVE_LIBSSH2_H */
 
-/* Define to 1 if you have the `ssl' library (-lssl). */
-#define HAVE_LIBSSL 1
+/* Define to 1 if you have the <libssh/libssh.h> header file. */
+/* #undef HAVE_LIBSSH_LIBSSH_H */
 
 /* if zlib is available */
 /* #undef HAVE_LIBZ */
@@ -404,8 +430,8 @@
 /* if brotli is available */
 /* #undef HAVE_BROTLI */
 
-/* if your compiler supports LL */
-#define HAVE_LL 1
+/* if zstd is available */
+/* #undef HAVE_ZSTD */
 
 /* Define to 1 if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
@@ -414,7 +440,9 @@
 #define HAVE_LOCALTIME_R 1
 
 /* Define to 1 if the compiler supports the 'long long' data type. */
-#define HAVE_LONGLONG 1
+#if KWIML_ABI_SIZEOF_LONG_LONG
+#  define HAVE_LONGLONG 1
+#endif
 
 /* Define to 1 if you have the malloc.h header file. */
 #define HAVE_MALLOC_H 1
@@ -445,9 +473,6 @@
 
 /* Define to 1 if you have the <openssl/crypto.h> header file. */
 #define HAVE_OPENSSL_CRYPTO_H 1
-
-/* Define to 1 if you have the <openssl/engine.h> header file. */
-/* #undef HAVE_OPENSSL_ENGINE_H */
 
 /* Define to 1 if you have the <openssl/err.h> header file. */
 #define HAVE_OPENSSL_ERR_H 1
@@ -574,9 +599,6 @@
 
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
-
-/* Define to 1 if you have the `SSL_get_shutdown' function. */
-/* #undef HAVE_SSL_GET_SHUTDOWN */
 
 /* Define to 1 if you have the <ssl.h> header file. */
 /* #undef HAVE_SSL_H */
@@ -829,10 +851,10 @@
 /* #undef RECVFROM_TYPE_RETV */
 
 /* Define to the type of arg 1 for recv. */
-#define RECV_TYPE_ARG1 int
+#define RECV_TYPE_ARG1 curl_socket_t
 
 /* Define to the type of arg 2 for recv. */
-#define RECV_TYPE_ARG2 void *
+#define RECV_TYPE_ARG2 char *
 
 /* Define to the type of arg 3 for recv. */
 #define RECV_TYPE_ARG3 size_t
@@ -841,7 +863,7 @@
 #define RECV_TYPE_ARG4 int
 
 /* Define to the function return type for recv. */
-#define RECV_TYPE_RETV int
+#define RECV_TYPE_RETV ssize_t
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
@@ -862,13 +884,13 @@
 /* #undef SELECT_TYPE_RETV */
 
 /* Define to the type qualifier of arg 2 for send. */
-#define SEND_QUAL_ARG2 const
+#define SEND_QUAL_ARG2  
 
 /* Define to the type of arg 1 for send. */
-#define SEND_TYPE_ARG1 int
+#define SEND_TYPE_ARG1 curl_socket_t
 
 /* Define to the type of arg 2 for send. */
-#define SEND_TYPE_ARG2 void *
+#define SEND_TYPE_ARG2 char *
 
 /* Define to the type of arg 3 for send. */
 #define SEND_TYPE_ARG3 size_t
@@ -877,22 +899,33 @@
 #define SEND_TYPE_ARG4 int
 
 /* Define to the function return type for send. */
-#define SEND_TYPE_RETV int
+#define SEND_TYPE_RETV ssize_t
+
+/*
+ Note: SIZEOF_* variables are fetched with CMake through check_type_size().
+ As per CMake documentation on CheckTypeSize, C preprocessor code is
+ generated by CMake into SIZEOF_*_CODE. This is what we use in the
+ following statements.
+
+ Reference: https://cmake.org/cmake/help/latest/module/CheckTypeSize.html
+*/
 
 /* The size of `int', as computed by sizeof. */
-#define SIZEOF_INT 4
+#define SIZEOF_INT KWIML_ABI_SIZEOF_INT
 
 /* The size of `short', as computed by sizeof. */
-#define SIZEOF_SHORT 2
+#define SIZEOF_SHORT KWIML_ABI_SIZEOF_SHORT
 
 /* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG 4
+#define SIZEOF_LONG KWIML_ABI_SIZEOF_LONG
 
 /* The size of `long long', as computed by sizeof. */
-#define SIZEOF_LONG_LONG 8
+#define SIZEOF_LONG_LONG KWIML_ABI_SIZEOF_LONG_LONG
 
 /* The size of `__int64', as computed by sizeof. */
-/* #undef SIZEOF___INT64 */
+#if KWIML_ABI_SIZEOF___INT64
+#  define SIZEOF___INT64 KWIML_ABI_SIZEOF___INT64
+#endif
 
 /* The size of `off_t', as computed by sizeof. */
 #define SIZEOF_OFF_T 8
@@ -933,14 +966,20 @@
 /* if GnuTLS is enabled */
 /* #undef USE_GNUTLS */
 
-/* if PolarSSL is enabled */
-/* #undef USE_POLARSSL */
-
 /* if Secure Transport is enabled */
 /* #undef USE_SECTRANSP */
 
 /* if mbedTLS is enabled */
 /* #undef USE_MBEDTLS */
+
+/* if BearSSL is enabled */
+/* #undef USE_BEARSSL */
+
+/* if WolfSSL is enabled */
+/* #undef USE_WOLFSSL */
+
+/* if libSSH is in use */
+/* #undef USE_LIBSSH */
 
 /* if libSSH2 is in use */
 /* #undef USE_LIBSSH2 */
@@ -951,6 +990,9 @@
 /* if NSS is enabled */
 /* #undef USE_NSS */
 
+/* if you have the PK11_CreateManagedGenericObject function */
+/* #undef HAVE_PK11_CREATEMANAGEDGENERICOBJECT */
+
 /* if you want to use OpenLDAP code instead of legacy ldap implementation */
 /* #undef USE_OPENLDAP */
 
@@ -958,10 +1000,25 @@
 #define USE_OPENSSL 1
 
 /* to enable NGHTTP2  */
-/* #undef USE_NGHTTP2 */
+#define USE_NGHTTP2 1
+
+/* to enable NGTCP2 */
+/* #undef USE_NGTCP2 */
+
+/* to enable NGHTTP3  */
+/* #undef USE_NGHTTP3 */
+
+/* to enable quiche */
+/* #undef USE_QUICHE */
+
+/* Define to 1 if you have the quiche_conn_set_qlog_fd function. */
+/* #undef HAVE_QUICHE_CONN_SET_QLOG_FD */
 
 /* if Unix domain sockets are enabled  */
 /* #undef USE_UNIX_SOCKETS */
+
+/* to enable alt-svc */
+/* #undef USE_ALTSVC */
 
 /* to enable SSPI support */
 /* #undef USE_WINDOWS_SSPI */

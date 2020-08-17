@@ -5,7 +5,7 @@ Property.CMakeOutputPath_bzip2 "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}

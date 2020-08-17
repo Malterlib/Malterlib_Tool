@@ -4,7 +4,7 @@ Property.CMakeOutputPath_zstd "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd/lib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd/lib/common'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd/lib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd/lib/common'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "DYNAMIC_BMI2=0;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -63,7 +63,19 @@ Property.CMakeOutputPath_zstd "@('../..'->MakeAbsolute())"
 				{
 					Compile.Type "C"
 				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress_literals.c"
+				{
+					Compile.Type "C"
+				}
 				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress_sequences.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress_superblock.c"
 				{
 					Compile.Type "C"
 				}

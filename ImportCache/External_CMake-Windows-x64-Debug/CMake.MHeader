@@ -86,10 +86,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C++"
 			}
-			%File "../../../../External/CMake/Source/kwsys/IOStream.cxx"
-			{
-				Compile.Type "C++"
-			}
 			%File "../../../../External/CMake/Source/kwsys/FStream.cxx"
 			{
 				Compile.Type "C++"
@@ -97,7 +93,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/SystemInformation.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_CXX_HAS_ATOL=1;KWSYS_CXX_HAS_ATOLL=1;KWSYS_CXX_HAS__ATOI64=1;KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_IOS_HAS_OSTREAM___INT64=1;KWSYS_SYS_HAS_PSAPI=1;KWSYS_USE_LONG_LONG=1;SIZEOF_VOID_P=8;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines "KWSYS_SYS_HAS_PSAPI=1;SIZEOF_VOID_P=8;@(Compile.PreprocessorDefines)"
 			}
 		}
 	}
@@ -172,10 +168,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 							Compile.Type "None"
 						}
 						%File "Source/cmsys/CommandLineArguments.hxx"
-						{
-							Compile.Type "None"
-						}
-						%File "Source/cmsys/IOStream.hxx"
 						{
 							Compile.Type "None"
 						}
@@ -422,7 +414,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/testSystemInformation.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_IOS_HAS_OSTREAM___INT64=1;KWSYS_USE_LONG_LONG=1;@(Compile.PreprocessorDefines)"
 			}
 			%File "../../../../External/CMake/Source/kwsys/testDynamicLoader.cxx"
 			{
@@ -617,7 +608,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -629,34 +620,52 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Target.BaseName "cmstd"
 	%Group "Utilities"
 	{
-		%Group "cm"
+		%Group "std"
 		{
-			%Group "bits"
+			%Group "cm"
 			{
-				%File "../../../../External/CMake/Utilities/std/cm/bits/string_view.cxx"
+				%Group "bits"
 				{
-					Compile.Type "C++"
+					%File "../../../../External/CMake/Utilities/std/cm/bits/fs_path.cxx"
+					{
+						Compile.Type "C++"
+					}
+					%File "../../../../External/CMake/Utilities/std/cm/bits/string_view.cxx"
+					{
+						Compile.Type "C++"
+					}
+				}
+				%File "../../../../External/CMake/Utilities/std/cm/filesystem"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/std/cm/memory"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/std/cm/optional"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/std/cm/shared_mutex"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/std/cm/string_view"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/std/cm/utility"
+				{
+					Compile.Type "None"
 				}
 			}
-			%File "../../../../External/CMake/Utilities/std/cm/memory"
+			%Group "cmext"
 			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/std/cm/optional"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/std/cm/shared_mutex"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/std/cm/string_view"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/std/cm/utility"
-			{
-				Compile.Type "None"
+				%File "../../../../External/CMake/Utilities/std/cmext/string_view"
+				{
+					Compile.Type "None"
+				}
 			}
 		}
 	}
@@ -666,13 +675,13 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "KWIML_LANGUAGE_C;KWIML_LANGUAGE_CXX;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "KWIML_LANGUAGE_C;KWIML_LANGUAGE_CXX;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -722,7 +731,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -824,7 +833,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzlib'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzlib'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -890,8 +899,8 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0600;@(Compile.PreprocessorDefines)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmnghttp2/lib/includes'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CURL"
@@ -907,6 +916,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "C"
 		}
 	}
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 }
@@ -915,8 +925,8 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('Utilities/cmcurl/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('Utilities/cmcurl'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('Utilities/cmcurl/lib'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "BUILDING_LIBCURL;HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0600;@(Compile.PreprocessorDefines)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmnghttp2/lib/includes'->MakeAbsolute());@('Utilities/cmcurl/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('Utilities/cmcurl'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('Utilities/cmcurl/lib'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "BUILDING_LIBCURL;HAVE_CONFIG_H;NGHTTP2_STATICLIB;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CURL"
@@ -929,119 +939,23 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "lib"
 		{
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/altsvc.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/amigaos.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/arpa_telnet.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/netrc.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/asyn.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/file.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/timeval.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostip.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/progress.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/formdata.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/cookie.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/sendf.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftp.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/url.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/dict.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/if2ip.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/speedcheck.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/urldata.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ldap.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/escape.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/telnet.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/getinfo.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strcase.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sec.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/memdebug.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_chunks.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_fnmatch.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/wildcard.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/fileinfo.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftplistparser.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtok.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/conncache.h"
 			{
 				Compile.Type "None"
 			}
@@ -1049,19 +963,55 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/llist.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/hash.h"
-			{
-				Compile.Type "None"
-			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/content_encoding.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/share.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/cookie.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_addrinfo.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_base64.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ctype.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_des.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_endian.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_fnmatch.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_get_line.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gethostname.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gssapi.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_hmac.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ldap.h"
 			{
 				Compile.Type "None"
 			}
@@ -1073,6 +1023,146 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_memory.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_memrchr.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_multibyte.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_core.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_wb.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_path.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_printf.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_range.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_rtmp.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sasl.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sec.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_setup.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_setup_once.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sha256.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sspi.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_threads.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curlx.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dict.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dotdot.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/easyif.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/escape.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/file.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/fileinfo.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/formdata.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftp.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/url.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftplistparser.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/getinfo.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/gopher.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hash.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostcheck.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostip.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http2.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_chunks.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_digest.h"
 			{
 				Compile.Type "None"
@@ -1081,147 +1171,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_pton.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/amigaos.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtoofft.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strerror.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_ntop.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curlx.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_memory.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_setup.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/transfer.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/select.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/easyif.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/multiif.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/parsedate.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/tftp.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/sockaddr.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/splay.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strdup.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/ssh.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_base64.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_addrinfo.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sspi.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/slist.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/nonblock.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_memrchr.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/imap.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/pop3.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/smtp.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/pingpong.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/rtsp.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_threads.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/warnless.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_hmac.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_rtmp.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gethostname.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/gopher.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_ntlm.h"
 			{
 				Compile.Type "None"
 			}
@@ -1229,95 +1179,27 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/non-ascii.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/if2ip.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/asyn.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/imap.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_ntlm.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_ntop.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gssapi.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_pton.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_wb.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/llist.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_core.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sasl.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_multibyte.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostcheck.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/conncache.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_setup_once.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/multihandle.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/setup-vms.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/dotdot.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http2.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/sigpipe.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/smb.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_endian.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_des.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_printf.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/system_win32.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/rand.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/memdebug.h"
 			{
 				Compile.Type "None"
 			}
@@ -1325,23 +1207,43 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sha256.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/mqtt.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/setopt.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/multihandle.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_path.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/multiif.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ctype.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/netrc.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_range.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/non-ascii.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/nonblock.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/parsedate.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pingpong.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pop3.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/progress.h"
 			{
 				Compile.Type "None"
 			}
@@ -1353,24 +1255,148 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/quic.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rand.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rename.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rtsp.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/select.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/sendf.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/setopt.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/setup-vms.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/share.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/sigpipe.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/slist.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/smb.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/smtp.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/sockaddr.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socketpair.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/speedcheck.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/splay.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strcase.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strdup.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strerror.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtok.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtoofft.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/system_win32.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/telnet.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/tftp.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/timeval.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/transfer.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/urlapi-int.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_get_line.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/urldata.h"
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/altsvc.h"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/warnless.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/wildcard.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/version_win32.h"
 			{
 				Compile.Type "None"
 			}
 			%Group "vauth"
 			{
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/vauth.h"
-				{
-					Compile.Type "None"
-				}
 				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/digest.h"
 				{
 					Compile.Type "None"
@@ -1379,9 +1405,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				{
 					Compile.Type "None"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/vauth.c"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/vauth.h"
 				{
-					Compile.Type "C"
+					Compile.Type "None"
 				}
 				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/cleartext.c"
 				{
@@ -1427,14 +1453,18 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				{
 					Compile.Type "C"
 				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vauth/vauth.c"
+				{
+					Compile.Type "C"
+				}
 			}
 			%Group "vtls"
 			{
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/openssl.h"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/bearssl.h"
 				{
 					Compile.Type "None"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/vtls.h"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/gskit.h"
 				{
 					Compile.Type "None"
 				}
@@ -1442,19 +1472,27 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				{
 					Compile.Type "None"
 				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/keylog.h"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls.h"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls_threadlock.h"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mesalink.h"
+				{
+					Compile.Type "None"
+				}
 				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/nssg.h"
 				{
 					Compile.Type "None"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/polarssl.h"
-				{
-					Compile.Type "None"
-				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/polarssl_threadlock.h"
-				{
-					Compile.Type "None"
-				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/cyassl.h"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/openssl.h"
 				{
 					Compile.Type "None"
 				}
@@ -1466,19 +1504,19 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				{
 					Compile.Type "None"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/gskit.h"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/vtls.h"
 				{
 					Compile.Type "None"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls.h"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/wolfssl.h"
 				{
 					Compile.Type "None"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mesalink.h"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/bearssl.c"
 				{
-					Compile.Type "None"
+					Compile.Type "C"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/openssl.c"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/gskit.c"
 				{
 					Compile.Type "C"
 				}
@@ -1486,7 +1524,19 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/vtls.c"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/keylog.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls_threadlock.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mesalink.c"
 				{
 					Compile.Type "C"
 				}
@@ -1494,15 +1544,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/polarssl.c"
-				{
-					Compile.Type "C"
-				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/polarssl_threadlock.c"
-				{
-					Compile.Type "C"
-				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/cyassl.c"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/openssl.c"
 				{
 					Compile.Type "C"
 				}
@@ -1518,24 +1560,74 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/gskit.c"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/vtls.c"
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls.c"
-				{
-					Compile.Type "C"
-				}
-				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/mesalink.c"
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vtls/wolfssl.c"
 				{
 					Compile.Type "C"
 				}
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/file.c"
+			%Group "vquic"
+			{
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vquic/ngtcp2.h"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vquic/quiche.h"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vquic/vquic.h"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vquic/ngtcp2.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vquic/quiche.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vquic/vquic.c"
+				{
+					Compile.Type "C"
+				}
+			}
+			%Group "vssh"
+			{
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vssh/ssh.h"
+				{
+					Compile.Type "None"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vssh/libssh.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vssh/libssh2.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../External/CMake/Utilities/cmcurl/lib/vssh/wolfssh.c"
+				{
+					Compile.Type "C"
+				}
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/altsvc.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/timeval.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/amigaos.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/asyn-ares.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/asyn-thread.c"
 			{
 				Compile.Type "C"
 			}
@@ -1543,15 +1635,15 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostip.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/conncache.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/progress.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/connect.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/formdata.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/content_encoding.c"
 			{
 				Compile.Type "C"
 			}
@@ -1559,11 +1651,103 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_addrinfo.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/sendf.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ctype.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_des.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_endian.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_fnmatch.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_get_line.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gethostname.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gssapi.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_memrchr.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_multibyte.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_core.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_wb.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_path.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_range.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_rtmp.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sasl.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sspi.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_threads.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dict.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dotdot.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/easy.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/escape.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/file.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/fileinfo.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/formdata.c"
 			{
 				Compile.Type "C"
 			}
@@ -1575,23 +1759,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/dict.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/if2ip.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/speedcheck.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/ldap.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/version.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftplistparser.c"
 			{
 				Compile.Type "C"
 			}
@@ -1599,79 +1767,11 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/escape.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/mprintf.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/telnet.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/netrc.c"
-			{
-				Compile.Type "C"
-			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/getinfo.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/transfer.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strcase.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/easy.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/security.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_fnmatch.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/fileinfo.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftplistparser.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/wildcard.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/krb5.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/memdebug.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_chunks.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtok.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/connect.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/llist.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/gopher.c"
 			{
 				Compile.Type "C"
 			}
@@ -1679,51 +1779,19 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/multi.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/content_encoding.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/share.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_digest.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/md4.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/md5.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_negotiate.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_pton.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtoofft.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strerror.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/amigaos.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hmac.c"
 			{
 				Compile.Type "C"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostasyn.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostcheck.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostip.c"
 			{
 				Compile.Type "C"
 			}
@@ -1739,179 +1807,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_ntop.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/parsedate.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/select.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/tftp.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/splay.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/strdup.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/ssh.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/ssh-libssh.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_addrinfo.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks_gssapi.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks_sspi.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sspi.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/slist.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/nonblock.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_memrchr.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/imap.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/pop3.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/smtp.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/pingpong.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/rtsp.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_threads.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/warnless.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/hmac.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_rtmp.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/openldap.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gethostname.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/gopher.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/idn_win32.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/non-ascii.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/asyn-ares.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/asyn-thread.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_gssapi.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_ntlm.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_wb.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_core.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sasl.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/rand.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_multibyte.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostcheck.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/conncache.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/dotdot.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http.c"
 			{
 				Compile.Type "C"
 			}
@@ -1919,19 +1815,67 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/smb.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_chunks.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_endian.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_digest.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_des.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_negotiate.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/system_win32.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_ntlm.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/idn_win32.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/if2ip.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/imap.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_ntop.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/inet_pton.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/krb5.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/ldap.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/llist.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/md4.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/md5.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/memdebug.c"
 			{
 				Compile.Type "C"
 			}
@@ -1939,23 +1883,47 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/sha256.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/mprintf.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/setopt.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/mqtt.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_path.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/multi.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ctype.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/netrc.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_range.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/non-ascii.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/nonblock.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/openldap.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/parsedate.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pingpong.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/pop3.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/progress.c"
 			{
 				Compile.Type "C"
 			}
@@ -1967,15 +1935,143 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rand.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rename.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/rtsp.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/security.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/select.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/sendf.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/setopt.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/sha256.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/share.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/slist.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/smb.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/smtp.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socketpair.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks_gssapi.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/socks_sspi.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/speedcheck.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/splay.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strcase.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strdup.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strerror.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtok.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/strtoofft.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/system_win32.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/telnet.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/tftp.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/timeval.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/transfer.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/urlapi.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_get_line.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/version.c"
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/altsvc.c"
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/warnless.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/wildcard.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/version_win32.c"
 			{
 				Compile.Type "C"
 			}
@@ -2003,9 +2099,123 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			}
 		}
 	}
+	%Dependency "Lib_cmnghttp2"
+	{
+		Dependency.Indirect true
+	}
 	%Dependency "Lib_cmzlib"
 	{
 		Dependency.Indirect true
+	}
+}
+%Target "Lib_cmnghttp2"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Utilities/cmnghttp2'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmnghttp2/lib/includes'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "HAVE_CONFIG_H;NGHTTP2_STATICLIB;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
+	Target.Type "StaticLibrary"
+	Target.BaseName "cmnghttp2"
+	%Group "Utilities"
+	{
+		%Group "lib"
+		{
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_buf.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_callbacks.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_debug.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_frame.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_hd.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_hd_huffman.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_hd_huffman_data.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_helper.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_http.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_map.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_mem.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_npn.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_option.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_outbound_item.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_pq.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_priority_spec.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_queue.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_rcbuf.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_session.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_stream.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_submit.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmnghttp2/lib/nghttp2_version.c"
+			{
+				Compile.Type "C"
+			}
+		}
 	}
 }
 %Target "Lib_cmexpat"
@@ -2013,7 +2223,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Utilities/cmexpat'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmexpat/lib'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Utilities/cmexpat'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmexpat/lib'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -2055,7 +2265,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -2105,7 +2315,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzstd/lib'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzstd/lib/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzstd/lib'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzstd/lib/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "DYNAMIC_BMI2=0;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -2164,7 +2374,19 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				{
 					Compile.Type "C"
 				}
+				%File "../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress_literals.c"
+				{
+					Compile.Type "C"
+				}
 				%File "../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress_sequences.c"
+				{
+					Compile.Type "C"
+				}
+				%File "../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress_superblock.c"
 				{
 					Compile.Type "C"
 				}
@@ -2254,7 +2476,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/check'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/delta'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/lz'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/rangecoder'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/simple'->MakeAbsolute());@('Utilities/cmliblzma'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/check'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/delta'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/lz'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/rangecoder'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/simple'->MakeAbsolute());@('Utilities/cmliblzma'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -2579,8 +2801,8 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('Utilities/cmlibarchive'->MakeAbsolute());@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzstd'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "HAVE_CONFIG_H;LIBARCHIVE_STATIC;LZMA_API_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath "@('../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('Utilities/cmlibarchive'->MakeAbsolute());@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzstd'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "HAVE_CONFIG_H;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/libarchive"
@@ -2742,6 +2964,14 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				Compile.Type "None"
 			}
 			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_ppmd_private.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_ppmd8.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_ppmd8_private.h"
 			{
 				Compile.Type "None"
 			}
@@ -2941,6 +3171,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_rar5.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_raw.c"
 			{
 				Compile.Type "C"
@@ -3129,6 +3363,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_private.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_raw.c"
 			{
 				Compile.Type "C"
@@ -3205,15 +3443,19 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_blake2sp_ref.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_blake2s_ref.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive.h"
 			{
 				Compile.Type "None"
 			}
 		}
-	}
-	%Dependency "Lib_cmliblzma"
-	{
-		Dependency.Indirect true
 	}
 	%Dependency "Lib_cmzstd"
 	{
@@ -3233,7 +3475,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmjsoncpp/include'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmjsoncpp/include'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -3271,7 +3513,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/src/win'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/src/win'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0600;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -3480,13 +3722,13 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "WindowsResource"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -3528,10 +3770,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
@@ -3543,13 +3785,13 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -3820,6 +4062,22 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		{
 			Compile.Type "C++"
 		}
+		%File "../../../../External/CMake/Source/cmCMakePath.h"
+		{
+			Compile.Type "None"
+		}
+		%File "../../../../External/CMake/Source/cmCMakePath.cxx"
+		{
+			Compile.Type "C++"
+		}
+		%File "../../../../External/CMake/Source/cmCMakePresetsFile.cxx"
+		{
+			Compile.Type "C++"
+		}
+		%File "../../../../External/CMake/Source/cmCMakePresetsFile.h"
+		{
+			Compile.Type "None"
+		}
 		%File "../../../../External/CMake/Source/cmCommandArgumentParserHelper.cxx"
 		{
 			Compile.Type "C++"
@@ -3861,6 +4119,14 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "None"
 		}
 		%File "../../../../External/CMake/Source/cmComputeTargetDepends.cxx"
+		{
+			Compile.Type "C++"
+		}
+		%File "../../../../External/CMake/Source/cmConsoleBuf.h"
+		{
+			Compile.Type "None"
+		}
+		%File "../../../../External/CMake/Source/cmConsoleBuf.cxx"
 		{
 			Compile.Type "C++"
 		}
@@ -4441,6 +4707,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		{
 			Compile.Type "C++"
 		}
+		%File "../../../../External/CMake/Source/cmJSONHelpers.h"
+		{
+			Compile.Type "None"
+		}
 		%File "../../../../External/CMake/Source/cmLDConfigLDConfigTool.cxx"
 		{
 			Compile.Type "C++"
@@ -4545,6 +4815,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		{
 			Compile.Type "C++"
 		}
+		%File "../../../../External/CMake/Source/cmMakefileProfilingData.cxx"
+		{
+			Compile.Type "C++"
+		}
 		%File "../../../../External/CMake/Source/cmMakefileUtilityTargetGenerator.cxx"
 		{
 			Compile.Type "C++"
@@ -4635,14 +4909,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "C++"
 		}
 		%File "../../../../External/CMake/Source/cmPropertyDefinition.h"
-		{
-			Compile.Type "None"
-		}
-		%File "../../../../External/CMake/Source/cmPropertyDefinitionMap.cxx"
-		{
-			Compile.Type "C++"
-		}
-		%File "../../../../External/CMake/Source/cmPropertyDefinitionMap.h"
 		{
 			Compile.Type "None"
 		}
@@ -4751,6 +5017,14 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "C++"
 		}
 		%File "../../../../External/CMake/Source/cmSourceGroup.h"
+		{
+			Compile.Type "None"
+		}
+		%File "../../../../External/CMake/Source/cmStandardLevelResolver.cxx"
+		{
+			Compile.Type "C++"
+		}
+		%File "../../../../External/CMake/Source/cmStandardLevelResolver.h"
 		{
 			Compile.Type "None"
 		}
@@ -5068,6 +5342,14 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "C++"
 		}
 		%File "../../../../External/CMake/Source/cmCMakeHostSystemInformationCommand.h"
+		{
+			Compile.Type "None"
+		}
+		%File "../../../../External/CMake/Source/cmCMakeLanguageCommand.cxx"
+		{
+			Compile.Type "C++"
+		}
+		%File "../../../../External/CMake/Source/cmCMakeLanguageCommand.h"
 		{
 			Compile.Type "None"
 		}
@@ -5883,10 +6165,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		{
 			Compile.Type "None"
 		}
-		%File "../../../../External/CMake/Source/cm_static_string_view.hxx"
-		{
-			Compile.Type "None"
-		}
 		%File "../../../../External/CMake/Source/cm_get_date.h"
 		{
 			Compile.Type "None"
@@ -6248,10 +6526,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_cmliblzma"
-	{
-		Dependency.Indirect true
-	}
 	%Dependency "Lib_cmzstd"
 	{
 		Dependency.Indirect true
@@ -6261,6 +6535,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		Dependency.Indirect true
 	}
 	%Dependency "Lib_cmexpat"
+	{
+		Dependency.Indirect true
+	}
+	%Dependency "Lib_cmnghttp2"
 	{
 		Dependency.Indirect true
 	}
@@ -6290,7 +6568,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -6401,6 +6679,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				Compile.Type "C++"
 			}
 			%File "../../../../External/CMake/Source/CTest/cmCTestLaunch.cxx"
+			{
+				Compile.Type "C++"
+			}
+			%File "../../../../External/CMake/Source/CTest/cmCTestLaunchReporter.cxx"
 			{
 				Compile.Type "C++"
 			}
@@ -6573,10 +6855,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_cmliblzma"
-	{
-		Dependency.Indirect true
-	}
 	%Dependency "Lib_cmzstd"
 	{
 		Dependency.Indirect true
@@ -6586,6 +6864,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		Dependency.Indirect true
 	}
 	%Dependency "Lib_cmexpat"
+	{
+		Dependency.Indirect true
+	}
+	%Dependency "Lib_cmnghttp2"
 	{
 		Dependency.Indirect true
 	}
@@ -6615,13 +6897,13 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "WindowsResource"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -6663,10 +6945,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
@@ -6678,7 +6960,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -6767,10 +7049,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_cmliblzma"
-	{
-		Dependency.Indirect true
-	}
 	%Dependency "Lib_cmzstd"
 	{
 		Dependency.Indirect true
@@ -6780,6 +7058,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		Dependency.Indirect true
 	}
 	%Dependency "Lib_cmexpat"
+	{
+		Dependency.Indirect true
+	}
+	%Dependency "Lib_cmnghttp2"
 	{
 		Dependency.Indirect true
 	}
@@ -6809,7 +7091,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7015,10 +7297,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_cmliblzma"
-	{
-		Dependency.Indirect true
-	}
 	%Dependency "Lib_cmzstd"
 	{
 		Dependency.Indirect true
@@ -7028,6 +7306,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		Dependency.Indirect true
 	}
 	%Dependency "Lib_cmexpat"
+	{
+		Dependency.Indirect true
+	}
+	%Dependency "Lib_cmnghttp2"
 	{
 		Dependency.Indirect true
 	}
@@ -7057,13 +7339,13 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "WindowsResource"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7092,7 +7374,6 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "None"
 		}
 	}
-	%Dependency "Lib_CMakeServerLib"
 	%Dependency "Lib_CMakeLib"
 	%Group "Windows"
 	{
@@ -7113,28 +7394,29 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
 	%Dependency "Lib_cmstd"
 	%Dependency "Lib_cmsys"
+	%Dependency "Lib_CMakeServerLib"
 }
 %Target "Exe_cpack"
 {
 	Compile
 	{
 		!!Compile.Type "WindowsResource"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7158,6 +7440,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "None"
 		}
 	}
+	%Dependency "Lib_CPackLib"
 	%Dependency "Lib_CMakeLib"
 	%Group "Windows"
 	{
@@ -7178,23 +7461,22 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
 	%Dependency "Lib_cmstd"
 	%Dependency "Lib_cmsys"
-	%Dependency "Lib_CPackLib"
 }
 %Target "Exe_testUVProcessChainHelper"
 {
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7217,7 +7499,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7241,7 +7523,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7299,6 +7581,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 				Compile.Type "C++"
 			}
 			%File "../../../../External/CMake/Tests/CMakeLib/testGeneratedFileStream.cxx"
+			{
+				Compile.Type "C++"
+			}
+			%File "../../../../External/CMake/Tests/CMakeLib/testJSONHelpers.cxx"
 			{
 				Compile.Type "C++"
 			}
@@ -7373,10 +7659,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
@@ -7388,7 +7674,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7409,10 +7695,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
@@ -7424,7 +7710,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7460,10 +7746,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
@@ -7475,7 +7761,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7511,10 +7797,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
@@ -7526,7 +7812,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7562,10 +7848,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
@@ -7577,7 +7863,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7613,10 +7899,61 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
+	%Dependency "Lib_cmcurl"
+	%Dependency "Lib_cmzlib"
+	%Dependency "Lib_cmlibrhash"
+	%Dependency "Lib_cmstd"
+	%Dependency "Lib_cmsys"
+}
+%Target "Exe_pseudo_cuda-memcheck"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "pseudo_cuda-memcheck"
+	%Group "Windows"
+	{
+		%Group "x64"
+		{
+			%Group "@(FullConfiguration)"
+			{
+				%Group "Tests"
+				{
+					%Group "CMakeLib"
+					{
+						%Group "PseudoMemcheck"
+						{
+							%File "Tests/CMakeLib/PseudoMemcheck/ret0.cxx"
+							{
+								Compile.Type "C++"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency "Lib_CMakeLib"
+	%Dependency "Lib_cmlibuv"
+	%Dependency "Lib_cmjsoncpp"
+	%Dependency "Lib_cmlibarchive"
+	%Dependency "Lib_cmzstd"
+	%Dependency "Lib_cmbzip2"
+	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
@@ -7628,7 +7965,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7669,7 +8006,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7710,7 +8047,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7751,7 +8088,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Tests/CMakeServerLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeServerLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7787,27 +8124,27 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "C++"
 		}
 	}
-	%Dependency "Lib_CMakeServerLib"
 	%Dependency "Lib_CMakeLib"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
 	%Dependency "Lib_cmstd"
 	%Dependency "Lib_cmsys"
+	%Dependency "Lib_CMakeServerLib"
 }
 %Target "Exe_exit_code"
 {
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7830,7 +8167,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7853,7 +8190,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7876,7 +8213,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7898,22 +8235,45 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmliblzma"
 	%Dependency "Lib_cmzstd"
 	%Dependency "Lib_cmbzip2"
 	%Dependency "Lib_cmexpat"
+	%Dependency "Lib_cmnghttp2"
 	%Dependency "Lib_cmcurl"
 	%Dependency "Lib_cmzlib"
 	%Dependency "Lib_cmlibrhash"
 	%Dependency "Lib_cmstd"
 	%Dependency "Lib_cmsys"
 }
+%Target "Exe_fake_build_command"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Target.Group "External/CMake"
+	{
+		!!Target.Group ""
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "fake_build_command"
+	%Group "Tests"
+	{
+		%File "../../../../External/CMake/Tests/RunCMake/fake_build_command.c"
+		{
+			Compile.Type "C"
+		}
+	}
+}
 %Target "Exe_pseudo_emulator_custom_command"
 {
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7936,7 +8296,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7959,7 +8319,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -7982,7 +8342,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -8005,7 +8365,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -8028,7 +8388,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -8051,7 +8411,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
+		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
 		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"

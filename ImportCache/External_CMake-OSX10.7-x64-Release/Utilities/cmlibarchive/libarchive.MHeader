@@ -5,8 +5,8 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('../../Utilities/cmlibarchive'->MakeAbsolute());@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "HAVE_CONFIG_H;LIBARCHIVE_STATIC;LZMA_API_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
+		SearchPath "@('../../../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('../../Utilities/cmlibarchive'->MakeAbsolute());@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "HAVE_CONFIG_H;LIBARCHIVE_STATIC;NDEBUG;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -169,6 +169,14 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 				Compile.Type "None"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_ppmd_private.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_ppmd8.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_ppmd8_private.h"
 			{
 				Compile.Type "None"
 			}
@@ -368,6 +376,10 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_rar5.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_read_support_format_raw.c"
 			{
 				Compile.Type "C"
@@ -556,6 +568,10 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_private.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_write_set_format_raw.c"
 			{
 				Compile.Type "C"
@@ -608,15 +624,19 @@ Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_blake2sp_ref.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive_blake2s_ref.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmlibarchive/libarchive/archive.h"
 			{
 				Compile.Type "None"
 			}
 		}
-	}
-	%Dependency "Lib_cmliblzma"
-	{
-		Dependency.Indirect true
 	}
 	%Dependency "Lib_cmzstd"
 	{

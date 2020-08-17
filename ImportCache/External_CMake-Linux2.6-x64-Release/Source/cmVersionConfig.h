@@ -1,8 +1,8 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #define CMake_VERSION_MAJOR 3
-#define CMake_VERSION_MINOR 17
-#define CMake_VERSION_PATCH 0
-#define CMake_VERSION_SUFFIX "gadd1296"
+#define CMake_VERSION_MINOR 19
+#define CMake_VERSION_PATCH 2
+#define CMake_VERSION_SUFFIX "gc157cd9"
 #define CMake_VERSION_IS_DIRTY 0
-#define CMake_VERSION "3.17.0-gadd1296"
+#define CMake_VERSION "3.19.2-gc157cd9"

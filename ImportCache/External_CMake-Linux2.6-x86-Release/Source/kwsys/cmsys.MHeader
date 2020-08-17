@@ -6,7 +6,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type "C"
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -31,7 +31,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type "C++"
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
@@ -99,7 +99,6 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/testSystemInformation.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_USE_LONG_LONG=1;@(Compile.PreprocessorDefines)"
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/testDynamicLoader.cxx"
 			{
@@ -115,14 +114,14 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type "C++"
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 	}
 	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -199,10 +198,6 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			{
 				Compile.Type "C++"
 			}
-			%File "../../../../../../External/CMake/Source/kwsys/IOStream.cxx"
-			{
-				Compile.Type "C++"
-			}
 			%File "../../../../../../External/CMake/Source/kwsys/FStream.cxx"
 			{
 				Compile.Type "C++"
@@ -210,7 +205,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/SystemInformation.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_CXX_HAS_ATOL=1;KWSYS_CXX_HAS_ATOLL=1;KWSYS_CXX_HAS_GETLOADAVG=1;KWSYS_CXX_HAS_RLIMIT64=1;KWSYS_IOS_HAS_OSTREAM_LONG_LONG=1;KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE=1;KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE=1;KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP=1;KWSYS_SYS_HAS_IFADDRS_H=1;KWSYS_USE_LONG_LONG=1;SIZEOF_VOID_P=4;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines "KWSYS_CXX_HAS_GETLOADAVG=1;KWSYS_CXX_HAS_RLIMIT64=1;KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE=1;KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE=1;KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP=1;KWSYS_SYS_HAS_IFADDRS_H=1;SIZEOF_VOID_P=4;@(Compile.PreprocessorDefines)"
 			}
 		}
 	}
@@ -288,10 +283,6 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 						{
 							Compile.Type "None"
 						}
-						%File "../../Source/cmsys/IOStream.hxx"
-						{
-							Compile.Type "None"
-						}
 						%File "../../Source/cmsys/FStream.hxx"
 						{
 							Compile.Type "None"
@@ -325,7 +316,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type "C"
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;cmsysTestDynload_EXPORTS;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;_FILE_OFFSET_BITS=64;cmsysTestDynload_EXPORTS;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -353,7 +344,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type "C++"
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
@@ -378,7 +369,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type "C"
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -419,7 +410,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type "C"
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -526,7 +517,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		!!Compile.Type "C"
 		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"

@@ -1,6 +1,3 @@
 ../../../../../../External/CMake/Utilities/cmzlib/.NoDartCoverage
 ../../../../../../External/CMake/Utilities/cmzlib/CMakeLists.txt
-../../../../../../External/CMake/Utilities/cmzlib/cm_zlib_mangle.h
-../../../../../../External/CMake/Utilities/cmzlib/zconf.h
-../../../../../../External/CMake/Utilities/cmzlib/zlib.h
 ../../../../../../External/CMake/Utilities/cmzlib/zlibDllConfig.h.in

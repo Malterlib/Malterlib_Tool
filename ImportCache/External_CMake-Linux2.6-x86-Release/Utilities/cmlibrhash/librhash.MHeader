@@ -5,8 +5,8 @@ Property.CMakeOutputPath_librhash "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../Source'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "NDEBUG;@(Compile.PreprocessorDefines)"
+		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../Source'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
+		PreprocessorDefines "NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
 		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
