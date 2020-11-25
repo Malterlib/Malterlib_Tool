@@ -51,7 +51,7 @@ namespace
 			CFile::fs_RenameFile(InputTempFile, InputFile);
 
 			// Wait for reply
-			NMib::NThread::CSemaphoreReportable ChangeSemaphore;
+			NMib::NThread::CSemaphore ChangeSemaphore;
 			CFileChangeNotification Notification;
 			Notification.f_Open(TempDir, EFileChange_All, &ChangeSemaphore);
 
