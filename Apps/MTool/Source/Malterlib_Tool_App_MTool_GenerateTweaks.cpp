@@ -475,9 +475,9 @@ private:
 				break;
 			case EType_Font:
 				if (_bHeader)
-					_Out += CStr::CFormat("\t\textern NMib::NStorage::TCLazyInit<QFont, NMib::NThread::CSpinLock> m_Font_{};" DNewLine) << RIter->f_GetName();
+					_Out += CStr::CFormat("\t\textern NMib::NStorage::TCLazyInit<QFont, NMib::NThread::CLowLevelLock> m_Font_{};" DNewLine) << RIter->f_GetName();
 				else
-					_Out += CStr::CFormat("\t\tNMib::NStorage::TCLazyInit<QFont, NMib::NThread::CSpinLock> m_Font_{};" DNewLine) << RIter->f_GetName();
+					_Out += CStr::CFormat("\t\tNMib::NStorage::TCLazyInit<QFont, NMib::NThread::CLowLevelLock> m_Font_{};" DNewLine) << RIter->f_GetName();
 				break;
 			case EType_PMetricInt:
 				if (_bHeader)
