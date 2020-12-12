@@ -21,7 +21,7 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 				, "BuildSystem?"_=
 				{
 					"Names"_= {"--build-system"}
-					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_BuildSystem", BuildSystemFiles.f_GetLen() == 1 ? BuildSystemFiles[0] : "")
+					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_BuildSystem", BuildSystemFiles.f_GetLen() == 1 ? BuildSystemFiles[0] : CStr())
 					, "Description"_= "The root build system file."
 				}
 				, "Generator?"_=
