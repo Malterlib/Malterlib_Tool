@@ -4,8 +4,10 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 
 #include <Mib/BuildSystem/BuildSystemPreprocessor>
+#include <Mib/BuildSystem/BuildSystem>
 #include <Mib/Perforce/Wrapper>
 #include <Mib/Cryptography/MD5Cache>
+#include <Mib/Container/Convert>
 
 class CTool_PostCopy : public CTool
 {
@@ -37,6 +39,8 @@ public:
 
 		bool bVerbose = false;
 		bool bHash = false;
+		bool bDirectory = false;
+		bool bRecursive = false;
 
 		for (mint i = 0; true; ++i)
 		{
@@ -62,6 +66,10 @@ public:
 				bVerbose = Value.f_ToInt(0) != 0 || Value == "true";
 			else if (Key == "Hash")
 				bHash = Value.f_ToInt(0) != 0 || Value == "true";
+			else if (Key == "FindDirectory")
+				bDirectory = Value.f_ToInt(0) != 0 || Value == "true";
+			else if (Key == "Recursive")
+				bRecursive = Value.f_ToInt(0) != 0 || Value == "true";
 			else
 				DError(CStr(CStr::CFormat("Unknown setting: {}") << Key));
 		}
@@ -75,7 +83,7 @@ public:
 		if (DestinationProject.f_IsEmpty())
 			DError("No destination project specified");
 
-		CRegistryPreserveAll Registry;
+		CBuildSystemRegistry Registry;
 		TCSet<CStr> SourceFiles;
 		NBuildSystem::CFindCache FindCache;
 		if (CFile::fs_FileExists(ConfigFile))
@@ -85,12 +93,31 @@ public:
 			Preprocessor.f_ReadFile(ConfigFile);
 		}
 
-		CRegistryPreserveAll OriginalRegistry = Registry;
+		CBuildSystemRegistry OriginalRegistry = Registry;
 
 		TCVector<CStr> ExcludePatterns;
 
 		if (auto pValue = Registry.f_GetChild("ExcludePatterns"))
-			ExcludePatterns = pValue->f_GetThisValue().f_Split<true>(";");
+		{
+			if (pValue->f_GetThisValue().f_IsString())
+			{
+				if (!pValue->f_GetThisValue().f_String().f_IsEmpty())
+					ExcludePatterns = pValue->f_GetThisValue().f_String().f_Split<true>(";");
+				Registry.f_SetValue("ExcludePatterns", ExcludePatterns);
+			}
+			else
+			{
+				if (!pValue->f_GetThisValue().f_IsArray())
+					CBuildSystem::fs_ThrowError(*pValue, "ExcludePatterns needs to be an array of strings");
+
+				for (auto &Pattern : pValue->f_GetThisValue().f_Array())
+				{
+					if (!Pattern.f_IsString())
+						CBuildSystem::fs_ThrowError(*pValue, "ExcludePatterns needs to be an array of strings");
+					ExcludePatterns.f_Insert(Pattern.f_String());
+				}
+			}
+		}
 		else
 		{
 			ExcludePatterns = {"*/.git", "*/.DS_Store"};
@@ -102,9 +129,23 @@ public:
 		TCSet<CStr> Tags;
 		if (pTags)
 		{
-			for (auto iTag = pTags->f_GetChildIterator("Tag"); iTag && iTag->f_GetName() == "Tag"; ++iTag)
+			if (pTags->f_GetThisValue().f_IsArray())
 			{
-				Tags[iTag->f_GetThisValue()];
+				for (auto &Tag : pTags->f_GetThisValue().f_Array())
+				{
+					if (!Tag.f_IsString())
+						CBuildSystem::fs_ThrowError(*pTags, "Tags needs to be an array of strings");
+					Tags[Tag.f_String()];
+				}
+			}
+			else if (pTags->f_GetThisValue().f_IsString())
+				pTags->f_SetThisValue(EJSONType_Array);
+			else
+			{
+				for (auto iTag = pTags->f_GetChildIterator("Tag"); iTag && iTag->f_GetName() == "Tag"; ++iTag)
+					Tags[iTag->f_GetThisValue().f_String()];
+
+				pTags->f_SetThisValue(NContainer::fg_ConvertContainer<TCVector<CStr>>(NContainer::fg_ConvertContainer<TCSet<CStr>>(NContainer::fg_ConvertContainer<TCVector<CStr>>(Tags))));
 			}
 		}
 
@@ -118,7 +159,11 @@ public:
 			DefaultRootDefault = "/opt/Deploy";
 #endif
 
-		CStr DefaultRoot = Registry.f_GetValue("DefaultRoot", DefaultRootDefault);
+		CStr DefaultRoot;
+		if (auto DefaultRootJSON = Registry.f_GetValue("DefaultRoot", DefaultRootDefault); DefaultRootJSON.f_IsString())
+			DefaultRoot = DefaultRootJSON.f_String();
+		else
+			DefaultRoot = DefaultRootDefault;
 
 		auto pProject = pProjects->f_GetChild(DestinationProject);
 		if (!pProject)
@@ -144,7 +189,7 @@ public:
 					for (auto iTag = iDest->f_GetChildIterator("Tag"); iTag && iTag->f_GetName() == "Tag"; ++iTag)
 					{
 						bTagFound = true;
-						if (Tags.f_FindEqual(iTag->f_GetThisValue()))
+						if (Tags.f_FindEqual(iTag->f_GetThisValue().f_String()))
 						{
 							bTagMatched = true;
 							break;
@@ -156,7 +201,7 @@ public:
 					bool bEnabledIf = true;
 					for (auto iEnableIf = iDest->f_GetChildIterator("EnableIf"); iEnableIf && iEnableIf->f_GetName() == "EnableIf"; ++iEnableIf)
 					{
-						if (_SourceFile.f_Find(iEnableIf->f_GetThisValue()) < 0)
+						if (_SourceFile.f_Find(iEnableIf->f_GetThisValue().f_String()) < 0)
 						{
 							bEnabledIf = false;
 							break;
@@ -166,9 +211,9 @@ public:
 					if (!bEnabledIf)
 						continue;
 
-					CStr NewFileName = iDest->f_GetValue("Rename", SourceFileName);
+					CStr NewFileName = iDest->f_GetValue("Rename", SourceFileName).f_String();
 
-					CStr Destination = iDest->f_GetThisValue();
+					CStr Destination = iDest->f_GetThisValue().f_String();
 					CStr FullDestination;
 
 					TCUniquePointer<CHashCache> pOldHashCache;
@@ -309,24 +354,10 @@ public:
 
 		CStr SourceFileName = CFile::fs_GetFile(SourceFile);
 
-		if (CFile::fs_GetFile(SourceFile).f_FindChars("~^*?") >= 0)
+		if (bRecursive || bDirectory || CFile::fs_GetFile(SourceFile).f_FindChars("*?") >= 0)
 		{
 			CStr BasePath = CFile::fs_GetPath(SourceFile);
 			mint BasePathLen = BasePath.f_GetLen() + 1;
-
-			bool bDirectory = false;
-			if (SourceFileName.f_StartsWith("~"))
-			{
-				bDirectory = true;
-				SourceFileName = SourceFileName.f_Extract(1);
-			}
-
-			bool bRecursive = false;
-			if (SourceFileName.f_StartsWith("^"))
-			{
-				bRecursive = true;
-				SourceFileName = SourceFileName.f_Extract(1);
-			}
 
 			SourceFile = CFile::fs_AppendPath(BasePath, SourceFileName);
 

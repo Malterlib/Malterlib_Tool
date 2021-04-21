@@ -446,7 +446,7 @@ public:
 
 		DependencyContents += CStr::CFormat("dependencies: \\\n  {}") << SourceFilename;
 
-		CRegistryPreserveAll Source;
+		CRegistryPreserveAllFull Source;
 		try
 		{
 			CStr SourceString;
@@ -465,8 +465,7 @@ public:
 			CStr m_Pattern;
 			CStr m_Destination;
 			bool m_bRecurse;
-			CStr m_File;
-			uint32 m_Line = 0;
+			CParseLocation m_Location;
 		};
 
 		TCVector<CInclude> lIncludes;
@@ -476,18 +475,17 @@ public:
 		{
 			if (IncludeIter->f_GetName().f_CmpNoCase("Include") == 0)
 			{
-				CRegistryPreserveAll* pIncludeReg = IncludeIter;
+				CRegistryPreserveAllFull* pIncludeReg = IncludeIter;
 
 				CInclude Inc;
 				Inc.m_Pattern = pIncludeReg->f_GetValue("Pattern", "");
 				Inc.m_Destination = pIncludeReg->f_GetValue("Destination", "");
 				Inc.m_bRecurse = pIncludeReg->f_GetValue("Recurse", "1").f_ToInt(1);
-				Inc.m_File = pIncludeReg->f_GetLocation().m_File;
-				Inc.m_Line = pIncludeReg->f_GetLocation().m_Line;
+				Inc.m_Location = pIncludeReg->f_GetLocation();
 
 				if (Inc.m_Pattern.f_IsEmpty())
 				{
-					DConOut(DMibPFileLineFormat " error: No Pattern specified in include block{\n}", Inc.m_File << Inc.m_Line);
+					DConOut(DMibPFileLineColumnFormat " error: No Pattern specified in include block{\n}", Inc.m_Location.m_File << Inc.m_Location.m_Line << Inc.m_Location.m_Column);
 					return 1;
 				}
 
@@ -555,7 +553,12 @@ public:
 
 			if (lSourceFiles.f_IsEmpty() && !CurInclude->m_bRecurse && CurInclude->m_Pattern.f_FindChars("*?") < 0)
 			{
-				DConOut(DMibPFileLineFormat " error: No files found for pattern '{}'{\n}", CurInclude->m_File << CurInclude->m_Line << CurInclude->m_Pattern);
+				DConOut
+					(
+						DMibPFileLineColumnFormat " error: No files found for pattern '{}'{\n}"
+						, CurInclude->m_Location.m_File << CurInclude->m_Location.m_Line << CurInclude->m_Location.m_Column << CurInclude->m_Pattern
+					)
+				;
 				return 1;
 			}
 
