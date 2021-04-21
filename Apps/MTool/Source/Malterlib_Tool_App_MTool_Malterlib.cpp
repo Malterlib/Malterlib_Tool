@@ -137,19 +137,22 @@ CEJSON::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefault)
 
 uint32 CTool_Malterlib::f_RunBuildSystem(TCFunction<CBuildSystem::ERetry (NBuildSystem::CBuildSystem &_BuildSystem)> &&_fCommand, EAnsiEncodingFlag _AnsiFlags)
 {
-	CBuildSystem::ERetry Retry = CBuildSystem::ERetry_Again;
-	while (Retry != CBuildSystem::ERetry_None)
-	{
-		NBuildSystem::CBuildSystem BuildSystem(_AnsiFlags);
-		if (Retry == CBuildSystem::ERetry_Again_NoReconcileOptions)
-			BuildSystem.f_NoReconcileOptions();
+	CBuildSystem::ERetry Retry = CBuildSystem::fs_RunBuildSystem
+		(
+			fg_Move(_fCommand)
+			, _AnsiFlags
+			, [](NStr::CStr const &_Output)
+			{
+				DMibConOutRaw(_Output);
+			}
+		)
+	;
 
-		Retry = _fCommand(BuildSystem);
-		if (Retry == CBuildSystem::ERetry_Relaunch)
-			return 3;
-		else if (Retry == CBuildSystem::ERetry_Relaunch_NoReconcileOptions)
-			return 4;
-	}
+	if (Retry == CBuildSystem::ERetry_Relaunch)
+		return 3;
+	else if (Retry == CBuildSystem::ERetry_Relaunch_NoReconcileOptions)
+		return 4;
+
 	return 0;
 }
 
