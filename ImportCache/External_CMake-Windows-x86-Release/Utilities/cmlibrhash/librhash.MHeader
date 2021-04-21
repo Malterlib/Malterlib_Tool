@@ -1,16 +1,24 @@
-Property.CMakeOutputPath_librhash "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_librhash define string = "../.."->MakeAbsolute()
 %Target "Lib_cmlibrhash"
 {
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../Source'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../Source"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/librhash"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmlibrhash"

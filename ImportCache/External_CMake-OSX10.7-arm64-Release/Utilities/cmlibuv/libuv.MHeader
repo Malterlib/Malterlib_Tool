@@ -1,18 +1,28 @@
-Property.CMakeOutputPath_libuv "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_libuv define string = "../.."->MakeAbsolute()
 %Target "Lib_cmlibuv"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src/unix'->MakeAbsolute());@('../../Source'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;NDEBUG;_DARWIN_UNLIMITED_SELECT=1;_DARWIN_USE_64_BIT_INODE=1;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmlibuv/include"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmlibuv/src"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmlibuv/src/unix"->MakeAbsolute(),
+			"../../Source"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_DARWIN_UNLIMITED_SELECT=1",
+			"_DARWIN_USE_64_BIT_INODE=1"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/libuv"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmlibuv"

@@ -1,18 +1,28 @@
-Property.CMakeOutputPath_libarchive "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_libarchive define string = "../.."->MakeAbsolute()
 %Target "Lib_cmlibarchive"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('../../Utilities/cmlibarchive'->MakeAbsolute());@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "HAVE_CONFIG_H;LIBARCHIVE_STATIC;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../../../../../External/CMake/Utilities/cmlibarchive/libarchive"->MakeAbsolute(),
+			"../../Utilities/cmlibarchive"->MakeAbsolute(),
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmbzip2"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmzstd"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"HAVE_CONFIG_H",
+			"LIBARCHIVE_STATIC",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/libarchive"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmlibarchive"

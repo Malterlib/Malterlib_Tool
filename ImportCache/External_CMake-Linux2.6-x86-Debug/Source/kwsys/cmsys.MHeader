@@ -1,18 +1,22 @@
-Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_cmsys define string = "../.."->MakeAbsolute()
 %Target "Exe_cmsysTestProcess"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Source"->MakeAbsolute(),
+			"../../Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmsysTestProcess"
@@ -30,13 +34,19 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../Source"->MakeAbsolute(),
+			"../../Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmsysTestsCxx"
@@ -44,7 +54,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -94,7 +104,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/testConsoleBuf.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/testSystemInformation.cxx"
 			{
@@ -113,21 +125,31 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../Source"->MakeAbsolute(),
+			"../../Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Source"->MakeAbsolute(),
+			"../../Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmsys"
@@ -138,7 +160,11 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/ProcessUNIX.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/Base64.c"
 			{
@@ -147,7 +173,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/EncodingC.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/MD5.c"
 			{
@@ -160,12 +188,18 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/System.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/String.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_STRING_C;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_STRING_C"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/Directory.cxx"
 			{
@@ -174,12 +208,16 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/DynamicLoader.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_SUPPORTS_SHARED_LIBS=1;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_SUPPORTS_SHARED_LIBS=1"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/EncodingCXX.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/Glob.cxx"
 			{
@@ -192,7 +230,15 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/SystemTools.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0;KWSYS_CXX_HAS_SETENV=1;KWSYS_CXX_HAS_UNSETENV=1;KWSYS_CXX_HAS_UTIMENSAT=1;KWSYS_CXX_HAS_UTIMES=1;KWSYS_CXX_STAT_HAS_ST_MTIM=1;KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=0;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0",
+					"KWSYS_CXX_HAS_SETENV=1",
+					"KWSYS_CXX_HAS_UNSETENV=1",
+					"KWSYS_CXX_HAS_UTIMENSAT=1",
+					"KWSYS_CXX_HAS_UTIMES=1",
+					"KWSYS_CXX_STAT_HAS_ST_MTIM=1",
+					"KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=0"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/CommandLineArguments.cxx"
 			{
@@ -205,7 +251,16 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/SystemInformation.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_CXX_HAS_GETLOADAVG=1;KWSYS_CXX_HAS_RLIMIT64=1;KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE=1;KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE=1;KWSYS_SYSTEMINFORMATION_HAS_DEBUG_BUILD=1;KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP=1;KWSYS_SYS_HAS_IFADDRS_H=1;SIZEOF_VOID_P=4;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_CXX_HAS_GETLOADAVG=1",
+					"KWSYS_CXX_HAS_RLIMIT64=1",
+					"KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE=1",
+					"KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE=1",
+					"KWSYS_SYSTEMINFORMATION_HAS_DEBUG_BUILD=1",
+					"KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP=1",
+					"KWSYS_SYS_HAS_IFADDRS_H=1",
+					"SIZEOF_VOID_P=4"
+				]
 			}
 		}
 	}
@@ -213,7 +268,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -311,18 +366,23 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 }
 %Target "Dll_cmsysTestDynload"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;_FILE_OFFSET_BITS=64;cmsysTestDynload_EXPORTS;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Source"->MakeAbsolute(),
+			"../../Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"_FILE_OFFSET_BITS=64",
+			"cmsysTestDynload_EXPORTS"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "DynamicLibrary"
 	Target.BaseName "cmsysTestDynload"
@@ -343,13 +403,19 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../Source"->MakeAbsolute(),
+			"../../Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "testConsoleBufChild"
@@ -364,18 +430,22 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 }
 %Target "Exe_cmsysTestSharedForward"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Source"->MakeAbsolute(),
+			"../../Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmsysTestSharedForward"
@@ -383,7 +453,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -405,18 +475,22 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 }
 %Target "Lib_cmsys_c"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Source"->MakeAbsolute(),
+			"../../Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmsys_c"
@@ -427,7 +501,11 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/ProcessUNIX.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/Base64.c"
 			{
@@ -436,7 +514,9 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/EncodingC.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/MD5.c"
 			{
@@ -449,12 +529,18 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 			%File "../../../../../../External/CMake/Source/kwsys/System.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
 			}
 			%File "../../../../../../External/CMake/Source/kwsys/String.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_STRING_C;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_STRING_C"
+				]
 			}
 		}
 	}
@@ -462,7 +548,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -512,18 +598,22 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 }
 %Target "Exe_cmsysTestsC"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Source'->MakeAbsolute());@('../../Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Source"->MakeAbsolute(),
+			"../../Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmsysTestsC"
@@ -531,7 +621,7 @@ Property.CMakeOutputPath_cmsys "@('../..'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{

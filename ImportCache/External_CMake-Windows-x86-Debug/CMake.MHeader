@@ -1,22 +1,44 @@
-Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
+Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 %Target "Lib_cmsys"
 {
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmsys"
@@ -35,7 +57,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/EncodingC.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
 			}
 			%File "../../../../External/CMake/Source/kwsys/MD5.c"
 			{
@@ -48,12 +72,18 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/System.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
 			}
 			%File "../../../../External/CMake/Source/kwsys/String.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_STRING_C;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_STRING_C"
+				]
 			}
 			%File "../../../../External/CMake/Source/kwsys/Directory.cxx"
 			{
@@ -62,12 +92,16 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/DynamicLoader.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_SUPPORTS_SHARED_LIBS=1;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_SUPPORTS_SHARED_LIBS=1"
+				]
 			}
 			%File "../../../../External/CMake/Source/kwsys/EncodingCXX.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
 			}
 			%File "../../../../External/CMake/Source/kwsys/Glob.cxx"
 			{
@@ -80,7 +114,15 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/SystemTools.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=1;KWSYS_CXX_HAS_SETENV=0;KWSYS_CXX_HAS_UNSETENV=0;KWSYS_CXX_HAS_UTIMENSAT=0;KWSYS_CXX_HAS_UTIMES=0;KWSYS_CXX_STAT_HAS_ST_MTIM=0;KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=0;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=1",
+					"KWSYS_CXX_HAS_SETENV=0",
+					"KWSYS_CXX_HAS_UNSETENV=0",
+					"KWSYS_CXX_HAS_UTIMENSAT=0",
+					"KWSYS_CXX_HAS_UTIMES=0",
+					"KWSYS_CXX_STAT_HAS_ST_MTIM=0",
+					"KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=0"
+				]
 			}
 			%File "../../../../External/CMake/Source/kwsys/CommandLineArguments.cxx"
 			{
@@ -93,7 +135,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/SystemInformation.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_SYS_HAS_PSAPI=1;SIZEOF_VOID_P=4;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_SYS_HAS_PSAPI=1",
+					"SIZEOF_VOID_P=4"
+				]
 			}
 		}
 	}
@@ -101,7 +146,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -202,13 +247,24 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmsysTestSharedForward"
@@ -216,7 +272,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -241,13 +297,24 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmsys_c"
@@ -266,7 +333,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/EncodingC.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
 			}
 			%File "../../../../External/CMake/Source/kwsys/MD5.c"
 			{
@@ -279,12 +348,18 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/System.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC;KWSYS_C_HAS_PTRDIFF_T;KWSYS_C_HAS_SSIZE_T;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
 			}
 			%File "../../../../External/CMake/Source/kwsys/String.c"
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines "KWSYS_STRING_C;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_STRING_C"
+				]
 			}
 		}
 	}
@@ -292,7 +367,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -345,13 +420,24 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmsysTestsCxx"
@@ -359,7 +445,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -409,7 +495,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			%File "../../../../External/CMake/Source/kwsys/testConsoleBuf.cxx"
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
 			}
 			%File "../../../../External/CMake/Source/kwsys/testSystemInformation.cxx"
 			{
@@ -428,13 +516,24 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmsysTestsC"
@@ -442,7 +541,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -478,13 +577,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;cmsysTestDynloadUse_EXPORTS;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE",
+			"cmsysTestDynloadUse_EXPORTS"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "DynamicLibrary"
 	Target.BaseName "cmsysTestDynloadUse"
@@ -506,13 +617,24 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmsysTestProcess"
@@ -530,13 +652,24 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "testConsoleBufChild"
@@ -554,13 +687,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;cmsysTestDynload_EXPORTS;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE",
+			"cmsysTestDynload_EXPORTS"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "DynamicLibrary"
 	Target.BaseName "cmsysTestDynload"
@@ -581,13 +726,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Source'->MakeAbsolute());@('Source/kwsys'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "BUILDING_TestDynloadImpl;KWSYS_NAMESPACE=cmsys;UNICODE;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Source"->MakeAbsolute(),
+			"Source/kwsys"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"BUILDING_TestDynloadImpl",
+			"KWSYS_NAMESPACE=cmsys",
+			"UNICODE",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_SCL_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/cmsys"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "SharedDynamicLibrary"
 	Target.BaseName "cmsysTestDynloadImpl"
@@ -608,13 +765,20 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmstd"
@@ -675,19 +839,37 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWIML_LANGUAGE_C;KWIML_LANGUAGE_CXX;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWIML_LANGUAGE_C",
+			"KWIML_LANGUAGE_CXX",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "KWIML_LANGUAGE_C;KWIML_LANGUAGE_CXX;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWIML_LANGUAGE_C",
+			"KWIML_LANGUAGE_CXX",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "kwiml_test"
@@ -731,13 +913,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/librhash"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmlibrhash"
@@ -833,13 +1023,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzlib'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmzlib"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMZLIB"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmzlib"
@@ -899,13 +1097,24 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmnghttp2/lib/includes'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmcurl/include"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmnghttp2/lib/includes"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"HAVE_CONFIG_H",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CURL"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "curltest"
@@ -925,13 +1134,30 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmnghttp2/lib/includes'->MakeAbsolute());@('Utilities/cmcurl/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('Utilities/cmcurl'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('Utilities/cmcurl/lib'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "BUILDING_LIBCURL;HAVE_CONFIG_H;NGHTTP2_STATICLIB;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmcurl/include"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmnghttp2/lib/includes"->MakeAbsolute(),
+			"Utilities/cmcurl/include"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmcurl"->MakeAbsolute(),
+			"Utilities/cmcurl"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmcurl/lib"->MakeAbsolute(),
+			"Utilities/cmcurl/lib"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"BUILDING_LIBCURL",
+			"HAVE_CONFIG_H",
+			"NGHTTP2_STATICLIB",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CURL"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmcurl"
@@ -2081,7 +2307,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Utilities"
 				{
@@ -2113,13 +2339,24 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Utilities/cmnghttp2'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmnghttp2/lib/includes'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "HAVE_CONFIG_H;NGHTTP2_STATICLIB;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Utilities/cmnghttp2"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmnghttp2/lib/includes"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"HAVE_CONFIG_H",
+			"NGHTTP2_STATICLIB",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmnghttp2"
@@ -2223,13 +2460,22 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Utilities/cmexpat'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmexpat/lib'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Utilities/cmexpat"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmexpat/lib"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmexpat"
@@ -2265,13 +2511,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/bzip2"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmbzip2"
@@ -2315,13 +2569,23 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzstd/lib'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzstd/lib/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "DYNAMIC_BMI2=0;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmzstd/lib"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmzstd/lib/common"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"DYNAMIC_BMI2=0",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/zstd"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmzstd"
@@ -2476,13 +2740,30 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/api'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/check'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/common'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/delta'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/lz'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/rangecoder'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmliblzma/liblzma/simple'->MakeAbsolute());@('Utilities/cmliblzma'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmliblzma/common"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmliblzma/liblzma/api"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmliblzma/liblzma/check"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmliblzma/liblzma/common"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmliblzma/liblzma/delta"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmliblzma/liblzma/lz"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmliblzma/liblzma/lzma"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmliblzma/liblzma/rangecoder"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmliblzma/liblzma/simple"->MakeAbsolute(),
+			"Utilities/cmliblzma"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMLIBLZMA"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmliblzma"
@@ -2801,13 +3082,26 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../../../External/CMake/Utilities/cmlibarchive/libarchive'->MakeAbsolute());@('Utilities/cmlibarchive'->MakeAbsolute());@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmbzip2'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmzstd'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "HAVE_CONFIG_H;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../../../External/CMake/Utilities/cmlibarchive/libarchive"->MakeAbsolute(),
+			"Utilities/cmlibarchive"->MakeAbsolute(),
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmbzip2"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmzstd"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"HAVE_CONFIG_H",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/libarchive"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmlibarchive"
@@ -3475,13 +3769,23 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmjsoncpp/include'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmjsoncpp/include"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/JsonCpp"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmjsoncpp"
@@ -3513,13 +3817,27 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../External/CMake/Utilities/cmlibuv/src/win'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0600;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmlibuv/include"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmlibuv/src"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/cmlibuv/src/win"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_WIN32_WINNT=0x0600"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/libuv"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmlibuv"
@@ -3722,19 +4040,53 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "WindowsResource"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmcldeps"
@@ -3743,7 +4095,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		%File "../../../../External/CMake/Source/cmcldeps.cxx"
 		{
 			Compile.Type "C++"
-			Compile.PreprocessorDefines "_WIN32_WINNT=0x0501;@(Compile.PreprocessorDefines)"
+			Compile.PreprocessorDefines += [
+				"_WIN32_WINNT=0x0501"
+			]
 		}
 		%File "../../../../External/CMake/Source/cmake.version.manifest"
 		{
@@ -3755,7 +4109,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -3785,19 +4139,53 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "CMakeLib"
@@ -4457,7 +4845,10 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		%File "../../../../External/CMake/Source/cmFileTime.cxx"
 		{
 			Compile.Type "C++"
-			Compile.PreprocessorDefines "CMake_STAT_HAS_ST_MTIM=0;CMake_STAT_HAS_ST_MTIMESPEC=0;@(Compile.PreprocessorDefines)"
+			Compile.PreprocessorDefines += [
+				"CMake_STAT_HAS_ST_MTIM=0",
+				"CMake_STAT_HAS_ST_MTIMESPEC=0"
+			]
 		}
 		%File "../../../../External/CMake/Source/cmFileTime.h"
 		{
@@ -4886,7 +5277,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		%File "../../../../External/CMake/Source/cmProcessOutput.cxx"
 		{
 			Compile.Type "C++"
-			Compile.PreprocessorDefines "KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8;@(Compile.PreprocessorDefines)"
+			Compile.PreprocessorDefines += [
+				"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+			]
 		}
 		%File "../../../../External/CMake/Source/cmProcessOutput.h"
 		{
@@ -5195,7 +5588,9 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 		%File "../../../../External/CMake/Source/cmake.cxx"
 		{
 			Compile.Type "C++"
-			Compile.PreprocessorDefines "CMAKE_USE_WMAKE;@(Compile.PreprocessorDefines)"
+			Compile.PreprocessorDefines += [
+				"CMAKE_USE_WMAKE"
+			]
 		}
 		%File "../../../../External/CMake/Source/cmake.h"
 		{
@@ -6568,13 +6963,30 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "CTestLib"
@@ -6897,19 +7309,53 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "WindowsResource"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "ctest"
@@ -6930,7 +7376,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -6960,13 +7406,30 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "CMakeServerLib"
@@ -7091,13 +7554,30 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "CPackLib"
@@ -7339,19 +7819,53 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "WindowsResource"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cmake"
@@ -7374,12 +7888,13 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "None"
 		}
 	}
+	%Dependency "Lib_CMakeServerLib"
 	%Dependency "Lib_CMakeLib"
 	%Group "Windows"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -7403,26 +7918,59 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibrhash"
 	%Dependency "Lib_cmstd"
 	%Dependency "Lib_cmsys"
-	%Dependency "Lib_CMakeServerLib"
 }
 %Target "Exe_cpack"
 {
 	Compile
 	{
 		!!Compile.Type "WindowsResource"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_DEBUG;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/LexerParser'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Source/CPack'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;UNICODE;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_UNICODE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_UNICODE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "cpack"
@@ -7446,7 +7994,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Source"
 				{
@@ -7476,13 +8024,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "testUVProcessChainHelper"
@@ -7499,13 +8059,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "testEncoding"
@@ -7523,13 +8095,26 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "CMakeLibTests"
@@ -7537,7 +8122,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -7674,13 +8259,26 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "testAffinity"
@@ -7710,13 +8308,26 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_purify"
@@ -7724,7 +8335,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -7761,13 +8372,26 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "memcheck_fail"
@@ -7775,7 +8399,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -7812,13 +8436,26 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_BC"
@@ -7826,7 +8463,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -7863,13 +8500,26 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_valgrind"
@@ -7877,7 +8527,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -7914,13 +8564,26 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_cuda-memcheck"
@@ -7928,7 +8591,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -7965,13 +8628,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudonl_BC"
@@ -7979,7 +8654,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -8006,13 +8681,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudonl_valgrind"
@@ -8020,7 +8707,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -8047,13 +8734,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudonl_purify"
@@ -8061,7 +8760,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -8088,13 +8787,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Tests/CMakeServerLib'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Tests/CMakeServerLib"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "CMakeServerLibTests"
@@ -8102,7 +8813,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	{
 		%Group "x86"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Tests"
 				{
@@ -8124,6 +8835,7 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 			Compile.Type "C++"
 		}
 	}
+	%Dependency "Lib_CMakeServerLib"
 	%Dependency "Lib_CMakeLib"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
@@ -8137,20 +8849,27 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	%Dependency "Lib_cmlibrhash"
 	%Dependency "Lib_cmstd"
 	%Dependency "Lib_cmsys"
-	%Dependency "Lib_CMakeServerLib"
 }
 %Target "Exe_exit_code"
 {
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "exit_code"
@@ -8167,13 +8886,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_emulator"
@@ -8190,13 +8917,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "color_warning"
@@ -8213,13 +8948,25 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('Utilities'->MakeAbsolute());@('Source'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@('../../../../External/CMake/Source/CTest'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source"->MakeAbsolute(),
+			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "ctresalloc"
@@ -8250,13 +8997,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "fake_build_command"
@@ -8273,13 +9028,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_emulator_custom_command"
@@ -8296,13 +9059,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "print_stdin"
@@ -8319,13 +9090,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_emulator_custom_command_arg"
@@ -8342,13 +9121,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_tidy"
@@ -8365,13 +9152,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_iwyu"
@@ -8388,13 +9183,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_cpplint"
@@ -8411,13 +9214,21 @@ Property.CMakeOutputPath_CMake "@('.'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMake"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "pseudo_cppcheck"

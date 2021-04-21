@@ -1,18 +1,21 @@
-Property.CMakeOutputPath_CMZLIB "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_CMZLIB define string = "../.."->MakeAbsolute()
 %Target "Lib_cmzlib"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzlib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines ";@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmzlib"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute()
+		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMZLIB"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmzlib"

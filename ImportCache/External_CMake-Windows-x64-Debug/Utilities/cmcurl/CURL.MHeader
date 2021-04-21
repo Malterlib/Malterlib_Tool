@@ -1,16 +1,27 @@
-Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 %Target "Exe_curltest"
 {
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmnghttp2/lib/includes'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "CURL_STATICLIB;HAVE_CONFIG_H;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmcurl/include"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmnghttp2/lib/includes"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"HAVE_CONFIG_H",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CURL"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
 	Target.BaseName "curltest"
@@ -30,13 +41,30 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmnghttp2/lib/includes'->MakeAbsolute());@('../../Utilities/cmcurl/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl'->MakeAbsolute());@('../../Utilities/cmcurl'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmcurl/lib'->MakeAbsolute());@('../../Utilities/cmcurl/lib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "BUILDING_LIBCURL;HAVE_CONFIG_H;NGHTTP2_STATICLIB;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmcurl/include"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmnghttp2/lib/includes"->MakeAbsolute(),
+			"../../Utilities/cmcurl/include"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmcurl"->MakeAbsolute(),
+			"../../Utilities/cmcurl"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmcurl/lib"->MakeAbsolute(),
+			"../../Utilities/cmcurl/lib"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"BUILDING_LIBCURL",
+			"HAVE_CONFIG_H",
+			"NGHTTP2_STATICLIB",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CURL"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmcurl"
@@ -1186,7 +1214,7 @@ Property.CMakeOutputPath_CURL "@('../..'->MakeAbsolute())"
 	{
 		%Group "x64"
 		{
-			%Group "@(FullConfiguration)"
+			%Group `@(FullConfiguration)`
 			{
 				%Group "Utilities"
 				{

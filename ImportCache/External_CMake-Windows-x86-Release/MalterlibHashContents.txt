@@ -1,0 +1,94 @@
+GeneratorVersion: 20
+Import.CMake_FullRebuildVersion: 3.1-4
+Import.CMake_CacheExcludePatterns: [
+	*/CMakeFiles/*,
+	*/cmake.tmp/*,
+	*.cmake,
+	*.ninja,
+	*/CMakeCache.txt,
+	*/MalterlibFullRebuildVersion,
+	*/.NoDartCoverage,
+	*/compile_commands.json,
+	*.tcl,
+	*/Testing/*,
+	*/Tests/*,
+	*.qs
+]
+
+Import.CMake_CacheReplaceContents: [
+	{
+		"Find": "C:/Go/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": "C:/strawberry/perl/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": "c:/Program Files/Git/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": "c:/Program Files/Git/usr/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": ,
+		"Replace": "MToolCMake"
+	},
+	{
+		"Find": ,
+		"Replace": "MToolCMake"
+	},
+	{
+		"Find": "/opt/local/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": "/usr/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": "/opt/homebrew/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": "/usr/local/go/bin/",
+		"Replace": ""
+	}
+]
+
+Import.CMake_Languages: [
+	{
+		"CMakeLanguage": "C",
+		"MalterlibLanguage": "C"
+	},
+	{
+		"CMakeLanguage": "CXX",
+		"MalterlibLanguage": "C++"
+	},
+	{
+		"CMakeLanguage": "ASM",
+		"MalterlibLanguage": "Assembler"
+	},
+	{
+		"CMakeLanguage": "ASM_NASM",
+		"MalterlibLanguage": "AssemblerNasm"
+	},
+	{
+		"CMakeLanguage": "ASM_MASM",
+		"MalterlibLanguage": "Assembler"
+	},
+	{
+		"CMakeLanguage": "RC",
+		"MalterlibLanguage": "WindowsResource"
+	}
+]
+
+Import.CMake_Config: Release
+Import.CMake_Variables: [
+	HAVE_OPENSSL_ENGINE_H=0,
+	ENABLE_LZMA=0,
+	ARCHIVE_CRYPTO_RMD160_OPENSSL=0
+]
+

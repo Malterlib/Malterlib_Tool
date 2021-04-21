@@ -1,16 +1,30 @@
-Property.CMakeOutputPath_libuv "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_libuv define string = "../.."->MakeAbsolute()
 %Target "Lib_cmlibuv"
 {
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/include'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmlibuv/src/win'->MakeAbsolute());@('../../Source'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;WIN32_LEAN_AND_MEAN;_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0600;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmlibuv/include"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmlibuv/src"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmlibuv/src/win"->MakeAbsolute(),
+			"../../Source"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_WIN32_WINNT=0x0600"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/libuv"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmlibuv"

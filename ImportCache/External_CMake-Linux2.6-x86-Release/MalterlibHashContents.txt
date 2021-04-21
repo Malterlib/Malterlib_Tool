@@ -1,0 +1,97 @@
+GeneratorVersion: 20
+Import.CMake_FullRebuildVersion: 3.1-4
+Import.CMake_CacheExcludePatterns: [
+	*/CMakeFiles/*,
+	*/cmake.tmp/*,
+	*.cmake,
+	*.ninja,
+	*/CMakeCache.txt,
+	*/MalterlibFullRebuildVersion,
+	*/.NoDartCoverage,
+	*/compile_commands.json,
+	*.tcl,
+	*/Testing/*,
+	*/Tests/*,
+	*.qs
+]
+
+Import.CMake_CacheReplaceContents: [
+	{
+		"Find": ,
+		"Replace": "MToolCMake"
+	},
+	{
+		"Find": ,
+		"Replace": "MToolCMake"
+	},
+	{
+		"Find": "/opt/local/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": "/usr/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": "/opt/homebrew/bin/",
+		"Replace": ""
+	},
+	{
+		"Find": "/usr/local/go/bin/",
+		"Replace": ""
+	}
+]
+
+Import.CMake_Languages: [
+	{
+		"CMakeLanguage": "C",
+		"MalterlibLanguage": "C"
+	},
+	{
+		"CMakeLanguage": "CXX",
+		"MalterlibLanguage": "C++"
+	},
+	{
+		"CMakeLanguage": "ASM",
+		"MalterlibLanguage": "Assembler"
+	}
+]
+
+Import.CMake_Config: Release
+Import.CMake_Variables: [
+	CMAKE_TRY_COMPILE_PLATFORM_VARIABLES=CMAKE_EXE_LINKER_FLAGS_INIT,
+	CMAKE_LINKER=lld,
+	CMAKE_EXE_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32" -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32",
+	CMAKE_STATIC_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32" -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32",
+	CMAKE_MODULE_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32" -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32",
+	CMAKE_SHARED_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32" -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32",
+	CMAKE_CXX_FLAGS_INIT=-stdlib=libc++,
+	CMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY,
+	CMAKE_RANLIB=Dependencies/llvm/11.0/build/main/bin/llvm-ranlib,
+	HAVE_OPENSSL_ENGINE_H=0,
+	ENABLE_LZMA=0,
+	HAVE_LIBRICHACL=0,
+	HAVE_ARC4RANDOM_BUF=0,
+	HAVE__CTIME64_S=0,
+	HAVE_READPASSPHRASE=0,
+	HAVE__LOCALTIME64_S=0,
+	HAVE__GMTIME64_S=0,
+	HAVE_POLL_FINE_EXITCODE=0,
+	HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT=,
+	HAVE_FSETXATTR_5=0,
+	HAVE_FSETXATTR_5__TRYRUN_OUTPUT=,
+	KWSYS_LFS_WORKS__TRYRUN_OUTPUT=,
+	KWSYS_LFS_WORKS=0,
+	HAVE_GLIBC_STRERROR_R__TRYRUN_OUTPUT=,
+	HAVE_GLIBC_STRERROR_R=0,
+	HAVE_POSIX_STRERROR_R__TRYRUN_OUTPUT=,
+	HAVE_POSIX_STRERROR_R=99,
+	HAVE_POLL_FINE_EXITCODE=0,
+	CMake_RUN_CXX_FILESYSTEM=0,
+	CMake_RUN_CXX_FILESYSTEM__TRYRUN_OUTPUT=1,
+	FIND_LIBRARY_USE_LIB32_PATHS=1,
+	ARCHIVE_CRYPTO_RMD160_OPENSSL=0,
+	HAVE_ARC4RANDOM_BUF=0,
+	HAVE__CTIME64_S=0
+]
+

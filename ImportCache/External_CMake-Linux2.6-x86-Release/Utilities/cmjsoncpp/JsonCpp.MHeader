@@ -1,16 +1,25 @@
-Property.CMakeOutputPath_JsonCpp "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_JsonCpp define string = "../.."->MakeAbsolute()
 %Target "Lib_cmjsoncpp"
 {
 	Compile
 	{
 		!!Compile.Type "C++"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmjsoncpp/include'->MakeAbsolute());@('../../Source'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmjsoncpp/include"->MakeAbsolute(),
+			"../../Source"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC",
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/JsonCpp"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmjsoncpp"

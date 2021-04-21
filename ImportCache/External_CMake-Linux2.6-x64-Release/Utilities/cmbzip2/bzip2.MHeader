@@ -1,18 +1,22 @@
-Property.CMakeOutputPath_bzip2 "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_bzip2 define string = "../.."->MakeAbsolute()
 %Target "Lib_cmbzip2"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "NDEBUG;_FILE_OFFSET_BITS=64;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_FILE_OFFSET_BITS=64"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/bzip2"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmbzip2"

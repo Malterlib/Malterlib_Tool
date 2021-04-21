@@ -1,1 +1,1 @@
-Property.CMakeOutputPath_CMakeHelp "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_CMakeHelp define string = "../.."->MakeAbsolute()

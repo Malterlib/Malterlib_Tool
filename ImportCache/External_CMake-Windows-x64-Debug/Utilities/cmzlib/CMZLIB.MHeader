@@ -1,16 +1,24 @@
-Property.CMakeOutputPath_CMZLIB "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_CMZLIB define string = "../.."->MakeAbsolute()
 %Target "Lib_cmzlib"
 {
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzlib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmzlib"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMZLIB"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmzlib"

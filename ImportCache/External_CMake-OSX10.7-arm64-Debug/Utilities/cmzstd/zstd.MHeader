@@ -1,18 +1,24 @@
-Property.CMakeOutputPath_zstd "@('../..'->MakeAbsolute())"
+Property.CMakeOutputPath_zstd define string = "../.."->MakeAbsolute()
 %Target "Lib_cmzstd"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../Utilities'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd/lib'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/cmzstd/lib/common'->MakeAbsolute());@('../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "DYNAMIC_BMI2=0;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../Utilities"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmzstd/lib"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/cmzstd/lib/common"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"DYNAMIC_BMI2=0"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/zstd"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmzstd"

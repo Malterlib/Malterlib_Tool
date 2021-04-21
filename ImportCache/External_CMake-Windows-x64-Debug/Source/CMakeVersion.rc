@@ -9,8 +9,8 @@ BEGIN
     BEGIN
         BLOCK "040904E4"
         BEGIN
-            VALUE "FileVersion",      "3.19.2-gc157cd9\0"
-            VALUE "ProductVersion",   "3.19.2-gc157cd9\0"
+            VALUE "FileVersion",      "3.19.2-gcbcae15\0"
+            VALUE "ProductVersion",   "3.19.2-gcbcae15\0"
         END
     END
 

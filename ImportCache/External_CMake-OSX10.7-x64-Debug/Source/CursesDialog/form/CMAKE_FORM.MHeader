@@ -1,18 +1,24 @@
-Property.CMakeOutputPath_CMAKE_FORM "@('../../..'->MakeAbsolute())"
+Property.CMakeOutputPath_CMAKE_FORM define string = "../../.."->MakeAbsolute()
 %Target "Lib_cmForm"
 {
-	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
-		SearchPath "@('../../../Utilities'->MakeAbsolute());@('../../../Source/CursesDialog/form'->MakeAbsolute());@('../../../../../../../External/CMake/Source/CursesDialog/form'->MakeAbsolute());@('../../../../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../../../../External/CMake/Utilities'->MakeAbsolute());@(Compile.SearchPath)"
-		PreprocessorDefines "LIBARCHIVE_STATIC;@(Compile.PreprocessorDefines)"
-		CLanguage "GNU11"
+		SearchPath += [
+			"../../../Utilities"->MakeAbsolute(),
+			"../../../Source/CursesDialog/form"->MakeAbsolute(),
+			"../../../../../../../External/CMake/Source/CursesDialog/form"->MakeAbsolute(),
+			"../../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Target.Group "External/CMAKE_FORM"
 	{
-		!!Target.Group ""
+		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
 	Target.BaseName "cmForm"
