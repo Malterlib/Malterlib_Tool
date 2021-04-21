@@ -3,15 +3,11 @@
 
 Property
 {
-	MToolEmbeddCMake true
-	{
-		!!MToolEmbeddCMake ""
-	}
+	MToolEmbeddCMake define bool = true
 }
 Property
 {
 	!!MToolEmbeddCMake true
-	
 	MalterlibBuildSystemEmbedCMake true
 }
 
@@ -23,7 +19,10 @@ Property
 		MalterlibDoExeFS true
         ProductName "Malterlib Tool"
 		MalterlibTargetNameType "Normal"
-		MalterlibExeFSExtraFiles "@('../../../../External/CMake/Templates'->MakeAbsolute())/^*|Templates;@('../../../../External/CMake/Modules'->MakeAbsolute())/^*|Modules;@(MalterlibExeFSExtraFiles)"
+		MalterlibExeFSExtraFiles =+ [
+			{Pattern: `@("../../../../External/CMake/Templates"->MakeAbsolute())/*`, Destination: "Templates", Recursive: true}
+			, {Pattern: `@("../../../../External/CMake/Modules"->MakeAbsolute())/*`, Destination: "Modules", Recursive: true }
+		]
 		{
 			!!MToolEmbeddCMake true
 		}
@@ -33,34 +32,36 @@ Property
 	{
 		Type "ConsoleExecutable"
 		BaseName "MTool"
-		LinkWithLibraries "Iphlpapi.lib;@(Target.LinkWithLibraries)"
+		LinkWithLibraries += "Iphlpapi.lib"
 		{
 			!!PlatformFamily "Windows"
 		}
 		Group "Apps"
-		ExtraGroups "{Malterlib}/{CloudTarBinaries};@(Target.ExtraGroups)"
+		ExtraGroups =+ "{Malterlib}/{CloudTarBinaries}"
 	}
 	Compile
 	{
 		!!CompileDialect "C"
-		SearchPath "@(CMakeOutputPath_CMake)/Utilities;@(CMakeOutputPath_CMake)/Source;@('../../../../External/CMake/Utilities'->MakeAbsolute());@('../../../../External/CMake/Utilities/std'->MakeAbsolute());@('../../../../External/CMake/Source'->MakeAbsolute());@(Compile.SearchPath)"
-		{
-			!!MToolEmbeddCMake true
-		}
-				
-		PreprocessorDefines "CMAKE_BUILD_WITH_CMAKE;CURL_STATICLIB;LIBARCHIVE_STATIC;CMAKE_DISABLE_MAIN;DMToolEmbedCMake=1;@(Compile.PreprocessorDefines)"
+		SearchPath += [
+			CMakeOutputPath_CMake / "Utilities"
+			, CMakeOutputPath_CMake / "Source"
+			, "../../../../External/CMake/Utilities"->MakeAbsolute()
+			, "../../../../External/CMake/Utilities/std"->MakeAbsolute()
+			, "../../../../External/CMake/Source"->MakeAbsolute()
+		]
 		{
 			!!MToolEmbeddCMake true
 		}
 
-		PreprocessorDefines "_HAS_AUTO_PTR_ETC=1;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines += ["CMAKE_BUILD_WITH_CMAKE", "CURL_STATICLIB", "LIBARCHIVE_STATIC", "CMAKE_DISABLE_MAIN", "DMToolEmbedCMake=1"]
+		{
+			!!MToolEmbeddCMake true
+		}
+
+		PreprocessorDefines += "_HAS_AUTO_PTR_ETC=1"
 		{
 			!!GeneratorFamily "VisualStudio"
 		}
-	}
-	Property
-	{
-		MalterlibLinkWithOpenSSL true
 	}
 	%Group "BuildScripts"
 	{
@@ -88,21 +89,21 @@ Property
 	Compile
 	{
 		!!CompileDialect "C"
-		PreprocessorDefines "CMAKE_MALTERLIB_EXEFS;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines += "CMAKE_MALTERLIB_EXEFS"
 	}
 	Property.ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake
 	%Group "ExternalBinaries"
 	{
 		Property
 		{
-			MalterlibBuildServerPutPath "BuildResults/@(PlatformFamily)/@(Architecture)"
+			MalterlibBuildServerPutPath `BuildResults/@(PlatformFamily)/@(Architecture)`
 		}
 	}
 	%Group "Apps"
 	{
 		Property
 		{
-			MalterlibBuildServerPutPath "BuildResults/@(PlatformFamily)/@(Architecture)"
+			MalterlibBuildServerPutPath `BuildResults/@(PlatformFamily)/@(Architecture)`
 		}
 		%Target "Malterlib_Tool_MTool"
 	}

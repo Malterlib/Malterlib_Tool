@@ -1,4 +1,4 @@
-// Copyright © 2016 Hansoft AB 
+// Copyright © 2016 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 Import "../Core/Lib_Malterlib.MTarget"
@@ -9,52 +9,73 @@ Import "Apps/*/*.MHeader"
 	Repository
 	{
 		Type "External"
-		Remotes "upstream=https://github.com/Kitware/CMake.git;@(Repository.Remotes)"
+		Remotes =+ {Name: "upstream", URL: "https://github.com/Kitware/CMake.git"}
 	}
 }
 
 %Import "../../External/CMake/CMakeLists.txt"
 {
-	Import.CMake_CacheExcludePatterns "*.tcl;*/Testing/*;*/Tests/*;*.qs;@(Import.CMake_CacheExcludePatterns)"
-	
-	Import.CMake_FullRebuildVersion "@(Import.CMake_FullRebuildVersion).1"
-	Import.CMake_Variables "CMAKE_CXX_FLAGS=-stdlib=libc++;@(Import.CMake_Variables)"
+	Import.CMake_CacheExcludePatterns =+ ["*.tcl", "*/Testing/*", "*/Tests/*", "*.qs"]
+
+	Import.CMake_FullRebuildVersion `@(Import.CMake_FullRebuildVersion).1`
+	Import.CMake_Variables =+ "CMAKE_CXX_FLAGS=-stdlib=libc++"
 	{
 		!!PlatformFamily "OSX"
 	}
 
-	Import.CMake_Variables "ENABLE_LZMA=0;HAVE_OPENSSL_ENGINE_H=0;@(Import.CMake_Variables)"
+	Import.CMake_Variables =+ ["HAVE_OPENSSL_ENGINE_H=0", "ENABLE_LZMA=0"]
 
-	Import.CMake_Variables "HAVE_LIBRICHACL=0;HAVE_ARC4RANDOM_BUF=0;HAVE__CTIME64_S=0;HAVE_READPASSPHRASE=0;HAVE__LOCALTIME64_S=0;HAVE__GMTIME64_S=0;@(Import.CMake_Variables)"
+	Import.CMake_Variables =+ [
+		"HAVE_LIBRICHACL=0"
+		, "HAVE_ARC4RANDOM_BUF=0"
+		, "HAVE__CTIME64_S=0"
+		, "HAVE_READPASSPHRASE=0"
+		, "HAVE__LOCALTIME64_S=0"
+		, "HAVE__GMTIME64_S=0"
+	]
 	{
 		!!PlatformFamily "Linux"
 	}
 
-	Import.CMake_Variables "HAVE_POLL_FINE_EXITCODE=0;HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT=;HAVE_FSETXATTR_5=0;HAVE_FSETXATTR_5__TRYRUN_OUTPUT=;KWSYS_LFS_WORKS__TRYRUN_OUTPUT=;KWSYS_LFS_WORKS=0;HAVE_GLIBC_STRERROR_R__TRYRUN_OUTPUT=;HAVE_GLIBC_STRERROR_R=0;HAVE_POSIX_STRERROR_R__TRYRUN_OUTPUT=;HAVE_POSIX_STRERROR_R=99;HAVE_POLL_FINE_EXITCODE=0;CMake_RUN_CXX_FILESYSTEM=0;CMake_RUN_CXX_FILESYSTEM__TRYRUN_OUTPUT=1;@(Import.CMake_Variables)"
+	Import.CMake_Variables =+ [
+		"HAVE_POLL_FINE_EXITCODE=0"
+		, "HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT="
+		, "HAVE_FSETXATTR_5=0"
+		, "HAVE_FSETXATTR_5__TRYRUN_OUTPUT="
+		, "KWSYS_LFS_WORKS__TRYRUN_OUTPUT="
+		, "KWSYS_LFS_WORKS=0"
+		, "HAVE_GLIBC_STRERROR_R__TRYRUN_OUTPUT="
+		, "HAVE_GLIBC_STRERROR_R=0"
+		, "HAVE_POSIX_STRERROR_R__TRYRUN_OUTPUT="
+		, "HAVE_POSIX_STRERROR_R=99"
+		, "HAVE_POLL_FINE_EXITCODE=0"
+		, "CMake_RUN_CXX_FILESYSTEM=0"
+		, "CMake_RUN_CXX_FILESYSTEM__TRYRUN_OUTPUT=1"
+	]
 	{
 		&
 		{
 			PlatformFamily "Linux"
-			!HostPlatformFamily "Linux" 
+			!HostPlatformFamily "Linux"
 		}
 	}
-	Import.CMake_Variables "FIND_LIBRARY_USE_LIB32_PATHS=1;@(Import.CMake_Variables)"
+	Import.CMake_Variables =+ "FIND_LIBRARY_USE_LIB32_PATHS=1"
 	{
 		&
 		{
 			PlatformFamily "Linux"
 			Architecture "x86"
-			!HostPlatformFamily "Linux" 
+			!HostPlatformFamily "Linux"
 		}
 	}
-	Import.CMake_Variables "ARCHIVE_CRYPTO_RMD160_OPENSSL=0;@(Import.CMake_Variables)"
+	Import.CMake_Variables =+ "ARCHIVE_CRYPTO_RMD160_OPENSSL=0"
 
-	Import.CMake_Variables "HAVE_ARC4RANDOM_BUF=0;HAVE__CTIME64_S=0;@(Import.CMake_Variables)"
+	Import.CMake_Variables =+ ["HAVE_ARC4RANDOM_BUF=0", "HAVE__CTIME64_S=0"]
 	{
 		!!PlatformFamily "Linux"
 	}
 
-	Target.ExtraGroups "~Automatic/DependBoringSSL;@(Target.ExtraGroups)"
+	Target.ExtraGroups =+ "~Automatic/DependBoringSSL"
 	{
 		&
 		{
@@ -86,7 +107,7 @@ Import "Apps/*/*.MHeader"
 		Warnings_UnusedValue false
 		Warnings_TautolagicalPointerCompare false
 		Warnings_DeprecatedDeclarations false
-		PreprocessorDefines "_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR=1;_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS=1;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines += ["_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR=1", "_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS=1"]
 	}
 	Compile
 	{
@@ -95,7 +116,7 @@ Import "Apps/*/*.MHeader"
 			CompileDialect "C"
 			PlatformFamily "Windows"
 		}
-		PreprocessorDefines "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines += "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS"
 	}
 	Compile
 	{
@@ -104,9 +125,9 @@ Import "Apps/*/*.MHeader"
 			CompileDialect "C"
 			GeneratorFamily "VisualStudio"
 		}
-		PreprocessorDefines "_HAS_AUTO_PTR_ETC=1;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines += "_HAS_AUTO_PTR_ETC=1"
 
-		ExtraCompilerFlags "-wd4838 @(Compile.ExtraCompilerFlags)"
+		ExtraCompilerFlags =+ "-wd4838"
 		{
 			&
 			{
@@ -120,7 +141,7 @@ Import "Apps/*/*.MHeader"
 		Compile
 		{
 			!!CompileDialect "C"
-			PrefixHeader ""
+			PrefixHeader undefined
 		}
 	}
 	%Target "Lib_cmcompress"
@@ -129,10 +150,7 @@ Import "Apps/*/*.MHeader"
 	}
 }
 
-Property.MalterlibEnableCMakeProject ""
-{
-	!!MalterlibEnableCMakeProject ""
-}
+Property.MalterlibEnableCMakeProject define bool = false
 
 %Workspace "CMake"
 {
@@ -141,7 +159,7 @@ Property.MalterlibEnableCMakeProject ""
 	Compile
 	{
 		!!CompileDialect "C"
-		PreprocessorDefines "CMAKE_MALTERLIB_EXEFS;@(Compile.PreprocessorDefines)"
+		PreprocessorDefines += "CMAKE_MALTERLIB_EXEFS"
 	}
 	%Target "Exe_cmake"
 	{
@@ -150,23 +168,28 @@ Property.MalterlibEnableCMakeProject ""
 		{
 			MalterlibPostCopyProject "cmake"
 			MalterlibDoExeFS true
-			MalterlibExeFSExtraFiles "@('../../External/CMake/Templates'->MakeAbsolute())/^*|Templates;@('../../External/CMake/Modules'->MakeAbsolute())/^*|Modules;@(MalterlibExeFSExtraFiles)"
+			MalterlibExeFSExtraFiles =+ [
+				{Pattern: `@("../../External/CMake/Templates"->MakeAbsolute())/*`, Destination: "Templates", Recursive: true}
+				, {Pattern: `@("../../External/CMake/Modules"->MakeAbsolute())/*`, Destination: "Modules", Recursive: true}
+			]
 		}
-		Target.LinkWithLibraries "Userenv.lib;Iphlpapi.lib;@(Target.LinkWithLibraries)"
+		Target.LinkWithLibraries += ["Userenv.lib", "Iphlpapi.lib"]
 		{
 			!!PlatformFamily "Windows"
 		}
 	}
 }
 
+Property.Malterlib_Tool_App_Targets define [type(CEntity)] = []
+
 %Workspace "Apps_Malterlib_Tool"
 {
 	&
 	{
 		MalterlibEnableInternalWorkspaces true
-		!Malterlib_Tool_App_Targets ""
+		!Malterlib_Tool_App_Targets []
 	}
-	
+
 	Property
 	{
 		MalterlibCloud_EnableVersionUpload true
@@ -175,8 +198,8 @@ Property.MalterlibEnableCMakeProject ""
 		{
 			!!TargetIsExecutable true
 		}
-	
-		MalterlibLog_Severities "Error;Critical;Warning;Info"
+
+		MalterlibLog_Severities ["Error", "Critical", "Warning", "Info"]
 		{
 			!!MalterlibLog_EnableVerboseDebugLog false
 		}
@@ -184,6 +207,6 @@ Property.MalterlibEnableCMakeProject ""
 
 	%Group "Apps"
 	{
-		%Target "@(Malterlib_Tool_App_Targets)"
+		%Target Malterlib_Tool_App_Targets
 	}
 }
