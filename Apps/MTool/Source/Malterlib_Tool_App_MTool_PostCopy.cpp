@@ -8,6 +8,7 @@
 #include <Mib/Perforce/Wrapper>
 #include <Mib/Cryptography/MD5Cache>
 #include <Mib/Container/Convert>
+#include <Mib/Encoding/JSONShortcuts>
 
 class CTool_PostCopy : public CTool
 {
@@ -28,6 +29,32 @@ public:
 			DConOut("Deleting empty dir: {}" DNewLine, _Path);
 			return;
 		}
+	}
+
+
+	static CBuildSystemRegistryValue fs_GetIdentifierKey(CStr const &_Identifier)
+	{
+		return CEJSON::fs_FromJSON
+			(
+				CJSON
+				{
+					"$type"__= "BuildSystemToken",
+					"$value"__= {
+						"Param"__= {
+							"$type"__= "BuildSystemToken",
+							"$value"__= {
+								"Type"__= "Identifier",
+								"EntityType"__= "",
+								"PropertyType"__= "",
+								"Name"__= _Identifier
+							}
+						},
+						"Paren"__= false,
+						"Type"__= "Expression"
+					}
+				}
+			)
+		;
 	}
 
 	aint f_Run(NContainer::CRegistry &_Params)
@@ -97,13 +124,15 @@ public:
 
 		TCVector<CStr> ExcludePatterns;
 
-		if (auto pValue = Registry.f_GetChild("ExcludePatterns"))
+		auto ExcludePatternsKey = fs_GetIdentifierKey("ExcludePatterns");
+
+		if (auto pValue = Registry.f_GetChildNoPath(ExcludePatternsKey))
 		{
 			if (pValue->f_GetThisValue().f_IsString())
 			{
 				if (!pValue->f_GetThisValue().f_String().f_IsEmpty())
 					ExcludePatterns = pValue->f_GetThisValue().f_String().f_Split<true>(";");
-				Registry.f_SetValue("ExcludePatterns", ExcludePatterns);
+				Registry.f_SetValueNoPath(ExcludePatternsKey, ExcludePatterns);
 			}
 			else
 			{
@@ -121,11 +150,14 @@ public:
 		else
 		{
 			ExcludePatterns = {"*/.git", "*/.DS_Store"};
-			Registry.f_SetValue("ExcludePatterns", CStr::fs_Join(ExcludePatterns, ";"));
+			Registry.f_SetValueNoPath(ExcludePatternsKey, CEJSON(ExcludePatterns));
 		}
 
-		auto pProjects = Registry.f_CreateChild("Projects");
-		auto pTags = Registry.f_CreateChild("Tags");
+		auto TagsKey = fs_GetIdentifierKey("Tags");
+		auto TagKey = fs_GetIdentifierKey("Tag");
+
+		auto pProjects = Registry.f_CreateChildNoPath(fs_GetIdentifierKey("Projects"));
+		auto pTags = Registry.f_CreateChildNoPath(TagsKey);
 		TCSet<CStr> Tags;
 		if (pTags)
 		{
@@ -142,10 +174,11 @@ public:
 				pTags->f_SetThisValue(EJSONType_Array);
 			else
 			{
-				for (auto iTag = pTags->f_GetChildIterator("Tag"); iTag && iTag->f_GetName() == "Tag"; ++iTag)
+				for (auto iTag = pTags->f_GetChildIterator(TagKey); iTag && iTag->f_GetName() == TagKey; ++iTag)
 					Tags[iTag->f_GetThisValue().f_String()];
 
 				pTags->f_SetThisValue(NContainer::fg_ConvertContainer<TCVector<CStr>>(NContainer::fg_ConvertContainer<TCSet<CStr>>(NContainer::fg_ConvertContainer<TCVector<CStr>>(Tags))));
+				pTags->f_DeleteAllChildren();
 			}
 		}
 
@@ -160,16 +193,20 @@ public:
 #endif
 
 		CStr DefaultRoot;
-		if (auto DefaultRootJSON = Registry.f_GetValue("DefaultRoot", DefaultRootDefault); DefaultRootJSON.f_IsString())
+		if (auto DefaultRootJSON = Registry.f_GetValueNoPath(fs_GetIdentifierKey("DefaultRoot"), DefaultRootDefault); DefaultRootJSON.f_IsString())
 			DefaultRoot = DefaultRootJSON.f_String();
 		else
 			DefaultRoot = DefaultRootDefault;
 
-		auto pProject = pProjects->f_GetChild(DestinationProject);
+		auto DestinationKey = fs_GetIdentifierKey("Destination");
+		auto EnableIfKey = fs_GetIdentifierKey("EnableIf");
+		auto DestinationProjectKey = fs_GetIdentifierKey(DestinationProject);
+
+		auto pProject = pProjects->f_GetChildNoPath(DestinationProjectKey);
 		if (!pProject)
 		{
-			pProject = pProjects->f_CreateChild(DestinationProject);
-			auto pDestination = pProject->f_CreateChild("Destination", true);
+			pProject = pProjects->f_CreateChildNoPath(DestinationProjectKey);
+			auto pDestination = pProject->f_CreateChildNoPath(DestinationKey, true);
 			pDestination->f_SetThisValue(CFile::fs_AppendPath(DefaultRoot, DestinationProject));
 			DConOut("Added {} post copy project to config file" DNewLine, DestinationProject);
 		}
@@ -180,13 +217,13 @@ public:
 					DError(CStr(CStr::CFormat("Source file does not exist: {}") << _SourceFile));
 
 				CStr SourceFileName = CFile::fs_GetFile(_SourceFile);
-				for (auto iDest = pProject->f_GetChildIterator("Destination"); iDest && iDest->f_GetName() == "Destination"; ++iDest)
+				for (auto iDest = pProject->f_GetChildIterator(DestinationKey); iDest && iDest->f_GetName() == DestinationKey; ++iDest)
 				{
 					CHashCache HashCache(CStr(), false, false);
 
 					bool bTagFound = false;
 					bool bTagMatched = false;
-					for (auto iTag = iDest->f_GetChildIterator("Tag"); iTag && iTag->f_GetName() == "Tag"; ++iTag)
+					for (auto iTag = iDest->f_GetChildIterator(TagKey); iTag && iTag->f_GetName() == TagKey; ++iTag)
 					{
 						bTagFound = true;
 						if (Tags.f_FindEqual(iTag->f_GetThisValue().f_String()))
@@ -199,7 +236,7 @@ public:
 						continue;
 
 					bool bEnabledIf = true;
-					for (auto iEnableIf = iDest->f_GetChildIterator("EnableIf"); iEnableIf && iEnableIf->f_GetName() == "EnableIf"; ++iEnableIf)
+					for (auto iEnableIf = iDest->f_GetChildIterator(EnableIfKey); iEnableIf && iEnableIf->f_GetName() == EnableIfKey; ++iEnableIf)
 					{
 						if (_SourceFile.f_Find(iEnableIf->f_GetThisValue().f_String()) < 0)
 						{
@@ -211,7 +248,7 @@ public:
 					if (!bEnabledIf)
 						continue;
 
-					CStr NewFileName = iDest->f_GetValue("Rename", SourceFileName).f_String();
+					CStr NewFileName = iDest->f_GetValueNoPath(fs_GetIdentifierKey("Rename"), SourceFileName).f_String();
 
 					CStr Destination = iDest->f_GetThisValue().f_String();
 					CStr FullDestination;
