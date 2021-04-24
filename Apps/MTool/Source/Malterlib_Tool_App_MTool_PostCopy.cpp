@@ -32,29 +32,9 @@ public:
 	}
 
 
-	static CBuildSystemRegistryValue fs_GetIdentifierKey(CStr const &_Identifier)
+	static CBuildSystemSyntax::CRootKey fs_GetIdentifierKey(CStr const &_Identifier)
 	{
-		return CEJSON::fs_FromJSON
-			(
-				CJSON
-				{
-					"$type"__= "BuildSystemToken",
-					"$value"__= {
-						"Param"__= {
-							"$type"__= "BuildSystemToken",
-							"$value"__= {
-								"Type"__= "Identifier",
-								"EntityType"__= "",
-								"PropertyType"__= "",
-								"Name"__= _Identifier
-							}
-						},
-						"Paren"__= false,
-						"Type"__= "Expression"
-					}
-				}
-			)
-		;
+		return CBuildSystemSyntax::CIdentifier{_Identifier, EEntityType_Invalid, EPropertyType_Property, true}.f_RootKey();
 	}
 
 	aint f_Run(NContainer::CRegistry &_Params)
@@ -128,29 +108,36 @@ public:
 
 		if (auto pValue = Registry.f_GetChildNoPath(ExcludePatternsKey))
 		{
-			if (pValue->f_GetThisValue().f_IsString())
+			if (pValue->f_GetThisValue().m_Value.f_IsConstantString())
 			{
-				if (!pValue->f_GetThisValue().f_String().f_IsEmpty())
-					ExcludePatterns = pValue->f_GetThisValue().f_String().f_Split<true>(";");
-				Registry.f_SetValueNoPath(ExcludePatternsKey, ExcludePatterns);
+				if (!pValue->f_GetThisValue().m_Value.f_ConstantString().f_IsEmpty())
+					ExcludePatterns = pValue->f_GetThisValue().m_Value.f_ConstantString().f_Split<true>(";");
+				CBuildSystemSyntax::CArray Array;
+				for (auto &Pattern : ExcludePatterns)
+					Array.m_Array.f_Insert(CBuildSystemSyntax::CValue{Pattern});
+				Registry.f_SetValueNoPath(ExcludePatternsKey, CBuildSystemSyntax::CRootValue{Array});
 			}
 			else
 			{
-				if (!pValue->f_GetThisValue().f_IsArray())
+				if (!pValue->f_GetThisValue().m_Value.f_IsArray())
 					CBuildSystem::fs_ThrowError(*pValue, "ExcludePatterns needs to be an array of strings");
 
-				for (auto &Pattern : pValue->f_GetThisValue().f_Array())
+				for (auto &Pattern : pValue->f_GetThisValue().m_Value.f_Array().m_Array)
 				{
-					if (!Pattern.f_IsString())
+					if (!Pattern.f_Get().f_IsConstantString())
 						CBuildSystem::fs_ThrowError(*pValue, "ExcludePatterns needs to be an array of strings");
-					ExcludePatterns.f_Insert(Pattern.f_String());
+					ExcludePatterns.f_Insert(Pattern.f_Get().f_ConstantString());
 				}
 			}
 		}
 		else
 		{
 			ExcludePatterns = {"*/.git", "*/.DS_Store"};
-			Registry.f_SetValueNoPath(ExcludePatternsKey, CEJSON(ExcludePatterns));
+
+			CBuildSystemSyntax::CArray Array;
+			for (auto &Pattern : ExcludePatterns)
+				Array.m_Array.f_Insert(CBuildSystemSyntax::CValue{Pattern});
+			Registry.f_SetValueNoPath(ExcludePatternsKey, CBuildSystemSyntax::CRootValue{Array});
 		}
 
 		auto TagsKey = fs_GetIdentifierKey("Tags");
@@ -161,23 +148,32 @@ public:
 		TCSet<CStr> Tags;
 		if (pTags)
 		{
-			if (pTags->f_GetThisValue().f_IsArray())
+			if (pTags->f_GetThisValue().m_Value.f_IsArray())
 			{
-				for (auto &Tag : pTags->f_GetThisValue().f_Array())
+				for (auto &Tag : pTags->f_GetThisValue().m_Value.f_Array().m_Array)
 				{
-					if (!Tag.f_IsString())
+					if (!Tag.f_Get().f_IsConstantString())
 						CBuildSystem::fs_ThrowError(*pTags, "Tags needs to be an array of strings");
-					Tags[Tag.f_String()];
+					Tags[Tag.f_Get().f_ConstantString()];
 				}
 			}
-			else if (pTags->f_GetThisValue().f_IsString())
-				pTags->f_SetThisValue(EJSONType_Array);
+			else if (pTags->f_GetThisValue().m_Value.f_IsConstantString())
+				pTags->f_SetThisValue(CBuildSystemSyntax::CRootValue{CBuildSystemSyntax::CArray{}});
 			else
 			{
 				for (auto iTag = pTags->f_GetChildIterator(TagKey); iTag && iTag->f_GetName() == TagKey; ++iTag)
-					Tags[iTag->f_GetThisValue().f_String()];
+				{
+					if (!iTag->f_GetThisValue().m_Value.f_IsConstantString())
+						CBuildSystem::fs_ThrowError(*pTags, "Tags needs to be an strings");
 
-				pTags->f_SetThisValue(NContainer::fg_ConvertContainer<TCVector<CStr>>(NContainer::fg_ConvertContainer<TCSet<CStr>>(NContainer::fg_ConvertContainer<TCVector<CStr>>(Tags))));
+					Tags[iTag->f_GetThisValue().m_Value.f_ConstantString()];
+				}
+
+				CBuildSystemSyntax::CArray Array;
+				for (auto &Tag : Tags)
+					Array.m_Array.f_Insert(CBuildSystemSyntax::CValue{Tag});
+
+				pTags->f_SetThisValue(CBuildSystemSyntax::CRootValue{Array});
 				pTags->f_DeleteAllChildren();
 			}
 		}
@@ -191,10 +187,11 @@ public:
 		if (!DefaultRootDefault)
 			DefaultRootDefault = "/opt/Deploy";
 #endif
+		CBuildSystemSyntax::CRootValue DefaultRootDefaultRootValue{DefaultRootDefault};
 
 		CStr DefaultRoot;
-		if (auto DefaultRootJSON = Registry.f_GetValueNoPath(fs_GetIdentifierKey("DefaultRoot"), DefaultRootDefault); DefaultRootJSON.f_IsString())
-			DefaultRoot = DefaultRootJSON.f_String();
+		if (auto DefaultRootJSON = Registry.f_GetValueNoPath(fs_GetIdentifierKey("DefaultRoot"), DefaultRootDefaultRootValue); DefaultRootJSON.m_Value.f_IsConstantString())
+			DefaultRoot = DefaultRootJSON.m_Value.f_ConstantString();
 		else
 			DefaultRoot = DefaultRootDefault;
 
@@ -207,7 +204,7 @@ public:
 		{
 			pProject = pProjects->f_CreateChildNoPath(DestinationProjectKey);
 			auto pDestination = pProject->f_CreateChildNoPath(DestinationKey, true);
-			pDestination->f_SetThisValue(CFile::fs_AppendPath(DefaultRoot, DestinationProject));
+			pDestination->f_SetThisValue(CBuildSystemSyntax::CRootValue{CFile::fs_AppendPath(DefaultRoot, DestinationProject)});
 			DConOut("Added {} post copy project to config file" DNewLine, DestinationProject);
 		}
 
@@ -226,7 +223,10 @@ public:
 					for (auto iTag = iDest->f_GetChildIterator(TagKey); iTag && iTag->f_GetName() == TagKey; ++iTag)
 					{
 						bTagFound = true;
-						if (Tags.f_FindEqual(iTag->f_GetThisValue().f_String()))
+						if (!iTag->f_GetThisValue().m_Value.f_IsConstantString())
+							CBuildSystem::fs_ThrowError(*iTag, "Tag needs to be a constant string");
+
+						if (Tags.f_FindEqual(iTag->f_GetThisValue().m_Value.f_ConstantString()))
 						{
 							bTagMatched = true;
 							break;
@@ -238,7 +238,10 @@ public:
 					bool bEnabledIf = true;
 					for (auto iEnableIf = iDest->f_GetChildIterator(EnableIfKey); iEnableIf && iEnableIf->f_GetName() == EnableIfKey; ++iEnableIf)
 					{
-						if (_SourceFile.f_Find(iEnableIf->f_GetThisValue().f_String()) < 0)
+						if (!iEnableIf->f_GetThisValue().m_Value.f_IsConstantString())
+							CBuildSystem::fs_ThrowError(*iEnableIf, "EnableIf needs to be a constant string");
+
+						if (_SourceFile.f_Find(iEnableIf->f_GetThisValue().m_Value.f_ConstantString()) < 0)
 						{
 							bEnabledIf = false;
 							break;
@@ -248,9 +251,15 @@ public:
 					if (!bEnabledIf)
 						continue;
 
-					CStr NewFileName = iDest->f_GetValueNoPath(fs_GetIdentifierKey("Rename"), SourceFileName).f_String();
+					auto SetNewfileName = iDest->f_GetValueNoPath(fs_GetIdentifierKey("Rename"), CBuildSystemSyntax::CRootValue{SourceFileName});
+					CStr NewFileName = SourceFileName;
+					if (SetNewfileName.m_Value.f_IsConstantString())
+						NewFileName = SetNewfileName.m_Value.f_ConstantString();
 
-					CStr Destination = iDest->f_GetThisValue().f_String();
+					if (!iDest->f_GetThisValue().m_Value.f_IsConstantString())
+						CBuildSystem::fs_ThrowError(*iDest, "Destination needs to be a constant string");
+
+					CStr Destination = iDest->f_GetThisValue().m_Value.f_ConstantString();
 					CStr FullDestination;
 
 					TCUniquePointer<CHashCache> pOldHashCache;
