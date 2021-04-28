@@ -141,9 +141,12 @@ uint32 CTool_Malterlib::f_RunBuildSystem(TCFunction<CBuildSystem::ERetry (NBuild
 		(
 			fg_Move(_fCommand)
 			, _AnsiFlags
-			, [](NStr::CStr const &_Output)
+			, [](NStr::CStr const &_Output, bool _bError)
 			{
-				DMibConOutRaw(_Output);
+				if (_bError)
+					DMibConErrOutRaw(_Output);
+				else
+					DMibConOutRaw(_Output);
 			}
 		)
 	;
