@@ -17,8 +17,8 @@ export MalterlibImportUpdateCache=false
 echo "DestinationDir: $DestinationDir"
 echo "Architecture: $Architecture"
 
-sudo apt install -y build-essential cmake ninja-build python3-distutils libacl1-dev libext2fs-dev libudev-dev libssl-dev uuid-dev libdbus-1-dev libsecret-1-dev libxcb-xinerama0-dev
-sudo apt-get build-dep qt5-default -y
+sudo apt install -y build-essential cmake ninja-build python3-distutils libacl1-dev libext2fs-dev libudev-dev libssl-dev uuid-dev libdbus-1-dev libsecret-1-dev libxcb-xinerama0-dev libunity-dev libxkbcommon-x11-dev libxkbcommon-dev
+sudo apt-get build-dep qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qt5dxcb-plugin -y
 
 mkdir -p "$DestinationDir"
 pushd "$DestinationDir"
@@ -30,14 +30,14 @@ fi
 pushd llvm-malterlib
 git fetch --all
 
-git checkout 11.0
-git reset --hard origin/11.0
+git checkout 12.0
+git reset --hard origin/12.0
 
-./mib update_repos
+MalterlibRepositoryHardReset=true ./mib update_repos
 
 pushd Scripts
 
-export LDFLAGS="-fuse-ld=lld-11"
+export LDFLAGS="-fuse-ld=lld-12"
 export CC=clang
 export CXX=clang++
 export MalterlibBuildSDK=true
@@ -100,9 +100,16 @@ fi
 mkdir -p "usr/lib/clang/"
 cp -r "../llvm-malterlib/build/main/lib/clang/"* "usr/lib/clang/"
 ln -s usr/lib lib
+ln -s usr/lib lib64
+ln -s usr/lib lib32
+ln -s usr/lib libx32
 
 cp -r "/usr/lib/${Architecture}-linux-gnu/"* usr/lib/
 cp -r /usr/lib/gcc usr/lib/
+
+rm -fr usr/share/pkgconfig
+mkdir -p usr/share/pkgconfig
+cp -r /usr/share/pkgconfig usr/share/
 
 rm -rf "usr/lib/libc++"*
 rm -rf "usr/lib/libcunwind"*
@@ -123,6 +130,9 @@ rm -rf usr/lib/gnome-software
 # Remove executables
 find . -type f -executable | grep -v '.*\.so\($\|\.\)' | xargs rm -f
 
+# Remove cmake files
+find . -name '*.cmake' | xargs rm -f
+
 rm -rf usr/include
 cp -r /usr/include usr/
 rm -rf "usr/include/c++"
@@ -139,6 +149,9 @@ find . -type l | while read l; do
 	    fi
     fi
 done
+
+# Remove files and directories that only differ by case
+find . | sort -f | uniq -di | xargs rm -r
 
 # Strip elf files to only needed for linking
 find . -type f -name '*.so' -exec objcopy -j .dynamic -j .dynsym -j .dynstr -j .symtab -j .strtab -j .shstrtab -j .gnu.version -j .gnu.version_d -j .gnu.version_r {} \; 2>&1 | sed '/^objcopy: .*warning: empty loadable segment detected at/d'
