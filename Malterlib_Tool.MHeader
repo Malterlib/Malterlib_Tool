@@ -32,6 +32,7 @@ Import "Apps/*/*.MHeader"
 		, "HAVE_READPASSPHRASE=0"
 		, "HAVE__LOCALTIME64_S=0"
 		, "HAVE__GMTIME64_S=0"
+		, "HAVE_STROPTS_H=0"
 	]
 	{
 		!!PlatformFamily "Linux"
