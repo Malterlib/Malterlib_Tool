@@ -26,32 +26,10 @@ Import "Apps/*/*.MHeader"
 	Import.CMake_Variables =+ ["HAVE_OPENSSL_ENGINE_H=0", "ENABLE_LZMA=0"]
 
 	Import.CMake_Variables =+ [
-		"HAVE_LIBRICHACL=0"
-		, "HAVE_ARC4RANDOM_BUF=0"
-		, "HAVE__CTIME64_S=0"
-		, "HAVE_READPASSPHRASE=0"
-		, "HAVE__LOCALTIME64_S=0"
-		, "HAVE__GMTIME64_S=0"
-		, "HAVE_STROPTS_H=0"
-	]
-	{
-		!!PlatformFamily "Linux"
-	}
-
-	Import.CMake_Variables =+ [
-		"HAVE_POLL_FINE_EXITCODE=0"
-		, "HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT="
-		, "HAVE_FSETXATTR_5=0"
-		, "HAVE_FSETXATTR_5__TRYRUN_OUTPUT="
-		, "KWSYS_LFS_WORKS__TRYRUN_OUTPUT="
-		, "KWSYS_LFS_WORKS=0"
-		, "HAVE_GLIBC_STRERROR_R__TRYRUN_OUTPUT="
-		, "HAVE_GLIBC_STRERROR_R=0"
-		, "HAVE_POSIX_STRERROR_R__TRYRUN_OUTPUT="
-		, "HAVE_POSIX_STRERROR_R=99"
-		, "HAVE_POLL_FINE_EXITCODE=0"
-		, "CMake_RUN_CXX_FILESYSTEM=0"
+		"CMake_RUN_CXX_FILESYSTEM=0"
 		, "CMake_RUN_CXX_FILESYSTEM__TRYRUN_OUTPUT=1"
+		, "HAVE_POLL_FINE_EXITCODE=0"
+		, "HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT="
 	]
 	{
 		&
@@ -60,21 +38,8 @@ Import "Apps/*/*.MHeader"
 			!HostPlatformFamily "Linux"
 		}
 	}
-	Import.CMake_Variables =+ "FIND_LIBRARY_USE_LIB32_PATHS=1"
-	{
-		&
-		{
-			PlatformFamily "Linux"
-			Architecture "x86"
-			!HostPlatformFamily "Linux"
-		}
-	}
-	Import.CMake_Variables =+ "ARCHIVE_CRYPTO_RMD160_OPENSSL=0"
 
-	Import.CMake_Variables =+ ["HAVE_ARC4RANDOM_BUF=0", "HAVE__CTIME64_S=0"]
-	{
-		!!PlatformFamily "Linux"
-	}
+	Import.CMake_Variables =+ "ARCHIVE_CRYPTO_RMD160_OPENSSL=0"
 
 	Target.ExtraGroups =+ "~Automatic/DependBoringSSL"
 	{
