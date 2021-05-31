@@ -7775,10 +7775,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "C++"
 			}
-			%File "../../../../External/CMake/Tests/CMakeLib/testCMFilesystemPath.cxx"
-			{
-				Compile.Type "C++"
-			}
 		}
 	}
 	%Dependency "Lib_CTestLib"

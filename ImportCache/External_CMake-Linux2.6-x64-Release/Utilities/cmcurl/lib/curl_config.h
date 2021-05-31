@@ -340,7 +340,7 @@
 /* #undef HAVE_IOCTLSOCKET */
 
 /* Define to 1 if you have the IoctlSocket camel case function. */
-#define HAVE_IOCTLSOCKET_CAMEL 1
+/* #undef HAVE_IOCTLSOCKET_CAMEL */
 
 /* Define to 1 if you have a working IoctlSocket camel case FIONBIO function.
    */
@@ -398,7 +398,7 @@
 /* #undef HAVE_LIBRESOLVE */
 
 /* Define to 1 if you have the `socket' library (-lsocket). */
-#define HAVE_LIBSOCKET 1
+/* #undef HAVE_LIBSOCKET */
 
 /* Define to 1 if you have the `ssh2' library (-lssh2). */
 /* #undef HAVE_LIBSSH2 */
@@ -505,7 +505,7 @@
 #define HAVE_POLL 1
 
 /* If you have a fine poll */
-/* #undef HAVE_POLL_FINE */
+#define HAVE_POLL_FINE 1
 
 /* Define to 1 if you have the <poll.h> header file. */
 #define HAVE_POLL_H 1
@@ -547,7 +547,7 @@
 #define HAVE_FSETXATTR 1
 
 /* fsetxattr() takes 5 args */
-/* #undef HAVE_FSETXATTR_5 */
+#define HAVE_FSETXATTR_5 1
 
 /* fsetxattr() takes 6 args */
 /* #undef HAVE_FSETXATTR_6 */
@@ -640,7 +640,7 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the strlcat function. */
-#define HAVE_STRLCAT 1
+/* #undef HAVE_STRLCAT */
 
 /* Define to 1 if you have the `strlcpy' function. */
 /* #undef HAVE_STRLCPY */
@@ -1078,4 +1078,4 @@
 #endif
 
 /* Define to 1 if you have the mach_absolute_time function. */
-#define HAVE_MACH_ABSOLUTE_TIME 1
+/* #undef HAVE_MACH_ABSOLUTE_TIME */

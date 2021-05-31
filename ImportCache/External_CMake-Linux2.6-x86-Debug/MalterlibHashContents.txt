@@ -39,6 +39,10 @@ Import.CMake_CacheReplaceContents: [
 	{
 		"Find": "/usr/local/go/bin/",
 		"Replace": ""
+	},
+	{
+		"Find": "/usr/local/bin/",
+		"Replace": ""
 	}
 ]
 
@@ -59,40 +63,24 @@ Import.CMake_Languages: [
 
 Import.CMake_Config: Debug
 Import.CMake_Variables: [
-	CMAKE_TRY_COMPILE_PLATFORM_VARIABLES=CMAKE_EXE_LINKER_FLAGS_INIT,
-	CMAKE_LINKER=lld,
-	CMAKE_EXE_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32" -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32",
-	CMAKE_STATIC_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32" -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32",
-	CMAKE_MODULE_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32" -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32",
-	CMAKE_SHARED_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32" -Xlinker -rpath-link -Xlinker "/Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32",
+	CMAKE_TRY_COMPILE_PLATFORM_VARIABLES=CMAKE_EXE_LINKER_FLAGS_INIT;CMAKE_STATIC_LINKER_FLAGS_INIT;CMAKE_MODULE_LINKER_FLAGS_INIT;CMAKE_SHARED_LINKER_FLAGS_INIT;CMAKE_RANLIB;CMAKE_AR;CMAKE_C_COMPILER;CMAKE_CXX_COMPILER;CMAKE_CXX_COMPILER_TARGET;CMAKE_C_COMPILER_TARGET;CMAKE_TOOLCHAIN_NO_PREFIX;CMAKE_FIND_ROOT_PATH;CMAKE_SYSROOT;CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN;CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN;CMAKE_SYSTEM_NAME;CMAKE_SYSTEM_PROCESSOR;CMAKE_LINKER,
+	CMAKE_EXE_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker /Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32 -Xlinker -rpath-link -Xlinker /Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32,
+	CMAKE_MODULE_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker /Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32 -Xlinker -rpath-link -Xlinker /Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32,
+	CMAKE_SHARED_LINKER_FLAGS_INIT= -fuse-ld=lld -stdlib=libc++ -Xlinker -rpath-link -Xlinker /Binaries/MalterlibSDK/Linux/x86/Linux.sdk/lib32 -Xlinker -rpath-link -Xlinker /Binaries/MalterlibSDK/Linux/x86/Linux.sdk/usr/lib32,
 	CMAKE_CXX_FLAGS_INIT=-stdlib=libc++,
-	CMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY,
+	CMAKE_LINKER=lld,
+	CMAKE_INSTALL_NAME_TOOL=/llvm-install-name-tool,
+	CMAKE_NM=/llvm-nm,
+	CMAKE_OBJDUMP=/llvm-objdump,
+	CMAKE_STRIP=/llvm-strip,
 	CMAKE_RANLIB=/llvm-ranlib,
+	CMAKE_AR=/llvm-ar,
 	HAVE_OPENSSL_ENGINE_H=0,
 	ENABLE_LZMA=0,
-	HAVE_LIBRICHACL=0,
-	HAVE_ARC4RANDOM_BUF=0,
-	HAVE__CTIME64_S=0,
-	HAVE_READPASSPHRASE=0,
-	HAVE__LOCALTIME64_S=0,
-	HAVE__GMTIME64_S=0,
-	HAVE_STROPTS_H=0,
-	HAVE_POLL_FINE_EXITCODE=0,
-	HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT=,
-	HAVE_FSETXATTR_5=0,
-	HAVE_FSETXATTR_5__TRYRUN_OUTPUT=,
-	KWSYS_LFS_WORKS__TRYRUN_OUTPUT=,
-	KWSYS_LFS_WORKS=0,
-	HAVE_GLIBC_STRERROR_R__TRYRUN_OUTPUT=,
-	HAVE_GLIBC_STRERROR_R=0,
-	HAVE_POSIX_STRERROR_R__TRYRUN_OUTPUT=,
-	HAVE_POSIX_STRERROR_R=99,
-	HAVE_POLL_FINE_EXITCODE=0,
 	CMake_RUN_CXX_FILESYSTEM=0,
 	CMake_RUN_CXX_FILESYSTEM__TRYRUN_OUTPUT=1,
-	FIND_LIBRARY_USE_LIB32_PATHS=1,
-	ARCHIVE_CRYPTO_RMD160_OPENSSL=0,
-	HAVE_ARC4RANDOM_BUF=0,
-	HAVE__CTIME64_S=0
+	HAVE_POLL_FINE_EXITCODE=0,
+	HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT=,
+	ARCHIVE_CRYPTO_RMD160_OPENSSL=0
 ]
 

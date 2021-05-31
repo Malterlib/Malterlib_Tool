@@ -224,7 +224,7 @@
 #define HAVE_CTYPE_H 1
 
 /* Define to 1 if you have the `cygwin_conv_path' function. */
-#define HAVE_CYGWIN_CONV_PATH 1
+/* #undef HAVE_CYGWIN_CONV_PATH */
 
 /* Define to 1 if you have the declaration of `ACE_GETACL', and to 0 if you
    don't. */
@@ -414,7 +414,7 @@
 #define HAVE_GETPWUID_R 1
 
 /* Define to 1 if you have the `getvfsbyname' function. */
-#define HAVE_GETVFSBYNAME 1
+/* #undef HAVE_GETVFSBYNAME */
 
 /* Define to 1 if you have the `getxattr' function. */
 /* #undef HAVE_GETXATTR */
@@ -438,7 +438,7 @@
 #define HAVE_LANGINFO_H 1
 
 /* Define to 1 if you have the `lchflags' function. */
-#define HAVE_LCHFLAGS 1
+/* #undef HAVE_LCHFLAGS */
 
 /* Define to 1 if you have the `lchmod' function. */
 /* #undef HAVE_LCHMOD */
@@ -598,7 +598,7 @@
 /* #undef HAVE_LZMA_H */
 
 /* Define to 1 if you have a working `lzma_stream_encoder_mt' function. */
-#define HAVE_LZMA_STREAM_ENCODER_MT 1
+/* #undef HAVE_LZMA_STREAM_ENCODER_MT */
 
 /* Define to 1 if you have the <lzo/lzo1x.h> header file. */
 /* #undef HAVE_LZO_LZO1X_H */
@@ -989,10 +989,10 @@
 /* #undef HAVE__CTIME64_S */
 
 /* Define to 1 if you have the `_fseeki64' function. */
-#define HAVE__FSEEKI64 1
+/* #undef HAVE__FSEEKI64 */
 
 /* Define to 1 if you have the `_get_timezone' function. */
-#define HAVE__GET_TIMEZONE 1
+/* #undef HAVE__GET_TIMEZONE */
 
 /* Define to 1 if you have the `_gmtime64_s' function. */
 /* #undef HAVE__GMTIME64_S */
@@ -1001,7 +1001,7 @@
 /* #undef HAVE__LOCALTIME64_S */
 
 /* Define to 1 if you have the `_mkgmtime64' function. */
-#define HAVE__MKGMTIME64 1
+/* #undef HAVE__MKGMTIME64 */
 
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST 
