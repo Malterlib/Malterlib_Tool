@@ -79,6 +79,18 @@ Property
 			%File "../../../../External/CMake/Source/cmcmd.h"
 		}
 	}
+	%Group "CMake"
+	{
+		%Group "Templates"
+		{
+			%File "../../../../External/CMake/Templates/^*"
+		}
+		%Group "Modules"
+		{
+			%File "../../../../External/CMake/Modules/^*"
+		}
+		Compile.Disabled true
+	}
 	%Dependency "Lib_Malterlib_Perforce"
 	%Dependency "Lib_Malterlib_BuildSystem"
 	%Dependency "Lib_Malterlib"
