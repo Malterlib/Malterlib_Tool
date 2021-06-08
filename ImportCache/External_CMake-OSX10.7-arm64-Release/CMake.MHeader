@@ -1045,6 +1045,10 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/c-hyper.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/conncache.h"
 			{
 				Compile.Type "None"
@@ -1101,6 +1105,10 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_krb5.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_ldap.h"
 			{
 				Compile.Type "None"
@@ -1153,10 +1161,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_sec.h"
-			{
-				Compile.Type "None"
-			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/curl_setup.h"
 			{
 				Compile.Type "None"
@@ -1185,11 +1189,23 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/doh.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/dotdot.h"
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/easyif.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/easyoptions.h"
 			{
 				Compile.Type "None"
 			}
@@ -1210,10 +1226,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftp.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/url.h"
 			{
 				Compile.Type "None"
 			}
@@ -1238,6 +1250,10 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/hostip.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hsts.h"
 			{
 				Compile.Type "None"
 			}
@@ -1266,6 +1282,10 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_aws_sigv4.h"
 			{
 				Compile.Type "None"
 			}
@@ -1338,10 +1358,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/psl.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/doh.h"
 			{
 				Compile.Type "None"
 			}
@@ -1457,11 +1473,19 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/url.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/urlapi-int.h"
 			{
 				Compile.Type "None"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/urldata.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/version_win32.h"
 			{
 				Compile.Type "None"
 			}
@@ -1474,14 +1498,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/version_win32.h"
 			{
 				Compile.Type "None"
 			}
@@ -1725,6 +1741,10 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/c-hyper.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/conncache.c"
 			{
 				Compile.Type "C"
@@ -1817,11 +1837,27 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/doh.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/dotdot.c"
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/easy.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/easygetopt.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/easyoptions.c"
 			{
 				Compile.Type "C"
 			}
@@ -1842,10 +1878,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 				Compile.Type "C"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/ftp.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/url.c"
 			{
 				Compile.Type "C"
 			}
@@ -1897,6 +1929,10 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/hsts.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/http.c"
 			{
 				Compile.Type "C"
@@ -1922,6 +1958,10 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 				Compile.Type "C"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/http_aws_sigv4.c"
 			{
 				Compile.Type "C"
 			}
@@ -2021,10 +2061,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/doh.c"
-			{
-				Compile.Type "C"
-			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/rand.c"
 			{
 				Compile.Type "C"
@@ -2034,10 +2070,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 				Compile.Type "C"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/rtsp.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/security.c"
 			{
 				Compile.Type "C"
 			}
@@ -2137,11 +2169,19 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/url.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/urlapi.c"
 			{
 				Compile.Type "C"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/version.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../External/CMake/Utilities/cmcurl/lib/version_win32.c"
 			{
 				Compile.Type "C"
 			}
@@ -2154,14 +2194,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 				Compile.Type "C"
 			}
 			%File "../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../External/CMake/Utilities/cmcurl/lib/version_win32.c"
 			{
 				Compile.Type "C"
 			}
@@ -4021,149 +4053,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 		}
 	}
 }
-%Target "Lib_CMakeServerLib"
-{
-	Compile
-	{
-		!!Compile.Type "C++"
-		SearchPath += [
-			"Utilities"->MakeAbsolute(),
-			"Source"->MakeAbsolute(),
-			"../../../../External/CMake/Source"->MakeAbsolute(),
-			"../../../../External/CMake/Source/LexerParser"->MakeAbsolute(),
-			"../../../../External/CMake/Source/CTest"->MakeAbsolute(),
-			"../../../../External/CMake/Source/CPack"->MakeAbsolute(),
-			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
-			"../../../../External/CMake/Utilities"->MakeAbsolute()
-		]
-		PreprocessorDefines += [
-			"CURL_STATICLIB",
-			"LIBARCHIVE_STATIC"
-		]
-	}
-	Property.MalterlibTargetNameType "Normal"
-	Target.Group "External/CMake"
-	{
-		!!Target.Group undefined
-	}
-	Target.Type "StaticLibrary"
-	Target.BaseName "CMakeServerLib"
-	%Group "Source"
-	{
-		%File "../../../../External/CMake/Source/cmConnection.h"
-		{
-			Compile.Type "None"
-		}
-		%File "../../../../External/CMake/Source/cmConnection.cxx"
-		{
-			Compile.Type "C++"
-		}
-		%File "../../../../External/CMake/Source/cmFileMonitor.cxx"
-		{
-			Compile.Type "C++"
-		}
-		%File "../../../../External/CMake/Source/cmFileMonitor.h"
-		{
-			Compile.Type "None"
-		}
-		%File "../../../../External/CMake/Source/cmJsonObjectDictionary.h"
-		{
-			Compile.Type "None"
-		}
-		%File "../../../../External/CMake/Source/cmJsonObjects.h"
-		{
-			Compile.Type "None"
-		}
-		%File "../../../../External/CMake/Source/cmJsonObjects.cxx"
-		{
-			Compile.Type "C++"
-		}
-		%File "../../../../External/CMake/Source/cmPipeConnection.cxx"
-		{
-			Compile.Type "C++"
-		}
-		%File "../../../../External/CMake/Source/cmPipeConnection.h"
-		{
-			Compile.Type "None"
-		}
-		%File "../../../../External/CMake/Source/cmServer.cxx"
-		{
-			Compile.Type "C++"
-		}
-		%File "../../../../External/CMake/Source/cmServer.h"
-		{
-			Compile.Type "None"
-		}
-		%File "../../../../External/CMake/Source/cmServerConnection.cxx"
-		{
-			Compile.Type "C++"
-		}
-		%File "../../../../External/CMake/Source/cmServerConnection.h"
-		{
-			Compile.Type "None"
-		}
-		%File "../../../../External/CMake/Source/cmServerProtocol.cxx"
-		{
-			Compile.Type "C++"
-		}
-		%File "../../../../External/CMake/Source/cmServerProtocol.h"
-		{
-			Compile.Type "None"
-		}
-	}
-	%Dependency "Lib_CMakeLib"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmlibuv"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmjsoncpp"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmlibarchive"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmzstd"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmbzip2"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmexpat"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmnghttp2"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmcurl"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmzlib"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmlibrhash"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmstd"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_cmsys"
-	{
-		Dependency.Indirect true
-	}
-}
 %Target "Exe_ctest"
 {
 	Compile
@@ -4503,14 +4392,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 		{
 			Compile.Type "None"
 		}
-		%File "../../../../External/CMake/Source/cmCheckCustomOutputs.h"
-		{
-			Compile.Type "None"
-		}
-		%File "../../../../External/CMake/Source/cmCheckCustomOutputs.cxx"
-		{
-			Compile.Type "C++"
-		}
 		%File "../../../../External/CMake/Source/cmCLocaleEnvironmentScope.h"
 		{
 			Compile.Type "None"
@@ -4687,6 +4568,14 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 		{
 			Compile.Type "None"
 		}
+		%File "../../../../External/CMake/Source/cmDependsCompiler.cxx"
+		{
+			Compile.Type "C++"
+		}
+		%File "../../../../External/CMake/Source/cmDependsCompiler.h"
+		{
+			Compile.Type "None"
+		}
 		%File "../../../../External/CMake/Source/cmDocumentation.cxx"
 		{
 			Compile.Type "C++"
@@ -4844,6 +4733,14 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 			Compile.Type "C++"
 		}
 		%File "../../../../External/CMake/Source/cmFileAPICMakeFiles.h"
+		{
+			Compile.Type "None"
+		}
+		%File "../../../../External/CMake/Source/cmFileAPIToolchains.cxx"
+		{
+			Compile.Type "C++"
+		}
+		%File "../../../../External/CMake/Source/cmFileAPIToolchains.h"
 		{
 			Compile.Type "None"
 		}
@@ -5578,6 +5475,14 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 		{
 			Compile.Type "None"
 		}
+		%File "../../../../External/CMake/Source/cmTransformDepfile.cxx"
+		{
+			Compile.Type "C++"
+		}
+		%File "../../../../External/CMake/Source/cmTransformDepfile.h"
+		{
+			Compile.Type "None"
+		}
 		%File "../../../../External/CMake/Source/cmUuid.cxx"
 		{
 			Compile.Type "C++"
@@ -5829,6 +5734,14 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 		%File "../../../../External/CMake/Source/cmCMakeMinimumRequired.h"
 		{
 			Compile.Type "None"
+		}
+		%File "../../../../External/CMake/Source/cmCMakePathCommand.h"
+		{
+			Compile.Type "None"
+		}
+		%File "../../../../External/CMake/Source/cmCMakePathCommand.cxx"
+		{
+			Compile.Type "C++"
 		}
 		%File "../../../../External/CMake/Source/cmCMakePolicyCommand.cxx"
 		{
@@ -6498,6 +6411,14 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 		{
 			Compile.Type "None"
 		}
+		%File "../../../../External/CMake/Source/cmTargetDepend.h"
+		{
+			Compile.Type "None"
+		}
+		%File "../../../../External/CMake/Source/cmTargetDepend.cxx"
+		{
+			Compile.Type "C++"
+		}
 		%File "../../../../External/CMake/Source/cmTargetIncludeDirectoriesCommand.cxx"
 		{
 			Compile.Type "C++"
@@ -6697,6 +6618,10 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 		%File "../../../../External/CMake/Source/cmLocalXCodeGenerator.h"
 		{
 			Compile.Type "None"
+		}
+		%File "../../../../External/CMake/Source/cmScanDepFormat.cxx"
+		{
+			Compile.Type "C++"
 		}
 		%File "../../../../External/CMake/Source/cmGlobalNinjaGenerator.cxx"
 		{
@@ -7100,7 +7025,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 		}
 	}
 	%Dependency "Lib_CMakeLib"
-	%Dependency "Lib_CMakeServerLib"
 	%Dependency "Lib_cmlibuv"
 	%Dependency "Lib_cmjsoncpp"
 	%Dependency "Lib_cmlibarchive"
@@ -8381,72 +8305,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 		}
 	}
 }
-%Target "Exe_CMakeServerLibTests"
-{
-	Compile
-	{
-		!!Compile.Type "C++"
-		SearchPath += [
-			"Utilities"->MakeAbsolute(),
-			"Tests/CMakeServerLib"->MakeAbsolute(),
-			"Source"->MakeAbsolute(),
-			"../../../../External/CMake/Source"->MakeAbsolute(),
-			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
-			"../../../../External/CMake/Utilities"->MakeAbsolute()
-		]
-		PreprocessorDefines += [
-			"CURL_STATICLIB",
-			"LIBARCHIVE_STATIC"
-		]
-	}
-	Property.MalterlibTargetNameType "Normal"
-	Target.Group "External/CMake"
-	{
-		!!Target.Group undefined
-	}
-	Target.Type "ConsoleExecutable"
-	Target.BaseName "CMakeServerLibTests"
-	%Group "OSX10.7"
-	{
-		%Group "arm64"
-		{
-			%Group `@(FullConfiguration)`
-			{
-				%Group "Tests"
-				{
-					%Group "CMakeServerLib"
-					{
-						%File "Tests/CMakeServerLib/CMakeServerLibTests.cxx"
-						{
-							Compile.Type "C++"
-						}
-					}
-				}
-			}
-		}
-	}
-	%Group "Tests"
-	{
-		%File "../../../../External/CMake/Tests/CMakeServerLib/testServerBuffering.cpp"
-		{
-			Compile.Type "C++"
-		}
-	}
-	%Dependency "Lib_CMakeLib"
-	%Dependency "Lib_CMakeServerLib"
-	%Dependency "Lib_cmlibuv"
-	%Dependency "Lib_cmjsoncpp"
-	%Dependency "Lib_cmlibarchive"
-	%Dependency "Lib_cmzstd"
-	%Dependency "Lib_cmbzip2"
-	%Dependency "Lib_cmexpat"
-	%Dependency "Lib_cmnghttp2"
-	%Dependency "Lib_cmcurl"
-	%Dependency "Lib_cmzlib"
-	%Dependency "Lib_cmlibrhash"
-	%Dependency "Lib_cmstd"
-	%Dependency "Lib_cmsys"
-}
 %Target "Exe_pseudo_cppcheck"
 {
 	Compile
@@ -8471,6 +8329,35 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 	%Group "Tests"
 	{
 		%File "../../../../External/CMake/Tests/RunCMake/pseudo_cppcheck.c"
+		{
+			Compile.Type "C"
+		}
+	}
+}
+%Target "Exe_pseudo_cpplint"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Target.Group "External/CMake"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "pseudo_cpplint"
+	%Group "Tests"
+	{
+		%File "../../../../External/CMake/Tests/RunCMake/pseudo_cpplint.c"
 		{
 			Compile.Type "C"
 		}
@@ -8558,6 +8445,35 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 	%Group "Tests"
 	{
 		%File "../../../../External/CMake/Tests/RunCMake/pseudo_emulator_custom_command_arg.c"
+		{
+			Compile.Type "C"
+		}
+	}
+}
+%Target "Exe_pseudo_llvm-rc"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			"Utilities"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
+			"../../../../External/CMake/Utilities"->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Target.Group "External/CMake"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "pseudo_llvm-rc"
+	%Group "Tests"
+	{
+		%File "../../../../External/CMake/Tests/RunCMake/pseudo_llvm-rc.c"
 		{
 			Compile.Type "C"
 		}
@@ -8667,35 +8583,6 @@ Property.CMakeOutputPath_CMake define string = "."->MakeAbsolute()
 	%Dependency "Lib_cmlibrhash"
 	%Dependency "Lib_cmstd"
 	%Dependency "Lib_cmsys"
-}
-%Target "Exe_pseudo_cpplint"
-{
-	Compile
-	{
-		!!Compile.Type "C"
-		SearchPath += [
-			"Utilities"->MakeAbsolute(),
-			"../../../../External/CMake/Utilities/std"->MakeAbsolute(),
-			"../../../../External/CMake/Utilities"->MakeAbsolute()
-		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
-	}
-	Property.MalterlibTargetNameType "Normal"
-	Target.Group "External/CMake"
-	{
-		!!Target.Group undefined
-	}
-	Target.Type "ConsoleExecutable"
-	Target.BaseName "pseudo_cpplint"
-	%Group "Tests"
-	{
-		%File "../../../../External/CMake/Tests/RunCMake/pseudo_cpplint.c"
-		{
-			Compile.Type "C"
-		}
-	}
 }
 %Target "Exe_pseudo_tidy"
 {

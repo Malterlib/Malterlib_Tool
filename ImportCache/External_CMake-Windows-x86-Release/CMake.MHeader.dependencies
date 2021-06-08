@@ -68,7 +68,6 @@
 ../../../../External/CMake/Tests/CMakeLists.txt
 ../../../../External/CMake/Tests/CMakeOnly/CMakeLists.txt
 ../../../../External/CMake/Tests/CMakeOnly/Test.cmake.in
-../../../../External/CMake/Tests/CMakeServerLib/CMakeLists.txt
 ../../../../External/CMake/Tests/CMakeTests/CMakeHostSystemInformationTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/CMakeLists.txt
 ../../../../External/CMake/Tests/CMakeTests/CMakeMinimumRequiredTest.cmake.in

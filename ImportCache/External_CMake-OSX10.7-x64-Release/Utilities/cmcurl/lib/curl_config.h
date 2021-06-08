@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2020, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2021, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -56,8 +56,8 @@
 /* to disable LDAPS */
 #define CURL_DISABLE_LDAPS 1
 
-/* to enable MQTT */
-#undef CURL_ENABLE_MQTT
+/* to disable MQTT */
+#define CURL_DISABLE_MQTT 1
 
 /* to disable POP3 */
 #define CURL_DISABLE_POP3 1
@@ -388,8 +388,11 @@
 /* Define to 1 if you have the <libgen.h> header file. */
 #define HAVE_LIBGEN_H 1
 
-/* Define to 1 if you have the `idn' library (-lidn). */
-/* #undef HAVE_LIBIDN */
+/* Define to 1 if you have the `idn2' library (-lidn2). */
+/* #undef HAVE_LIBIDN2 */
+
+/* Define to 1 if you have the idn2.h header file. */
+/* #undef HAVE_IDN2_H */
 
 /* Define to 1 if you have the `resolv' library (-lresolv). */
 /* #undef HAVE_LIBRESOLV */
@@ -461,6 +464,9 @@
 
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #define HAVE_NETINET_TCP_H 1
+
+/* Define to 1 if you have the <linux/tcp.h> header file. */
+/* #undef HAVE_LINUX_TCP_H */
 
 /* Define to 1 if you have the <net/if.h> header file. */
 #define HAVE_NET_IF_H 1
@@ -999,6 +1005,10 @@
 /* if OpenSSL is in use */
 /* #undef USE_OPENSSL */
 
+/* Define to 1 if you don't want the OpenSSL configuration to be loaded
+   automatically */
+/* #undef CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG */
+
 /* to enable NGHTTP2  */
 #define USE_NGHTTP2 1
 
@@ -1017,8 +1027,8 @@
 /* if Unix domain sockets are enabled  */
 /* #undef USE_UNIX_SOCKETS */
 
-/* to enable alt-svc */
-/* #undef USE_ALTSVC */
+/* to disable alt-svc */
+#define CURL_DISABLE_ALTSVC 1
 
 /* to enable SSPI support */
 /* #undef USE_WINDOWS_SSPI */

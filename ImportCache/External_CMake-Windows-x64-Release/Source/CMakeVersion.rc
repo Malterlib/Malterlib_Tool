@@ -2,15 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 1               VERSIONINFO
-FILEVERSION     3,19,2,0
-PRODUCTVERSION  3,19,2,0
+FILEVERSION     3,20,4,0
+PRODUCTVERSION  3,20,4,0
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
         BLOCK "040904E4"
         BEGIN
-            VALUE "FileVersion",      "3.19.2-gcbcae15\0"
-            VALUE "ProductVersion",   "3.19.2-gcbcae15\0"
+            VALUE "FileVersion",      "3.20.4-g8782a65\0"
+            VALUE "ProductVersion",   "3.20.4-g8782a65\0"
         END
     END
 

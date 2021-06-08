@@ -88,6 +88,10 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/c-hyper.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/conncache.h"
 			{
 				Compile.Type "None"
@@ -144,6 +148,10 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_krb5.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ldap.h"
 			{
 				Compile.Type "None"
@@ -196,10 +204,6 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_sec.h"
-			{
-				Compile.Type "None"
-			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_setup.h"
 			{
 				Compile.Type "None"
@@ -228,11 +232,23 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/doh.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dotdot.h"
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easyif.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easyoptions.h"
 			{
 				Compile.Type "None"
 			}
@@ -253,10 +269,6 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/ftp.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/url.h"
 			{
 				Compile.Type "None"
 			}
@@ -281,6 +293,10 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hostip.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hsts.h"
 			{
 				Compile.Type "None"
 			}
@@ -309,6 +325,10 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_aws_sigv4.h"
 			{
 				Compile.Type "None"
 			}
@@ -381,10 +401,6 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/psl.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/doh.h"
 			{
 				Compile.Type "None"
 			}
@@ -500,11 +516,19 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "None"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/url.h"
+			{
+				Compile.Type "None"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urlapi-int.h"
 			{
 				Compile.Type "None"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urldata.h"
+			{
+				Compile.Type "None"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/version_win32.h"
 			{
 				Compile.Type "None"
 			}
@@ -517,14 +541,6 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 				Compile.Type "None"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/version_win32.h"
 			{
 				Compile.Type "None"
 			}
@@ -768,6 +784,10 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/c-hyper.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/conncache.c"
 			{
 				Compile.Type "C"
@@ -860,11 +880,27 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/doh.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dotdot.c"
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easy.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easygetopt.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easyoptions.c"
 			{
 				Compile.Type "C"
 			}
@@ -885,10 +921,6 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 				Compile.Type "C"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/ftp.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/url.c"
 			{
 				Compile.Type "C"
 			}
@@ -940,6 +972,10 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hsts.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http.c"
 			{
 				Compile.Type "C"
@@ -965,6 +1001,10 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 				Compile.Type "C"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_aws_sigv4.c"
 			{
 				Compile.Type "C"
 			}
@@ -1064,10 +1104,6 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/doh.c"
-			{
-				Compile.Type "C"
-			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/rand.c"
 			{
 				Compile.Type "C"
@@ -1077,10 +1113,6 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 				Compile.Type "C"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/rtsp.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/security.c"
 			{
 				Compile.Type "C"
 			}
@@ -1180,11 +1212,19 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			{
 				Compile.Type "C"
 			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/url.c"
+			{
+				Compile.Type "C"
+			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urlapi.c"
 			{
 				Compile.Type "C"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/version.c"
+			{
+				Compile.Type "C"
+			}
+			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/version_win32.c"
 			{
 				Compile.Type "C"
 			}
@@ -1197,14 +1237,6 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 				Compile.Type "C"
 			}
 			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/version_win32.c"
 			{
 				Compile.Type "C"
 			}
