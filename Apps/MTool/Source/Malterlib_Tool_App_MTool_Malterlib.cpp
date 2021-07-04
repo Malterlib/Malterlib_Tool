@@ -69,6 +69,10 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 		}
 	}
 #endif
+
+	if (Version.f_IsEmpty())
+		Version = "12";
+
 	return "Xcode{}"_f << Version;
 
 #elif defined(DPlatformFamily_Windows)
