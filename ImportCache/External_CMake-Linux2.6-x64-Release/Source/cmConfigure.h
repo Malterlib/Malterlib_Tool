@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include "cmsys/Configure.hxx" // IWYU pragma: export
+#include "Source/cmsys/Configure.hxx"
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)

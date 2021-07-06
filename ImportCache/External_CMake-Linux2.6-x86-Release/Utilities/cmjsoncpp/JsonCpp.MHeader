@@ -1,15 +1,17 @@
-Property.CMakeOutputPath_JsonCpp define string = "../.."->MakeAbsolute()
-%Target "Lib_cmjsoncpp"
+Property.CMakeOutputPath_JsonCpp define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+%Target "Lib_JsonCpp_cmjsoncpp"
 {
 	Compile
 	{
 		!!Compile.Type "C++"
 		SearchPath += [
-			"../../Utilities"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmjsoncpp/include"->MakeAbsolute(),
-			"../../Source"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmjsoncpp/include`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"LIBARCHIVE_STATIC",
@@ -17,29 +19,31 @@ Property.CMakeOutputPath_JsonCpp define string = "../.."->MakeAbsolute()
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
 	Target.Group "External/JsonCpp"
 	{
 		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
-	Target.BaseName "cmjsoncpp"
+	Target.BaseName "JsonCpp_cmjsoncpp"
+	Target.BaseFileName "cmjsoncpp"
 	%Group "Utilities"
 	{
 		%Group "lib_json"
 		{
-			%File "../../../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_reader.cpp"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmjsoncpp/src/lib_json/json_reader.cpp`
 			{
 				Compile.Type "C++"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_tool.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmjsoncpp/src/lib_json/json_tool.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_value.cpp"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmjsoncpp/src/lib_json/json_value.cpp`
 			{
 				Compile.Type "C++"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmjsoncpp/src/lib_json/json_writer.cpp"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmjsoncpp/src/lib_json/json_writer.cpp`
 			{
 				Compile.Type "C++"
 			}

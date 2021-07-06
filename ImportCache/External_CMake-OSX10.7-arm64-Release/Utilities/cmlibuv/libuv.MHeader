@@ -1,17 +1,19 @@
-Property.CMakeOutputPath_libuv define string = "../.."->MakeAbsolute()
-%Target "Lib_cmlibuv"
+Property.CMakeOutputPath_libuv define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+%Target "Lib_libuv_cmlibuv"
 {
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
-			"../../Utilities"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmlibuv/include"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmlibuv/src"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmlibuv/src/unix"->MakeAbsolute(),
-			"../../Source"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/include`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"LIBARCHIVE_STATIC",
@@ -20,175 +22,177 @@ Property.CMakeOutputPath_libuv define string = "../.."->MakeAbsolute()
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
 	Target.Group "External/libuv"
 	{
 		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
-	Target.BaseName "cmlibuv"
+	Target.BaseName "libuv_cmlibuv"
+	Target.BaseFileName "cmlibuv"
 	%Group "Utilities"
 	{
 		%Group "src"
 		{
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/fs-poll.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/fs-poll.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/heap-inl.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/heap-inl.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/idna.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/idna.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/inet.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/idna.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/queue.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/idna.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/strscpy.c"
-			{
-				Compile.Type "C"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/strscpy.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/threadpool.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/inet.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/timer.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/queue.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strscpy.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/uv-common.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strscpy.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/threadpool.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/uv-common.h"
-			{
-				Compile.Type "None"
-			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/uv-data-getter-setters.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/timer.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmlibuv/src/version.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/uv-common.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/uv-common.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/uv-data-getter-setters.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/version.c`
 			{
 				Compile.Type "C"
 			}
 			%Group "unix"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/async.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/async.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/atomic-ops.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/atomic-ops.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/core.c"
-				{
-					Compile.Type "C"
-				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/dl.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/core.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/fs.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/dl.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/getaddrinfo.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/fs.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/getnameinfo.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/getaddrinfo.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/internal.h"
-				{
-					Compile.Type "None"
-				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/loop-watcher.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/getnameinfo.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/loop.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/internal.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/loop-watcher.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/pipe.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/loop.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/poll.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/pipe.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/process.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/poll.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/signal.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/process.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/spinlock.h"
-				{
-					Compile.Type "None"
-				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/stream.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/signal.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/tcp.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/spinlock.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/stream.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/thread.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/tcp.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/tty.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/thread.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/udp.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/tty.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/udp.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/darwin.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/bsd-ifaddrs.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/darwin-proctitle.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/darwin.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/fsevents.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/darwin-proctitle.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/kqueue.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/fsevents.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmlibuv/src/unix/proctitle.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/kqueue.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/proctitle.c`
 				{
 					Compile.Type "C"
 				}

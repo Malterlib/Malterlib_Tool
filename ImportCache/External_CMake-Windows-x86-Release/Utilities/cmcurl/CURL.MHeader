@@ -1,15 +1,16 @@
-Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
-%Target "Exe_curltest"
+Property.CMakeOutputPath_CURL define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+%Target "Com_CURL_curltest"
 {
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
-			"../../Utilities"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmcurl/include"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmnghttp2/lib/includes"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/include`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmnghttp2/lib/includes`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -19,39 +20,45 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
 	Target.Group "External/CURL"
 	{
 		!!Target.Group undefined
 	}
 	Target.Type "ConsoleExecutable"
-	Target.BaseName "curltest"
+	Target.BaseName "CURL_curltest"
+	Target.BaseFileName "curltest"
 	%Group "Utilities"
 	{
-		%File "../../../../../../External/CMake/Utilities/cmcurl/curltest.c"
+		%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/curltest.c`
 		{
 			Compile.Type "C"
 		}
 	}
-	%Dependency "Lib_cmnghttp2"
-	%Dependency "Lib_cmcurl"
-	%Dependency "Lib_cmzlib"
+	%Dependency "Lib_CURL_cmcurl"
+	%Dependency "Lib_CMake_cmnghttp2"
+	%Dependency "Lib_CMZLIB_cmzlib"
 }
-%Target "Lib_cmcurl"
+%Target "Lib_CURL_cmcurl"
 {
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
-			"../../Utilities"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmcurl/include"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmnghttp2/lib/includes"->MakeAbsolute(),
-			"../../Utilities/cmcurl/include"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmcurl"->MakeAbsolute(),
-			"../../Utilities/cmcurl"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmcurl/lib"->MakeAbsolute(),
-			"../../Utilities/cmcurl/lib"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/include`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmnghttp2/lib/includes`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Utilities/cmcurl/include`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Utilities/cmcurl`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Utilities/cmcurl/lib`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"BUILDING_LIBCURL",
@@ -62,1181 +69,1183 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
 	Target.Group "External/CURL"
 	{
 		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
-	Target.BaseName "cmcurl"
+	Target.BaseName "CURL_cmcurl"
+	Target.BaseFileName "cmcurl"
 	%Group "Utilities"
 	{
 		%Group "lib"
 		{
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/altsvc.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/altsvc.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/amigaos.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/amigaos.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/arpa_telnet.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/arpa_telnet.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/asyn.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/asyn.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/c-hyper.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/c-hyper.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/conncache.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/conncache.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/connect.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/connect.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/content_encoding.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/content_encoding.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/cookie.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cookie.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_addrinfo.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_addrinfo.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_base64.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_base64.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ctype.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_ctype.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_des.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_des.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_endian.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_endian.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_fnmatch.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_fnmatch.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_get_line.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_get_line.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_gethostname.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_gethostname.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_gssapi.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_gssapi.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_hmac.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_hmac.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_krb5.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_krb5.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ldap.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_ldap.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_md4.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_md4.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_md5.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_md5.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_memory.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_memory.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_memrchr.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_memrchr.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_multibyte.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_multibyte.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_core.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_ntlm_core.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_wb.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_ntlm_wb.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_path.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_path.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_printf.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_printf.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_range.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_range.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_rtmp.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_rtmp.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_sasl.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_sasl.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_setup.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_setup.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_setup_once.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_setup_once.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_sha256.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_sha256.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_sspi.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_sspi.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_threads.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_threads.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curlx.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curlx.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dict.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dict.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/doh.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/doh.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dotdot.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dotdot.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dynbuf.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easyif.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/easyif.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easyoptions.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/easyoptions.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/escape.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/escape.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/file.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/file.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/fileinfo.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/fileinfo.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/formdata.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/formdata.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/ftp.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/ftp.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/ftplistparser.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/ftplistparser.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/getinfo.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/getinfo.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/gopher.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/gopher.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hash.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hash.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hostcheck.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostcheck.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hostip.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostip.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hsts.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hsts.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http2.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http2.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_chunks.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_chunks.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_digest.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_digest.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_negotiate.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_negotiate.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_ntlm.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_ntlm.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_proxy.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_aws_sigv4.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_aws_sigv4.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/if2ip.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/if2ip.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/imap.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/imap.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/inet_ntop.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/inet_ntop.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/inet_pton.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/inet_pton.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/llist.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/llist.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/memdebug.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/memdebug.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/mime.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/mime.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/mqtt.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/mqtt.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/multihandle.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/multihandle.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/multiif.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/multiif.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/netrc.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/netrc.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/non-ascii.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/non-ascii.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/nonblock.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/nonblock.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/parsedate.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/parsedate.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/pingpong.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/pingpong.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/pop3.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/pop3.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/progress.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/progress.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/psl.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/psl.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/quic.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/quic.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/rand.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/rand.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/rename.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/rename.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/rtsp.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/rtsp.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/select.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/select.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/sendf.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/sendf.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/setopt.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/setopt.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/setup-vms.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/setup-vms.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/share.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/share.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/sigpipe.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/sigpipe.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/slist.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/slist.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/smb.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/smb.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/smtp.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/smtp.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/sockaddr.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/sockaddr.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/socketpair.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/socketpair.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/socks.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/socks.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/speedcheck.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/speedcheck.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/splay.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/splay.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strcase.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strcase.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strdup.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strdup.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strerror.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strerror.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strtok.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strtok.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strtoofft.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strtoofft.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/system_win32.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/system_win32.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/telnet.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/telnet.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/tftp.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/tftp.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/timeval.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/timeval.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/transfer.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/transfer.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/url.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/url.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urlapi-int.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/urlapi-int.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urldata.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/urldata.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/version_win32.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/version_win32.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/warnless.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/warnless.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/wildcard.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/wildcard.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.h"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/x509asn1.h`
 			{
-				Compile.Type "None"
+				Compile.Disabled true
 			}
 			%Group "vauth"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/digest.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/digest.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/ntlm.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/ntlm.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/vauth.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/vauth.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/cleartext.c"
-				{
-					Compile.Type "C"
-				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/cram.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/cleartext.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/digest.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/cram.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/digest_sspi.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/digest.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/krb5_gssapi.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/digest_sspi.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/krb5_sspi.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/krb5_gssapi.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/ntlm.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/krb5_sspi.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/ntlm_sspi.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/ntlm.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/oauth2.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/ntlm_sspi.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/spnego_gssapi.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/oauth2.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/spnego_sspi.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/spnego_gssapi.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vauth/vauth.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/spnego_sspi.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/vauth.c`
 				{
 					Compile.Type "C"
 				}
 			}
 			%Group "vtls"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/bearssl.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/bearssl.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/gskit.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/gskit.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/gtls.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/gtls.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/keylog.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/keylog.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mbedtls.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls_threadlock.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mbedtls_threadlock.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/mesalink.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mesalink.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/nssg.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/nssg.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/openssl.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/openssl.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/schannel.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/schannel.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/sectransp.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/sectransp.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/vtls.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/vtls.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/wolfssl.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/wolfssl.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/bearssl.c"
-				{
-					Compile.Type "C"
-				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/gskit.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/bearssl.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/gtls.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/gskit.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/keylog.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/gtls.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/keylog.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/mbedtls_threadlock.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mbedtls.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/mesalink.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mbedtls_threadlock.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/nss.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mesalink.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/openssl.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/nss.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/schannel.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/openssl.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/schannel_verify.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/schannel.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/sectransp.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/schannel_verify.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/vtls.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/sectransp.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vtls/wolfssl.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/vtls.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/wolfssl.c`
 				{
 					Compile.Type "C"
 				}
 			}
 			%Group "vquic"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vquic/ngtcp2.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/ngtcp2.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vquic/quiche.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/quiche.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vquic/vquic.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/vquic.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vquic/ngtcp2.c"
-				{
-					Compile.Type "C"
-				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vquic/quiche.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/ngtcp2.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vquic/vquic.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/quiche.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/vquic.c`
 				{
 					Compile.Type "C"
 				}
 			}
 			%Group "vssh"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vssh/ssh.h"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vssh/ssh.h`
 				{
-					Compile.Type "None"
+					Compile.Disabled true
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vssh/libssh.c"
-				{
-					Compile.Type "C"
-				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vssh/libssh2.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vssh/libssh.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmcurl/lib/vssh/wolfssh.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vssh/libssh2.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vssh/wolfssh.c`
 				{
 					Compile.Type "C"
 				}
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/altsvc.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/altsvc.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/amigaos.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/amigaos.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/asyn-ares.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/asyn-ares.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/asyn-thread.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/asyn-thread.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/base64.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/base64.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/c-hyper.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/c-hyper.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/conncache.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/conncache.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/connect.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/connect.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/content_encoding.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/content_encoding.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/cookie.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cookie.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_addrinfo.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_addrinfo.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ctype.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_ctype.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_des.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_des.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_endian.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_endian.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_fnmatch.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_fnmatch.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_get_line.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_get_line.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_gethostname.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_gethostname.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_gssapi.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_gssapi.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_memrchr.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_memrchr.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_multibyte.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_multibyte.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_core.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_ntlm_core.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_ntlm_wb.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_ntlm_wb.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_path.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_path.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_range.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_range.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_rtmp.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_rtmp.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_sasl.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_sasl.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_sspi.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_sspi.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/curl_threads.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_threads.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dict.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dict.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/doh.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/doh.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dotdot.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dotdot.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/dynbuf.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dynbuf.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easy.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/easy.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easygetopt.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/easygetopt.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/easyoptions.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/easyoptions.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/escape.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/escape.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/file.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/file.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/fileinfo.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/fileinfo.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/formdata.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/formdata.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/ftp.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/ftp.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/ftplistparser.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/ftplistparser.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/getenv.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/getenv.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/getinfo.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/getinfo.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/gopher.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/gopher.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hash.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hash.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hmac.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hmac.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hostasyn.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostasyn.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hostcheck.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostcheck.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hostip.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostip.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hostip4.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostip4.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hostip6.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostip6.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hostsyn.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostsyn.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/hsts.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hsts.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http2.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http2.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_chunks.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_chunks.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_digest.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_digest.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_negotiate.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_negotiate.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_ntlm.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_ntlm.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_proxy.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_proxy.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/http_aws_sigv4.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_aws_sigv4.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/idn_win32.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/idn_win32.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/if2ip.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/if2ip.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/imap.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/imap.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/inet_ntop.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/inet_ntop.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/inet_pton.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/inet_pton.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/krb5.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/krb5.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/ldap.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/ldap.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/llist.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/llist.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/md4.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/md4.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/md5.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/md5.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/memdebug.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/memdebug.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/mime.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/mime.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/mprintf.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/mprintf.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/mqtt.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/mqtt.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/multi.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/multi.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/netrc.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/netrc.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/non-ascii.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/non-ascii.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/nonblock.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/nonblock.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/openldap.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/openldap.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/parsedate.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/parsedate.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/pingpong.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/pingpong.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/pop3.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/pop3.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/progress.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/progress.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/psl.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/psl.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/rand.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/rand.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/rename.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/rename.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/rtsp.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/rtsp.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/select.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/select.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/sendf.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/sendf.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/setopt.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/setopt.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/sha256.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/sha256.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/share.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/share.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/slist.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/slist.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/smb.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/smb.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/smtp.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/smtp.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/socketpair.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/socketpair.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/socks.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/socks.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/socks_gssapi.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/socks_gssapi.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/socks_sspi.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/socks_sspi.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/speedcheck.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/speedcheck.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/splay.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/splay.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strcase.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strcase.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strdup.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strdup.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strerror.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strerror.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strtok.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strtok.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/strtoofft.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/strtoofft.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/system_win32.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/system_win32.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/telnet.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/telnet.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/tftp.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/tftp.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/timeval.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/timeval.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/transfer.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/transfer.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/url.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/url.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/urlapi.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/urlapi.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/version.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/version.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/version_win32.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/version_win32.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/warnless.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/warnless.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/wildcard.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/wildcard.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmcurl/lib/x509asn1.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/x509asn1.c`
 			{
 				Compile.Type "C"
 			}
@@ -1254,9 +1263,9 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 					{
 						%Group "lib"
 						{
-							%File "../../Utilities/cmcurl/lib/curl_config.h"
+							%File `@('../..'->MakeAbsolute())/Utilities/cmcurl/lib/curl_config.h`
 							{
-								Compile.Type "None"
+								Compile.Disabled true
 							}
 						}
 					}
@@ -1264,11 +1273,11 @@ Property.CMakeOutputPath_CURL define string = "../.."->MakeAbsolute()
 			}
 		}
 	}
-	%Dependency "Lib_cmnghttp2"
+	%Dependency "Lib_CMake_cmnghttp2"
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_cmzlib"
+	%Dependency "Lib_CMZLIB_cmzlib"
 	{
 		Dependency.Indirect true
 	}

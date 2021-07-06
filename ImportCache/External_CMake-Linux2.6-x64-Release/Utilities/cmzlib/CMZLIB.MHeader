@@ -1,69 +1,72 @@
-Property.CMakeOutputPath_CMZLIB define string = "../.."->MakeAbsolute()
-%Target "Lib_cmzlib"
+Property.CMakeOutputPath_CMZLIB define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+%Target "Lib_CMZLIB_cmzlib"
 {
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
-			"../../Utilities"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmzlib"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute()
+			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute()
 		]
 		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
 	Target.Group "External/CMZLIB"
 	{
 		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
-	Target.BaseName "cmzlib"
+	Target.BaseName "CMZLIB_cmzlib"
+	Target.BaseFileName "cmzlib"
 	%Group "Utilities"
 	{
 		%Group "cmzlib"
 		{
-			%File "../../../../../../External/CMake/Utilities/cmzlib/adler32.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/adler32.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/compress.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/compress.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/crc32.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/crc32.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/deflate.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/deflate.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/gzio.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/gzio.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/inffast.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/inffast.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/inflate.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/inflate.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/inftrees.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/inftrees.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/trees.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/trees.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/uncompr.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/uncompr.c`
 			{
 				Compile.Type "C"
 			}
-			%File "../../../../../../External/CMake/Utilities/cmzlib/zutil.c"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/zutil.c`
 			{
 				Compile.Type "C"
 			}

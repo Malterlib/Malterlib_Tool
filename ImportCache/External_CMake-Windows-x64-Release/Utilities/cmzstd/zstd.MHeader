@@ -1,15 +1,16 @@
-Property.CMakeOutputPath_zstd define string = "../.."->MakeAbsolute()
-%Target "Lib_cmzstd"
+Property.CMakeOutputPath_zstd define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+%Target "Lib_zstd_cmzstd"
 {
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
-			"../../Utilities"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmzstd/lib"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/cmzstd/lib/common"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities/std"->MakeAbsolute(),
-			"../../../../../../External/CMake/Utilities"->MakeAbsolute()
+			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"DYNAMIC_BMI2=0",
@@ -18,151 +19,153 @@ Property.CMakeOutputPath_zstd define string = "../.."->MakeAbsolute()
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
 	Target.Group "External/zstd"
 	{
 		!!Target.Group undefined
 	}
 	Target.Type "StaticLibrary"
-	Target.BaseName "cmzstd"
+	Target.BaseName "zstd_cmzstd"
+	Target.BaseFileName "cmzstd"
 	%Group "Utilities"
 	{
 		%Group "lib"
 		{
 			%Group "common"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/entropy_common.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common/entropy_common.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/error_private.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common/error_private.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/fse_decompress.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common/fse_decompress.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/pool.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common/pool.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/threading.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common/threading.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/xxhash.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common/xxhash.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/common/zstd_common.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common/zstd_common.c`
 				{
 					Compile.Type "C"
 				}
 			}
 			%Group "compress"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/fse_compress.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/fse_compress.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/hist.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/hist.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/huf_compress.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/huf_compress.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress_literals.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_compress_literals.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_compress.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress_sequences.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_compress_sequences.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_compress_superblock.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_compress_superblock.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_double_fast.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_double_fast.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_fast.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_fast.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_lazy.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_lazy.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_ldm.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_ldm.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstdmt_compress.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstdmt_compress.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/compress/zstd_opt.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_opt.c`
 				{
 					Compile.Type "C"
 				}
 			}
 			%Group "decompress"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/decompress/huf_decompress.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/decompress/huf_decompress.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/decompress/zstd_ddict.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/decompress/zstd_ddict.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/decompress/zstd_decompress_block.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/decompress/zstd_decompress_block.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/decompress/zstd_decompress.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/decompress/zstd_decompress.c`
 				{
 					Compile.Type "C"
 				}
 			}
 			%Group "deprecated"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/deprecated/zbuff_common.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/deprecated/zbuff_common.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/deprecated/zbuff_compress.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/deprecated/zbuff_compress.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/deprecated/zbuff_decompress.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/deprecated/zbuff_decompress.c`
 				{
 					Compile.Type "C"
 				}
 			}
 			%Group "dictBuilder"
 			{
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/dictBuilder/cover.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/dictBuilder/cover.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/dictBuilder/divsufsort.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/dictBuilder/divsufsort.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/dictBuilder/fastcover.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/dictBuilder/fastcover.c`
 				{
 					Compile.Type "C"
 				}
-				%File "../../../../../../External/CMake/Utilities/cmzstd/lib/dictBuilder/zdict.c"
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/dictBuilder/zdict.c`
 				{
 					Compile.Type "C"
 				}

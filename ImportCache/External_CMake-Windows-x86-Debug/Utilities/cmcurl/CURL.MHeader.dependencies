@@ -1,3 +1,4 @@
+../../Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../../../External/CMake/Utilities/cmcurl/CMake/CurlTests.c
 ../../../../../../External/CMake/Utilities/cmcurl/CMake/FindNGHTTP2.cmake
 ../../../../../../External/CMake/Utilities/cmcurl/CMake/Macros.cmake
