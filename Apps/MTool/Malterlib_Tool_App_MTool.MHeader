@@ -43,11 +43,13 @@ Property
 	{
 		!!CompileDialect "C"
 		SearchPath += [
-			CMakeOutputPath_CMake / "Utilities"
+			CMakeOutputPath_CMake
+			, CMakeOutputPath_CMake / "Utilities"
 			, CMakeOutputPath_CMake / "Source"
 			, "../../../../External/CMake/Utilities"->MakeAbsolute()
 			, "../../../../External/CMake/Utilities/std"->MakeAbsolute()
 			, "../../../../External/CMake/Source"->MakeAbsolute()
+			, "../../../../External/CMake"->MakeAbsolute()
 		]
 		{
 			!!MToolEmbeddCMake true
