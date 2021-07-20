@@ -23,6 +23,40 @@ Import "Apps/*/*.MHeader"
 		!!PlatformFamily "OSX"
 	}
 
+	Import.CMake_Variables =+ [
+		"HAVE_ZLIB_H=1"
+		, "ARCHIVE_CRYPTO_MD5_OPENSSL=1"
+		, "ARCHIVE_CRYPTO_RMD160_OPENSSL=0"
+		, "ARCHIVE_CRYPTO_SHA1_OPENSSL=1"
+		, "ARCHIVE_CRYPTO_SHA256_OPENSSL=1"
+		, "ARCHIVE_CRYPTO_SHA384_OPENSSL=1"
+		, "ARCHIVE_CRYPTO_SHA512_OPENSSL=1"
+	]
+
+	Import.CMake_Variables =+ [
+		"ENABLE_TAR=1"
+		, "ENABLE_TAR_SHARED=0"
+		, "ENABLE_CPIO=0"
+		, "ENABLE_CAT=0"
+		, "ENABLE_CAT_SHARED=0"
+		, "ENABLE_TEST=0"
+		, "ENABLE_COVERAGE=0"
+		, "ENABLE_INSTALL=0"
+		, "ENABLE_ICONV=0"
+		, "ENABLE_LZ4=0"
+		, "ENABLE_ZSTD=0"
+		, "ENABLE_OPENSSL=1"
+		, "ENABLE_NETTLE=0"
+		, "ENABLE_LIBXML2=0"
+		, "ENABLE_LZMA=0"
+		, "ENABLE_BZip2=0"
+		, "ENABLE_EXPAT=0"
+		, `OPENSSL_ROOT_DIR=@("../../../../External/boringssl"->MakeAbsolute())`
+		, "OPENSSL_LIBRARIES=/dev/null"
+		, "OPENSSL_CRYPTO_LIBRARY=/dev/null"
+		, "OPENSSL_SSL_LIBRARY=/dev/null"
+	]
+
 	Import.CMake_Variables =+ ["HAVE_OPENSSL_ENGINE_H=0", "ENABLE_LZMA=0"]
 
 	Import.CMake_Variables =+ [
@@ -38,8 +72,6 @@ Import "Apps/*/*.MHeader"
 			!HostPlatformFamily "Linux"
 		}
 	}
-
-	Import.CMake_Variables =+ "ARCHIVE_CRYPTO_RMD160_OPENSSL=0"
 
 	Target.ExtraGroups =+ "~Automatic/DependBoringSSL"
 	{
@@ -74,6 +106,11 @@ Import "Apps/*/*.MHeader"
 		Warnings_TautolagicalPointerCompare false
 		Warnings_DeprecatedDeclarations false
 		PreprocessorDefines += ["_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR=1", "_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS=1"]
+
+		PreprocessorDefines += ["_GNU_SOURCE"]
+		{
+			!!PlatformFamily "Linux"
+		}
 	}
 	Compile
 	{
