@@ -3222,8 +3222,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmbzip2`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
@@ -3864,15 +3862,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			}
 		}
 	}
-	%Dependency "Lib_bzip2_cmbzip2"
-	{
-		Dependency.Indirect true
-	}
 	%Dependency "Lib_CMZLIB_cmzlib"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
 	}
@@ -4189,7 +4179,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Lib_CMake_CMakeLib"
 {
@@ -6840,10 +6829,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_zstd_cmzstd"
-	{
-		Dependency.Indirect true
-	}
 }
 %Target "Lib_CMake_CPackLib"
 {
@@ -7018,10 +7003,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_zstd_cmzstd"
-	{
-		Dependency.Indirect true
-	}
 }
 %Target "Com_CMake_cpack"
 {
@@ -7075,7 +7056,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_cmake"
 {
@@ -7136,7 +7116,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Lib_CMake_CTestLib"
 {
@@ -7479,10 +7458,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_zstd_cmzstd"
-	{
-		Dependency.Indirect true
-	}
 }
 %Target "Tool_CMake_test_clean"
 {
@@ -7726,7 +7701,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_testAffinity"
 {
@@ -7779,7 +7753,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_runcompilecommands"
 {
@@ -7832,7 +7805,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_testUVProcessChainHelper"
 {
@@ -7939,7 +7911,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudo_BC"
 {
@@ -8007,7 +7978,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudo_purify"
 {
@@ -8075,7 +8045,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_memcheck_fail"
 {
@@ -8143,7 +8112,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudo_valgrind"
 {
@@ -8211,7 +8179,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudonl_purify"
 {
@@ -8698,7 +8665,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
 	%Dependency "Lib_CMZLIB_cmzlib"
-	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudo_tidy"
 {

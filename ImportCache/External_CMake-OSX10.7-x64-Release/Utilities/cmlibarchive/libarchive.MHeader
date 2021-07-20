@@ -10,8 +10,6 @@ Property.CMakeOutputPath_libarchive define string = `@('../..'->MakeAbsolute())`
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
-			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmbzip2`->MakeAbsolute(),
-			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
@@ -651,15 +649,7 @@ Property.CMakeOutputPath_libarchive define string = `@('../..'->MakeAbsolute())`
 			}
 		}
 	}
-	%Dependency "Lib_bzip2_cmbzip2"
-	{
-		Dependency.Indirect true
-	}
 	%Dependency "Lib_CMZLIB_cmzlib"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
 	}
