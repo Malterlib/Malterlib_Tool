@@ -76,6 +76,20 @@ Import.CMake_CacheReplaceContents: [
 		"FilePatterns": []
 	},
 	{
+		"Find": "C:\\strawberry\\perl\\bin\\",
+		"Replace": "",
+		"ApplyToPaths": false,
+		"ExcludeFilePatterns": [],
+		"FilePatterns": []
+	},
+	{
+		"Find": "C:\\\\strawberry\\\\perl\\\\bin\\\\",
+		"Replace": "",
+		"ApplyToPaths": false,
+		"ExcludeFilePatterns": [],
+		"FilePatterns": []
+	},
+	{
 		"Find": "c:/Program Files/Git/bin/",
 		"Replace": "",
 		"ApplyToPaths": false,
@@ -83,7 +97,35 @@ Import.CMake_CacheReplaceContents: [
 		"FilePatterns": []
 	},
 	{
+		"Find": "c:\\Program Files\\Git\\bin\\",
+		"Replace": "",
+		"ApplyToPaths": false,
+		"ExcludeFilePatterns": [],
+		"FilePatterns": []
+	},
+	{
+		"Find": "c:\\\\Program Files\\\\Git\\\\bin\\\\",
+		"Replace": "",
+		"ApplyToPaths": false,
+		"ExcludeFilePatterns": [],
+		"FilePatterns": []
+	},
+	{
 		"Find": "c:/Program Files/Git/usr/bin/",
+		"Replace": "",
+		"ApplyToPaths": false,
+		"ExcludeFilePatterns": [],
+		"FilePatterns": []
+	},
+	{
+		"Find": "c:\\Program Files\\Git\\usr\\bin\\",
+		"Replace": "",
+		"ApplyToPaths": false,
+		"ExcludeFilePatterns": [],
+		"FilePatterns": []
+	},
+	{
+		"Find": "c:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\",
 		"Replace": "",
 		"ApplyToPaths": false,
 		"ExcludeFilePatterns": [],
