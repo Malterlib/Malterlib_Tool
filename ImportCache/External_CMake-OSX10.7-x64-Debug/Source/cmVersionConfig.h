@@ -3,6 +3,6 @@
 #define CMake_VERSION_MAJOR 3
 #define CMake_VERSION_MINOR 20
 #define CMake_VERSION_PATCH 4
-#define CMake_VERSION_SUFFIX "g2a48491"
+#define CMake_VERSION_SUFFIX "gaf0f4ac"
 #define CMake_VERSION_IS_DIRTY 0
-#define CMake_VERSION "3.20.4-g2a48491"
+#define CMake_VERSION "3.20.4-gaf0f4ac"
