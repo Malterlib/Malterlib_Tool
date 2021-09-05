@@ -322,10 +322,7 @@ public:
 			CStr m_BasePath;
 			CStr m_FileName;
 
-			bool operator < (CSymbolFile const &_Right) const
-			{
-				return fg_TupleReferences(m_BasePath, m_FileName) < fg_TupleReferences(_Right.m_BasePath, _Right.m_FileName);
-			}
+			auto operator <=> (CSymbolFile const &_Right) const = default;
 		};
 
 		TCRegions<CTime> m_SourceTimes;
