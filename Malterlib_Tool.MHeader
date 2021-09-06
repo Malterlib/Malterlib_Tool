@@ -51,10 +51,6 @@ Import "Apps/*/*.MHeader"
 		, "ENABLE_LZMA=0"
 		, "ENABLE_BZip2=0"
 		, "ENABLE_EXPAT=0"
-		, `OPENSSL_ROOT_DIR=@("../../../../External/boringssl"->MakeAbsolute())`
-		, "OPENSSL_LIBRARIES=/dev/null"
-		, "OPENSSL_CRYPTO_LIBRARY=/dev/null"
-		, "OPENSSL_SSL_LIBRARY=/dev/null"
 	]
 
 	Import.CMake_Variables =+ ["HAVE_OPENSSL_ENGINE_H=0", "ENABLE_LZMA=0"]
