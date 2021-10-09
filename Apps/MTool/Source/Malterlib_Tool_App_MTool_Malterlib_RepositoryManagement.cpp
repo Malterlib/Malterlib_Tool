@@ -563,6 +563,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_= false
 						, "Description"_= "When on a non-default branch, push to all remotes, not just origin.\n"
 					}
+					, "Force?"_=
+					{
+						"Names"_= {"--force", "-f"}
+						, "Default"_= false
+						, "Description"_= "Force push to remotes.\n"
+					}
 					, Filter_Name
 					, fFilter_Type("")
 					, Filter_Tags
@@ -592,6 +598,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					Flags |= CBuildSystem::ERepoPushFlag_FollowTags;
 				if (_Params["NonDefaultToAll"].f_Boolean())
 					Flags |= CBuildSystem::ERepoPushFlag_NonDefaultToAll;
+				if (_Params["Force"].f_Boolean())
+					Flags |= CBuildSystem::ERepoPushFlag_Force;
 
 				TCVector<CStr> Remotes;
 				for (auto &Param : _Params["Remotes"].f_Array())
