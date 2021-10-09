@@ -250,6 +250,22 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	}
 
 	{
+		auto Option_Pretend = "Pretend?"_=
+			{
+				"Names"_= {"--pretend", "-p"}
+				, "Default"_= false
+				, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
+			}
+		;
+
+		auto Option_Force = "Force?"_=
+			{
+				"Names"_= {"--force", "-f"}
+				, "Default"_= false
+				, "Description"_= "Overwrite any destination branches that already exists.\n"
+			}
+		;
+
 		o_ToolsSection.f_RegisterDirectCommand
 			(
 				{
@@ -258,12 +274,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, "Category"_= "Repository management"
 					, "Options"_=
 					{
-						"Pretend?"_=
-						{
-							"Names"_= {"--pretend", "-p"}
-							, "Default"_= false
-							, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
-						}
+						Option_Pretend
+						, Option_Force
 						, fFilter_Type("")
 						, fFilter_OnlyChanged(true)
 						, fs_CachedEnvironmentOption(true)
@@ -290,6 +302,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					if (_Params["Pretend"].f_Boolean())
 						Flags |= CBuildSystem::ERepoBranchFlag_Pretend;
 
+					if (_Params["Force"].f_Boolean())
+						Flags |= CBuildSystem::ERepoBranchFlag_Force;
+
 					return f_RunBuildSystem
 						(
 							[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
@@ -302,48 +317,47 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				}
 			)
 		;
-	}
 
-	o_ToolsSection.f_RegisterDirectCommand
-		(
-			{
-				"Names"_= {"unbranch"}
-				, "Description"_= "Check out the default branch for matching repositories.\n"
-				, "Category"_= "Repository management"
-				, "Options"_=
+		o_ToolsSection.f_RegisterDirectCommand
+			(
 				{
-					"Pretend?"_=
+					"Names"_= {"unbranch"}
+					, "Description"_= "Check out the default branch for matching repositories.\n"
+					, "Category"_= "Repository management"
+					, "Options"_=
 					{
-						"Names"_= {"--pretend", "-p"}
-						, "Default"_= false
-						, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
+						Option_Pretend
+						, Option_Force
+						, fFilter_Type("")
+						, fFilter_OnlyChanged(true)
+						, fs_CachedEnvironmentOption(true)
 					}
-					, fFilter_Type("")
-					, fFilter_OnlyChanged(true)
-					, fs_CachedEnvironmentOption(true)
 				}
-			}
-			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
-			{
-				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+				, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				{
+					CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
-				CBuildSystem::ERepoBranchFlag Flags = CBuildSystem::ERepoBranchFlag_None;
+					CBuildSystem::ERepoBranchFlag Flags = CBuildSystem::ERepoBranchFlag_None;
 
-				if (_Params["Pretend"].f_Boolean())
-					Flags |= CBuildSystem::ERepoBranchFlag_Pretend;
+					if (_Params["Pretend"].f_Boolean())
+						Flags |= CBuildSystem::ERepoBranchFlag_Pretend;
 
-				return f_RunBuildSystem
-					(
-						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
-						{
-							return _BuildSystem.f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
-						}
-						, _CommandLineClient.f_AnsiEncodingFlags()
-					)
-				;
-			}
-		)
-	;
+					if (_Params["Force"].f_Boolean())
+						Flags |= CBuildSystem::ERepoBranchFlag_Force;
+
+					return f_RunBuildSystem
+						(
+							[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+							{
+								return _BuildSystem.f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
+							}
+							, _CommandLineClient.f_AnsiEncodingFlags()
+						)
+					;
+				}
+			)
+		;
+	}
 
 	o_ToolsSection.f_RegisterDirectCommand
 		(
