@@ -1,0 +1,191 @@
+Property.CMakeOutputPath_CMAKE_FORM define string = `@('../../..'->MakeAbsolute())`->MakeAbsolute()
+%Target "Lib_CMAKE_FORM_cmForm"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('../../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../..'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
+			`@('../../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"LIBARCHIVE_STATIC"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/CMAKE_FORM"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "StaticLibrary"
+	Target.BaseName "CMAKE_FORM_cmForm"
+	Target.BaseFileName "cmForm"
+	%Group "Source"
+	{
+		%Group "form"
+		{
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_arg.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_attr.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_current.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_def.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_dup.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_ftchoice.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_ftlink.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_info.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_just.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_link.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_max.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_move.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_newftyp.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_opts.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_pad.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_page.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_stat.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_type.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_user.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_cursor.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_data.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_def.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_driver.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_hook.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_opts.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_page.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_post.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_req_name.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_scale.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_sub.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_user.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_win.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_alnum.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_alpha.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_enum.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_int.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_ipv4.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_num.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_regex.c`
+			{
+				Compile.Type "C"
+			}
+		}
+	}
+}
