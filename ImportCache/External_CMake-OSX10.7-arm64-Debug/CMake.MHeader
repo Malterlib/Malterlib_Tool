@@ -60,7 +60,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 					{
 						Compile
 						{
-							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/OSX/x64/ctest`->MakeAbsolute()->EscapeHost()) -D Nightly`
+							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/OSX/arm64/ctest`->MakeAbsolute()->EscapeHost()) -D Nightly`
 							AllowNonExisting true
 							Disabled false
 							Custom_WorkingDirectory `@('.'->MakeAbsolute())`->MakeAbsolute()
@@ -97,7 +97,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 					{
 						Compile
 						{
-							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/OSX/x64/ctest`->MakeAbsolute()->EscapeHost()) -D Continuous`
+							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/OSX/arm64/ctest`->MakeAbsolute()->EscapeHost()) -D Continuous`
 							AllowNonExisting true
 							Disabled false
 							Custom_WorkingDirectory `@('.'->MakeAbsolute())`->MakeAbsolute()
@@ -134,7 +134,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 					{
 						Compile
 						{
-							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/OSX/x64/ctest`->MakeAbsolute()->EscapeHost()) -D Experimental`
+							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/OSX/arm64/ctest`->MakeAbsolute()->EscapeHost()) -D Experimental`
 							AllowNonExisting true
 							Disabled false
 							Custom_WorkingDirectory `@('.'->MakeAbsolute())`->MakeAbsolute()
@@ -7994,10 +7994,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 				Compile.Type "C++"
 			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Tests/CMakeLib/testCMExtAlgorithm.cxx`
-			{
-				Compile.Type "C++"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Tests/CMakeLib/testCMFilesystemPath.cxx`
 			{
 				Compile.Type "C++"
 			}
