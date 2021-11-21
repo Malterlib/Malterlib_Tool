@@ -302,7 +302,7 @@ public:
 				ExtraStream >> Flags;
 				ExtraStream >> UnixTimestamp;
 
-				Time = CTimeConvert::fs_FromCreateFromUnixSeconds(UnixTimestamp);
+				Time = CTimeConvert::fs_FromUnixSeconds(UnixTimestamp);
 				bFoundTimeHeader = true;
 			}
 
