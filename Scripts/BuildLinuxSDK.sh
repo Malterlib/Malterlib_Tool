@@ -23,30 +23,6 @@ sudo apt-get build-dep qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qt5dxcb
 mkdir -p "$DestinationDir"
 pushd "$DestinationDir"
 
-if ! [[ -d llvm-malterlib ]]; then
-	git clone https://github.com/Malterlib/llvm-malterlib.git
-fi
-
-pushd llvm-malterlib
-git fetch --all
-
-git checkout 12.0
-git reset --hard origin/12.0
-
-MalterlibRepositoryHardReset=true ./mib update_repos
-
-pushd Scripts
-
-export LDFLAGS="-fuse-ld=lld-12"
-export CC=clang
-export CXX=clang++
-export MalterlibBuildSDK=true
-
-./build.sh
-
-popd
-popd
-
 mkdir -p Linux.sdk
 pushd Linux.sdk
 
@@ -97,8 +73,8 @@ if ! [ -h /lib ] ; then
 	cp -r "/lib/${Architecture}-linux-gnu/"* usr/lib/
 fi
 
-mkdir -p "usr/lib/clang/"
-cp -r "../llvm-malterlib/build/main/lib/clang/"* "usr/lib/clang/"
+#mkdir -p "usr/lib/clang/"
+#cp -r "../llvm-malterlib/build/main/lib/clang/"* "usr/lib/clang/"
 ln -s usr/lib lib
 ln -s usr/lib lib64
 ln -s usr/lib lib32
@@ -114,8 +90,8 @@ cp -r /usr/share/pkgconfig usr/share/
 rm -rf "usr/lib/libc++"*
 rm -rf "usr/lib/libcunwind"*
 
-cp -r "../llvm-malterlib/build/main/lib/libc++"* "usr/lib/"
-cp -r "../llvm-malterlib/build/main/lib/libunwind"* "usr/lib/"
+#cp -r "../llvm-malterlib/build/main/lib/libc++"* "usr/lib/"
+#cp -r "../llvm-malterlib/build/main/lib/libunwind"* "usr/lib/"
 
 # Remove some big stuff
 rm -rf usr/lib/guile
@@ -137,7 +113,7 @@ rm -rf usr/include
 cp -r /usr/include usr/
 rm -rf "usr/include/c++"
 mkdir -p "usr/include/c++"
-cp -r "../llvm-malterlib/build/main/include/c++/"* "usr/include/c++/"
+#cp -r "../llvm-malterlib/build/main/include/c++/"* "usr/include/c++/"
 
 ln -s . usr/lib/${Architecture}-linux-gnu
 
@@ -156,3 +132,4 @@ find . | sort -f | uniq -di | xargs rm -r
 # Strip elf files to only needed for linking
 find . -type f -name '*.so' -exec objcopy -j .dynamic -j .dynsym -j .dynstr -j .symtab -j .strtab -j .shstrtab -j .gnu.version -j .gnu.version_d -j .gnu.version_r {} \; 2>&1 | sed '/^objcopy: .*warning: empty loadable segment detected at/d'
 find . -type f -name '*.so.*' -exec objcopy -j .dynamic  -j .dynsym -j .dynstr -j .symtab -j .strtab -j .shstrtab -j .gnu.version -j .gnu.version_d -j .gnu.version_r {} \; 2>&1 | sed '/^objcopy: .*warning: empty loadable segment detected at/d'
+
