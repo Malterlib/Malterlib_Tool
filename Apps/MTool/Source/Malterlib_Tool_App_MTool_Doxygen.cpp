@@ -547,7 +547,7 @@ public:
 		{
 			CStr ImageExtensions = Registry.f_GetValue("--doxygen-image-extensions", "");
 			while (!ImageExtensions.f_IsEmpty())
-				m_DoxygenImageExtensions[fg_GetStrSep(ImageExtensions, ";")];
+				m_DoxygenImageExtensions[fg_GetStrSep(ImageExtensions, ",")];
 		}
 
 //		DConOut("\n{}\n", Registry.f_GenerateStr());
