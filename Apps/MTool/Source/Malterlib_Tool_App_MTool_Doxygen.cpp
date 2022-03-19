@@ -22,7 +22,7 @@ namespace
 			if (Value == "-Xlinker")
 				continue;
 
-			if (Value.f_StartsWith("-"))
+			if (Value.f_StartsWith("-") && LastOption != "--doxygen-options")
 			{
 				if (!LastOption.f_IsEmpty())
 				{
@@ -208,6 +208,8 @@ public:
 	CStr m_OutputDir;
 	bool m_bDoxygenEnableClang = false;
 
+	TCVector<CStr> m_DoxygenOptions;
+
 	TCLinkedList<CRegistry> m_Libraries;
 	TCMap<CStr, CStr> m_Tags;
 
@@ -317,7 +319,7 @@ public:
 			{
 				for (auto &Module : m_Modules)
 				{
-					TCVector<CStr> LaunchParams;
+					TCVector<CStr> LaunchParams = m_DoxygenOptions;
 
 					struct CState
 					{
@@ -549,6 +551,12 @@ public:
 			while (!ImageExtensions.f_IsEmpty())
 				m_DoxygenImageExtensions[fg_GetStrSep(ImageExtensions, ",")];
 		}
+		{
+			CStr Options = Registry.f_GetValue("--doxygen-options", "");
+			while (!Options.f_IsEmpty())
+				m_DoxygenOptions.f_Insert(fg_GetStrSep(Options, ","));
+		}
+
 
 //		DConOut("\n{}\n", Registry.f_GenerateStr());
 /*
