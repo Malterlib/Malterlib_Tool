@@ -15,8 +15,11 @@ if ($ENV{MalterlibPlatform} MATCHES "Linux" AND $ENV{MalterlibArch} MATCHES "x86
   set(CMAKE_SHARED_LINKER_FLAGS_INIT "-latomic" CACHE STRING "")
 else()
   set(LLVM_TARGETS_TO_BUILD X86;ARM;AArch64 CACHE STRING "")
-  set(BOOTSTRAP_LLVM_ENABLE_LTO ON CACHE BOOL "")
-
+  if ($ENV{StandaloneBuild} MATCHES "true")
+    set(BOOTSTRAP_LLVM_ENABLE_LTO OFF CACHE BOOL "")
+  else()
+    set(BOOTSTRAP_LLVM_ENABLE_LTO ON CACHE BOOL "")
+  endif()
 endif()
 
 set(CMAKE_BUILD_TYPE Release CACHE STRING "")

@@ -21,10 +21,13 @@ if ($ENV{MalterlibPlatform} MATCHES "Linux" AND $ENV{MalterlibArch} MATCHES "x86
   set(CMAKE_EXE_LINKER_FLAGS_INIT "-latomic" CACHE STRING "")
   set(CMAKE_SHARED_LINKER_FLAGS_INIT "-latomic" CACHE STRING "")
 else()
-  # Setting up the stage2 LTO option needs to be done on the stage1 build so that
-  # the proper LTO library dependencies can be connected.
-  set(BOOTSTRAP_LLVM_ENABLE_LTO ON CACHE BOOL "")
-
+  if ($ENV{StandaloneBuild} MATCHES "true")
+    set(BOOTSTRAP_LLVM_ENABLE_LTO OFF CACHE BOOL "")
+  else()
+    # Setting up the stage2 LTO option needs to be done on the stage1 build so that
+    # the proper LTO library dependencies can be connected.
+    set(BOOTSTRAP_LLVM_ENABLE_LTO ON CACHE BOOL "")
+  endif()
   if (NOT APPLE)
     # Since LLVM_ENABLE_LTO is ON we need a LTO capable linker
     set(BOOTSTRAP_LLVM_ENABLE_LLD ON CACHE BOOL "")

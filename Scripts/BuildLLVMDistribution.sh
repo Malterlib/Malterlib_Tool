@@ -22,6 +22,11 @@ pushd "$ScriptDir"
 NCPUS=`nproc || sysctl -n hw.ncpu`
 echo Number of CPUs: ${NCPUS}
 
+if [[ "$BuildIncremental" != "true" ]]; then
+	rm -rf "$RootDir/build"
+	rm -rf "$DistributionDir/"*
+fi
+
 BuildCompilerLTO()
 {
 	mkdir -p "$RootDir/build/dist_temp"
@@ -29,82 +34,85 @@ BuildCompilerLTO()
 		local BuildDir="$PWD"
 	popd
 
-	pushd "$BuildDir/dist_temp"
-		echo Building compiler
+	if [[ "$BuildIncremental" != "true" ]]; then
+		pushd "$BuildDir/dist_temp"
+			echo Building compiler
 
-		local ExtraCMake="-G Ninja"
+			local ExtraCMake="-G Ninja"
 
-		(cmake $ExtraCMake -C "$RootDir/cmake_caches/PGO.cmake" "$MalterlibRoot/External/llvm-project/llvm")
+			(cmake $ExtraCMake -C "$RootDir/cmake_caches/PGO.cmake" "$MalterlibRoot/External/llvm-project/llvm")
 
-		time ninja -j${NCPUS} stage2-instrumented
-	popd
+			time ninja -j${NCPUS} stage2-instrumented
+		popd
 
-	# Generate profiling data
-	pushd "$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins"
-		#ninja check-all || true
-	popd
+		# Generate profiling data
+		pushd "$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins"
+			#ninja check-all || true
+		popd
 
-	pushd "$MalterlibRoot"
-		#export EnableReleaseConfig=true
-		export EnableReleaseTestingConfig=true
-		export MalterlibDisableBuildSystemGeneration=true
-		export PlatformToolsetCompiler="$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins/bin/clang"
+		pushd "$MalterlibRoot"
+			#export EnableReleaseConfig=true
+			export EnableReleaseTestingConfig=true
+			export MalterlibDisableBuildSystemGeneration=true
+			export PlatformToolsetCompiler="$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins/bin/clang"
+			export MalterlibImportUpdateCache=false
 
-		if [[ "$MalterlibPlatform" == "OSX" ]]; then
-			export EnableArchitecture_x86=false
-			export EnableArchitecture_x64=true
-			export EnableArchitecture_arm64=true
-			export EnablePlatform_OSX10_7=true
-			export EnablePlatform_Linux2_6=true
+			if [[ "$MalterlibPlatform" == "OSX" ]]; then
+				export EnableArchitecture_x86=false
+				export EnableArchitecture_x64=true
+				export EnableArchitecture_arm64=true
+				export EnablePlatform_OSX10_7=true
+				export EnablePlatform_Linux2_6=true
 
-			./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
+				./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
 
-			#./mib build "Tests" "OSX10.7" "arm64" "Release (Tests)" || true # Crashes
-			./mib build "Tests" "OSX10.7" "arm64" "Debug" || true
-			./mib build "Tests" "OSX10.7" "arm64" "Release Testing (Tests)" || true
-			#./mib build "Tests" "OSX10.7" "x64" "Release (Tests)" || true # Crashes
-			./mib build "Tests" "OSX10.7" "x64" "Debug" || true
-			./mib build "Tests" "OSX10.7" "x64" "Release Testing (Tests)" || true
-			#./mib build "Tests" "Linux2.6" "x64" "Release (Tests)" || true # Crashes
-			./mib build "Tests" "Linux2.6" "x64" "Debug" || true
-			./mib build "Tests" "Linux2.6" "x64" "Release Testing (Tests)" || true
-		elif [[ "$MalterlibPlatform" == "Linux" ]]; then
-			export EnableArchitecture_x86=false
-			export EnableArchitecture_x64=true
-			export EnableArchitecture_arm64=false
-			export EnablePlatform_OSX10_7=false
-			export EnablePlatform_Linux2_6=true
+				#./mib build "Tests" "OSX10.7" "arm64" "Release (Tests)" || true # Crashes
+				./mib build "Tests" "OSX10.7" "arm64" "Debug" || true
+				./mib build "Tests" "OSX10.7" "arm64" "Release Testing (Tests)" || true
+				#./mib build "Tests" "OSX10.7" "x64" "Release (Tests)" || true # Crashes
+				./mib build "Tests" "OSX10.7" "x64" "Debug" || true
+				./mib build "Tests" "OSX10.7" "x64" "Release Testing (Tests)" || true
+				#./mib build "Tests" "Linux2.6" "x64" "Release (Tests)" || true # Crashes
+				./mib build "Tests" "Linux2.6" "x64" "Debug" || true
+				./mib build "Tests" "Linux2.6" "x64" "Release Testing (Tests)" || true
+			elif [[ "$MalterlibPlatform" == "Linux" ]]; then
+				export EnableArchitecture_x86=false
+				export EnableArchitecture_x64=true
+				export EnableArchitecture_arm64=false
+				export EnablePlatform_OSX10_7=false
+				export EnablePlatform_Linux2_6=true
 
-			#./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
-			#./mib build "Tests" "Linux2.6" "x64" "Release (Tests)" || true # Crashes
-			#./mib build "Tests" "Linux2.6" "x64" "Debug" || true
-			#./mib build "Tests" "Linux2.6" "x64" "Release Testing (Tests)" || true
-		        pushd "$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins"
-				ninja check-clang || true
-		        popd
+				#./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
+				#./mib build "Tests" "Linux2.6" "x64" "Release (Tests)" || true # Crashes
+				#./mib build "Tests" "Linux2.6" "x64" "Debug" || true
+				#./mib build "Tests" "Linux2.6" "x64" "Release Testing (Tests)" || true
+			        pushd "$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins"
+					ninja check-clang || true
+			        popd
 
-		elif [[ "$MalterlibPlatform" == "Windows" ]]; then
-			export EnableArchitecture_x86=true
-			export EnableArchitecture_x64=true
-			export EnableArchitecture_arm64=false
-			export EnablePlatform_Windows=true
+			elif [[ "$MalterlibPlatform" == "Windows" ]]; then
+				export EnableArchitecture_x86=true
+				export EnableArchitecture_x64=true
+				export EnableArchitecture_arm64=false
+				export EnablePlatform_Windows=true
 
-			./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
+				./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
 
-			#./mib build "Tests" "Windows" "x64" "Release (Tests)" || true # Crashes
-			./mib build "Tests" "Windows" "x64" "Debug" || true
-			./mib build "Tests" "Windows" "x64" "Release Testing (Tests)" || true
-			./mib build "Tests" "Windows" "x86" "Debug" || true
-			./mib build "Tests" "Windows" "x86" "Release Testing (Tests)" || true
-		else
-			echo "Unknow platform"
-			exit 1
-		fi
+				#./mib build "Tests" "Windows" "x64" "Release (Tests)" || true # Crashes
+				./mib build "Tests" "Windows" "x64" "Debug" || true
+				./mib build "Tests" "Windows" "x64" "Release Testing (Tests)" || true
+				./mib build "Tests" "Windows" "x86" "Debug" || true
+				./mib build "Tests" "Windows" "x86" "Release Testing (Tests)" || true
+			else
+				echo "Unknow platform"
+				exit 1
+			fi
 
-	popd
+		popd
 
-	# Merge profiling data
-	"$BuildDir/dist_temp/bin/llvm-profdata" merge "-output=$RootDir/build/merged.profdata" "$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins/profiles/"*.profraw
+		# Merge profiling data
+		"$BuildDir/dist_temp/bin/llvm-profdata" merge "-output=$RootDir/build/merged.profdata" "$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins/profiles/"*.profraw
+	fi
 
 	mkdir -p "$RootDir/build/dist_temp2"
 	pushd "$RootDir/build/dist_temp2"
@@ -120,6 +128,7 @@ BuildCompilerLTO()
 
 BuildCompiler()
 {
+	export StandaloneBuild=true
 	mkdir -p "$RootDir/build/dist_temp2"
 	pushd "$RootDir/build"
 		local BuildDir="$PWD"
@@ -135,7 +144,7 @@ BuildCompiler()
 	popd
 }
 
-if [[ "$MalterlibPlatform/$MalterlibArch" == "Linux/x86" ]] ; then
+if [[ "$MalterlibPlatform/$MalterlibArch" == "Linux/x86" ]] || [[ "$1" == "debug" ]]; then
 	BuildCompiler
 else
 	BuildCompilerLTO
