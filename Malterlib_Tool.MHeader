@@ -56,6 +56,14 @@ Import "Apps/*/*.MHeader"
 	Import.CMake_Variables =+ ["HAVE_OPENSSL_ENGINE_H=0", "ENABLE_LZMA=0"]
 
 	Import.CMake_Variables =+ [
+		"HAVE_POLL_FINE_EXITCODE=0"
+		, "HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT="
+	]
+	{
+		!!PlatformFamily "OSX"
+	}
+
+	Import.CMake_Variables =+ [
 		"CMake_RUN_CXX_FILESYSTEM=0"
 		, "CMake_RUN_CXX_FILESYSTEM__TRYRUN_OUTPUT=1"
 		, "HAVE_POLL_FINE_EXITCODE=0"
