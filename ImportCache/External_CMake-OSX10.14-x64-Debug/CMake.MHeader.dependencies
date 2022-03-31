@@ -141,7 +141,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/EnforceConfig.cmake.in
 ../../../../External/CMake/Tests/FindPackageModeMakefileTest/CMakeLists.txt
 ../../../../External/CMake/Tests/FindThreads/CMakeLists.txt
-../../../../External/CMake/Tests/FortranC/Flags.cmake.in
 ../../../../External/CMake/Tests/JacocoCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/JavascriptCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/JavascriptCoverage/output.json.in

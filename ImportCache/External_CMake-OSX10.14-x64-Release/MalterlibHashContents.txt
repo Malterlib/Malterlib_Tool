@@ -112,6 +112,7 @@ Import.CMake_Variables: [
 	CMAKE_OSX_DEPLOYMENT_TARGET=10.14,
 	CMAKE_OSX_SYSROOT=/private/var/db/xcode_select_link/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk,
 	CMAKE_OSX_ARCHITECTURES=x86_64,
+	,
 	OPENSSL_ROOT_DIR=/External/boringssl,
 	OPENSSL_LIBRARIES=/dev/null,
 	OPENSSL_CRYPTO_LIBRARY=/dev/null,
@@ -142,7 +143,9 @@ Import.CMake_Variables: [
 	ENABLE_BZip2=0,
 	ENABLE_EXPAT=0,
 	HAVE_OPENSSL_ENGINE_H=0,
-	ENABLE_LZMA=0
+	ENABLE_LZMA=0,
+	HAVE_POLL_FINE_EXITCODE=0,
+	HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT=
 ]
 
 Import.CMake_IncludeInHash: [
