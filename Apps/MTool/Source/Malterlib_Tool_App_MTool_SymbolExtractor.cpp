@@ -265,11 +265,11 @@ public:
 
 		if 
 			(
-				fg_Clamp(Date.tm_mon, 0u, 11u) != Date.tm_mon 
-				|| fg_Clamp(Date.tm_mday, 1u, uint32(CTimeConvert::fs_GetDaysInMonth(Date.tm_year, Date.tm_mon))) != Date.tm_mday
-				|| fg_Clamp(Date.tm_hour, 0u, 23u) != Date.tm_hour
-				|| fg_Clamp(Date.tm_min, 0u, 59u) != Date.tm_min
-				|| fg_Clamp(Date.tm_sec, 0u, 59u) != Date.tm_sec
+				fg_Clamp(Date.tm_mon, 0, 11) != Date.tm_mon 
+				|| fg_Clamp(Date.tm_mday, 1, int32(CTimeConvert::fs_GetDaysInMonth(Date.tm_year, Date.tm_mon))) != Date.tm_mday
+				|| fg_Clamp(Date.tm_hour, 0, 23) != Date.tm_hour
+				|| fg_Clamp(Date.tm_min, 0, 59) != Date.tm_min
+				|| fg_Clamp(Date.tm_sec, 0, 59) != Date.tm_sec
 			)
 		{
 			DError(fg_Format("Invalid date in zip file: {}", _Path));

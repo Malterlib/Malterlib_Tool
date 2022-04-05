@@ -77,7 +77,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 
 #elif defined(DPlatformFamily_Windows)
 	CStr RepoConfigFile = _RootPath / "Repo.conf";
-	CStr Version = "2019";
+	CStr Version = "2022";
 
 	if (CFile::fs_FileExists(RepoConfigFile))
 	{
