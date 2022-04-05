@@ -434,8 +434,6 @@ private:
 		EType Type;
 		CStr ValueStr, TypeStr;
 
-		bool bFirst = true;
-
 		CStr Filename = NFile::CFile::fs_GetFileNoExt(_DestFileName);
 
 		for (auto RIter = _Reg.f_GetChildIterator(); RIter; ++RIter)
@@ -495,9 +493,6 @@ private:
 				DMibNeverGetHere;
 				break;
 			}
-
-			bFirst = false;
-
 		}
 
 		if (_bHeader)
