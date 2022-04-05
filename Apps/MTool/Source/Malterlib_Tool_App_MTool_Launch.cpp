@@ -27,7 +27,7 @@ public:
 
 		int Ret = 0;
 
-		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
+		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutableRawParams
 			(
 				FileName
 				, Params
@@ -402,7 +402,7 @@ public:
 
 		int Ret = 0;
 
-		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
+		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutableRawParams
 			(
 				FileName
 				, Params

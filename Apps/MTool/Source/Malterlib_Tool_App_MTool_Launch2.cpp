@@ -482,7 +482,7 @@ private:
 			}
 		;
 
-		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
+		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutableRawParams
 			(
 					_Options.m_Target
 				, 	Params
