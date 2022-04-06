@@ -72,7 +72,7 @@ public:
 	{
 		CStr DoneMessage = "Done!";
 		auto ReportDone
-			= g_OnScopeExit > [&]
+			= g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}

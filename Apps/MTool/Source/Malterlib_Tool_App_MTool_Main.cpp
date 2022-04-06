@@ -149,7 +149,7 @@ public:
 			OldSignals[Signal] = signal(Signal, fSignalHandler);
 
 		auto Cleanup
-			= g_OnScopeExit > [&]
+			= g_OnScopeExit / [&]
 			{
 				for (auto iOldSignal = OldSignals.f_GetIterator(); iOldSignal; ++iOldSignal)
 					signal(iOldSignal.f_GetKey(), *iOldSignal);

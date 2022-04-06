@@ -241,7 +241,7 @@ public:
 		unzFile pZipFile = unzOpen2_64(_Path, &Functions);
 		if (!pZipFile)
 			DError(fg_Format("Failed to create zip file: {}", _Path));
-		auto Cleanup = g_OnScopeExit > [&]()
+		auto Cleanup = g_OnScopeExit / [&]()
 			{
 				unzClose(pZipFile);
 			}
