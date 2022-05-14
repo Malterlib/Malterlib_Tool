@@ -137,8 +137,20 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, "NeedActionOnPush?"_=
 					{
 						"Names"_= {"--need-action-on-push", "-p"}
-						, "Default"_= false
+						, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPush", "false") == "true"
 						, "Description"_= "Consider repositories that needs to be pushed as requiring action when --open-editor is specified.\n"
+					}
+					, "NeedActionOnPull?"_=
+					{
+						"Names"_= {"--need-action-on-pull"}
+						, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPull", "true") == "true"
+						, "Description"_= "Consider repositories that needs to be pulled as requiring action when --open-editor is specified.\n"
+					}
+					, "NeedActionOnLocalChanes?"_=
+					{
+						"Names"_= {"--need-action-on-local-changes"}
+						, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnLocalChanges", "true") == "true"
+						, "Description"_= "Consider repositories that has local changes as requiring action when --open-editor is specified.\n"
 					}
 					, "NonDefaultToAll?"_=
 					{
@@ -172,10 +184,14 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					Flags |= CBuildSystem::ERepoStatusFlag_UseDefaultUpstreamBranch;
 				if (_Params["OpenEditor"].f_Boolean())
 					Flags |= CBuildSystem::ERepoStatusFlag_OpenEditor;
-				if (_Params["NeedActionOnPush"].f_Boolean())
-					Flags |= CBuildSystem::ERepoStatusFlag_NeedActionOnPush;
 				if (_Params["NonDefaultToAll"].f_Boolean())
 					Flags |= CBuildSystem::ERepoStatusFlag_NonDefaultToAll;
+				if (_Params["NeedActionOnPush"].f_Boolean())
+					Flags |= CBuildSystem::ERepoStatusFlag_NeedActionOnPush;
+				if (_Params["NeedActionOnPull"].f_Boolean())
+					Flags |= CBuildSystem::ERepoStatusFlag_NeedActionOnPull;
+				if (_Params["NeedActionOnLocalChanes"].f_Boolean())
+					Flags |= CBuildSystem::ERepoStatusFlag_NeedActionOnLocalChanges;
 
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
