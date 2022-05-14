@@ -21,7 +21,9 @@ Property.CMakeOutputPath_CMLIBLZMA define string = `@('../..'->MakeAbsolute())`-
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += []
+		PreprocessorDefines += [
+			"MYTHREAD_POSIX"
+		]
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -38,7 +40,19 @@ Property.CMakeOutputPath_CMLIBLZMA define string = `@('../..'->MakeAbsolute())`-
 		{
 			%Group "common"
 			{
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common/mythread.h`
+				{
+					Compile.Disabled true
+				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common/sysdefs.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common/tuklib_cpucores.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common/tuklib_cpucores.h`
 				{
 					Compile.Disabled true
 				}
@@ -170,6 +184,10 @@ Property.CMakeOutputPath_CMLIBLZMA define string = `@('../..'->MakeAbsolute())`-
 					{
 						Compile.Type "C"
 					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/hardware_cputhreads.c`
+					{
+						Compile.Type "C"
+					}
 					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/index.c`
 					{
 						Compile.Type "C"
@@ -186,6 +204,10 @@ Property.CMakeOutputPath_CMLIBLZMA define string = `@('../..'->MakeAbsolute())`-
 					{
 						Compile.Type "C"
 					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/outqueue.c`
+					{
+						Compile.Type "C"
+					}
 					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_buffer_decoder.c`
 					{
 						Compile.Type "C"
@@ -199,6 +221,10 @@ Property.CMakeOutputPath_CMLIBLZMA define string = `@('../..'->MakeAbsolute())`-
 						Compile.Type "C"
 					}
 					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_encoder_mt.c`
 					{
 						Compile.Type "C"
 					}

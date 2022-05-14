@@ -26,61 +26,91 @@
 /* when building libcurl itself */
 /* #undef BUILDING_LIBCURL */
 
-/* to disable cookies support */
+/* to disable alt-svc */
+#define CURL_DISABLE_ALTSVC 1
+
+/* disables cookies support */
 /* #undef CURL_DISABLE_COOKIES */
 
-/* to disable cryptographic authentication */
+/* disables cryptographic authentication */
 /* #undef CURL_DISABLE_CRYPTO_AUTH */
 
-/* to disable DICT */
+/* disables DICT */
 #define CURL_DISABLE_DICT 1
 
-/* to disable FILE */
+/* disables DNS-over-HTTPS */
+/* #undef CURL_DISABLE_DOH */
+
+/* disables FILE */
 /* #undef CURL_DISABLE_FILE */
 
-/* to disable FTP */
+/* disables FTP */
 /* #undef CURL_DISABLE_FTP */
 
-/* to disable GOPHER */
+/* disables GOPHER */
 #define CURL_DISABLE_GOPHER 1
 
-/* to disable IMAP */
-#define CURL_DISABLE_IMAP 1
+/* disables HSTS support */
+#define CURL_DISABLE_HSTS 1
 
-/* to disable HTTP */
+/* disables HTTP */
 /* #undef CURL_DISABLE_HTTP */
 
-/* to disable LDAP */
+/* disables IMAP */
+#define CURL_DISABLE_IMAP 1
+
+/* disables LDAP */
 #define CURL_DISABLE_LDAP 1
 
-/* to disable LDAPS */
+/* disables LDAPS */
 #define CURL_DISABLE_LDAPS 1
 
-/* to disable MQTT */
+/* disables --libcurl option from the curl tool */
+/* #undef CURL_DISABLE_LIBCURL_OPTION */
+
+/* disables MIME support */
+/* #undef CURL_DISABLE_MIME */
+
+/* disables MQTT */
 #define CURL_DISABLE_MQTT 1
 
-/* to disable POP3 */
+/* disables netrc parser */
+/* #undef CURL_DISABLE_NETRC */
+
+/* disables NTLM support */
+/* #undef CURL_DISABLE_NTLM */
+
+/* disables date parsing */
+/* #undef CURL_DISABLE_PARSEDATE */
+
+/* disables POP3 */
 #define CURL_DISABLE_POP3 1
 
-/* to disable proxies */
+/* disables built-in progress meter */
+/* #undef CURL_DISABLE_PROGRESS_METER */
+
+/* disables proxies */
 /* #undef CURL_DISABLE_PROXY */
 
-/* to disable RTSP */
+/* disables RTSP */
 #define CURL_DISABLE_RTSP 1
 
-/* to disable SMB */
+/* disables SMB */
 /* #undef CURL_DISABLE_SMB */
 
-/* to disable SMTP */
+/* disables SMTP */
 #define CURL_DISABLE_SMTP 1
 
-/* to disable TELNET */
+/* disables use of socketpair for curl_multi_poll */
+/* #undef CURL_DISABLE_SOCKETPAIR */
+
+/* disables TELNET */
 #define CURL_DISABLE_TELNET 1
 
-/* to disable TFTP */
+/* disables TFTP */
 #define CURL_DISABLE_TFTP 1
 
-/* to disable verbose strings */
+/* disables verbose strings */
 /* #undef CURL_DISABLE_VERBOSE_STRINGS */
 
 /* to make a symbol visible */
@@ -104,27 +134,6 @@
 
 /* Define if you want to enable IPv6 support */
 #define ENABLE_IPV6 1
-
-/* Define to the type qualifier of arg 1 for getnameinfo. */
-/* #undef GETNAMEINFO_QUAL_ARG1 */
-
-/* Define to the type of arg 1 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG1 */
-
-/* Define to the type of arg 2 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG2 */
-
-/* Define to the type of args 4 and 6 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG46 */
-
-/* Define to the type of arg 7 for getnameinfo. */
-/* #undef GETNAMEINFO_TYPE_ARG7 */
-
-/* Specifies the number of arguments to getservbyport_r */
-/* #undef GETSERVBYPORT_R_ARGS */
-
-/* Specifies the size of the buffer to pass to getservbyport_r */
-/* #undef GETSERVBYPORT_R_BUFSIZE */
 
 /* Define to 1 if you have the alarm function. */
 #define HAVE_ALARM 1
@@ -159,17 +168,11 @@
 /* Define to 1 if you have the `CRYPTO_cleanup_all_ex_data' function. */
 /* #undef HAVE_CRYPTO_CLEANUP_ALL_EX_DATA */
 
-/* Define to 1 if you have the <crypto.h> header file. */
-/* #undef HAVE_CRYPTO_H */
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
-
-/* Define to 1 if you have the <err.h> header file. */
-#define HAVE_ERR_H 1
 
 /* Define to 1 if you have the fcntl function. */
 #define HAVE_FCNTL 1
@@ -180,17 +183,8 @@
 /* Define to 1 if you have a working fcntl O_NONBLOCK function. */
 #define HAVE_FCNTL_O_NONBLOCK 1
 
-/* Define to 1 if you have the fdopen function. */
-/* #undef HAVE_FDOPEN */
-
-/* Define to 1 if you have the `fork' function. */
-#define HAVE_FORK 1
-
 /* Define to 1 if you have the freeaddrinfo function. */
 #define HAVE_FREEADDRINFO 1
-
-/* Define to 1 if you have the freeifaddrs function. */
-#define HAVE_FREEIFADDRS 1
 
 /* Define to 1 if you have the ftruncate function. */
 #define HAVE_FTRUNCATE 1
@@ -201,20 +195,8 @@
 /* Define to 1 if you have the `geteuid' function. */
 #define HAVE_GETEUID 1
 
-/* Define to 1 if you have the gethostbyaddr function. */
-#define HAVE_GETHOSTBYADDR 1
-
-/* Define to 1 if you have the gethostbyaddr_r function. */
-#define HAVE_GETHOSTBYADDR_R 1
-
-/* gethostbyaddr_r() takes 5 args */
-/* #undef HAVE_GETHOSTBYADDR_R_5 */
-
-/* gethostbyaddr_r() takes 7 args */
-/* #undef HAVE_GETHOSTBYADDR_R_7 */
-
-/* gethostbyaddr_r() takes 8 args */
-#define HAVE_GETHOSTBYADDR_R_8 1
+/* Define to 1 if you have the `getppid' function. */
+#define HAVE_GETPPID 1
 
 /* Define to 1 if you have the gethostbyname function. */
 #define HAVE_GETHOSTBYNAME 1
@@ -237,14 +219,11 @@
 /* Define to 1 if you have a working getifaddrs function. */
 /* #undef HAVE_GETIFADDRS */
 
-/* Define to 1 if you have the getnameinfo function. */
-/* #undef HAVE_GETNAMEINFO */
-
 /* Define to 1 if you have the `getpass_r' function. */
 /* #undef HAVE_GETPASS_R */
 
 /* Define to 1 if you have the `getppid' function. */
-/* #undef HAVE_GETPPID */
+#define HAVE_GETPPID 1
 
 /* Define to 1 if you have the `getprotobyname' function. */
 #define HAVE_GETPROTOBYNAME 1
@@ -266,9 +245,6 @@
 
 /* Define to 1 if you have the `getrlimit' function. */
 #define HAVE_GETRLIMIT 1
-
-/* Define to 1 if you have the getservbyport_r function. */
-/* #undef HAVE_GETSERVBYPORT_R */
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY 1
@@ -315,20 +291,17 @@
 /* Define to 1 if you have the `inet_addr' function. */
 #define HAVE_INET_ADDR 1
 
-/* Define to 1 if you have the inet_ntoa_r function. */
-/* #undef HAVE_INET_NTOA_R */
-
-/* inet_ntoa_r() takes 2 args */
-/* #undef HAVE_INET_NTOA_R_2 */
-
-/* inet_ntoa_r() takes 3 args */
-/* #undef HAVE_INET_NTOA_R_3 */
-
 /* Define to 1 if you have a IPv6 capable working inet_ntop function. */
 /* #undef HAVE_INET_NTOP */
 
 /* Define to 1 if you have a IPv6 capable working inet_pton function. */
 #define HAVE_INET_PTON 1
+
+/* Define to 1 if symbol `sa_family_t' exists */
+#define HAVE_SA_FAMILY_T 1
+
+/* Define to 1 if symbol `ADDRESS_FAMILY' exists */
+/* #undef HAVE_ADDRESS_FAMILY */
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
@@ -405,21 +378,6 @@
 
 /* Define to 1 if you have the `ssh2' library (-lssh2). */
 /* #undef HAVE_LIBSSH2 */
-
-/* Define to 1 if libssh2 provides `libssh2_version'. */
-/* #undef HAVE_LIBSSH2_VERSION */
-
-/* Define to 1 if libssh2 provides `libssh2_init'. */
-/* #undef HAVE_LIBSSH2_INIT */
-
-/* Define to 1 if libssh2 provides `libssh2_exit'. */
-/* #undef HAVE_LIBSSH2_EXIT */
-
-/* Define to 1 if libssh2 provides `libssh2_scp_send64'. */
-/* #undef HAVE_LIBSSH2_SCP_SEND64 */
-
-/* Define to 1 if libssh2 provides `libssh2_session_handshake'. */
-/* #undef HAVE_LIBSSH2_SESSION_HANDSHAKE */
 
 /* Define to 1 if you have the <libssh2.h> header file. */
 /* #undef HAVE_LIBSSH2_H */
@@ -501,9 +459,6 @@
 /* Define to 1 if you have the <pem.h> header file. */
 /* #undef HAVE_PEM_H */
 
-/* Define to 1 if you have the `perror' function. */
-#define HAVE_PERROR 1
-
 /* Define to 1 if you have the `pipe' function. */
 #define HAVE_PIPE 1
 
@@ -540,9 +495,6 @@
 /* Define to 1 if you have the recvfrom function. */
 /* #undef HAVE_RECVFROM */
 
-/* Define to 1 if you have the <rsa.h> header file. */
-/* #undef HAVE_RSA_H */
-
 /* Define to 1 if you have the select function. */
 #define HAVE_SELECT 1
 
@@ -576,9 +528,6 @@
 /* Define to 1 if you have a working setsockopt SO_NONBLOCK function. */
 /* #undef HAVE_SETSOCKOPT_SO_NONBLOCK */
 
-/* Define to 1 if you have the <sgtty.h> header file. */
-#define HAVE_SGTTY_H 1
-
 /* Define to 1 if you have the sigaction function. */
 #define HAVE_SIGACTION 1
 
@@ -593,12 +542,6 @@
 
 /* Define to 1 if you have the sigsetjmp function or macro. */
 #define HAVE_SIGSETJMP 1
-
-/* Define to 1 if sig_atomic_t is an available typedef. */
-#define HAVE_SIG_ATOMIC_T 1
-
-/* Define to 1 if sig_atomic_t is already defined as volatile. */
-/* #undef HAVE_SIG_ATOMIC_T_VOLATILE */
 
 /* Define to 1 if struct sockaddr_in6 has the sin6_scope_id member */
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
@@ -644,15 +587,6 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
-
-/* Define to 1 if you have the strlcat function. */
-/* #undef HAVE_STRLCAT */
-
-/* Define to 1 if you have the `strlcpy' function. */
-/* #undef HAVE_STRLCPY */
-
-/* Define to 1 if you have the strncasecmp function. */
-/* #undef HAVE_STRNCASECMP */
 
 /* Define to 1 if you have the strncmpi function. */
 /* #undef HAVE_STRNCMPI */
@@ -744,6 +678,9 @@
 /* Define to 1 if you have the `utime' function. */
 #define HAVE_UTIME 1
 
+/* Define to 1 if you have the `utimes' function. */
+#define HAVE_UTIMES 1
+
 /* Define to 1 if you have the <utime.h> header file. */
 #define HAVE_UTIME_H 1
 
@@ -764,9 +701,6 @@
 
 /* Define to 1 if you have the winsock2.h header file. */
 /* #undef HAVE_WINSOCK2_H */
-
-/* Define to 1 if you have the winsock.h header file. */
-/* #undef HAVE_WINSOCK_H */
 
 /* Define this symbol if your OS supports changing the contents of argv */
 /* #undef HAVE_WRITABLE_ARGV */
@@ -871,9 +805,6 @@
 /* Define to the function return type for recv. */
 #define RECV_TYPE_RETV ssize_t
 
-/* Define as the return type of signal handlers (`int' or `void'). */
-#define RETSIGTYPE void
-
 /* Define to the type qualifier of arg 5 for select. */
 /* #undef SELECT_QUAL_ARG5 */
 
@@ -966,9 +897,6 @@
 /* Define if you want to enable WIN32 threaded DNS lookup */
 /* #undef USE_THREADS_WIN32 */
 
-/* Define to disable non-blocking sockets. */
-/* #undef USE_BLOCKING_SOCKETS */
-
 /* if GnuTLS is enabled */
 /* #undef USE_GNUTLS */
 
@@ -1026,9 +954,6 @@
 
 /* if Unix domain sockets are enabled  */
 /* #undef USE_UNIX_SOCKETS */
-
-/* to disable alt-svc */
-#define CURL_DISABLE_ALTSVC 1
 
 /* to enable SSPI support */
 /* #undef USE_WINDOWS_SSPI */
@@ -1089,3 +1014,9 @@
 
 /* Define to 1 if you have the mach_absolute_time function. */
 /* #undef HAVE_MACH_ABSOLUTE_TIME */
+
+/* to enable Windows IDN */
+/* #undef USE_WIN32_IDN */
+
+/* to make the compiler know the prototypes of Windows IDN APIs */
+/* #undef WANT_IDN_PROTOTYPES */

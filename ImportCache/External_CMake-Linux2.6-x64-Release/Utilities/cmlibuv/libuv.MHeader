@@ -171,6 +171,10 @@ Property.CMakeOutputPath_libuv define string = `@('../..'->MakeAbsolute())`->Mak
 				{
 					Compile.Type "C"
 				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/epoll.c`
+				{
+					Compile.Type "C"
+				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/linux-core.c`
 				{
 					Compile.Type "C"

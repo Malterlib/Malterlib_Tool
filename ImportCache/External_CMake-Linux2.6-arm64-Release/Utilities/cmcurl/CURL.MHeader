@@ -14,7 +14,8 @@ Property.CMakeOutputPath_CURL define string = `@('../..'->MakeAbsolute())`->Make
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
-			"HAVE_CONFIG_H"
+			"HAVE_CONFIG_H",
+			"OPENSSL_SUPPRESS_DEPRECATED"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -61,7 +62,8 @@ Property.CMakeOutputPath_CURL define string = `@('../..'->MakeAbsolute())`->Make
 		PreprocessorDefines += [
 			"BUILDING_LIBCURL",
 			"HAVE_CONFIG_H",
-			"NGHTTP2_STATICLIB"
+			"NGHTTP2_STATICLIB",
+			"OPENSSL_SUPPRESS_DEPRECATED"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -90,6 +92,10 @@ Property.CMakeOutputPath_CURL define string = `@('../..'->MakeAbsolute())`->Make
 				Compile.Disabled true
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/asyn.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/bufref.h`
 			{
 				Compile.Disabled true
 			}
@@ -579,6 +585,10 @@ Property.CMakeOutputPath_CURL define string = `@('../..'->MakeAbsolute())`->Make
 				{
 					Compile.Type "C"
 				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/gsasl.c`
+				{
+					Compile.Type "C"
+				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vauth/krb5_gssapi.c`
 				{
 					Compile.Type "C"
@@ -650,6 +660,10 @@ Property.CMakeOutputPath_CURL define string = `@('../..'->MakeAbsolute())`->Make
 				{
 					Compile.Disabled true
 				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/rustls.h`
+				{
+					Compile.Disabled true
+				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/schannel.h`
 				{
 					Compile.Disabled true
@@ -699,6 +713,10 @@ Property.CMakeOutputPath_CURL define string = `@('../..'->MakeAbsolute())`->Make
 					Compile.Type "C"
 				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/openssl.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/rustls.c`
 				{
 					Compile.Type "C"
 				}
@@ -786,6 +804,10 @@ Property.CMakeOutputPath_CURL define string = `@('../..'->MakeAbsolute())`->Make
 				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/base64.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/bufref.c`
 			{
 				Compile.Type "C"
 			}

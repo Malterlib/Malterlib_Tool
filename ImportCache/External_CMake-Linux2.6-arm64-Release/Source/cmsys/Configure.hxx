@@ -16,11 +16,11 @@
   1
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC > 0x5130 && defined(__has_attribute)
-#  define cmsys__has_cpp_attribute(x) __has_attribute(x)
+#  define cmsys_has_cpp_attribute(x) __has_attribute(x)
 #elif defined(__has_cpp_attribute)
-#  define cmsys__has_cpp_attribute(x) __has_cpp_attribute(x)
+#  define cmsys_has_cpp_attribute(x) __has_cpp_attribute(x)
 #else
-#  define cmsys__has_cpp_attribute(x) 0
+#  define cmsys_has_cpp_attribute(x) 0
 #endif
 
 #if __cplusplus >= 201103L
@@ -31,13 +31,13 @@
 
 #ifndef cmsys_FALLTHROUGH
 #  if __cplusplus >= 201703L &&                                               \
-    cmsys__has_cpp_attribute(fallthrough)
+    cmsys_has_cpp_attribute(fallthrough)
 #    define cmsys_FALLTHROUGH [[fallthrough]]
 #  elif __cplusplus >= 201103L &&                                             \
-    cmsys__has_cpp_attribute(gnu::fallthrough)
+    cmsys_has_cpp_attribute(gnu::fallthrough)
 #    define cmsys_FALLTHROUGH [[gnu::fallthrough]]
 #  elif __cplusplus >= 201103L &&                                             \
-    cmsys__has_cpp_attribute(clang::fallthrough)
+    cmsys_has_cpp_attribute(clang::fallthrough)
 #    define cmsys_FALLTHROUGH [[clang::fallthrough]]
 #  endif
 #endif
@@ -45,7 +45,7 @@
 #  define cmsys_FALLTHROUGH static_cast<void>(0)
 #endif
 
-#undef cmsys__has_cpp_attribute
+#undef cmsys_has_cpp_attribute
 
 /* If building a C++ file in kwsys itself, give the source file
    access to the macros without a configured namespace.  */

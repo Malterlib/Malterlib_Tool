@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.4)
 
 # This is a template for the CTest script for this system
 
-set(CTEST_SITE                          "erikmbp09")
+set(CTEST_SITE                          "erikmacpro03.local")
 set(CTEST_BUILD_NAME                    "Linux-clang++")
 
 # ---

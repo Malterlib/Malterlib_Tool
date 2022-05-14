@@ -1,4 +1,5 @@
 /* config.h.  Generated from build/cmake/config.h.in by cmake configure */
+#define __LIBARCHIVE_CONFIG_H_INCLUDED 1
 #if defined(__osf__)
 # define _OSF_SOURCE
 #endif
@@ -146,13 +147,13 @@
 /* #undef ARCHIVE_XATTR_LINUX */
 
 /* Version number of bsdcpio */
-#define BSDCPIO_VERSION_STRING "3.4.2"
+#define BSDCPIO_VERSION_STRING "3.5.1"
 
 /* Version number of bsdtar */
-#define BSDTAR_VERSION_STRING "3.4.2"
+#define BSDTAR_VERSION_STRING "3.5.1"
 
 /* Version number of bsdcat */
-#define BSDCAT_VERSION_STRING "3.4.2"
+#define BSDCAT_VERSION_STRING "3.5.1"
 
 /* Define to 1 if you have the `acl_create_entry' function. */
 /* #undef HAVE_ACL_CREATE_ENTRY */
@@ -742,6 +743,9 @@
 /* Define to 1 if you have the `strchr' function. */
 #define HAVE_STRCHR 1
 
+/* Define to 1 if you have the `strnlen' function. */
+#define HAVE_STRNLEN 1
+
 /* Define to 1 if you have the `strdup' function. */
 #define HAVE_STRDUP 1
 
@@ -1007,10 +1011,10 @@
 #define ICONV_CONST 
 
 /* Version number of libarchive as a single integer */
-#define LIBARCHIVE_VERSION_NUMBER "3004002"
+#define LIBARCHIVE_VERSION_NUMBER "3005001"
 
 /* Version number of libarchive */
-#define LIBARCHIVE_VERSION_STRING "3.4.2"
+#define LIBARCHIVE_VERSION_STRING "3.5.1"
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
@@ -1064,7 +1068,7 @@
 #endif /* SAFE_TO_DEFINE_EXTENSIONS */
 
 /* Version number of package */
-#define VERSION "3.4.2"
+#define VERSION "3.5.1"
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 /* #undef _FILE_OFFSET_BITS */

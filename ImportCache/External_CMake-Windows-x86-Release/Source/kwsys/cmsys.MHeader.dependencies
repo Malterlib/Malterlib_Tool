@@ -15,6 +15,7 @@
 ../../../../../../External/CMake/Source/kwsys/Process.h.in
 ../../../../../../External/CMake/Source/kwsys/RegularExpression.hxx.in
 ../../../../../../External/CMake/Source/kwsys/SharedForward.h.in
+../../../../../../External/CMake/Source/kwsys/Status.hxx.in
 ../../../../../../External/CMake/Source/kwsys/String.h.in
 ../../../../../../External/CMake/Source/kwsys/String.hxx.in
 ../../../../../../External/CMake/Source/kwsys/System.h.in

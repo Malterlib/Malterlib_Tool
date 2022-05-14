@@ -45,6 +45,7 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Source/kwsys/Process.h.in
 ../../../../External/CMake/Source/kwsys/RegularExpression.hxx.in
 ../../../../External/CMake/Source/kwsys/SharedForward.h.in
+../../../../External/CMake/Source/kwsys/Status.hxx.in
 ../../../../External/CMake/Source/kwsys/String.h.in
 ../../../../External/CMake/Source/kwsys/String.hxx.in
 ../../../../External/CMake/Source/kwsys/System.h.in
@@ -69,7 +70,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CMakeLists.txt
 ../../../../External/CMake/Tests/CMakeOnly/CMakeLists.txt
 ../../../../External/CMake/Tests/CMakeOnly/Test.cmake.in
-../../../../External/CMake/Tests/CMakeTests/CMakeHostSystemInformationTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/CMakeLists.txt
 ../../../../External/CMake/Tests/CMakeTests/CMakeMinimumRequiredTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/CheckSourceTreeTest.cmake.in
@@ -179,6 +179,7 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Utilities/cmcurl/lib/curl_config.h.cmake
 ../../../../External/CMake/Utilities/cmexpat/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmexpat/ConfigureChecks.cmake
+../../../../External/CMake/Utilities/cmexpat/expat_config.h.cmake
 ../../../../External/CMake/Utilities/cmjsoncpp/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmlibarchive/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmlibarchive/CTestConfig.cmake

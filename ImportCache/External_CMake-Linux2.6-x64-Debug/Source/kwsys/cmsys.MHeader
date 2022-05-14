@@ -83,6 +83,10 @@ Property.CMakeOutputPath_cmsys define string = `@('../..'->MakeAbsolute())`->Mak
 			{
 				Compile.Type "C++"
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testStatus.cxx`
+			{
+				Compile.Type "C++"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testSystemTools.cxx`
 			{
 				Compile.Type "C++"
@@ -272,6 +276,10 @@ Property.CMakeOutputPath_cmsys define string = `@('../..'->MakeAbsolute())`->Mak
 					"SIZEOF_VOID_P=8"
 				]
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/Status.cxx`
+			{
+				Compile.Type "C++"
+			}
 		}
 	}
 	%Group "Linux2.6"
@@ -357,6 +365,10 @@ Property.CMakeOutputPath_cmsys define string = `@('../..'->MakeAbsolute())`->Mak
 							Compile.Disabled true
 						}
 						%File `@('../..'->MakeAbsolute())/Source/cmsys/ConsoleBuf.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Status.hxx`
 						{
 							Compile.Disabled true
 						}

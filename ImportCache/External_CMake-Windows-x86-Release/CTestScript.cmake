@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.4)
 
 # This is a template for the CTest script for this system
 
-set(CTEST_SITE                          "erikwindev01")
+set(CTEST_SITE                          "winbuild02")
 set(CTEST_BUILD_NAME                    "Win32-ninja")
 
 # ---
@@ -15,7 +15,7 @@ set(CTEST_BUILD_CONFIGURATION           "Release")
 #set(CTEST_MEMORYCHECK_COMMAND           "MEMORYCHECK_COMMAND-NOTFOUND")
 #set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE "")
 #set(CTEST_MEMORYCHECK_COMMAND_OPTIONS   "")
-#set(CTEST_COVERAGE_COMMAND              "C:/Strawberry/c/bin/gcov.exe")
+#set(CTEST_COVERAGE_COMMAND              "COVERAGE_COMMAND-NOTFOUND")
 set(CTEST_NOTES_FILES                   "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}")
 
 #CTEST_EMPTY_BINARY_DIRECTORY(${CTEST_BINARY_DIRECTORY})

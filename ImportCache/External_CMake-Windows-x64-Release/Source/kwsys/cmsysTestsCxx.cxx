@@ -11,6 +11,7 @@
 
 /* Forward declare test functions. */
 int testConfigure(int, char*[]);
+int testStatus(int, char*[]);
 int testSystemTools(int, char*[]);
 int testCommandLineArguments(int, char*[]);
 int testCommandLineArguments1(int, char*[]);
@@ -47,6 +48,10 @@ static functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
     {
     "testConfigure",
     testConfigure
+  },
+  {
+    "testStatus",
+    testStatus
   },
   {
     "testSystemTools",
