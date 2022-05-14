@@ -36,6 +36,10 @@ Property
 		{
 			!!PlatformFamily "Windows"
 		}
+		LinkWithLibraries =+ [["-framework", "SystemConfiguration"]]
+		{
+			!!PlatformIsDarwin true
+		}
 		Group "Apps"
 		ExtraGroups =+ "{Malterlib}/{CloudTarBinaries}"
 	}
