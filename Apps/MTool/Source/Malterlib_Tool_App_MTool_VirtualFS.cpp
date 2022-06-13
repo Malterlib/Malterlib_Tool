@@ -779,7 +779,7 @@ public:
 			{
 
 				CStr ASMOutput;
-				if (Platform == "OSX")
+				if (Platform == "OSX" || Platform == "macOS")
 				{
 					ASMOutput = CStr::CFormat
 						(

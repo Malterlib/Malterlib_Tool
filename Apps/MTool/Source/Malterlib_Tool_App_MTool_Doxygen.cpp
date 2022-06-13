@@ -93,7 +93,6 @@ namespace
 		{
 			f_AddDependencyInfoHelper(0x40, _Path);
 		}
-
 	};
 }
 class CTool_DoxygenCompile : public CTool
