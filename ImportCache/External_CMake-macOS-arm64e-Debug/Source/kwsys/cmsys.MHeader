@@ -1,0 +1,690 @@
+Property.CMakeOutputPath_cmsys define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+%Target "Lib_cmsys_cmsys"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys"
+		]
+	}
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "StaticLibrary"
+	Target.BaseName "cmsys_cmsys"
+	Target.BaseFileName "cmsys"
+	%Group "Source"
+	{
+		%Group "kwsys"
+		{
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/ProcessUNIX.c`
+			{
+				Compile.Type "C"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/Base64.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/EncodingC.c`
+			{
+				Compile.Type "C"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/MD5.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/Terminal.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/System.c`
+			{
+				Compile.Type "C"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/String.c`
+			{
+				Compile.Type "C"
+				Compile.PreprocessorDefines += [
+					"KWSYS_STRING_C"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/Directory.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/DynamicLoader.cxx`
+			{
+				Compile.Type "C++"
+				Compile.PreprocessorDefines += [
+					"KWSYS_SUPPORTS_SHARED_LIBS=1"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/EncodingCXX.cxx`
+			{
+				Compile.Type "C++"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/Glob.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/RegularExpression.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/SystemTools.cxx`
+			{
+				Compile.Type "C++"
+				Compile.PreprocessorDefines += [
+					"KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0",
+					"KWSYS_CXX_HAS_SETENV=1",
+					"KWSYS_CXX_HAS_UNSETENV=1",
+					"KWSYS_CXX_HAS_UTIMENSAT=0",
+					"KWSYS_CXX_HAS_UTIMES=1",
+					"KWSYS_CXX_STAT_HAS_ST_MTIM=0",
+					"KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=1"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/CommandLineArguments.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/FStream.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/SystemInformation.cxx`
+			{
+				Compile.Type "C++"
+				Compile.PreprocessorDefines += [
+					"KWSYS_CXX_HAS_GETLOADAVG=1",
+					"KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE=1",
+					"KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE=1",
+					"KWSYS_SYSTEMINFORMATION_HAS_DEBUG_BUILD=1",
+					"KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP=1",
+					"KWSYS_SYS_HAS_IFADDRS_H=1",
+					"SIZEOF_VOID_P=8"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/Status.cxx`
+			{
+				Compile.Type "C++"
+			}
+		}
+	}
+	%Group "macOS"
+	{
+		%Group "arm64e"
+		{
+			%Group `@(FullConfiguration)`
+			{
+				%Group "Source"
+				{
+					%Group "cmsys"
+					{
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Configure.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/SharedForward.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Process.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Base64.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Encoding.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/MD5.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Terminal.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/System.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/String.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Directory.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/DynamicLoader.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Encoding.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Glob.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/RegularExpression.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/SystemTools.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/CommandLineArguments.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/FStream.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/SystemInformation.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/ConsoleBuf.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Status.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Configure.hxx`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/String.hxx`
+						{
+							Compile.Disabled true
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target "Lib_cmsys_cmsys_c"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "StaticLibrary"
+	Target.BaseName "cmsys_cmsys_c"
+	Target.BaseFileName "cmsys_c"
+	%Group "Source"
+	{
+		%Group "kwsys"
+		{
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/ProcessUNIX.c`
+			{
+				Compile.Type "C"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/Base64.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/EncodingC.c`
+			{
+				Compile.Type "C"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/MD5.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/Terminal.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/System.c`
+			{
+				Compile.Type "C"
+				Compile.PreprocessorDefines += [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
+					"KWSYS_C_HAS_PTRDIFF_T",
+					"KWSYS_C_HAS_SSIZE_T"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/String.c`
+			{
+				Compile.Type "C"
+				Compile.PreprocessorDefines += [
+					"KWSYS_STRING_C"
+				]
+			}
+		}
+	}
+	%Group "macOS"
+	{
+		%Group "arm64e"
+		{
+			%Group `@(FullConfiguration)`
+			{
+				%Group "Source"
+				{
+					%Group "cmsys"
+					{
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Configure.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/SharedForward.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Process.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Base64.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Encoding.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/MD5.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/Terminal.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/System.h`
+						{
+							Compile.Disabled true
+						}
+						%File `@('../..'->MakeAbsolute())/Source/cmsys/String.h`
+						{
+							Compile.Disabled true
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target "Com_cmsys_cmsysTestsC"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "cmsys_cmsysTestsC"
+	Target.BaseFileName "cmsysTestsC"
+	%Group "macOS"
+	{
+		%Group "arm64e"
+		{
+			%Group `@(FullConfiguration)`
+			{
+				%Group "Source"
+				{
+					%Group "kwsys"
+					{
+						%File `@('../..'->MakeAbsolute())/Source/kwsys/cmsysTestsC.c`
+						{
+							Compile.Type "C"
+						}
+					}
+				}
+			}
+		}
+	}
+	%Group "Source"
+	{
+		%Group "kwsys"
+		{
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testEncode.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testTerminal.c`
+			{
+				Compile.Type "C"
+			}
+		}
+	}
+	%Dependency "Lib_cmsys_cmsys_c"
+}
+%Target "Com_cmsys_testConsoleBufChild"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "cmsys_testConsoleBufChild"
+	Target.BaseFileName "testConsoleBufChild"
+	%Group "Source"
+	{
+		%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testConsoleBufChild.cxx`
+		{
+			Compile.Type "C++"
+		}
+	}
+	%Dependency "Lib_cmsys_cmsys"
+}
+%Target "Dll_cmsys_cmsysTestDynload"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys",
+			"cmsysTestDynload_EXPORTS"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "DynamicLibrary"
+	Target.BaseName "cmsys_cmsysTestDynload"
+	Target.BaseFileName "cmsysTestDynload"
+	%Group "Source"
+	{
+		%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testDynload.c`
+		{
+			Compile.Type "C"
+		}
+	}
+	%Dependency "Lib_cmsys_cmsys"
+	{
+		Dependency.Link false
+	}
+}
+%Target "Com_cmsys_cmsysTestsCxx"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "cmsys_cmsysTestsCxx"
+	Target.BaseFileName "cmsysTestsCxx"
+	%Group "macOS"
+	{
+		%Group "arm64e"
+		{
+			%Group `@(FullConfiguration)`
+			{
+				%Group "Source"
+				{
+					%Group "kwsys"
+					{
+						%File `@('../..'->MakeAbsolute())/Source/kwsys/cmsysTestsCxx.cxx`
+						{
+							Compile.Type "C++"
+						}
+					}
+				}
+			}
+		}
+	}
+	%Group "Source"
+	{
+		%Group "kwsys"
+		{
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testConfigure.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testStatus.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testSystemTools.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testCommandLineArguments.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testCommandLineArguments1.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testDirectory.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testEncoding.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testFStream.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testConsoleBuf.cxx`
+			{
+				Compile.Type "C++"
+				Compile.PreprocessorDefines += [
+					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
+				]
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testSystemInformation.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testDynamicLoader.cxx`
+			{
+				Compile.Type "C++"
+			}
+		}
+	}
+	%Dependency "Lib_cmsys_cmsys"
+}
+%Target "Com_cmsys_cmsysTestProcess"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "cmsys_cmsysTestProcess"
+	Target.BaseFileName "cmsysTestProcess"
+	%Group "Source"
+	{
+		%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testProcess.c`
+		{
+			Compile.Type "C"
+		}
+	}
+	%Dependency "Lib_cmsys_cmsys_c"
+}
+%Target "Com_cmsys_cmsysTestSharedForward"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"KWSYS_NAMESPACE=cmsys"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/cmsys"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "cmsys_cmsysTestSharedForward"
+	Target.BaseFileName "cmsysTestSharedForward"
+	%Group "macOS"
+	{
+		%Group "arm64e"
+		{
+			%Group `@(FullConfiguration)`
+			{
+				%Group "Source"
+				{
+					%Group "kwsys"
+					{
+						%File `@('../..'->MakeAbsolute())/Source/kwsys/testSharedForward.c`
+						{
+							Compile.Type "C"
+						}
+					}
+				}
+			}
+		}
+	}
+	%Dependency "Lib_cmsys_cmsys_c"
+	{
+		Dependency.Link false
+	}
+}
