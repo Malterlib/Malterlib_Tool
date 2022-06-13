@@ -46,7 +46,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 			, fDummyCommand
 		)
 	;
-#if DPlatformFamily_OSX
+#if DPlatformFamily_macOS
 	Section.f_RegisterDirectCommand
 		(
 			{

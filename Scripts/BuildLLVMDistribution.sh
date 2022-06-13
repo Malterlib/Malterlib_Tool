@@ -57,35 +57,35 @@ BuildCompilerLTO()
 			export PlatformToolsetCompiler="$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins/bin/clang"
 			export MalterlibImportUpdateCache=false
 
-			if [[ "$MalterlibPlatform" == "OSX" ]]; then
+			if [[ "$MalterlibPlatform" == "macOS" ]]; then
 				export EnableArchitecture_x86=false
 				export EnableArchitecture_x64=true
 				export EnableArchitecture_arm64=true
-				export EnablePlatform_OSX10_7=true
-				export EnablePlatform_Linux2_6=true
+				export EnablePlatform_macOS=true
+				export EnablePlatform_Linux=true
 
 				./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
 
-				#./mib build "Tests" "OSX10.7" "arm64" "Release (Tests)" || true # Crashes
-				./mib build "Tests" "OSX10.7" "arm64" "Debug" || true
-				./mib build "Tests" "OSX10.7" "arm64" "Release Testing (Tests)" || true
-				#./mib build "Tests" "OSX10.7" "x64" "Release (Tests)" || true # Crashes
-				./mib build "Tests" "OSX10.7" "x64" "Debug" || true
-				./mib build "Tests" "OSX10.7" "x64" "Release Testing (Tests)" || true
-				#./mib build "Tests" "Linux2.6" "x64" "Release (Tests)" || true # Crashes
-				./mib build "Tests" "Linux2.6" "x64" "Debug" || true
-				./mib build "Tests" "Linux2.6" "x64" "Release Testing (Tests)" || true
+				#./mib build "Tests" "macOS" "arm64" "Release (Tests)" || true # Crashes
+				./mib build "Tests" "macOS" "arm64" "Debug" || true
+				./mib build "Tests" "macOS" "arm64" "Release Testing (Tests)" || true
+				#./mib build "Tests" "macOS" "x64" "Release (Tests)" || true # Crashes
+				./mib build "Tests" "macOS" "x64" "Debug" || true
+				./mib build "Tests" "macOS" "x64" "Release Testing (Tests)" || true
+				#./mib build "Tests" "Linux" "x64" "Release (Tests)" || true # Crashes
+				./mib build "Tests" "Linux" "x64" "Debug" || true
+				./mib build "Tests" "Linux" "x64" "Release Testing (Tests)" || true
 			elif [[ "$MalterlibPlatform" == "Linux" ]]; then
 				export EnableArchitecture_x86=false
 				export EnableArchitecture_x64=true
 				export EnableArchitecture_arm64=false
-				export EnablePlatform_OSX10_7=false
-				export EnablePlatform_Linux2_6=true
+				export EnablePlatform_macOS=false
+				export EnablePlatform_Linux=true
 
 				#./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
-				#./mib build "Tests" "Linux2.6" "x64" "Release (Tests)" || true # Crashes
-				#./mib build "Tests" "Linux2.6" "x64" "Debug" || true
-				#./mib build "Tests" "Linux2.6" "x64" "Release Testing (Tests)" || true
+				#./mib build "Tests" "Linux" "x64" "Release (Tests)" || true # Crashes
+				#./mib build "Tests" "Linux" "x64" "Debug" || true
+				#./mib build "Tests" "Linux" "x64" "Release Testing (Tests)" || true
 			        pushd "$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins"
 					ninja check-clang || true
 			        popd

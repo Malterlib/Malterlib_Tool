@@ -114,7 +114,7 @@ class CToolApp : public NMib::CApplication
 public:
 	aint f_Main()
 	{
-#if defined(DPlatformFamily_OSX) && !defined(DMibSanitizerEnabled)
+#if defined(DPlatformFamily_macOS) && !defined(DMibSanitizerEnabled)
 
 		int Signals[] =
 			{

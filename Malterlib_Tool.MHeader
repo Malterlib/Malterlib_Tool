@@ -20,7 +20,7 @@ Import "Apps/*/*.MHeader"
 	Import.CMake_FullRebuildVersion `@(Import.CMake_FullRebuildVersion).1`
 	Import.CMake_Variables =+ "CMAKE_CXX_FLAGS=-stdlib=libc++"
 	{
-		!!PlatformFamily "OSX"
+		!!PlatformFamily "macOS"
 	}
 
 	Import.CMake_Variables =+ [
@@ -60,7 +60,7 @@ Import "Apps/*/*.MHeader"
 		, "HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT="
 	]
 	{
-		!!PlatformFamily "OSX"
+		!!PlatformFamily "macOS"
 	}
 
 	Import.CMake_Variables =+ [

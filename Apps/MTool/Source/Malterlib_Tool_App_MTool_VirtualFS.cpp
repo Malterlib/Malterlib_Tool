@@ -274,7 +274,7 @@ public:
 			"    and optionally:" DNewLine
 			"      -verbose        - Detailed information on all operations performed will be displayed." DNewLine
 			"      -odepend        - Output dependency in make format to file." DNewLine
-			"      -platform       - The target platform. Currently this only matters for -asm and 'OSX' and 'Linux' is supported" DNewLine
+			"      -platform       - The target platform. Currently this only matters for -asm and 'macOS' and 'Linux' is supported" DNewLine
 			"      -oidsdepend     - Output dependency in ids dependency format to file." DNewLine
 			"      -dest <Path>    - Path within VFS to prefix included files with" DNewLine
 			"      -symbol <Name>  - The name of the exported symbol (decorated)" DNewLine
@@ -292,7 +292,7 @@ public:
 		CStr DependencyFile;
 		CStr DependencyContents;
 		CStr MalterlibDependencyFile;
-		CStr Platform = "OSX";
+		CStr Platform = "macOS";
 		NBuildSystem::CMalterlibDependencyTracker MalterlibDependencyTracker;
 
 		auto f_IntToStr = [](int _Val) -> CStr
@@ -779,7 +779,7 @@ public:
 			{
 
 				CStr ASMOutput;
-				if (Platform == "OSX" || Platform == "macOS")
+				if (Platform == "macOS")
 				{
 					ASMOutput = CStr::CFormat
 						(

@@ -14,7 +14,7 @@ CStr CTool_Malterlib::fs_GetFileNameOrEmpty(NEncoding::CEJSON const &_Param, CSt
 
 CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 {
-#if defined(DPlatformFamily_OSX) || defined(DPlatformFamily_Linux)
+#if defined(DPlatformFamily_macOS) || defined(DPlatformFamily_Linux)
 	CStr RepoConfigFile = _RootPath / "Repo.conf";
 	CStr Version;
 
@@ -28,7 +28,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 		}
 	}
 
-#if defined(DPlatformFamily_OSX)
+#if defined(DPlatformFamily_macOS)
 	if (Version.f_IsEmpty())
 	{
 		CStr XcodePath = "/Applications/Xcode.app/Contents";

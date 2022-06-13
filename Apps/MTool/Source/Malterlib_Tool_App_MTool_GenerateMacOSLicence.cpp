@@ -4,7 +4,7 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 
 
-class CTool_GenerateOSXLicence : public CTool
+class CTool_GenerateMacOSLicence : public CTool
 {
 public:
 
@@ -96,5 +96,5 @@ public:
 
 };
 
-DMibRuntimeClass(CTool, CTool_GenerateOSXLicence);
+DMibRuntimeClass(CTool, CTool_GenerateMacOSLicence);
 

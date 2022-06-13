@@ -67,7 +67,7 @@ BuildTarget "Malterlib Tool"
 		Command "../../../Core/BuildScripts/Prebuild.sh"
 		{
 			Platform Windows
-			Platform OSX
+			Platform macOS
 			Params "Malterlib MTool"
 		}
 	}
@@ -88,25 +88,25 @@ BuildTarget "Malterlib Tool"
 			}
 			Command "../../../Core/BuildScripts/BuildWorkspace.sh"
 			{
-				Platform OSX
-				Params "MTool OSX10.7 x64 Release"
+				Platform macOS
+				Params "MTool macOS x64 Release"
 			}
 			Command "../../../Core/BuildScripts/BuildWorkspace.sh"
 			{
-				Platform OSX
-				Params "MTool Linux2.6 x64 Release"
+				Platform macOS
+				Params "MTool Linux x64 Release"
 			}
 			Command "../../../Core/BuildScripts/BuildWorkspace.sh"
 			{
-				Platform OSX
-				Params "MTool Linux2.6 x86 Release"
+				Platform macOS
+				Params "MTool Linux x86 Release"
 			}
 		}
 		Stage "Deploy"
 		{
 			Command DeployBuild.sh
 			{
-				Platform OSX
+				Platform macOS
 			}
 		}
 	}
@@ -116,7 +116,7 @@ BuildTarget "Malterlib Tool"
 		Command "../../../Core/BuildScripts/Postbuild.sh"
 		{
 			Platform Windows
-			Platform OSX
+			Platform macOS
 			Params "MTool"
 		}
 	}

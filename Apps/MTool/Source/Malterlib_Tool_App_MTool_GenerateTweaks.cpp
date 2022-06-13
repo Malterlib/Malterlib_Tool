@@ -385,7 +385,7 @@ private:
 			_Out += "#pragma once" DNewLine;
 			_Out += DNewLine;
 
-			// Malterlib needs to be included first to get correct new/delete specs on OSX
+			// Malterlib needs to be included first to get correct new/delete specs on macOS
 			if (_UsedTypes & EType_PMetricFloat || _UsedTypes & EType_PMetricInt)
 			{
 				_Out += "#include <Mib/Core/Core>" DNewLine;
