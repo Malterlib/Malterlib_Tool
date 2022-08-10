@@ -114,48 +114,6 @@ class CToolApp : public NMib::CApplication
 public:
 	aint f_Main()
 	{
-#if defined(DPlatformFamily_macOS) && !defined(DMibSanitizerEnabled)
-
-		int Signals[] =
-			{
-				SIGHUP,
-				SIGINT,
-				SIGQUIT,
-				SIGILL,
-				SIGABRT,
-				SIGEMT,
-				SIGFPE,
-				SIGKILL,
-				SIGSYS,
-				SIGPIPE,
-				SIGALRM,
-				SIGTERM,
-				SIGURG,
-				SIGSTOP,
-				SIGTSTP,
-				SIGCONT
-			}
-		;
-
-		auto fSignalHandler = [](int _Signal)
-			{
-				DConOut("Ignored signal: {}\n", _Signal);
-			}
-		;
-
-		TCMap<int, void (*)(int)> OldSignals;
-
-		for (auto &Signal : Signals)
-			OldSignals[Signal] = signal(Signal, fSignalHandler);
-
-		auto Cleanup
-			= g_OnScopeExit / [&]
-			{
-				for (auto iOldSignal = OldSignals.f_GetIterator(); iOldSignal; ++iOldSignal)
-					signal(iOldSignal.f_GetKey(), *iOldSignal);
-			}
-		;
-#endif
 		return fg_RunApp
 			(
 				[]
