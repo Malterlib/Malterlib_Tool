@@ -7,7 +7,7 @@
 #include <Mib/Encoding/EJSON>
 #include <Mib/CommandLine/AnsiEncoding>
 
-class CTool_Malterlib : public CDistributedTool
+class CTool_Malterlib : public CDistributedTool, public CAllowUnsafeThis
 {
 public:
 	static CStr fs_GetFileNameOrEmpty(CEJSON const &_Param, CStr const &_CurrentDirectory);
@@ -15,7 +15,13 @@ public:
 	static CGenerateOptions fs_ParseSharedOptions(CEJSON const &_Params);
 	static CEJSON::CKeyValue fs_CachedEnvironmentOption(bool _bDefault);
 
-	uint32 f_RunBuildSystem(TCFunction<CBuildSystem::ERetry (CBuildSystem &_BuildSystem)> &&_fCommand, EAnsiEncodingFlag _AnsiFlags);
+	TCFuture<uint32> f_RunBuildSystem
+		(
+			NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem &_BuildSystem)> _fCommand
+			, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine
+			, CGenerateOptions const *_pGenerateOptions
+		)
+	;
 
 	void f_Register_SharedOptions(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
 	void f_Register_DummyCommands(CDistributedAppCommandLineSpecification &o_CommandLine);

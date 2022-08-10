@@ -114,6 +114,8 @@ class CToolApp : public NMib::CApplication
 public:
 	aint f_Main()
 	{
+		fg_SetConcurrencyManagerDefaultExecutionPriority(EPriority_Low, EExecutionPriority_Normal);
+		
 		return fg_RunApp
 			(
 				[]

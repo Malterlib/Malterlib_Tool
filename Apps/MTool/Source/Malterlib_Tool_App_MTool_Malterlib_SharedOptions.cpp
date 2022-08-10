@@ -9,6 +9,17 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 	CStr CurrentDirectory = CFile::fs_GetCurrentDirectory();
 	auto BuildSystemFiles = CFile::fs_FindFiles(CurrentDirectory / "*.MBuildSystem");
 
+	CEJSON DetailedPositionsDefault;
+	{
+		auto DetailedPositionsEnv = fg_GetSys()->f_GetEnvironmentVariable("Malterlib_UseDetailedPositions", "OnDemand");
+		if (DetailedPositionsEnv == "true")
+			DetailedPositionsDefault = true;
+		else if (DetailedPositionsEnv == "false")
+			DetailedPositionsDefault = false;
+		else
+			DetailedPositionsDefault = DetailedPositionsEnv;
+	}
+	
 	o_ToolsSection.f_RegisterSectionOptions
 		(
 			{
@@ -108,6 +119,22 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					, "Default"_= false
 					, "Hidden"_= true
 					, "Description"_= "[INTERNAL] Used internally when relaunching to force reconcile options to be ignored.\n"
+				}
+				, "DetailedPositions?"_=
+				{
+					"Names"_= {"--detailed-positions"}
+					, "Type"_= COneOf{true, false, "OnDemand"}
+					, "Default"_= fg_Move(DetailedPositionsDefault)
+					, "Description"_= "Use detailed positions.\n"
+					"Enabling detailed positions is going to significantly affect performance. The default is OnDemand which will re-run the command"
+					" with detailed positions in case of an error."
+				}
+				, "DetailedValues?"_=
+				{
+					"Names"_= {"--detailed-values"}
+					, "Default"_= false
+					, "Description"_= "Show values for contributing positions.\n"
+					"Enabling detailed values is going to significantly affect performance"
 				}
 			}
 		)

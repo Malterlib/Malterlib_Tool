@@ -6,7 +6,7 @@
 
 void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
 {
-	o_ToolsSection.f_RegisterDirectCommand
+	o_ToolsSection.f_RegisterCommand
 		(
 			{
 				"Names"_= {"update_repos"}
@@ -14,15 +14,20 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				, "Category"_= "Repository management"
 				, "Options"_= {fs_CachedEnvironmentOption(true)}
 			}
-			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
-				return f_RunBuildSystem
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				co_return co_await f_RunBuildSystem
 					(
-						[GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+						[GenerateOptions](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 						{
-							return _BuildSystem.f_Action_Repository_Update(GenerateOptions);
+							co_await ECoroutineFlag_AllowReferences;
+							co_return co_await _BuildSystem.f_Action_Repository_Update(GenerateOptions);
 						}
-					 	, _CommandLineClient.f_AnsiEncodingFlags()
+					 	, _pCommandLine
+						, &GenerateOptions
 					)
 				;
 			}
@@ -83,7 +88,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		}
 	;
 
-	o_ToolsSection.f_RegisterDirectCommand
+	o_ToolsSection.f_RegisterCommand
 		(
 			{
 				"Names"_= {"status"}
@@ -166,8 +171,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
 				CBuildSystem::ERepoStatusFlag Flags = CBuildSystem::ERepoStatusFlag_None;
 
 				if (_Params["ShowUnchanged"].f_Boolean())
@@ -195,13 +202,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
-				return f_RunBuildSystem
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				co_return co_await f_RunBuildSystem
 					(
-						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+						[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 						{
-							return _BuildSystem.f_Action_Repository_Status(GenerateOptions, RepoFilter, Flags);
+							co_await ECoroutineFlag_AllowReferences;
+							co_return co_await _BuildSystem.f_Action_Repository_Status(GenerateOptions, RepoFilter, Flags);
 						}
-					 	, _CommandLineClient.f_AnsiEncodingFlags()
+					 	, _pCommandLine
+						, &GenerateOptions
 					)
 				;
 			}
@@ -209,7 +219,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	;
 
 	{
-		o_ToolsSection.f_RegisterDirectCommand
+		o_ToolsSection.f_RegisterCommand
 			(
 				{
 					"Names"_= {"git"}
@@ -242,8 +252,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						}
 					}
 				}
-				, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
+					co_await ECoroutineFlag_CaptureExceptions;
+
 					CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 					bool bParallel = !_Params["Synchronous"].f_Boolean();
 
@@ -251,13 +263,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					for (auto &Param : _Params["GitParameters"].f_Array())
 						GitParameters.f_Insert(Param.f_String());
 
-					return f_RunBuildSystem
+					auto GenerateOptions = fs_ParseSharedOptions(_Params);
+					co_return co_await f_RunBuildSystem
 						(
-							[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+							[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 							{
-								return _BuildSystem.f_Action_Repository_ForEachRepo(GenerateOptions, RepoFilter, bParallel, GitParameters);
+								co_await ECoroutineFlag_AllowReferences;
+								co_return co_await _BuildSystem.f_Action_Repository_ForEachRepo(GenerateOptions, RepoFilter, bParallel, GitParameters);
 							}
-						 	, _CommandLineClient.f_AnsiEncodingFlags()
+						 	, _pCommandLine
+							, &GenerateOptions
 						)
 					;
 				}
@@ -282,7 +297,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			}
 		;
 
-		o_ToolsSection.f_RegisterDirectCommand
+		o_ToolsSection.f_RegisterCommand
 			(
 				{
 					"Names"_= {"branch"}
@@ -305,8 +320,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						}
 					}
 				}
-				, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
+					co_await ECoroutineFlag_CaptureExceptions;
+
 					CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
 					CStr Branch = _Params["Branch"].f_String();
@@ -321,20 +338,23 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					if (_Params["Force"].f_Boolean())
 						Flags |= CBuildSystem::ERepoBranchFlag_Force;
 
-					return f_RunBuildSystem
+					auto GenerateOptions = fs_ParseSharedOptions(_Params);
+					co_return co_await f_RunBuildSystem
 						(
-							[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+							[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 							{
-								return _BuildSystem.f_Action_Repository_Branch(GenerateOptions, RepoFilter, Branch, Flags);
+								co_await ECoroutineFlag_AllowReferences;
+								co_return co_await _BuildSystem.f_Action_Repository_Branch(GenerateOptions, RepoFilter, Branch, Flags);
 							}
-						 	, _CommandLineClient.f_AnsiEncodingFlags()
+						 	, _pCommandLine
+							, &GenerateOptions
 						)
 					;
 				}
 			)
 		;
 
-		o_ToolsSection.f_RegisterDirectCommand
+		o_ToolsSection.f_RegisterCommand
 			(
 				{
 					"Names"_= {"unbranch"}
@@ -349,8 +369,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, fs_CachedEnvironmentOption(true)
 					}
 				}
-				, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
+					co_await ECoroutineFlag_CaptureExceptions;
+
 					CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
 					CBuildSystem::ERepoBranchFlag Flags = CBuildSystem::ERepoBranchFlag_None;
@@ -361,13 +383,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					if (_Params["Force"].f_Boolean())
 						Flags |= CBuildSystem::ERepoBranchFlag_Force;
 
-					return f_RunBuildSystem
+					auto GenerateOptions = fs_ParseSharedOptions(_Params);
+					co_return co_await f_RunBuildSystem
 						(
-							[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+							[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 							{
-								return _BuildSystem.f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
+								co_await ECoroutineFlag_AllowReferences;
+								co_return co_await _BuildSystem.f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
 							}
-							, _CommandLineClient.f_AnsiEncodingFlags()
+							, _pCommandLine
+							, &GenerateOptions
 						)
 					;
 				}
@@ -375,7 +400,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		;
 	}
 
-	o_ToolsSection.f_RegisterDirectCommand
+	o_ToolsSection.f_RegisterCommand
 		(
 			{
 				"Names"_= {"cleanup-branches"}
@@ -430,8 +455,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
 				CBuildSystem::ERepoCleanupBranchesFlag Flags = CBuildSystem::ERepoCleanupBranchesFlag_None;
@@ -451,20 +478,23 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				if (_Params["Force"].f_Boolean())
 					Flags |= CBuildSystem::ERepoCleanupBranchesFlag_Force;
 
-				return f_RunBuildSystem
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				co_return co_await f_RunBuildSystem
 					(
-						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+						[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 						{
-							return _BuildSystem.f_Action_Repository_CleanupBranches(GenerateOptions, RepoFilter, Flags, Branches);
+							co_await ECoroutineFlag_AllowReferences;
+							co_return co_await _BuildSystem.f_Action_Repository_CleanupBranches(GenerateOptions, RepoFilter, Flags, Branches);
 						}
-					 	, _CommandLineClient.f_AnsiEncodingFlags()
+					 	, _pCommandLine
+						, &GenerateOptions
 					)
 				;
 			}
 		)
 	;
 
-	o_ToolsSection.f_RegisterDirectCommand
+	o_ToolsSection.f_RegisterCommand
 		(
 			{
 				"Names"_= {"cleanup-tags"}
@@ -519,8 +549,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
 				CBuildSystem::ERepoCleanupTagsFlag Flags = CBuildSystem::ERepoCleanupTagsFlag_None;
@@ -540,20 +572,23 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				if (_Params["Force"].f_Boolean())
 					Flags |= CBuildSystem::ERepoCleanupTagsFlag_Force;
 
-				return f_RunBuildSystem
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				co_return co_await f_RunBuildSystem
 					(
-						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+						[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 						{
-							return _BuildSystem.f_Action_Repository_CleanupTags(GenerateOptions, RepoFilter, Flags, Tags);
+							co_await ECoroutineFlag_AllowReferences;
+							co_return co_await _BuildSystem.f_Action_Repository_CleanupTags(GenerateOptions, RepoFilter, Flags, Tags);
 						}
-					 	, _CommandLineClient.f_AnsiEncodingFlags()
+					 	, _pCommandLine
+						, &GenerateOptions
 					)
 				;
 			}
 		)
 	;
 
-	o_ToolsSection.f_RegisterDirectCommand
+	o_ToolsSection.f_RegisterCommand
 		(
 			{
 				"Names"_= {"push"}
@@ -602,8 +637,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
 				CBuildSystem::ERepoPushFlag Flags = CBuildSystem::ERepoPushFlag_None;
@@ -621,20 +658,23 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				for (auto &Param : _Params["Remotes"].f_Array())
 					Remotes.f_Insert(Param.f_String());
 
-				return f_RunBuildSystem
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				co_return co_await f_RunBuildSystem
 					(
-						[=, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+						[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 						{
-							return _BuildSystem.f_Action_Repository_Push(GenerateOptions, RepoFilter, Remotes, Flags);
+							co_await ECoroutineFlag_AllowReferences;
+							co_return co_await _BuildSystem.f_Action_Repository_Push(GenerateOptions, RepoFilter, Remotes, Flags);
 						}
-					 	, _CommandLineClient.f_AnsiEncodingFlags()
+					 	, _pCommandLine
+						, &GenerateOptions
 					)
 				;
 			}
 		)
 	;
 
-	o_ToolsSection.f_RegisterDirectCommand
+	o_ToolsSection.f_RegisterCommand
 		(
 			{
 				"Names"_= {"list-commits"}
@@ -712,8 +752,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
 				CStr FromRef = _Params["FromReference"].f_String();
@@ -746,11 +788,13 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				uint32 MaxCommitsMain = _Params["MaxCommitsMain"].f_Integer();
 				uint32 MaxMessageWidth = _Params["MaxMessageWidth"].f_Integer();
 
-				return f_RunBuildSystem
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				co_return co_await f_RunBuildSystem
 					(
-						[&, GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+						[&](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 						{
-							return _BuildSystem.f_Action_Repository_ListCommits
+							co_await ECoroutineFlag_AllowReferences;
+							co_return co_await _BuildSystem.f_Action_Repository_ListCommits
 								(
 								 	GenerateOptions
 								 	, RepoFilter
@@ -762,11 +806,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								 	, MaxCommitsMain
 								 	, MaxCommits
 								 	, MaxMessageWidth
-									, _CommandLineClient
+									, _pCommandLine
 								)
 							;
 						}
-					 	, _CommandLineClient.f_AnsiEncodingFlags()
+					 	, _pCommandLine
+						, &GenerateOptions
 					)
 				;
 			}

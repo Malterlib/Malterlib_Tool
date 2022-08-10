@@ -31,10 +31,17 @@ public:
 		}
 	}
 
-
 	static CBuildSystemSyntax::CRootKey fs_GetIdentifierKey(CStr const &_Identifier)
 	{
-		return CBuildSystemSyntax::CIdentifier{_Identifier, EEntityType_Invalid, EPropertyType_Property, true}.f_RootKey();
+		return CBuildSystemSyntax::CIdentifier
+			{
+				NMib::NBuildSystem::CStringAndHash(CAssertAddedToStringCache(), _Identifier, _Identifier.f_Hash())
+				, EEntityType_Invalid
+				, EPropertyType_Property
+				, true
+			}
+			.f_RootKey()
+		;
 	}
 
 	aint f_Run(NContainer::CRegistry &_Params)
@@ -91,12 +98,13 @@ public:
 			DError("No destination project specified");
 
 		CBuildSystemRegistry Registry;
+		CStringCache StringCache;
 		TCSet<CStr> SourceFiles;
 		NBuildSystem::CFindCache FindCache;
 		if (CFile::fs_FileExists(ConfigFile))
 		{
 			TCMap<CStr, CStr> Environment = fg_GetSys()->f_Environment();
-			NBuildSystem::CBuildSystemPreprocessor Preprocessor(Registry, SourceFiles, FindCache, Environment);
+			NBuildSystem::CBuildSystemPreprocessor Preprocessor(Registry, SourceFiles, FindCache, Environment, StringCache);
 			Preprocessor.f_ReadFile(ConfigFile);
 		}
 
@@ -112,32 +120,30 @@ public:
 			{
 				if (!pValue->f_GetThisValue().m_Value.f_ConstantString().f_IsEmpty())
 					ExcludePatterns = pValue->f_GetThisValue().m_Value.f_ConstantString().f_Split<true>(";");
-				CBuildSystemSyntax::CArray Array;
+
+				CEJSONSorted Array;
 				for (auto &Pattern : ExcludePatterns)
-					Array.m_Array.f_Insert(CBuildSystemSyntax::CValue{Pattern});
-				Registry.f_SetValueNoPath(ExcludePatternsKey, CBuildSystemSyntax::CRootValue{Array});
+					Array.f_Insert(Pattern);
+
+				Registry.f_SetValueNoPath(ExcludePatternsKey, {{Array}});
 			}
 			else
 			{
-				if (!pValue->f_GetThisValue().m_Value.f_IsArray())
+				auto &Value = pValue->f_GetThisValue().m_Value;
+				if (!Value.f_IsConstant() || !Value.f_Constant().f_IsStringArray())
 					CBuildSystem::fs_ThrowError(*pValue, "ExcludePatterns needs to be an array of strings");
 
-				for (auto &Pattern : pValue->f_GetThisValue().m_Value.f_Array().m_Array)
-				{
-					if (!Pattern.f_Get().f_IsConstantString())
-						CBuildSystem::fs_ThrowError(*pValue, "ExcludePatterns needs to be an array of strings");
-					ExcludePatterns.f_Insert(Pattern.f_Get().f_ConstantString());
-				}
+				ExcludePatterns = Value.f_Constant().f_StringArray();
 			}
 		}
 		else
 		{
 			ExcludePatterns = {"*/.git", "*/.DS_Store"};
 
-			CBuildSystemSyntax::CArray Array;
+			CEJSONSorted Array;
 			for (auto &Pattern : ExcludePatterns)
-				Array.m_Array.f_Insert(CBuildSystemSyntax::CValue{Pattern});
-			Registry.f_SetValueNoPath(ExcludePatternsKey, CBuildSystemSyntax::CRootValue{Array});
+				Array.f_Insert(Pattern);
+			Registry.f_SetValueNoPath(ExcludePatternsKey, {{Array}});
 		}
 
 		auto TagsKey = fs_GetIdentifierKey("Tags");
@@ -148,13 +154,13 @@ public:
 		TCSet<CStr> Tags;
 		if (pTags)
 		{
-			if (pTags->f_GetThisValue().m_Value.f_IsArray())
+			if (pTags->f_GetThisValue().m_Value.f_IsConstant() && pTags->f_GetThisValue().m_Value.f_Constant().f_IsArray())
 			{
-				for (auto &Tag : pTags->f_GetThisValue().m_Value.f_Array().m_Array)
+				for (auto &Tag : pTags->f_GetThisValue().m_Value.f_Constant().f_Array())
 				{
-					if (!Tag.f_Get().f_IsConstantString())
+					if (!Tag.f_IsString())
 						CBuildSystem::fs_ThrowError(*pTags, "Tags needs to be an array of strings");
-					Tags[Tag.f_Get().f_ConstantString()];
+					Tags[Tag.f_String()];
 				}
 			}
 			else if (pTags->f_GetThisValue().m_Value.f_IsConstantString())
@@ -169,11 +175,11 @@ public:
 					Tags[iTag->f_GetThisValue().m_Value.f_ConstantString()];
 				}
 
-				CBuildSystemSyntax::CArray Array;
+				CEJSONSorted Array;
 				for (auto &Tag : Tags)
-					Array.m_Array.f_Insert(CBuildSystemSyntax::CValue{Tag});
+					Array.f_Insert(Tag);
 
-				pTags->f_SetThisValue(CBuildSystemSyntax::CRootValue{Array});
+				pTags->f_SetThisValue({{Array}});
 				pTags->f_DeleteAllChildren();
 			}
 		}

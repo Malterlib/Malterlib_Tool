@@ -125,6 +125,19 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJSON const 
 	GenerateOptions.m_bForceUpdateRemotes = _Params["ForceUpdateRemotes"].f_Boolean();
 	GenerateOptions.f_ParseReconcileActions(_Params);
 
+	auto &DetailedPositions = _Params["DetailedPositions"];
+	if (DetailedPositions.f_IsString() && DetailedPositions.f_String() == "OnDemand")
+		GenerateOptions.m_DetailedPositions = EDetailedPositions_OnDemand;
+	else if (DetailedPositions.f_IsBoolean())
+	{
+		if (DetailedPositions.f_Boolean())
+			GenerateOptions.m_DetailedPositions = EDetailedPositions_Enable;
+		else
+			GenerateOptions.m_DetailedPositions = EDetailedPositions_Disable;
+	}
+
+	GenerateOptions.m_bDetailedValues = _Params["DetailedValues"].f_Boolean();
+
 	return GenerateOptions;
 }
 
@@ -139,48 +152,55 @@ CEJSON::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefault)
 	;
 }
 
-uint32 CTool_Malterlib::f_RunBuildSystem(TCFunction<CBuildSystem::ERetry (NBuildSystem::CBuildSystem &_BuildSystem)> &&_fCommand, EAnsiEncodingFlag _AnsiFlags)
+TCFuture<uint32> CTool_Malterlib::f_RunBuildSystem
+	(
+		NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem &_BuildSystem)> _fCommand
+		, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine
+		, CGenerateOptions const *_pGenerateOptions
+	)
 {
-	try
+	CFile::CSetAttributeEmulationScope DisableAttributeEmulationScope(false);
+
+	auto RetryResult = co_await CBuildSystem::fs_RunBuildSystem
+		(
+			fg_Move(_fCommand)
+			, _pCommandLine
+			, [_pCommandLine](NStr::CStr const &_Output, bool _bError)
+			{
+				if (_bError)
+					*_pCommandLine %= _Output;
+				else
+					*_pCommandLine += _Output;
+			}
+			, *_pGenerateOptions
+		)
+		.f_Wrap()
+	;
+
+	if (!RetryResult)
 	{
-		CBuildSystem::ERetry Retry = CBuildSystem::fs_RunBuildSystem
-			(
-				fg_Move(_fCommand)
-				, _AnsiFlags
-				, [](NStr::CStr const &_Output, bool _bError)
-				{
-					if (_bError)
-						DMibConErrOutRaw(_Output);
-					else
-						DMibConOutRaw(_Output);
-				}
-			)
+		auto AnsiEncoding = _pCommandLine->f_AnsiEncoding();
+
+		*_pCommandLine %=
+			"\n"
+			"{}Errors:{}\n"
+			"{}\n"_f
+			<< AnsiEncoding.f_StatusError()
+			<< AnsiEncoding.f_Default()
+			<< RetryResult.f_GetExceptionStr()
 		;
 
-		if (Retry == CBuildSystem::ERetry_Relaunch)
-			return 3;
-		else if (Retry == CBuildSystem::ERetry_Relaunch_NoReconcileOptions)
-			return 4;
-
-		return 0;
+		co_return 1;
 	}
-	catch (NException::CException const &_Exception)
-	{
-		CAnsiEncoding AnsiEncoding(_AnsiFlags);
 
-		DMibConErrOut2
-			(
-				"\n"
-				"{}Errors:{}\n"
-				"{}\n"
-				, AnsiEncoding.f_StatusError()
-				, AnsiEncoding.f_Default()
-				, _Exception.f_GetErrorStr()
-			)
-		;
+	CBuildSystem::ERetry Retry = *RetryResult;
 
-		return 1;
-	}
+	if (Retry == CBuildSystem::ERetry_Relaunch)
+		co_return 3;
+	else if (Retry == CBuildSystem::ERetry_Relaunch_NoReconcileOptions)
+		co_return 4;
+
+	co_return 0;
 }
 
 void CTool_Malterlib::f_Register

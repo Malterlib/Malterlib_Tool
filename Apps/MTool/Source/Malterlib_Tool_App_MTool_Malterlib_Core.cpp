@@ -6,7 +6,7 @@
 
 void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
 {
-	o_ToolsSection.f_RegisterDirectCommand
+	o_ToolsSection.f_RegisterCommand
 		(
 			{
 				"Names"_= {"generate"}
@@ -17,7 +17,6 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 					"Action?"_=
 					{
 						"Names"_= {"--action"}
-						, "Default"_= "Build"
 						, "Type"_= COneOf{"Build", "Clean", "ReBuild"}
 						, "Description"_= "Action from build system when generating as part of build.\n"
 						"One of: Build, Clean or ReBuild\n"
@@ -33,32 +32,88 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
 				CGenerateOptions GenerateOptions = fs_ParseSharedOptions(_Params);
 
 				GenerateOptions.m_Settings.m_Workspace = _Params["Workspace"].f_String();
-				GenerateOptions.m_Settings.m_Action = _Params["Action"].f_String();
+				if (auto pValue = _Params.f_GetMember("Action"))
+					GenerateOptions.m_Settings.m_Action = pValue->f_String();
+
+				#if defined(DPlatformFamily_macOS) && !defined(DMibSanitizerEnabled)
+					int Signals[] =
+						{
+							SIGHUP,
+							SIGINT,
+							SIGQUIT,
+							SIGILL,
+							SIGABRT,
+							SIGEMT,
+							SIGFPE,
+							SIGKILL,
+							SIGSYS,
+							SIGPIPE,
+							SIGALRM,
+							SIGTERM,
+							SIGURG,
+							SIGSTOP,
+							SIGTSTP,
+							SIGCONT
+						}
+					;
+
+					auto fSignalHandler = [](int _Signal)
+						{
+							DConOut("Ignored signal: {}\n", _Signal);
+						}
+					;
+
+					TCMap<int, void (*)(int)> OldSignals;
+
+					bool bRunningFromXcode = fg_GetSys()->f_GetEnvironmentVariable("XCODE_APP_SUPPORT_DIR") && fg_GetSys()->f_GetEnvironmentVariable("ACTION");
+					if (bRunningFromXcode)
+					{
+						for (auto &Signal : Signals)
+							OldSignals[Signal] = signal(Signal, fSignalHandler);
+					}
+
+					auto Cleanup
+						= g_OnScopeExit / [&]
+						{
+							for (auto iOldSignal = OldSignals.f_GetIterator(); iOldSignal; ++iOldSignal)
+								signal(iOldSignal.f_GetKey(), *iOldSignal);
+						}
+					;
+				#endif
 
 				bool bChanged = false;
 
-				auto ExitValue = f_RunBuildSystem
+				auto AnsiEncoding = _pCommandLine->f_AnsiEncoding();
+
+				auto ExitValue = co_await f_RunBuildSystem
 					(
-						[&](NBuildSystem::CBuildSystem &_BuildSystem)
+						[&](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 						{
+							co_await ECoroutineFlag_AllowReferences;
+
 							CBuildSystem::ERetry Retry = CBuildSystem::ERetry_None;
-							if (_BuildSystem.f_Action_Generate(GenerateOptions, Retry))
+
+							if (co_await _BuildSystem.f_Action_Generate(GenerateOptions, Retry))
 								bChanged = true;
-							return Retry;
+
+							co_return Retry;
 						}
-					 	, _CommandLineClient.f_AnsiEncodingFlags()
+					 	, _pCommandLine
+						, &GenerateOptions
 					)
 				;
 
 				if (ExitValue)
-					return ExitValue;
+					co_return ExitValue;
 
-				return bChanged ? 2 : 0;
+				co_return bChanged ? 2 : 0;
 			}
 		)
 	;
