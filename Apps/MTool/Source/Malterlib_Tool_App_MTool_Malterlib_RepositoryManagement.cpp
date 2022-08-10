@@ -557,7 +557,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		(
 			{
 				"Names"_= {"push"}
-				, "Description"_= "Clean up branches that have been pushed.\n"
+				, "Description"_= "Push all repositories that need pushing.\n"
 				, "Category"_= "Repository management"
 				, "Options"_=
 				{
@@ -638,7 +638,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		(
 			{
 				"Names"_= {"list-commits"}
-				, "Description"_= "Clean up branches that have been pushed.\n"
+				, "Description"_= "List commits in all repositories between two commits in main repository.\n"
 				, "Category"_= "Repository management"
 				, "Options"_=
 				{
