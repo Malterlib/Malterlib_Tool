@@ -141,26 +141,46 @@ CEJSON::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefault)
 
 uint32 CTool_Malterlib::f_RunBuildSystem(TCFunction<CBuildSystem::ERetry (NBuildSystem::CBuildSystem &_BuildSystem)> &&_fCommand, EAnsiEncodingFlag _AnsiFlags)
 {
-	CBuildSystem::ERetry Retry = CBuildSystem::fs_RunBuildSystem
-		(
-			fg_Move(_fCommand)
-			, _AnsiFlags
-			, [](NStr::CStr const &_Output, bool _bError)
-			{
-				if (_bError)
-					DMibConErrOutRaw(_Output);
-				else
-					DMibConOutRaw(_Output);
-			}
-		)
-	;
+	try
+	{
+		CBuildSystem::ERetry Retry = CBuildSystem::fs_RunBuildSystem
+			(
+				fg_Move(_fCommand)
+				, _AnsiFlags
+				, [](NStr::CStr const &_Output, bool _bError)
+				{
+					if (_bError)
+						DMibConErrOutRaw(_Output);
+					else
+						DMibConOutRaw(_Output);
+				}
+			)
+		;
 
-	if (Retry == CBuildSystem::ERetry_Relaunch)
-		return 3;
-	else if (Retry == CBuildSystem::ERetry_Relaunch_NoReconcileOptions)
-		return 4;
+		if (Retry == CBuildSystem::ERetry_Relaunch)
+			return 3;
+		else if (Retry == CBuildSystem::ERetry_Relaunch_NoReconcileOptions)
+			return 4;
 
-	return 0;
+		return 0;
+	}
+	catch (NException::CException const &_Exception)
+	{
+		CAnsiEncoding AnsiEncoding(_AnsiFlags);
+
+		DMibConErrOut2
+			(
+				"\n"
+				"{}Errors:{}\n"
+				"{}\n"
+				, AnsiEncoding.f_StatusError()
+				, AnsiEncoding.f_Default()
+				, _Exception.f_GetErrorStr()
+			)
+		;
+
+		return 1;
+	}
 }
 
 void CTool_Malterlib::f_Register
