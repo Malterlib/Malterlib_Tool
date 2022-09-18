@@ -194,6 +194,8 @@ public:
 		bool bCopied = false;
 		bool bVerbose = false;
 
+		NContainer::TCVector<NStr::CStr> ExcludePatterns = fg_GetSys()->f_GetEnvironmentVariable("MalterlibDiffCopyExcludePatterns").f_Split(";");
+
         if (NFile::CFile::fs_FileExists(SourcePattern, EFileAttrib_Directory))
         {
 			CStr FullDestPath;
@@ -214,6 +216,7 @@ public:
 								fg_LogVerbose(_Change, _Source, _Destination, _Link);
 							return CFile::EDiffCopyChangeAction_Perform;
 						}
+						, ExcludePatterns
 					)
 				)
 			{
@@ -228,12 +231,16 @@ public:
 		if (bDirectory)
 			Attribs = EFileAttrib_Directory;
 
-		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(SourcePattern, Attribs, bRecursive, false);
+		NFile::CFile::CFindFilesOptions FindOptions(SourcePattern, bRecursive);
+		FindOptions.m_AttribMask = Attribs;
+		FindOptions.m_ExcludePatterns = ExcludePatterns;
+
+		TCVector<CFile::CFoundFile> Files = NFile::CFile::fs_FindFiles(FindOptions);
 
 		mint nFiles = Files.f_GetLen();
-		for (mint i = 0; i < nFiles; ++i)
+		for (auto &File : Files)
 		{
-			CStr FilePath = fg_ForceStrUTF8(Files[i]);
+			auto &FilePath = File.m_Path;
 			CStr RelativePath = FilePath.f_Extract(SourceDir.f_GetLen() + 1);
 			CStr FileDest;
 			if (bDestinationIsFile)
