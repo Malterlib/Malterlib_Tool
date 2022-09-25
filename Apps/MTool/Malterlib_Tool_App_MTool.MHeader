@@ -109,7 +109,19 @@ Property
 		!!CompileDialect "C"
 		PreprocessorDefines += "CMAKE_MALTERLIB_EXEFS"
 	}
-	Property.ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake
+	Property
+	{
+		ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake
+		MToolProfDataPath define string = MToolDirectory / "ProfileData/MTool.profdata"
+		MalterlibProfileGuidedOptimization MToolProfDataPath
+		{
+			&
+			{
+				MToolProfDataPath->FileExists() true
+				!MalterlibProfileGuidedOptimization "generate"
+			}
+		}
+	}
 	%Group "ExternalBinaries"
 	{
 		Property
