@@ -3,7 +3,7 @@
 
 Property
 {
-	MToolEmbeddCMake define bool = true
+	MToolEmbeddCMake: bool = true
 }
 Property
 {
@@ -112,7 +112,7 @@ Property
 	Property
 	{
 		ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake
-		MToolProfDataPath define string = MToolDirectory / "ProfileData/MTool.profdata"
+		MToolProfDataPath: string = MToolDirectory / "ProfileData/MTool.profdata"
 		MalterlibProfileGuidedOptimization MToolProfDataPath
 		{
 			&

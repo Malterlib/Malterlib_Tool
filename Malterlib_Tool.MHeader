@@ -22,7 +22,7 @@ Property
 	}
 
 	f_RemoveElements function([string] _Elements, string _ToRemove) [string] = []
-	f_RemoveElements _Elements->ForEach("f_RemoveElementsHelper", {_ToRemove: _ToRemove})
+	f_RemoveElements _Elements->ForEach(&f_RemoveElementsHelper, {_ToRemove: _ToRemove})
 }
 
 %Import "../../External/CMake/CMakeLists.txt"
@@ -214,7 +214,7 @@ Property
 	}
 }
 
-Property.MalterlibEnableCMakeProject define bool = false
+Property.MalterlibEnableCMakeProject: bool = false
 
 %Workspace "CMake"
 {
@@ -244,7 +244,7 @@ Property.MalterlibEnableCMakeProject define bool = false
 	}
 }
 
-Property.Malterlib_Tool_App_Targets define [type(CEntity)] = []
+Property.Malterlib_Tool_App_Targets: [type(CEntity)] = []
 
 %Workspace "Apps_Malterlib_Tool"
 {
