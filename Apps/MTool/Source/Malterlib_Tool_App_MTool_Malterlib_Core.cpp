@@ -105,7 +105,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 
 							co_return Retry;
 						}
-					 	, _pCommandLine
+						, _pCommandLine
 						, &GenerateOptions
 					)
 				;

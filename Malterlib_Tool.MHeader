@@ -13,6 +13,18 @@ Import "Apps/*/*.MHeader"
 	}
 }
 
+Property
+{
+	f_RemoveElementsHelper function(string _Element) [string] = []
+	f_RemoveElementsHelper =+ _Element
+	{
+		!_Element _ToRemove
+	}
+
+	f_RemoveElements function([string] _Elements, string _ToRemove) [string] = []
+	f_RemoveElements _Elements->ForEach("f_RemoveElementsHelper", {_ToRemove: _ToRemove})
+}
+
 %Import "../../External/CMake/CMakeLists.txt"
 {
 	Import.CMake_CacheExcludePatterns =+ ["*.tcl", "*/Testing/*", "*/Tests/*", "*.qs"]
@@ -51,6 +63,7 @@ Import "Apps/*/*.MHeader"
 		, "ENABLE_LZMA=0"
 		, "ENABLE_BZip2=0"
 		, "ENABLE_EXPAT=0"
+		, "CMAKE_USE_SYSTEM_ZLIB=1"
 	]
 
 	Import.CMake_Variables =+ ["HAVE_OPENSSL_ENGINE_H=0", "ENABLE_LZMA=0"]
@@ -143,17 +156,55 @@ Import "Apps/*/*.MHeader"
 			}
 		}
 	}
-	%Target "Lib_cmlibarchive"
+
+	%Target "Lib_libarchive_cmlibarchive"
 	{
 		Compile
 		{
 			!!CompileDialect "C"
-			PrefixHeader undefined
+			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
+		}
+		%Dependency "Lib_zlib"
+		{
+			!DocumentationEnabled true
+			Dependency.Indirect true
 		}
 	}
-	%Target "Lib_cmcompress"
+
+	%Target "Lib_bzip2_cmbzip2"
 	{
-		Property.MalterlibNeedLanguage_Cxx true
+		Compile
+		{
+			!!CompileDialect "C"
+			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
+		}
+	}
+
+	%Target "Lib_cmsys_cmsys"
+	{
+		Compile
+		{
+			!!CompileDialect "C"
+			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
+		}
+	}
+
+	%Target "Lib_CURL_cmcurl"
+	{
+		Compile
+		{
+			!!CompileDialect "C"
+			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
+		}
+	}
+
+	%Target "Lib_CMLIBLZMA_cmliblzma"
+	{
+		Compile
+		{
+			!!CompileDialect "C"
+			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
+		}
 	}
 }
 
