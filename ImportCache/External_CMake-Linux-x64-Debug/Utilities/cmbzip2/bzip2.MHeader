@@ -11,7 +11,8 @@ Property.CMakeOutputPath_bzip2 define string = `@('../..'->MakeAbsolute())`->Mak
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
-			"_FILE_OFFSET_BITS=64"
+			"_FILE_OFFSET_BITS=64",
+			"_XOPEN_SOURCE=600"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"

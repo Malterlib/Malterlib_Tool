@@ -147,13 +147,13 @@
 /* #undef ARCHIVE_XATTR_LINUX */
 
 /* Version number of bsdcpio */
-#define BSDCPIO_VERSION_STRING "3.5.1"
+#define BSDCPIO_VERSION_STRING "3.6.0"
 
 /* Version number of bsdtar */
-#define BSDTAR_VERSION_STRING "3.5.1"
+#define BSDTAR_VERSION_STRING "3.6.0"
 
 /* Version number of bsdcat */
-#define BSDCAT_VERSION_STRING "3.5.1"
+#define BSDCAT_VERSION_STRING "3.6.0"
 
 /* Define to 1 if you have the `acl_create_entry' function. */
 /* #undef HAVE_ACL_CREATE_ENTRY */
@@ -204,7 +204,7 @@
 /* #undef HAVE_BSDXML_H */
 
 /* Define to 1 if you have the <bzlib.h> header file. */
-/* #undef HAVE_BZLIB_H */
+#define HAVE_BZLIB_H 1
 
 /* Define to 1 if you have the `chflags' function. */
 /* #undef HAVE_CHFLAGS */
@@ -463,7 +463,7 @@
 /* #undef HAVE_LIBBSDXML */
 
 /* Define to 1 if you have the `bz2' library (-lbz2). */
-/* #undef HAVE_LIBBZ2 */
+#define HAVE_LIBBZ2 1
 
 /* Define to 1 if you have the `b2' library (-lb2). */
 /* #undef HAVE_LIBB2 */
@@ -487,7 +487,7 @@
 /* #undef HAVE_LIBLZ4 */
 
 /* Define to 1 if you have the `lzma' library (-llzma). */
-/* #undef HAVE_LIBLZMA */
+#define HAVE_LIBLZMA 1
 
 /* Define to 1 if you have the `lzmadec' library (-llzmadec). */
 /* #undef HAVE_LIBLZMADEC */
@@ -520,7 +520,11 @@
 #define HAVE_LIBZ 1
 
 /* Define to 1 if you have the `zstd' library (-lzstd). */
-/* #undef HAVE_LIBZSTD */
+#define HAVE_LIBZSTD 1
+
+/* Define to 1 if you have the `zstd' library (-lzstd) with compression
+   support. */
+#define HAVE_LIBZSTD_COMPRESSOR 1
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
@@ -528,8 +532,8 @@
 /* Define to 1 if you have the `link' function. */
 /* #undef HAVE_LINK */
 
-/* Define to 1 if you have the <linux/types.h> header file. */
-/* #undef HAVE_LINUX_TYPES_H */
+/* Define to 1 if you have the `linkat' function. */
+/* #undef HAVE_LINKAT */
 
 /* Define to 1 if you have the <linux/fiemap.h> header file. */
 /* #undef HAVE_LINUX_FIEMAP_H */
@@ -596,10 +600,10 @@
 /* #undef HAVE_LZMADEC_H */
 
 /* Define to 1 if you have the <lzma.h> header file. */
-/* #undef HAVE_LZMA_H */
+#define HAVE_LZMA_H 1
 
 /* Define to 1 if you have a working `lzma_stream_encoder_mt' function. */
-/* #undef HAVE_LZMA_STREAM_ENCODER_MT */
+#define HAVE_LZMA_STREAM_ENCODER_MT 1
 
 /* Define to 1 if you have the <lzo/lzo1x.h> header file. */
 /* #undef HAVE_LZO_LZO1X_H */
@@ -987,7 +991,7 @@
 #define HAVE_ZLIB_H 1
 
 /* Define to 1 if you have the <zstd.h> header file. */
-/* #undef HAVE_ZSTD_H */
+#define HAVE_ZSTD_H 1
 
 /* Define to 1 if you have the `_ctime64_s' function. */
 #define HAVE__CTIME64_S 1
@@ -1011,10 +1015,10 @@
 #define ICONV_CONST 
 
 /* Version number of libarchive as a single integer */
-#define LIBARCHIVE_VERSION_NUMBER "3005001"
+#define LIBARCHIVE_VERSION_NUMBER "3006000"
 
 /* Version number of libarchive */
-#define LIBARCHIVE_VERSION_STRING "3.5.1"
+#define LIBARCHIVE_VERSION_STRING "3.6.0"
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
@@ -1068,7 +1072,7 @@
 #endif /* SAFE_TO_DEFINE_EXTENSIONS */
 
 /* Version number of package */
-#define VERSION "3.5.1"
+#define VERSION "3.6.0"
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 /* #undef _FILE_OFFSET_BITS */
@@ -1081,15 +1085,15 @@
 
 /* Define to control Windows SDK version */
 #ifndef NTDDI_VERSION
-#define NTDDI_VERSION 0x05010000
+#define NTDDI_VERSION 0x06010000
 #endif // NTDDI_VERSION
 
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501
+#define _WIN32_WINNT 0x0601
 #endif // _WIN32_WINNT
 
 #ifndef WINVER
-#define WINVER 0x0501
+#define WINVER 0x0601
 #endif // WINVER
 
 /* Define to empty if `const' does not conform to ANSI C. */

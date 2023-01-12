@@ -23,7 +23,8 @@ Property.CMakeOutputPath_CMLIBLZMA define string = `@('../..'->MakeAbsolute())`-
 		]
 		PreprocessorDefines += [
 			"MYTHREAD_POSIX",
-			"_FILE_OFFSET_BITS=64"
+			"_FILE_OFFSET_BITS=64",
+			"_XOPEN_SOURCE=600"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"

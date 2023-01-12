@@ -22,7 +22,8 @@ Property.CMakeOutputPath_CMLIBLZMA define string = `@('../..'->MakeAbsolute())`-
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
-			"MYTHREAD_POSIX"
+			"MYTHREAD_POSIX",
+			"_XOPEN_SOURCE=600"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"

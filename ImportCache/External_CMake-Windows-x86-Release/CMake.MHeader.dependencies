@@ -23,6 +23,7 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Source/Checks/cm_cxx_filesystem.cxx
 ../../../../External/CMake/Source/Checks/cm_cxx_make_unique.cxx
 ../../../../External/CMake/Source/Checks/cm_message_checks_compat.cmake
+../../../../External/CMake/Source/Modules/CMakeBuildUtilities.cmake
 ../../../../External/CMake/Source/Modules/OverrideC.cmake
 ../../../../External/CMake/Source/Modules/OverrideCXX.cmake
 ../../../../External/CMake/Source/cmConfigure.cmake.h.in
@@ -72,7 +73,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CMakeOnly/Test.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/CMakeLists.txt
 ../../../../External/CMake/Tests/CMakeTests/CMakeMinimumRequiredTest.cmake.in
-../../../../External/CMake/Tests/CMakeTests/CheckSourceTreeTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/CompilerIdVendorTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/EndStuffTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/FileDownloadBadHashTest.cmake.in
@@ -98,7 +98,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CMakeTests/VariableWatchTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/VersionTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/WhileTest.cmake.in
-../../../../External/CMake/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake.in
 ../../../../External/CMake/Tests/CTestConfig/dashboard.cmake.in
 ../../../../External/CMake/Tests/CTestConfig/script.cmake.in
 ../../../../External/CMake/Tests/CTestCoverageCollectGCOV/test.cmake.in
@@ -129,6 +128,7 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CTestTestZeroTimeout/test.cmake.in
 ../../../../External/CMake/Tests/CTestUpdateGIT.cmake.in
 ../../../../External/CMake/Tests/CheckFortran.cmake
+../../../../External/CMake/Tests/CheckSourceTree/CMakeLists.txt
 ../../../../External/CMake/Tests/CheckSwift.cmake
 ../../../../External/CMake/Tests/CoberturaCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/CoberturaCoverage/coverage.xml.in
@@ -197,9 +197,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Utilities/cmlibuv/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmnghttp2/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmnghttp2/cmakeconfig.h.in
-../../../../External/CMake/Utilities/cmzlib/.NoDartCoverage
-../../../../External/CMake/Utilities/cmzlib/CMakeLists.txt
-../../../../External/CMake/Utilities/cmzlib/zlibDllConfig.h.in
 ../../../../External/CMake/Utilities/cmzstd/CMakeLists.txt
 ../../../../External/CMake/Utilities/std/CMakeLists.txt
 ../../../../External/CMake/Utilities/std/cmSTL.hxx.in

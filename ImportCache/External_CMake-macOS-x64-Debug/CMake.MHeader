@@ -265,7 +265,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 					"KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0",
 					"KWSYS_CXX_HAS_SETENV=1",
 					"KWSYS_CXX_HAS_UNSETENV=1",
-					"KWSYS_CXX_HAS_UTIMENSAT=0",
+					"KWSYS_CXX_HAS_UTIMENSAT=1",
 					"KWSYS_CXX_HAS_UTIMES=1",
 					"KWSYS_CXX_STAT_HAS_ST_MTIM=0",
 					"KWSYS_CXX_STAT_HAS_ST_MTIMESPEC=1"
@@ -1095,80 +1095,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		}
 	}
 }
-%Target "Lib_CMZLIB_cmzlib"
-{
-	Compile
-	{
-		!!Compile.Type "C"
-		SearchPath += [
-			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute()
-		]
-		PreprocessorDefines += []
-	}
-	Property.MalterlibTargetNameType "Normal"
-	Compile.AllowNonExisting true
-	Target.Group "External/CMZLIB"
-	{
-		!!Target.Group undefined
-	}
-	Target.Type "StaticLibrary"
-	Target.BaseName "CMZLIB_cmzlib"
-	Target.BaseFileName "cmzlib"
-	%Group "Utilities"
-	{
-		%Group "cmzlib"
-		{
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/adler32.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/compress.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/crc32.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/deflate.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/gzio.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/inffast.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/inflate.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/inftrees.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/trees.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/uncompr.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzlib/zutil.c`
-			{
-				Compile.Type "C"
-			}
-		}
-	}
-}
 %Target "Com_CURL_curltest"
 {
 	Compile
@@ -1205,7 +1131,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	}
 	%Dependency "Lib_CURL_cmcurl"
 	%Dependency "Lib_CMake_cmnghttp2"
-	%Dependency "Lib_CMZLIB_cmzlib"
 }
 %Target "Lib_CURL_cmcurl"
 {
@@ -1226,7 +1151,8 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('.'->MakeAbsolute())/Utilities/cmcurl/lib`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"BUILDING_LIBCURL",
@@ -1415,11 +1341,11 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Disabled true
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dotdot.h`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dynbuf.h`
 			{
 				Compile.Disabled true
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dynbuf.h`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/easy_lock.h`
 			{
 				Compile.Disabled true
 			}
@@ -1443,7 +1369,15 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/fopen.h`
+			{
+				Compile.Disabled true
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/formdata.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/functypes.h`
 			{
 				Compile.Disabled true
 			}
@@ -1463,11 +1397,15 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/h2h3.h`
+			{
+				Compile.Disabled true
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hash.h`
 			{
 				Compile.Disabled true
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostcheck.h`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/headers.h`
 			{
 				Compile.Disabled true
 			}
@@ -1555,11 +1493,11 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Disabled true
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/non-ascii.h`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/nonblock.h`
 			{
 				Compile.Disabled true
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/nonblock.h`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/noproxy.h`
 			{
 				Compile.Disabled true
 			}
@@ -1687,6 +1625,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/timediff.h`
+			{
+				Compile.Disabled true
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/timeval.h`
 			{
 				Compile.Disabled true
@@ -1719,7 +1661,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Disabled true
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/x509asn1.h`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/ws.h`
 			{
 				Compile.Disabled true
 			}
@@ -1804,6 +1746,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 				{
 					Compile.Disabled true
 				}
+				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/hostcheck.h`
+				{
+					Compile.Disabled true
+				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/keylog.h`
 				{
 					Compile.Disabled true
@@ -1813,10 +1759,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 					Compile.Disabled true
 				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mbedtls_threadlock.h`
-				{
-					Compile.Disabled true
-				}
-				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mesalink.h`
 				{
 					Compile.Disabled true
 				}
@@ -1848,6 +1790,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 				{
 					Compile.Disabled true
 				}
+				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/x509asn1.h`
+				{
+					Compile.Disabled true
+				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/bearssl.c`
 				{
 					Compile.Type "C"
@@ -1860,6 +1806,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 				{
 					Compile.Type "C"
 				}
+				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/hostcheck.c`
+				{
+					Compile.Type "C"
+				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/keylog.c`
 				{
 					Compile.Type "C"
@@ -1869,10 +1819,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 					Compile.Type "C"
 				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mbedtls_threadlock.c`
-				{
-					Compile.Type "C"
-				}
-				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/mesalink.c`
 				{
 					Compile.Type "C"
 				}
@@ -1908,9 +1854,17 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 				{
 					Compile.Type "C"
 				}
+				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/x509asn1.c`
+				{
+					Compile.Type "C"
+				}
 			}
 			%Group "vquic"
 			{
+				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/msh3.h`
+				{
+					Compile.Disabled true
+				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/ngtcp2.h`
 				{
 					Compile.Disabled true
@@ -1922,6 +1876,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/vquic.h`
 				{
 					Compile.Disabled true
+				}
+				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/msh3.c`
+				{
+					Compile.Type "C"
 				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/ngtcp2.c`
 				{
@@ -2003,10 +1961,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Type "C"
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_ctype.c`
-			{
-				Compile.Type "C"
-			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_des.c`
 			{
 				Compile.Type "C"
@@ -2079,10 +2033,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Type "C"
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dotdot.c`
-			{
-				Compile.Type "C"
-			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dynbuf.c`
 			{
 				Compile.Type "C"
@@ -2111,6 +2061,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Type "C"
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/fopen.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/formdata.c`
 			{
 				Compile.Type "C"
@@ -2135,7 +2089,15 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Type "C"
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/h2h3.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hash.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/headers.c`
 			{
 				Compile.Type "C"
 			}
@@ -2144,10 +2106,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 				Compile.Type "C"
 			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostasyn.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hostcheck.c`
 			{
 				Compile.Type "C"
 			}
@@ -2267,11 +2225,11 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Type "C"
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/non-ascii.c`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/nonblock.c`
 			{
 				Compile.Type "C"
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/nonblock.c`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/noproxy.c`
 			{
 				Compile.Type "C"
 			}
@@ -2399,6 +2357,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Type "C"
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/timediff.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/timeval.c`
 			{
 				Compile.Type "C"
@@ -2431,7 +2393,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Type "C"
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/x509asn1.c`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/ws.c`
 			{
 				Compile.Type "C"
 			}
@@ -2460,10 +2422,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		}
 	}
 	%Dependency "Lib_CMake_cmnghttp2"
-	{
-		Dependency.Indirect true
-	}
-	%Dependency "Lib_CMZLIB_cmzlib"
 	{
 		Dependency.Indirect true
 	}
@@ -3256,12 +3214,16 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmbzip2`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/api`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"HAVE_CONFIG_H",
-			"LIBARCHIVE_STATIC"
+			"LZMA_API_STATIC"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -3801,7 +3763,15 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Type "C"
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_write_set_format_cpio_binary.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_write_set_format_cpio_newc.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_write_set_format_cpio_odc.c`
 			{
 				Compile.Type "C"
 			}
@@ -3895,7 +3865,15 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			}
 		}
 	}
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_bzip2_cmbzip2"
+	{
+		Dependency.Indirect true
+	}
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
+	{
+		Dependency.Indirect true
+	}
+	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
 	}
@@ -3914,9 +3892,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -3967,7 +3943,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC",
 			"_DARWIN_UNLIMITED_SELECT=1",
 			"_DARWIN_USE_64_BIT_INODE=1"
 		]
@@ -4014,6 +3989,14 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 				Compile.Type "C"
 			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strscpy.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strtok.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strtok.h`
 			{
 				Compile.Disabled true
 			}
@@ -4165,9 +4148,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -4353,10 +4334,9 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -4373,10 +4353,9 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -4681,7 +4660,15 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		{
 			Compile.Type "C++"
 		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmCMakePresetsGraphReadJSONPackagePresets.cxx`
+		{
+			Compile.Type "C++"
+		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmCMakePresetsGraphReadJSONTestPresets.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmCMakePresetsGraphReadJSONWorkflowPresets.cxx`
 		{
 			Compile.Type "C++"
 		}
@@ -4737,6 +4724,14 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		{
 			Compile.Type "C++"
 		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmConstStack.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmConstStack.tcc`
+		{
+			Compile.Disabled true
+		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmCPackPropertiesGenerator.h`
 		{
 			Compile.Disabled true
@@ -4789,11 +4784,23 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		{
 			Compile.Disabled true
 		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmCxxModuleMapper.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmCxxModuleMapper.h`
+		{
+			Compile.Disabled true
+		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDefinitions.cxx`
 		{
 			Compile.Type "C++"
 		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDefinitions.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDependencyProvider.h`
 		{
 			Compile.Disabled true
 		}
@@ -5096,10 +5103,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmFileTime.cxx`
 		{
 			Compile.Type "C++"
-			Compile.PreprocessorDefines += [
-				"CMake_STAT_HAS_ST_MTIM=0",
-				"CMake_STAT_HAS_ST_MTIMESPEC=1"
-			]
 		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmFileTime.h`
 		{
@@ -5461,6 +5464,14 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		{
 			Compile.Disabled true
 		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmPlaceholderExpander.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmPlaceholderExpander.h`
+		{
+			Compile.Disabled true
+		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmRulePlaceholderExpander.cxx`
 		{
 			Compile.Type "C++"
@@ -5476,14 +5487,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmLocale.h`
 		{
 			Compile.Disabled true
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmMachO.h`
-		{
-			Compile.Disabled true
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmMachO.cxx`
-		{
-			Compile.Type "C++"
 		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmMakefile.cxx`
 		{
@@ -5576,9 +5579,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmProcessOutput.cxx`
 		{
 			Compile.Type "C++"
-			Compile.PreprocessorDefines += [
-				"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
-			]
 		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmProcessOutput.h`
 		{
@@ -5860,6 +5860,14 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		{
 			Compile.Disabled true
 		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmWindowsRegistry.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmWindowsRegistry.h`
+		{
+			Compile.Disabled true
+		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmWorkerPool.cxx`
 		{
 			Compile.Type "C++"
@@ -5903,9 +5911,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmake.cxx`
 		{
 			Compile.Type "C++"
-			Compile.PreprocessorDefines += [
-				"CMAKE_USE_WMAKE"
-			]
 		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmake.h`
 		{
@@ -6175,6 +6180,14 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		{
 			Compile.Disabled true
 		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmExperimental.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmExperimental.h`
+		{
+			Compile.Disabled true
+		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmExportCommand.cxx`
 		{
 			Compile.Type "C++"
@@ -6268,6 +6281,14 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			Compile.Type "C++"
 		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmForEachCommand.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmBlockCommand.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmBlockCommand.h`
 		{
 			Compile.Disabled true
 		}
@@ -6412,6 +6433,14 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			Compile.Type "C++"
 		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmInstallCommandArguments.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmInstallCxxModuleBmiGenerator.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmInstallCxxModuleBmiGenerator.h`
 		{
 			Compile.Disabled true
 		}
@@ -6895,78 +6924,6 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		{
 			Compile.Disabled true
 		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_get_date.h`
-		{
-			Compile.Disabled true
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_get_date.c`
-		{
-			Compile.Type "C"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_utf8.h`
-		{
-			Compile.Disabled true
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_utf8.c`
-		{
-			Compile.Type "C"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_codecvt.hxx`
-		{
-			Compile.Disabled true
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_codecvt.cxx`
-		{
-			Compile.Type "C++"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDuration.h`
-		{
-			Compile.Disabled true
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDuration.cxx`
-		{
-			Compile.Type "C++"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/bindexplib.cxx`
-		{
-			Compile.Type "C++"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmXCodeObject.cxx`
-		{
-			Compile.Type "C++"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmXCode21Object.cxx`
-		{
-			Compile.Type "C++"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmXCodeScheme.cxx`
-		{
-			Compile.Type "C++"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmGlobalXCodeGenerator.cxx`
-		{
-			Compile.Type "C++"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmGlobalXCodeGenerator.h`
-		{
-			Compile.Disabled true
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmLocalXCodeGenerator.cxx`
-		{
-			Compile.Type "C++"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmLocalXCodeGenerator.h`
-		{
-			Compile.Disabled true
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmGlobalWatcomWMakeGenerator.cxx`
-		{
-			Compile.Type "C++"
-		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmGlobalWatcomWMakeGenerator.h`
-		{
-			Compile.Disabled true
-		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmScanDepFormat.cxx`
 		{
 			Compile.Type "C++"
@@ -7031,6 +6988,86 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		{
 			Compile.Disabled true
 		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_get_date.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_get_date.c`
+		{
+			Compile.Type "C"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_utf8.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_utf8.c`
+		{
+			Compile.Type "C"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_codecvt.hxx`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cm_codecvt.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDuration.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDuration.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/bindexplib.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmMachO.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmMachO.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmXCodeObject.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmXCode21Object.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmXCodeScheme.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmGlobalXCodeGenerator.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmGlobalXCodeGenerator.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmLocalXCodeGenerator.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmLocalXCodeGenerator.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmGlobalWatcomWMakeGenerator.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmGlobalWatcomWMakeGenerator.h`
+		{
+			Compile.Disabled true
+		}
 	}
 	%Dependency "Lib_bzip2_cmbzip2"
 	{
@@ -7049,6 +7086,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		Dependency.Indirect true
 	}
 	%Dependency "Lib_libarchive_cmlibarchive"
+	{
+		Dependency.Indirect true
+	}
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	{
 		Dependency.Indirect true
 	}
@@ -7072,7 +7113,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
 	}
@@ -7085,14 +7126,14 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		SearchPath += [
 			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
 			`@('.'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -7397,6 +7438,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	{
 		Dependency.Indirect true
 	}
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
+	{
+		Dependency.Indirect true
+	}
 	%Dependency "Lib_librhash_cmlibrhash"
 	{
 		Dependency.Indirect true
@@ -7417,7 +7462,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
 	}
@@ -7430,14 +7475,16 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		SearchPath += [
 			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
+			`@('.'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('.'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -7551,15 +7598,8 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CPack/cmCPackDragNDropGenerator.cxx`
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines += [
-					"HAVE_CoreServices"
-				]
 			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CPack/cmCPackPKGGenerator.cxx`
-			{
-				Compile.Type "C++"
-			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CPack/cmCPackPackageMakerGenerator.cxx`
 			{
 				Compile.Type "C++"
 			}
@@ -7593,6 +7633,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	{
 		Dependency.Indirect true
 	}
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
+	{
+		Dependency.Indirect true
+	}
 	%Dependency "Lib_librhash_cmlibrhash"
 	{
 		Dependency.Indirect true
@@ -7613,7 +7657,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	{
 		Dependency.Indirect true
 	}
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
 	}
@@ -7630,10 +7674,9 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -7670,12 +7713,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_ctest"
 {
@@ -7685,14 +7729,14 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		SearchPath += [
 			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
 			`@('.'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -7722,12 +7766,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_cpack"
 {
@@ -7737,14 +7782,16 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 		SearchPath += [
 			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
+			`@('.'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('.'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -7774,12 +7821,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_ccmake"
 {
@@ -7793,13 +7841,12 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Source/CPack`->MakeAbsolute(),
 			`@('.'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -7887,12 +7934,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Tool_CMake_test_clean"
 {
@@ -7951,9 +7999,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -7986,8 +8032,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -8118,6 +8166,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			{
 				Compile.Type "C++"
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Tests/CMakeLib/testCMExtEnumSet.cxx`
+			{
+				Compile.Type "C++"
+			}
 		}
 	}
 	%Dependency "Lib_CMake_CMakeLib"
@@ -8127,12 +8179,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_testEncoding"
 {
@@ -8151,9 +8204,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -8187,8 +8238,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -8217,12 +8270,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_testAffinity"
 {
@@ -8238,8 +8292,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -8268,12 +8324,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudo_valgrind"
 {
@@ -8289,8 +8346,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -8334,12 +8393,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudo_purify"
 {
@@ -8355,8 +8415,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -8400,12 +8462,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudo_BC"
 {
@@ -8421,8 +8484,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -8466,12 +8531,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudo_cuda-memcheck"
 {
@@ -8487,8 +8553,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -8532,12 +8600,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_memcheck_fail"
 {
@@ -8553,8 +8622,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -8598,12 +8669,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudonl_valgrind"
 {
@@ -8622,9 +8694,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -8678,9 +8748,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -8734,9 +8802,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -8784,9 +8850,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -8816,9 +8880,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -8848,9 +8910,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -8881,8 +8941,10 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CTest`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
@@ -8912,12 +8974,13 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 	%Dependency "Lib_CMake_cmexpat"
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	%Dependency "Lib_librhash_cmlibrhash"
 	%Dependency "Lib_libuv_cmlibuv"
 	%Dependency "Lib_CMake_cmnghttp2"
 	%Dependency "Lib_CMake_cmstd"
 	%Dependency "Lib_cmsys_cmsys"
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_zstd_cmzstd"
 }
 %Target "Com_CMake_pseudo_llvm-rc"
 {
@@ -8930,9 +8993,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -8962,9 +9023,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -8994,9 +9053,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -9026,9 +9083,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -9058,9 +9113,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -9090,9 +9143,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -9122,9 +9173,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -9154,9 +9203,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -9186,9 +9233,7 @@ Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbs
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true

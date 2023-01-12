@@ -36,13 +36,19 @@ Property
 	}
 
 	Import.CMake_Variables =+ [
-		"HAVE_ZLIB_H=1"
-		, "ARCHIVE_CRYPTO_MD5_OPENSSL=1"
+		"ARCHIVE_CRYPTO_MD5_OPENSSL=1"
 		, "ARCHIVE_CRYPTO_RMD160_OPENSSL=0"
 		, "ARCHIVE_CRYPTO_SHA1_OPENSSL=1"
 		, "ARCHIVE_CRYPTO_SHA256_OPENSSL=1"
 		, "ARCHIVE_CRYPTO_SHA384_OPENSSL=1"
 		, "ARCHIVE_CRYPTO_SHA512_OPENSSL=1"
+	]
+
+	Import.CMake_Variables =+ [
+		"HAVE_ZLIB_H=1"
+		, `ZLIB_INCLUDE_DIR=@("../../External/zlib"->MakeAbsolute())`
+		, `ZSTD_INCLUDE_DIRS=@("../../External/zstd/lib"->MakeAbsolute())`
+		, "ZLIB_LIBRARY=/dev/null"
 	]
 
 	Import.CMake_Variables =+ [

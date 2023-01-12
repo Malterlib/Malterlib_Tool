@@ -16,7 +16,6 @@ Property.CMakeOutputPath_libuv define string = `@('../..'->MakeAbsolute())`->Mak
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC",
 			"_FILE_OFFSET_BITS=64",
 			"_GNU_SOURCE"
 		]
@@ -63,6 +62,14 @@ Property.CMakeOutputPath_libuv define string = `@('../..'->MakeAbsolute())`->Mak
 				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strscpy.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strtok.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strtok.h`
 			{
 				Compile.Disabled true
 			}

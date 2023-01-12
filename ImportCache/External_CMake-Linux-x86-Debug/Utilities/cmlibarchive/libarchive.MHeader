@@ -10,13 +10,20 @@ Property.CMakeOutputPath_libarchive define string = `@('../..'->MakeAbsolute())`
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmbzip2`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/api`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
-			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"HAVE_CONFIG_H",
-			"LIBARCHIVE_STATIC",
-			"_FILE_OFFSET_BITS=64"
+			"LZMA_API_STATIC",
+			"_BSD_SOURCE",
+			"_DEFAULT_SOURCE",
+			"_FILE_OFFSET_BITS=64",
+			"_XOPEN_SOURCE=600"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -556,7 +563,15 @@ Property.CMakeOutputPath_libarchive define string = `@('../..'->MakeAbsolute())`
 			{
 				Compile.Type "C"
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_write_set_format_cpio_binary.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_write_set_format_cpio_newc.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_write_set_format_cpio_odc.c`
 			{
 				Compile.Type "C"
 			}
@@ -650,7 +665,15 @@ Property.CMakeOutputPath_libarchive define string = `@('../..'->MakeAbsolute())`
 			}
 		}
 	}
-	%Dependency "Lib_CMZLIB_cmzlib"
+	%Dependency "Lib_bzip2_cmbzip2"
+	{
+		Dependency.Indirect true
+	}
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
+	{
+		Dependency.Indirect true
+	}
+	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
 	}
