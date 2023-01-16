@@ -4,6 +4,8 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
 
+#include <Mib/Process/ProcessLaunch>
+
 void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
 {
 	o_ToolsSection.f_RegisterCommand
@@ -270,6 +272,116 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							{
 								co_await ECoroutineFlag_AllowReferences;
 								co_return co_await _BuildSystem.f_Action_Repository_ForEachRepo(GenerateOptions, RepoFilter, bParallel, GitParameters);
+							}
+						 	, _pCommandLine
+							, &GenerateOptions
+						)
+					;
+				}
+			)
+		;
+	}
+
+	{
+		o_ToolsSection.f_RegisterCommand
+			(
+				{
+					"Names"_= {"repo-run"}
+					, "Description"_= "Run commands with git directory as current path.\n"
+					, "Category"_= "Repository management"
+					, "ErrorOnCommandAsParameter"_= false
+					, "ErrorOnOptionAsParameter"_= false
+					, "Options"_=
+					{
+						"Synchronous?"_=
+						{
+							"Names"_= {"--sync", "-s"}
+							, "Default"_= false
+							, "Description"_= "Run all commands synchronously. By default all invocations will bu run in parallel.\n"
+						}
+						, Filter_Name
+						, fFilter_Type("")
+						, Filter_Tags
+						, Filter_Branch
+						, fFilter_OnlyChanged(false)
+						, fs_CachedEnvironmentOption(true)
+						, "Shell?"_=
+						{
+							"Names"_= {"--shell"}
+							, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("SHELL", "")
+							, "Description"_= "Run commands in this shell.\n"
+						}
+						, "ShellOptions?"_=
+						{
+							"Names"_= {"--shell-options"}
+							, "Default"_= {"-c"}
+							, "Description"_= "The options to send to the shell.\n"
+						}
+						, "ShellParamsInString?"_=
+						{
+							"Names"_= {"--shell-params-in-string"}
+							, "Default"_= true
+							, "Description"_= "If the arguments should be sent in a string to the shell, or if not it will be sent as separate params.\n"
+						}
+					}
+					, "Parameters"_=
+					{
+						"RunCommand"_=
+						{
+							"Type"_= ""
+							, "Description"_= "The command to run.\n"
+						}
+						, "Parameters...?"_=
+						{
+							"Type"_= {""}
+							, "Default"_= _[_]
+							, "Description"_= "The parameters to send to the command.\n"
+						}
+					}
+				}
+				, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				{
+					co_await ECoroutineFlag_CaptureExceptions;
+
+					CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+
+					CStr Shell = _Params["Shell"].f_String();
+					TCVector<CStr> ShellOptions = _Params["ShellOptions"].f_StringArray();
+					bool bShellParamsInString = _Params["ShellParamsInString"].f_Boolean();
+
+					CStr Command = _Params["RunCommand"].f_String();
+					TCVector<CStr> Parameters = _Params["Parameters"].f_StringArray();
+
+					CBuildSystem::CForEachRepoDirOptions Options;
+					if (Shell)
+					{
+						Options.m_Application = Shell;
+						Options.m_Params.f_Insert(ShellOptions);
+
+						TCVector<CStr> CommandParameters;
+						CommandParameters.f_Insert(Command);
+						CommandParameters.f_Insert(Parameters);
+
+						if (bShellParamsInString)
+							Options.m_Params.f_Insert(CStr::fs_Join(CommandParameters, " "));
+						else
+							Options.m_Params.f_Insert(CommandParameters);
+					}
+					else
+					{
+						Options.m_Application = Command;
+						Options.m_Params.f_Insert(Parameters);
+					}
+
+					Options.m_bParallel = !_Params["Synchronous"].f_Boolean();
+
+					auto GenerateOptions = fs_ParseSharedOptions(_Params);
+					co_return co_await f_RunBuildSystem
+						(
+							[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+							{
+								co_await ECoroutineFlag_AllowReferences;
+								co_return co_await _BuildSystem.f_Action_Repository_ForEachRepoDir(GenerateOptions, RepoFilter, Options);
 							}
 						 	, _pCommandLine
 							, &GenerateOptions
