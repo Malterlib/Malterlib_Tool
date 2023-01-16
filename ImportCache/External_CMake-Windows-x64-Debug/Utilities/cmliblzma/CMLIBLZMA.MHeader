@@ -1,4 +1,4 @@
-Property.CMakeOutputPath_CMLIBLZMA define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+Property.CMakeOutputPath_CMLIBLZMA: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_CMLIBLZMA_cmliblzma"
 {
 	Compile

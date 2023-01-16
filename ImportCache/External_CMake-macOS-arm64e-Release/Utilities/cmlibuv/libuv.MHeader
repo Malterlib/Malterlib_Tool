@@ -1,4 +1,4 @@
-Property.CMakeOutputPath_libuv define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_libuv_cmlibuv"
 {
 	Compile

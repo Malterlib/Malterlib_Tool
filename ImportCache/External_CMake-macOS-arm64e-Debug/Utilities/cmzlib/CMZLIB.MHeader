@@ -1,4 +1,4 @@
-Property.CMakeOutputPath_CMZLIB define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+Property.CMakeOutputPath_CMZLIB: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_CMZLIB_cmzlib"
 {
 	Compile

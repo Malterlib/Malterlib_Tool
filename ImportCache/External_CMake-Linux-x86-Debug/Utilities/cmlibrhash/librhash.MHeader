@@ -1,4 +1,4 @@
-Property.CMakeOutputPath_librhash define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+Property.CMakeOutputPath_librhash: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_librhash_cmlibrhash"
 {
 	Compile

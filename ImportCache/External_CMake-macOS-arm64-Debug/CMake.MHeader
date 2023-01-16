@@ -1,4 +1,4 @@
-Property.CMakeOutputPath_CMake define string = `@('.'->MakeAbsolute())`->MakeAbsolute()
+Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute()
 %Target "Tool_CMake_Experimental"
 {
 	Property.MalterlibTargetNameType "Normal"

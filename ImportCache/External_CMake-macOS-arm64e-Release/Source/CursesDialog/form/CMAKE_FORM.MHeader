@@ -1,4 +1,4 @@
-Property.CMakeOutputPath_CMAKE_FORM define string = `@('../../..'->MakeAbsolute())`->MakeAbsolute()
+Property.CMakeOutputPath_CMAKE_FORM: string = `@('../../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_CMAKE_FORM_cmForm"
 {
 	Compile

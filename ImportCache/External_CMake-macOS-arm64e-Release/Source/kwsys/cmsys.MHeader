@@ -1,4 +1,4 @@
-Property.CMakeOutputPath_cmsys define string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_cmsys_cmsys"
 {
 	Compile
