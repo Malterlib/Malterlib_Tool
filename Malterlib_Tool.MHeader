@@ -115,6 +115,7 @@ Property
 	{
 		!!CompileDialect "C"
 		DynamicTypeInfo true
+		Analyzer false
 	}
 	Compile
 	{
