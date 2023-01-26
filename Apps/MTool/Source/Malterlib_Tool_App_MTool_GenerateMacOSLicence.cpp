@@ -60,17 +60,12 @@ public:
 					else
 						FormattedReplacementText += "\t$\"";
 
-					mint nCount = 0;
 					for (mint j = 0; j < nChars; ++j)
 					{
 						if (j > 0 && (j & 1) == 0)
-						{
 							FormattedReplacementText += " ";
-							++nCount;
-						}
 
 						FormattedReplacementText += CAnsiStr::CFormat("{nfh,sj2,sf0,nc}") << (uint8)ReplacementTextAnsi.f_GetAt(iChar + j);
-						nCount += 2;
 					}
 
 					FormattedReplacementText += "\"\n";
