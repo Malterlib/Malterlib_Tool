@@ -96,6 +96,22 @@ Property
 	%Dependency "Lib_Malterlib_BuildSystem"
 	%Dependency "Lib_Malterlib_Git"
 	%Dependency "Lib_Malterlib"
+
+	%Dependency {
+		Name: "Com_ninja_ninja"
+		, Properties: {
+			Dependency.Target: "Com_ninja_ninja"
+			, Dependency.TargetProperties: {
+				MalterlibPostCopyProject: MalterlibPostCopyProject
+				, MalterlibPostCopyDestination: `@(MalterlibPostCopyDestination)/`
+				, Target.Name: "Com_ninja_ninja"
+				, Target.Group: "ExternalBinaries/ninja"
+			}
+		}
+	}
+	{
+		Dependency.Link false
+	}
 }
 
 %Workspace "MTool"

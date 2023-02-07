@@ -1,5 +1,8 @@
 {
 	"../../External/CMake": {
 		"Hash": "0b3e68854f487c18553f8cb38d11787c398dd23d"
+	},
+	"../../External/ninja": {
+		"Hash": "35380baab26a25a48ddd35a7737c693734c811bd"
 	}
 }
