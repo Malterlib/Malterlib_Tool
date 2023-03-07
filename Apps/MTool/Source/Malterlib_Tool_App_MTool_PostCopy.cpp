@@ -442,7 +442,7 @@ public:
 		{
 			CStr NewRegistry = Registry.f_GenerateStr();
 			CByteVector Temp;
-			CFile::fs_WriteStringToVector(Temp, NewRegistry);
+			CFile::fs_WriteStringToVector(Temp, NewRegistry, false);
 
 			CFile::fs_CreateDirectory(CFile::fs_GetPath(ConfigFile));
 			if (CFile::fs_CopyFileDiff(Temp, ConfigFile, CTime::fs_NowUTC()))
