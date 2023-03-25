@@ -138,7 +138,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 						{
 							return _BuildSystem.f_Action_Create(GenerateOptions);
 						}
-					 	, _CommandLineClient.f_AnsiEncodingFlags()
+						, _CommandLineClient.f_AnsiEncodingFlags()
 					)
 				;
 			}

@@ -460,7 +460,7 @@ public:
 				case EProcessLaunchOutputType_StdOut:
 					DConOutRaw(_Output);
 					break;
- 				case EProcessLaunchOutputType_Max:
+				case EProcessLaunchOutputType_Max:
 					DMibNeverGetHere;
 					break;
 				}

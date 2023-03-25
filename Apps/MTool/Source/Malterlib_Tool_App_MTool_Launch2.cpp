@@ -31,19 +31,19 @@ private:
 	private:
 		enum EField
 		{
-				EField_None				= 0
-			,	EField_Time				= DMibBit(0)
-			,	EField_PerforceParsing	= DMibBit(1)
-			,	EField_SeparateStdErr 	= DMibBit(2)
-			,	EField_DelayOutput		= DMibBit(3)
-			,	EField_Sandbox			= DMibBit(4)
-			, 	EField_SandboxCopyRoot	= DMibBit(5)
-			,	EField_CPUUsage			= DMibBit(7)
-			,	EField_AttributeOutput 	= DMibBit(8)
-			,	EField_RedirectStdOut	= DMibBit(9)
-			,	EField_EchoCommand		= DMibBit(10)
-			,	EField_Stats			= DMibBit(11)
-			,	EField_LimitConcurrency	= DMibBit(12)
+			EField_None					= 0
+			, EField_Time				= DMibBit(0)
+			, EField_PerforceParsing	= DMibBit(1)
+			, EField_SeparateStdErr		= DMibBit(2)
+			, EField_DelayOutput		= DMibBit(3)
+			, EField_Sandbox			= DMibBit(4)
+			, EField_SandboxCopyRoot	= DMibBit(5)
+			, EField_CPUUsage			= DMibBit(7)
+			, EField_AttributeOutput	= DMibBit(8)
+			, EField_RedirectStdOut		= DMibBit(9)
+			, EField_EchoCommand		= DMibBit(10)
+			, EField_Stats				= DMibBit(11)
+			, EField_LimitConcurrency	= DMibBit(12)
 		};
 
 		EField m_Fields;
@@ -148,31 +148,28 @@ private:
 		{
 			EField DefFields = _Defaults.m_Fields;
 
-			#define ApplyField(_FieldName, _VarName) \
-				if ( 	!(m_Fields & EField_##_FieldName) \
-					&&	(DefFields & EField_##_FieldName) ) \
-					_VarName = _Defaults. _VarName;
+			#define DApplyField(d_FieldName, d_VarName) \
+				if (!(m_Fields & EField_##d_FieldName) && (DefFields & EField_##d_FieldName)) \
+					d_VarName = _Defaults. d_VarName;
 
-			ApplyField(Time, m_bTime);
-			ApplyField(Stats, m_bStats);
-			ApplyField(LimitConcurrency, m_LimitConcurrency);
-			ApplyField(PerforceParsing, m_bPerforceParsing);
-			ApplyField(SeparateStdErr, m_bSeparateStdErr);
-			ApplyField(EchoCommand, m_bEchoCommand);
-			ApplyField(DelayOutput, m_bDelayOutput);
-			ApplyField(Sandbox, m_bSandbox);
-			ApplyField(SandboxCopyRoot, m_bSandboxCopyRoot);
-			ApplyField(CPUUsage, m_CPUUsage);
-			ApplyField(RedirectStdOut, m_RedirectStdOut);
-			ApplyField(AttributeOutput, m_bAttributeOutput);
+			DApplyField(Time, m_bTime);
+			DApplyField(Stats, m_bStats);
+			DApplyField(LimitConcurrency, m_LimitConcurrency);
+			DApplyField(PerforceParsing, m_bPerforceParsing);
+			DApplyField(SeparateStdErr, m_bSeparateStdErr);
+			DApplyField(EchoCommand, m_bEchoCommand);
+			DApplyField(DelayOutput, m_bDelayOutput);
+			DApplyField(Sandbox, m_bSandbox);
+			DApplyField(SandboxCopyRoot, m_bSandboxCopyRoot);
+			DApplyField(CPUUsage, m_CPUUsage);
+			DApplyField(RedirectStdOut, m_RedirectStdOut);
+			DApplyField(AttributeOutput, m_bAttributeOutput);
 
 			if (m_SandboxRoots.f_IsEmpty())
 				m_SandboxRoots = _Defaults.m_SandboxRoots;
 
-			#undef ApplyField
+			#undef DApplyField
 		}
-
-
 	};
 
 	struct CGlobalOptions
@@ -326,12 +323,16 @@ private:
 
 			pLineEnd = pLineEnd2;
 
-			if (	_Type == EProcessLaunchOutputType_StdOut
-				&& 	bPerforceParsing
-				&& 	(
-							fg_StrStartsWith(pLineStart, "info")
-						||	fg_StrStartsWith(pLineStart, "exit")
-					))
+			if
+				(
+					_Type == EProcessLaunchOutputType_StdOut
+					&& bPerforceParsing
+					&&
+					(
+						fg_StrStartsWith(pLineStart, "info")
+						|| fg_StrStartsWith(pLineStart, "exit")
+					)
+				)
 			{
 				// Supress
 			}
@@ -484,61 +485,60 @@ private:
 
 		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutableRawParams
 			(
-					_Options.m_Target
-				, 	Params
-				,	CFile::fs_GetCurrentDirectory()
-				, 	[this, pProc, fl_EchoCommand](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
+				_Options.m_Target
+				, Params
+				, CFile::fs_GetCurrentDirectory()
+				, [this, pProc, fl_EchoCommand](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
+				{
+					CLaunchOptions const& Options = pProc->m_Options;
+
+					if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
 					{
-						CLaunchOptions const& Options = pProc->m_Options;
+						DLock(m_ConOutLock);
+						DConOut("error: Failed to launch #{} {}: {}", Options.m_iLaunch << Options.m_Target << _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
+						pProc->m_ReturnValue = 255u;
+					}
+					else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
+					{
+						DLock(m_ConOutLock);
 
-						if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
+						fl_EchoCommand();
+						fp_OutputWholeLines(pProc->m_StdOutBuffer, EProcessLaunchOutputType_StdOut, Options, true);
+						fp_OutputWholeLines(pProc->m_StdErrBuffer, EProcessLaunchOutputType_StdErr, Options, true);
+
+						if (Options.m_bTime)
 						{
-							DLock(m_ConOutLock);
-							DConOut("error: Failed to launch #{} {}: {}", Options.m_iLaunch << Options.m_Target << _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
-							pProc->m_ReturnValue = 255u;
+							DConOut("Launch #{} {} took {} seconds to run." DNewLine, Options.m_iLaunch << Options.m_Target << _TimeSinceLaunch);
 						}
-						else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
+
+						if (Options.m_bStats)
 						{
-							DLock(m_ConOutLock);
+							NMib::NProcess::CProcessStatistics MemoryStats = pProc->m_pProcessLaunchInfo->f_GetProcessLaunch()->f_GetOverallMemoryStatistics();
+							NMib::NProcess::CProcessStatistics ExecutionStats = pProc->m_pProcessLaunchInfo->f_GetProcessLaunch()->f_GetOverallExecutionStatistics();
 
-							fl_EchoCommand();
-							fp_OutputWholeLines(pProc->m_StdOutBuffer, EProcessLaunchOutputType_StdOut, Options, true);
-							fp_OutputWholeLines(pProc->m_StdErrBuffer, EProcessLaunchOutputType_StdErr, Options, true);
+							mint MaxLen = 0;
+							MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(MemoryStats), MaxLen);
+							MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(ExecutionStats), MaxLen);
+							MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(pProc->m_SampledMemoryStats), MaxLen);
 
-							if (Options.m_bTime)
-							{
-								DConOut("Launch #{} {} took {} seconds to run." DNewLine, Options.m_iLaunch << Options.m_Target << _TimeSinceLaunch);
-							}
+							fp_DisplayStats(MemoryStats, MaxLen);
+							fp_DisplayStats(ExecutionStats, MaxLen);
+							fp_DisplayStats(pProc->m_SampledMemoryStats, MaxLen);
+						}
 
-							if (Options.m_bStats)
-							{
-								NMib::NProcess::CProcessStatistics MemoryStats = pProc->m_pProcessLaunchInfo->f_GetProcessLaunch()->f_GetOverallMemoryStatistics();
-								NMib::NProcess::CProcessStatistics ExecutionStats = pProc->m_pProcessLaunchInfo->f_GetProcessLaunch()->f_GetOverallExecutionStatistics();
-
-								mint MaxLen = 0;
-								MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(MemoryStats), MaxLen);
-								MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(ExecutionStats), MaxLen);
-								MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(pProc->m_SampledMemoryStats), MaxLen);
-
-								fp_DisplayStats(MemoryStats, MaxLen);
-								fp_DisplayStats(ExecutionStats, MaxLen);
-								fp_DisplayStats(pProc->m_SampledMemoryStats, MaxLen);
-							}
-
-							uint32 ThisValue = _StateChange.f_Get<EProcessLaunchState_Exited>();
-							if (ThisValue != 0)
-							{
-								DConOut("error: Launch #{} {} exited with {}" DNewLine,  Options.m_iLaunch << Options.m_Target << ThisValue);
-							}
-							pProc->m_ReturnValue = ThisValue;
-							if (Options.m_bEchoCommand)
-							{
-								pProc->m_bEchoedCommand = true;
-								DConOut("\n------------------->\n", 0);
-							}
-
+						uint32 ThisValue = _StateChange.f_Get<EProcessLaunchState_Exited>();
+						if (ThisValue != 0)
+						{
+							DConOut("error: Launch #{} {} exited with {}" DNewLine,  Options.m_iLaunch << Options.m_Target << ThisValue);
+						}
+						pProc->m_ReturnValue = ThisValue;
+						if (Options.m_bEchoCommand)
+						{
+							pProc->m_bEchoedCommand = true;
+							DConOut("\n------------------->\n", 0);
 						}
 					}
+				}
 			)
 		;
 

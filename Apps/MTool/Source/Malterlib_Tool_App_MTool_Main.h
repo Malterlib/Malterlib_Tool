@@ -21,7 +21,7 @@ public:
 			TCActor<CDistributedToolAppActor> const &_ToolActor
 			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
 			, CDistributedAppCommandLineSpecification &o_CommandLine
-		 	, NStr::CStr const &_ClassName
+			, NStr::CStr const &_ClassName
 		) override
 	;
 

@@ -322,8 +322,7 @@ public:
 					TargetFormat = ETargetFormat_COFF;
 				else if (CurArg.f_CmpNoCase("-asm") == 0)
 					TargetFormat = ETargetFormat_ASM;
-				else if ( 		(CurArg.f_CmpNoCase("-o") == 0)
-							|| 	(CurArg.f_CmpNoCase("-output") == 0) )
+				else if ((CurArg.f_CmpNoCase("-o") == 0) ||	(CurArg.f_CmpNoCase("-output") == 0))
 				{
 					++iCurArg;
 					TargetFilename = _Params.f_GetValue(f_IntToStr(iCurArg), "");

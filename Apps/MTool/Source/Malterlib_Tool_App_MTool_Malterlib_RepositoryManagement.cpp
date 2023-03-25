@@ -28,7 +28,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_await ECoroutineFlag_AllowReferences;
 							co_return co_await _BuildSystem.f_Action_Repository_Update(GenerateOptions);
 						}
-					 	, _pCommandLine
+						, _pCommandLine
 						, &GenerateOptions
 					)
 				;
@@ -212,7 +212,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_await ECoroutineFlag_AllowReferences;
 							co_return co_await _BuildSystem.f_Action_Repository_Status(GenerateOptions, RepoFilter, Flags);
 						}
-					 	, _pCommandLine
+						, _pCommandLine
 						, &GenerateOptions
 					)
 				;
@@ -273,7 +273,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_await ECoroutineFlag_AllowReferences;
 								co_return co_await _BuildSystem.f_Action_Repository_ForEachRepo(GenerateOptions, RepoFilter, bParallel, GitParameters);
 							}
-						 	, _pCommandLine
+							, _pCommandLine
 							, &GenerateOptions
 						)
 					;
@@ -383,7 +383,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_await ECoroutineFlag_AllowReferences;
 								co_return co_await _BuildSystem.f_Action_Repository_ForEachRepoDir(GenerateOptions, RepoFilter, Options);
 							}
-						 	, _pCommandLine
+							, _pCommandLine
 							, &GenerateOptions
 						)
 					;
@@ -458,7 +458,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_await ECoroutineFlag_AllowReferences;
 								co_return co_await _BuildSystem.f_Action_Repository_Branch(GenerateOptions, RepoFilter, Branch, Flags);
 							}
-						 	, _pCommandLine
+							, _pCommandLine
 							, &GenerateOptions
 						)
 					;
@@ -598,7 +598,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_await ECoroutineFlag_AllowReferences;
 							co_return co_await _BuildSystem.f_Action_Repository_CleanupBranches(GenerateOptions, RepoFilter, Flags, Branches);
 						}
-					 	, _pCommandLine
+						, _pCommandLine
 						, &GenerateOptions
 					)
 				;
@@ -692,7 +692,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_await ECoroutineFlag_AllowReferences;
 							co_return co_await _BuildSystem.f_Action_Repository_CleanupTags(GenerateOptions, RepoFilter, Flags, Tags);
 						}
-					 	, _pCommandLine
+						, _pCommandLine
 						, &GenerateOptions
 					)
 				;
@@ -778,7 +778,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_await ECoroutineFlag_AllowReferences;
 							co_return co_await _BuildSystem.f_Action_Repository_Push(GenerateOptions, RepoFilter, Remotes, Flags);
 						}
-					 	, _pCommandLine
+						, _pCommandLine
 						, &GenerateOptions
 					)
 				;
@@ -908,21 +908,21 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_await ECoroutineFlag_AllowReferences;
 							co_return co_await _BuildSystem.f_Action_Repository_ListCommits
 								(
-								 	GenerateOptions
-								 	, RepoFilter
-								 	, FromRef
-								 	, ToRef
-								 	, Flags
-								 	, WildcardColumns
-								 	, Prefix
-								 	, MaxCommitsMain
-								 	, MaxCommits
-								 	, MaxMessageWidth
+									GenerateOptions
+									, RepoFilter
+									, FromRef
+									, ToRef
+									, Flags
+									, WildcardColumns
+									, Prefix
+									, MaxCommitsMain
+									, MaxCommits
+									, MaxMessageWidth
 									, _pCommandLine
 								)
 							;
 						}
-					 	, _pCommandLine
+						, _pCommandLine
 						, &GenerateOptions
 					)
 				;

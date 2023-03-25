@@ -392,7 +392,7 @@ public:
 									}
 									return CFile::EDiffCopyChangeAction_Perform;
 								}
-							 	, ExcludePatterns
+								, ExcludePatterns
 							)
 						)
 					{

@@ -7,9 +7,9 @@ Architecture=`uname -m`
 if [[ "$Architecture" == "i686" ]] || [[ "$Architecture" == "i586" ]] || [[ "$Architecture" == "i486" ]] || [[ "$Architecture" == "i386" ]] ; then
 	Architecture=i386
 elif [[ "$Architecture" == "x86_64" ]]; then
-    if [[ `getconf LONG_BIT` == "32" ]] ; then
+	if [[ `getconf LONG_BIT` == "32" ]] ; then
 		Architecture=i386
-    fi
+	fi
 fi
 
 export MalterlibImportUpdateCache=false
@@ -118,12 +118,12 @@ mkdir -p "usr/include/c++"
 ln -s . usr/lib/${Architecture}-linux-gnu
 
 find . -type l | while read l; do
-    link="$(readlink "$l")"
-    if [[ "$link" =~ ^/ ]]; then
-    	if [ -e "${SDKDir}$link" ] ; then
-	    	ln -fs "$(realpath --relative-to="$(dirname "$(realpath -s "$l")")" "${SDKDir}$link")" "$l"
-	    fi
-    fi
+	link="$(readlink "$l")"
+	if [[ "$link" =~ ^/ ]]; then
+	if [ -e "${SDKDir}$link" ] ; then
+		ln -fs "$(realpath --relative-to="$(dirname "$(realpath -s "$l")")" "${SDKDir}$link")" "$l"
+		fi
+	fi
 done
 
 # Remove files and directories that only differ by case

@@ -23,7 +23,7 @@ void CTool::f_Register
 		TCActor<CDistributedToolAppActor> const &_ToolActor
 		, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
 		, CDistributedAppCommandLineSpecification &o_CommandLine
-	 	, NStr::CStr const &_ClassName
+		, NStr::CStr const &_ClassName
 	)
 {
 	if (fg_IsCMake() || fg_IsMalterlib())
@@ -50,7 +50,7 @@ void CTool::f_Register
 				, "ErrorOnOptionAsParameter"_= false
 			}
 			, [this](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
-		 	{
+			{
 				NContainer::CRegistry Params;
 				mint iOut = 0;
 
