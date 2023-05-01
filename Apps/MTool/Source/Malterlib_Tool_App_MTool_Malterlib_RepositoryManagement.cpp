@@ -165,6 +165,13 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_= false
 						, "Description"_= "When on a non-default branch, show push state to all remotes, not just origin.\n"
 					}
+					, "HideBranches?"_=
+					{
+						"Names"_= {"--hide-branches", "-H"}
+						, "Type"_= {""}
+						, "Default"_= _[_]
+						, "Description"_= "Hide these branchs. Supports wildcards.\n"
+					}
 					, Filter_Name
 					, fFilter_Type("")
 					, Filter_Tags
@@ -204,13 +211,15 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
+				auto HideBranches = _Params["HideBranches"].f_StringArray();
+
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
 				co_return co_await f_RunBuildSystem
 					(
 						[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
 						{
 							co_await ECoroutineFlag_AllowReferences;
-							co_return co_await _BuildSystem.f_Action_Repository_Status(GenerateOptions, RepoFilter, Flags);
+							co_return co_await _BuildSystem.f_Action_Repository_Status(GenerateOptions, RepoFilter, Flags, HideBranches, _pCommandLine);
 						}
 						, _pCommandLine
 						, &GenerateOptions
