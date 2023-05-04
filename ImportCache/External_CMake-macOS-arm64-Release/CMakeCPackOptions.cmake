@@ -19,8 +19,8 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   # Use the icon from cmake-gui for add-remove programs
   set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\cmake-gui.exe")
 
-  set(CPACK_NSIS_PACKAGE_NAME "CMake 3.26.3-gb0f2c24")
-  set(CPACK_NSIS_DISPLAY_NAME "CMake 3.26.3-gb0f2c24, a cross-platform, open-source build system")
+  set(CPACK_NSIS_PACKAGE_NAME "CMake 3.26.3-g0b3d3bf")
+  set(CPACK_NSIS_DISPLAY_NAME "CMake 3.26.3-g0b3d3bf, a cross-platform, open-source build system")
   set(CPACK_NSIS_HELP_LINK "https://cmake.org")
   set(CPACK_NSIS_URL_INFO_ABOUT "http://www.kitware.com")
   set(CPACK_NSIS_CONTACT cmake+development@discourse.cmake.org)
@@ -222,9 +222,9 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
   # Reset CPACK_PACKAGE_VERSION to deal with WiX restriction.
   # But the file names still use the full CMake_VERSION value:
   set(CPACK_PACKAGE_FILE_NAME
-    "cmake-3.26.3-gb0f2c24-${CPACK_SYSTEM_NAME}")
+    "cmake-3.26.3-g0b3d3bf-${CPACK_SYSTEM_NAME}")
   set(CPACK_SOURCE_PACKAGE_FILE_NAME
-    "cmake-3.26.3-gb0f2c24")
+    "cmake-3.26.3-g0b3d3bf")
 
   if(NOT CPACK_WIX_SIZEOF_VOID_P)
     set(CPACK_WIX_SIZEOF_VOID_P "8")

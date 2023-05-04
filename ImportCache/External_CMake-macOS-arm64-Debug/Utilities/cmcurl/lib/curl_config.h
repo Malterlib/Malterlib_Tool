@@ -354,7 +354,7 @@
 #endif
 
 /* Define to 1 if you have the MSG_NOSIGNAL flag. */
-/* #undef HAVE_MSG_NOSIGNAL */
+#define HAVE_MSG_NOSIGNAL 1
 
 /* Define to 1 if you have the <netdb.h> header file. */
 #define HAVE_NETDB_H 1
@@ -498,7 +498,7 @@
 #define HAVE_STRTOLL 1
 
 /* if struct sockaddr_storage is defined */
-/* #undef HAVE_STRUCT_SOCKADDR_STORAGE */
+#define HAVE_STRUCT_SOCKADDR_STORAGE 1
 
 /* Define to 1 if you have the timeval struct. */
 #define HAVE_STRUCT_TIMEVAL 1

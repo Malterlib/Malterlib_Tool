@@ -5,6 +5,6 @@
 #define CMake_VERSION_MAJOR 3
 #define CMake_VERSION_MINOR 26
 #define CMake_VERSION_PATCH 3
-#define CMake_VERSION_SUFFIX "gb0f2c24"
-#define CMake_VERSION_IS_DIRTY 1
-#define CMake_VERSION "3.26.3-gb0f2c24-dirty"
+#define CMake_VERSION_SUFFIX "g0b3d3bf"
+#define CMake_VERSION_IS_DIRTY 0
+#define CMake_VERSION "3.26.3-g0b3d3bf"

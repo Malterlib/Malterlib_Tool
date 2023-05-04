@@ -4,4 +4,4 @@
 
 /* Whether CMake is using its own STL implementation.  */
 #define CMake_HAVE_CXX_MAKE_UNIQUE
-/* #undef CMake_HAVE_CXX_FILESYSTEM */
+#define CMake_HAVE_CXX_FILESYSTEM
