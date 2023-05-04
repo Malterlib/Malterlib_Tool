@@ -24,6 +24,9 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Source/Checks/cm_cxx_filesystem.cxx
 ../../../../External/CMake/Source/Checks/cm_cxx_make_unique.cxx
 ../../../../External/CMake/Source/Checks/cm_message_checks_compat.cmake
+../../../../External/CMake/Source/CursesDialog/CMakeLists.txt
+../../../../External/CMake/Source/CursesDialog/form/CMakeLists.txt
+../../../../External/CMake/Source/CursesDialog/form/cmFormConfigure.h.in
 ../../../../External/CMake/Source/Modules/CMakeBuildUtilities.cmake
 ../../../../External/CMake/Source/Modules/OverrideC.cmake
 ../../../../External/CMake/Source/Modules/OverrideCXX.cmake
@@ -75,8 +78,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CMakeTests/CMakeMinimumRequiredTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/CompilerIdVendorTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/EndStuffTest.cmake.in
-../../../../External/CMake/Tests/CMakeTests/FileDownloadBadHashTest.cmake.in
-../../../../External/CMake/Tests/CMakeTests/FileDownloadTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/FileTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/FileUploadTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/FindBaseTest.cmake.in

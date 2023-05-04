@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.4)
 # This is a template for the CTest script for this system
 
 set(CTEST_SITE                          "erikmbp09")
-set(CTEST_BUILD_NAME                    "Darwin-clang++")
+set(CTEST_BUILD_NAME                    "Darwin-c++")
 
 # ---
 set(CTEST_SOURCE_DIRECTORY              "../../../../External/CMake")
@@ -15,7 +15,7 @@ set(CTEST_BUILD_CONFIGURATION           "Release")
 #set(CTEST_MEMORYCHECK_COMMAND           "MEMORYCHECK_COMMAND-NOTFOUND")
 #set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE "")
 #set(CTEST_MEMORYCHECK_COMMAND_OPTIONS   "")
-#set(CTEST_COVERAGE_COMMAND              "gcov")
+#set(CTEST_COVERAGE_COMMAND              "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchaingcov")
 set(CTEST_NOTES_FILES                   "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}")
 
 #CTEST_EMPTY_BINARY_DIRECTORY(${CTEST_BINARY_DIRECTORY})

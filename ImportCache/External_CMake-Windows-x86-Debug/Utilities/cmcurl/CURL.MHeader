@@ -105,6 +105,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cfilters.h`
+			{
+				Compile.Disabled true
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/conncache.h`
 			{
 				Compile.Disabled true
@@ -354,6 +358,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				Compile.Disabled true
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_aws_sigv4.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/idn.h`
 			{
 				Compile.Disabled true
 			}
@@ -694,6 +702,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				{
 					Compile.Disabled true
 				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/vtls_int.h`
+				{
+					Compile.Disabled true
+				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/wolfssl.h`
 				{
 					Compile.Disabled true
@@ -846,6 +858,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/c-hyper.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cfilters.c`
 			{
 				Compile.Type "C"
 			}
@@ -1069,7 +1085,7 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			{
 				Compile.Type "C"
 			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/idn_win32.c`
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/idn.c`
 			{
 				Compile.Type "C"
 			}

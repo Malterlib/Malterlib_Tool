@@ -8,9 +8,6 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #define ssize_t KWIML_INT_intptr_t
 
-/* sizeof(int *) */
-#define SIZEOF_INT_P KWIML_ABI_SIZEOF_DATA_PTR
-
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 /* #undef HAVE_ARPA_INET_H */
 

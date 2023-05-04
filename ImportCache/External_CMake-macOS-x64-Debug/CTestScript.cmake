@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.4)
 # This is a template for the CTest script for this system
 
 set(CTEST_SITE                          "erikmbp09")
-set(CTEST_BUILD_NAME                    "Darwin-clang++")
+set(CTEST_BUILD_NAME                    "Darwin-c++")
 
 # ---
 set(CTEST_SOURCE_DIRECTORY              "../../../../External/CMake")

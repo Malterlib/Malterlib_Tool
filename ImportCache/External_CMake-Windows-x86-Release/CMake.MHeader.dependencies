@@ -75,8 +75,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CMakeTests/CMakeMinimumRequiredTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/CompilerIdVendorTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/EndStuffTest.cmake.in
-../../../../External/CMake/Tests/CMakeTests/FileDownloadBadHashTest.cmake.in
-../../../../External/CMake/Tests/CMakeTests/FileDownloadTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/FileTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/FileUploadTest.cmake.in
 ../../../../External/CMake/Tests/CMakeTests/FindBaseTest.cmake.in

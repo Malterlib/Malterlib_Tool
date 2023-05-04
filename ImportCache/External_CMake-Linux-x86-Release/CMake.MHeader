@@ -1222,6 +1222,10 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cfilters.h`
+			{
+				Compile.Disabled true
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/conncache.h`
 			{
 				Compile.Disabled true
@@ -1471,6 +1475,10 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 				Compile.Disabled true
 			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http_aws_sigv4.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/idn.h`
 			{
 				Compile.Disabled true
 			}
@@ -1811,6 +1819,10 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 				{
 					Compile.Disabled true
 				}
+				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/vtls_int.h`
+				{
+					Compile.Disabled true
+				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vtls/wolfssl.h`
 				{
 					Compile.Disabled true
@@ -1963,6 +1975,10 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 				Compile.Type "C"
 			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/c-hyper.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cfilters.c`
 			{
 				Compile.Type "C"
 			}
@@ -2186,7 +2202,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			{
 				Compile.Type "C"
 			}
-			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/idn_win32.c`
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/idn.c`
 			{
 				Compile.Type "C"
 			}
@@ -2493,6 +2509,10 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 				Compile.Type "C"
 			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmnghttp2/lib/nghttp2_debug.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmnghttp2/lib/nghttp2_extpri.c`
 			{
 				Compile.Type "C"
 			}
@@ -4185,6 +4205,196 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		}
 	}
 }
+%Target "Lib_CMAKE_FORM_cmForm"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('.'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"_FILE_OFFSET_BITS=64"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/CMAKE_FORM"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "StaticLibrary"
+	Target.BaseName "CMAKE_FORM_cmForm"
+	Target.BaseFileName "cmForm"
+	%Group "Source"
+	{
+		%Group "form"
+		{
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_arg.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_attr.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_current.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_def.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_dup.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_ftchoice.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_ftlink.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_info.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_just.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_link.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_max.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_move.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_newftyp.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_opts.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_pad.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_page.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_stat.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_type.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fld_user.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_cursor.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_data.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_def.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_driver.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_hook.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_opts.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_page.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_post.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_req_name.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_scale.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_sub.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_user.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/frm_win.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_alnum.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_alpha.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_enum.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_int.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_ipv4.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_num.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form/fty_regex.c`
+			{
+				Compile.Type "C"
+			}
+		}
+	}
+}
 %Target "Lib_CMake_CMakeLib"
 {
 	Compile
@@ -4581,6 +4791,14 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		{
 			Compile.Type "C++"
 		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmConfigureLog.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmConfigureLog.cxx`
+		{
+			Compile.Type "C++"
+		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmConsoleBuf.h`
 		{
 			Compile.Disabled true
@@ -4725,15 +4943,19 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		{
 			Compile.Type "C++"
 		}
-		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDocumentationSection.cxx`
-		{
-			Compile.Type "C++"
-		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDynamicLoader.cxx`
 		{
 			Compile.Type "C++"
 		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDynamicLoader.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDyndepCollation.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmDyndepCollation.h`
 		{
 			Compile.Disabled true
 		}
@@ -4874,6 +5096,14 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			Compile.Type "C++"
 		}
 		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmFileAPICodemodel.h`
+		{
+			Compile.Disabled true
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmFileAPIConfigureLog.cxx`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/CMake'->MakeAbsolute())/Source/cmFileAPIConfigureLog.h`
 		{
 			Compile.Disabled true
 		}
@@ -7666,6 +7896,120 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 	}
 	%Dependency "Lib_CMake_CMakeLib"
 	%Dependency "Lib_CMake_CPackLib"
+	%Dependency "Lib_bzip2_cmbzip2"
+	%Dependency "Lib_CURL_cmcurl"
+	%Dependency "Lib_CMake_cmexpat"
+	%Dependency "Lib_JsonCpp_cmjsoncpp"
+	%Dependency "Lib_libarchive_cmlibarchive"
+	%Dependency "Lib_CMLIBLZMA_cmliblzma"
+	%Dependency "Lib_librhash_cmlibrhash"
+	%Dependency "Lib_libuv_cmlibuv"
+	%Dependency "Lib_CMake_cmnghttp2"
+	%Dependency "Lib_CMake_cmstd"
+	%Dependency "Lib_cmsys_cmsys"
+	%Dependency "Lib_zstd_cmzstd"
+}
+%Target "Com_CMake_ccmake"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('.'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
+			`@('.'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"CURL_STATICLIB",
+			"LIBARCHIVE_STATIC",
+			"_FILE_OFFSET_BITS=64"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/CMake"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "CMake_ccmake"
+	Target.BaseFileName "ccmake"
+	%Group "Source"
+	{
+		%Group "CursesDialog"
+		{
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/ccmake.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesBoolWidget.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesCacheEntryComposite.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesColor.cxx`
+			{
+				Compile.Type "C++"
+				Compile.PreprocessorDefines += [
+					"HAVE_CURSES_USE_DEFAULT_COLORS"
+				]
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesDummyWidget.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesFilePathWidget.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesForm.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesLabelWidget.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesLongMessageForm.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesMainForm.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesOptionsWidget.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesPathWidget.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesStringWidget.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/cmCursesWidget.cxx`
+			{
+				Compile.Type "C++"
+			}
+		}
+	}
+	%Dependency "Lib_CMake_CMakeLib"
+	%Dependency "Lib_CMAKE_FORM_cmForm"
 	%Dependency "Lib_bzip2_cmbzip2"
 	%Dependency "Lib_CURL_cmcurl"
 	%Dependency "Lib_CMake_cmexpat"

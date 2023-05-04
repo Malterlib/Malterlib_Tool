@@ -143,9 +143,6 @@
 /* Define to 1 if you have the <arpa/tftp.h> header file. */
 #define HAVE_ARPA_TFTP_H 1
 
-/* Define to 1 if you have the <assert.h> header file. */
-#define HAVE_ASSERT_H 1
-
 /* Define to 1 if you have _Atomic support. */
 /* #undef HAVE_ATOMIC */
 
@@ -166,9 +163,6 @@
 
 /* Define to 1 if you have the `closesocket' function. */
 /* #undef HAVE_CLOSESOCKET */
-
-/* Define to 1 if you have the <errno.h> header file. */
-#define HAVE_ERRNO_H 1
 
 /* Define to 1 if you have the fcntl function. */
 /* #undef HAVE_FCNTL */
@@ -384,7 +378,7 @@
 #define HAVE_PIPE 1
 
 /* If you have a fine poll */
-#define HAVE_POLL_FINE 1
+/* #undef HAVE_POLL_FINE */
 
 /* Define to 1 if you have the <poll.h> header file. */
 #define HAVE_POLL_H 1
@@ -589,9 +583,6 @@
 
 /* Define to 1 if you have the ws2tcpip.h header file. */
 /* #undef HAVE_WS2TCPIP_H */
-
-/* Define if you have the <process.h> header file. */
-/* #undef HAVE_PROCESS_H */
 
 /* Define to 1 if you need the lber.h header file even with ldap.h */
 /* #undef NEED_LBER_H */
@@ -805,9 +796,6 @@
 
 /* to enable Windows IDN */
 /* #undef USE_WIN32_IDN */
-
-/* to make the compiler know the prototypes of Windows IDN APIs */
-/* #undef WANT_IDN_PROTOTYPES */
 
 /* Define to 1 to enable websocket support. */
 /* #undef USE_WEBSOCKETS */

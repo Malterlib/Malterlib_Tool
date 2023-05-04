@@ -77,6 +77,7 @@ Property
 	Import.CMake_Variables =+ [
 		"HAVE_POLL_FINE_EXITCODE=0"
 		, "HAVE_POLL_FINE_EXITCODE__TRYRUN_OUTPUT="
+		, "HAVE_STRUCT_TIMEVAL=1"
 	]
 	{
 		!!PlatformFamily "macOS"
