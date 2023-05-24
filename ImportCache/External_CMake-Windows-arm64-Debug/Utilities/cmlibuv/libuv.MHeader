@@ -1,0 +1,235 @@
+Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+%Target "Lib_libuv_cmlibuv"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/include`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"WIN32_LEAN_AND_MEAN",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_WIN32_WINNT=0x0600"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/libuv"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "StaticLibrary"
+	Target.BaseName "libuv_cmlibuv"
+	Target.BaseFileName "cmlibuv"
+	%Group "Utilities"
+	{
+		%Group "src"
+		{
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/fs-poll.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/heap-inl.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/idna.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/idna.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/inet.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/queue.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strscpy.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strscpy.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strtok.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strtok.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/threadpool.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/timer.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/uv-common.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/uv-common.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/uv-data-getter-setters.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/version.c`
+			{
+				Compile.Type "C"
+			}
+			%Group "win"
+			{
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/async.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/atomicops-inl.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/core.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/detect-wakeup.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/dl.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/error.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/fs-event.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/fs.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/getaddrinfo.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/getnameinfo.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/handle.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/handle-inl.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/internal.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/loop-watcher.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/pipe.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/poll.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/process-stdio.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/process.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/req-inl.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/signal.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/snprintf.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/stream.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/stream-inl.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/tcp.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/thread.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/tty.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/udp.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/util.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/winapi.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/winapi.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/winsock.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/winsock.h`
+				{
+					Compile.Disabled true
+				}
+			}
+		}
+	}
+}

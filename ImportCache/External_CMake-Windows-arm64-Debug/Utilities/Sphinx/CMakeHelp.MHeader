@@ -1,0 +1,1 @@
+Property.CMakeOutputPath_CMakeHelp: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()

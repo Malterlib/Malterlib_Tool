@@ -1,0 +1,372 @@
+Property.CMakeOutputPath_CMLIBLZMA: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
+%Target "Lib_CMLIBLZMA_cmliblzma"
+{
+	Compile
+	{
+		!!Compile.Type "C"
+		SearchPath += [
+			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/api`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/check`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/delta`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lz`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lzma`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/rangecoder`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple`->MakeAbsolute(),
+			`@('../..'->MakeAbsolute())/Utilities/cmliblzma`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"MYTHREAD_VISTA",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/CMLIBLZMA"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "StaticLibrary"
+	Target.BaseName "CMLIBLZMA_cmliblzma"
+	Target.BaseFileName "cmliblzma"
+	%Group "Utilities"
+	{
+		%Group "cmliblzma"
+		{
+			%Group "common"
+			{
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common/mythread.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common/sysdefs.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common/tuklib_cpucores.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common/tuklib_cpucores.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common/tuklib_integer.h`
+				{
+					Compile.Disabled true
+				}
+			}
+			%Group "liblzma"
+			{
+				%Group "check"
+				{
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/check/check.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/check/crc32_fast.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/check/crc32_table.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/check/crc64_fast.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/check/crc64_table.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/check/sha256.c`
+					{
+						Compile.Type "C"
+					}
+				}
+				%Group "common"
+				{
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/alone_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/alone_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/auto_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/block_buffer_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/block_buffer_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/block_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/block_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/block_header_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/block_header_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/block_util.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/common.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/easy_buffer_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/easy_decoder_memusage.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/easy_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/easy_encoder_memusage.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/easy_preset.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/filter_buffer_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/filter_buffer_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/filter_common.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/filter_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/filter_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/filter_flags_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/filter_flags_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/hardware_cputhreads.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/index.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/index_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/index_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/index_hash.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/outqueue.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_buffer_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_buffer_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_encoder_mt.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_flags_common.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_flags_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/stream_flags_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/vli_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/vli_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/common/vli_size.c`
+					{
+						Compile.Type "C"
+					}
+				}
+				%Group "delta"
+				{
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/delta/delta_common.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/delta/delta_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/delta/delta_encoder.c`
+					{
+						Compile.Type "C"
+					}
+				}
+				%Group "lz"
+				{
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lz/lz_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lz/lz_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lz/lz_encoder_mf.c`
+					{
+						Compile.Type "C"
+					}
+				}
+				%Group "lzma"
+				{
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lzma/fastpos_table.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lzma/lzma2_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lzma/lzma2_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lzma/lzma_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lzma/lzma_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lzma/lzma_encoder_optimum_fast.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lzma/lzma_encoder_optimum_normal.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/lzma/lzma_encoder_presets.c`
+					{
+						Compile.Type "C"
+					}
+				}
+				%Group "rangecoder"
+				{
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/rangecoder/price_table.c`
+					{
+						Compile.Type "C"
+					}
+				}
+				%Group "simple"
+				{
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/arm.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/armthumb.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/ia64.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/powerpc.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/simple_coder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/simple_decoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/simple_encoder.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/sparc.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/x86.c`
+					{
+						Compile.Type "C"
+					}
+				}
+			}
+		}
+	}
+}
