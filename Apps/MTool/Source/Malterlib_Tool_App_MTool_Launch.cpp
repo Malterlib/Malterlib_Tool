@@ -196,7 +196,7 @@ public:
 			{
 				if (--iNestedParam == 0)
 					pCurrentProgram = nullptr;
-				else
+				else if (pCurrentProgram)
 					pCurrentProgram->m_Params.f_Insert(Param);
 			}
 			else if (pCurrentProgram)

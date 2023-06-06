@@ -17,7 +17,7 @@ public:
 		CStr Source = _Files[0].f_ReplaceChar('\\', '/');
 		CStr Target = _Files[1].f_ReplaceChar('\\', '/');
 
-		ESymbolicLinkFlag Flags;
+		ESymbolicLinkFlag Flags = ESymbolicLinkFlag_None;
 
 		{
 			auto DPIter = _Params.f_FindEqual("UseDevicePath");
