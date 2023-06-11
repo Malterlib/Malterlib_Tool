@@ -18,7 +18,7 @@ else()
   if ($ENV{StandaloneBuild} MATCHES "true")
     set(BOOTSTRAP_LLVM_ENABLE_LTO OFF CACHE BOOL "")
   else()
-    set(BOOTSTRAP_LLVM_ENABLE_LTO ON CACHE BOOL "")
+    set(BOOTSTRAP_LLVM_ENABLE_LTO "Thin" CACHE STRING "")
   endif()
 endif()
 
