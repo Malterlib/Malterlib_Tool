@@ -171,6 +171,10 @@ Property
 		{
 			!!CompileDialect "C"
 			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
+			Warnings_SingleBitBitfieldConstantConversion false
+			{
+				!!GeneratorFamily "Xcode"
+			}
 		}
 		%Dependency "Lib_zlib"
 		{
