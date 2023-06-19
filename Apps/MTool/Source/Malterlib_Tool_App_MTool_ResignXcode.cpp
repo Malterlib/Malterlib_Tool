@@ -97,6 +97,8 @@ public:
 						}
 					;
 
+					TCSet<CStr> SigningWhiteList = {Destination, "/xcodebuild", "/llbuild.framework", "/XCBBuildService.framework", "/XCBBuildService.bundle"};
+
 					if (!bCopyDone)
 					{
 						co_await
@@ -112,12 +114,11 @@ public:
 												if (_Destination == StateFile)
 													return CFile::EDiffCopyChangeAction_Skip;
 
-												if (_Source.f_Find("/CoreSimulator/") >= 0 || _Source.f_Find("/LLDB.framework") >= 0 || _Source.f_EndsWith("/lldb"))
+												if (_Source.f_Find("/CoreSimulator/") >= 0)
 												{
 													++nFiles;
 													return CFile::EDiffCopyChangeAction_Perform;
 												}
-
 
 												if (_Source.f_EndsWith("/_CodeSignature"))
 												{
@@ -126,21 +127,31 @@ public:
 													ToSignPath = ToSignPath.f_RemoveSuffix("/Versions/A");
 													ToSignPath = ToSignPath.f_RemoveSuffix("/Contents");
 
-													ToSign[ToSignPath];
-													++nFilesSkipped;
-													return CFile::EDiffCopyChangeAction_Skip;
-												}
-												else if (_Source.f_Find("/_CodeSignature/") >= 0)
-												{
-													++nFilesSkipped;
-													return CFile::EDiffCopyChangeAction_Skip;
+													for (auto &WhiteListed : SigningWhiteList)
+													{
+														if (ToSignPath.f_EndsWith(WhiteListed))
+														{
+															ToSign[ToSignPath];
+															break;
+														}
+													}
 												}
 
 												auto Attribs = CFile::fs_GetAttributesOnLink(_Source);
 												if (!(Attribs & EFileAttrib_Link) && !(Attribs & EFileAttrib_Directory) && (Attribs & EFileAttrib_UserExecute))
 												{
 													if (CFile::fs_GetExtension(_Destination) == "")
-														ToSignExecutables[_Destination];
+													{
+														for (auto &WhiteListed : SigningWhiteList)
+														{
+															if (_Destination.f_EndsWith(WhiteListed))
+															{
+																ToSignExecutables[_Destination];
+																break;
+															}
+														}
+
+													}
 												}
 
 												if (Clock.f_GetTime() > 1.0)
@@ -184,23 +195,55 @@ public:
 
 					CStr MainExecutable = Destination / "Contents/MacOS/Xcode";
 
+#if DUseExistingEntitlements
+					CFile::fs_CreateDirectory(CFile::fs_GetTemporaryDirectory());
+					CStr TempEntitlementsFile = CFile::fs_GetTemporaryDirectory() / "Temp.entitlements";
+#endif
+
 					mint nExecutableSign = 0;
 
 					for (auto &ToSign : ToSignExecutablesVector)
 					{
 						if (ToSign == MainExecutable)
+						{
+							++nExecutableSign;
 							continue;
+						}
 
 						TCActor<CProcessLaunchActor> Launch = fg_Construct();
-						TCVector<CStr> Params;
 
-						Params = {"-f", "-s", "-", ToSign};
+						TCVector<CStr> Params;
+#if DUseExistingEntitlements
+						auto SourcePath = Source / ToSign.f_RemovePrefix(Destination);
+						CStr Entitlements;
+						{
+							TCVector<CStr> Params = {"-d", "--entitlements", "-", "--xml", SourcePath};
+							CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
+							auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch)).f_Wrap();
+							if (Result)
+								Entitlements = Result->f_GetStdOut().f_Trim();
+						}
+
+						if (Entitlements && !ToSign.f_EndsWith("/xcodebuild"))
+						{
+							if (Entitlements.f_Find("com.apple.private"))
+							{
+								++nExecutableSign;
+								continue;
+							}
+
+							DMibConOut2("{}: {}\n", SourcePath, Entitlements);
+							CFile::fs_WriteStringToFile(TempEntitlementsFile, Entitlements, false);
+							Params = {"--entitlements", TempEntitlementsFile};
+						}
+#endif
+						Params.f_Insert({"-f", "-s", "-", ToSign});
 
 						CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
 						auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch));
 
 						++nExecutableSign;
-						CUStr ToOutput = CStr("  {}/{} executables signed"_f << nExecutableSign << (ToSignExecutablesVector.f_GetLen() - 1));
+						CUStr ToOutput = CStr("  {}/{} executables signed"_f << nExecutableSign << ToSignExecutablesVector.f_GetLen());
 						*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
 					}
 					*_pCommandLine %= "\n";
@@ -210,15 +253,39 @@ public:
 					for (auto &ToSign : ToSignVector)
 					{
 						TCActor<CProcessLaunchActor> Launch = fg_Construct();
-						TCVector<CStr> Params;
 
-						Params = {"-f", "-s", "-", ToSign};
+						TCVector<CStr> Params;
+#if DUseExistingEntitlements
+						auto SourcePath = Source / ToSign.f_RemovePrefix(Destination);
+						CStr Entitlements;
+						{
+							TCVector<CStr> Params = {"-d", "--entitlements", "-", "--xml", SourcePath};
+							CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
+							auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch)).f_Wrap();
+							if (Result)
+								Entitlements = Result->f_GetStdOut().f_Trim();
+						}
+
+						if (Entitlements && ToSign != Destination)
+						{
+							if (Entitlements.f_Find("com.apple.private"))
+							{
+								++nSign;
+								continue;
+							}
+
+							DMibConOut2("{}: {}\n", SourcePath, Entitlements);
+							CFile::fs_WriteStringToFile(TempEntitlementsFile, Entitlements, false);
+							Params = {"--entitlements", TempEntitlementsFile};
+						}
+#endif
+						Params.f_Insert({"-f", "-s", "-", ToSign});
 
 						CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
 						auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch));
 
 						++nSign;
-						CUStr ToOutput = CStr("  {}/{} bundles signed"_f << nSign << ToSignExecutablesVector.f_GetLen());
+						CUStr ToOutput = CStr("  {}/{} bundles signed"_f << nSign << ToSignVector.f_GetLen());
 						*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
 					}
 					*_pCommandLine %= "\n";
