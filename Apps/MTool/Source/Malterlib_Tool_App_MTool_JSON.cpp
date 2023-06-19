@@ -57,7 +57,7 @@ public:
 		else
 			Contents.f_SetResult(CFile::fs_ReadStringFromFile(CFile::fs_GetExpandedPath(SourcePath, true)));
 
-		CEJSON JSON = CEJSON::fs_FromString(Contents.f_MoveFuture().f_CallSync(60.0));
+		CEJSONSorted JSON = CEJSONSorted::fs_FromString(Contents.f_MoveFuture().f_CallSync(60.0));
 
 		if (Params.f_IsEmpty())
 		{
@@ -67,7 +67,7 @@ public:
 
 		for (auto &Param : Params)
 		{
-			CEJSON const *pValue = &JSON;
+			CEJSONSorted const *pValue = &JSON;
 			CStr CurrentPath;
 			for (auto &Path : Param.f_Split<true>("."))
 			{

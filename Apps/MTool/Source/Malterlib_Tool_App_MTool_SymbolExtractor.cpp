@@ -334,10 +334,10 @@ public:
 
 		void f_Read(CStr const &_FileName)
 		{
-			CEJSON Database;
+			CEJSONSorted Database;
 
 			if (CFile::fs_FileExists(_FileName))
-				Database = CEJSON::fs_FromString(CFile::fs_ReadStringFromFile(_FileName, true), _FileName);
+				Database = CEJSONSorted::fs_FromString(CFile::fs_ReadStringFromFile(_FileName, true), _FileName);
 			else
 				return;
 
@@ -362,14 +362,14 @@ public:
 
 		void f_Write(CStr const &_FileName) const
 		{
-			CEJSON Database;
+			CEJSONSorted Database;
 
 			{
 				auto &OutRegions = Database["SourceRegions"] = EJSONType_Array;
 
 				for (auto &Time : m_SourceTimes)
 				{
-					CEJSON TimeData = {"Start"_= Time.f_Start(), "End"_= Time.f_End()};
+					CEJSONSorted TimeData = {"Start"_= Time.f_Start(), "End"_= Time.f_End()};
 
 					auto &Files = TimeData["Files"] = EJSONType_Array;
 
@@ -395,7 +395,7 @@ public:
 				{
 					for (auto &File : Files)
 					{
-						CEJSON FileData = {"Time"_= m_SourceFilesByTime.fs_GetKey(Files), "FileName"_= File};
+						CEJSONSorted FileData = {"Time"_= m_SourceFilesByTime.fs_GetKey(Files), "FileName"_= File};
 
 						OutFiles.f_Insert(fg_Move(FileData));
 					}

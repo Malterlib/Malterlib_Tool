@@ -11,12 +11,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_= {"update_repos"}
-				, "Description"_= "Update repositories.\n"
-				, "Category"_= "Repository management"
-				, "Options"_= {fs_CachedEnvironmentOption(true)}
+				"Names"_o= {"update_repos"}
+				, "Description"_o= "Update repositories.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o= {fs_CachedEnvironmentOption(true)}
 			}
-			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -36,40 +36,40 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		)
 	;
 
-	auto Filter_Name = "RepoName?"_=
+	auto Filter_Name = "RepoName?"_o=
 		{
-			"Names"_= {"--repo-name", "-n"}
-			, "Default"_= "*"
-			, "Description"_= "Only run command on repositories that have a name that match the specified wildcard."
+			"Names"_o= {"--repo-name", "-n"}
+			, "Default"_o= "*"
+			, "Description"_o= "Only run command on repositories that have a name that match the specified wildcard."
 		}
 	;
 
-	auto Filter_Branch = "RepoBranch?"_=
+	auto Filter_Branch = "RepoBranch?"_o=
 		{
-			"Names"_= {"--repo-branch"}
-			, "Default"_= ""
-			, "Description"_= "Only run command on repositories that are currently on specified branch."
+			"Names"_o= {"--repo-branch"}
+			, "Default"_o= ""
+			, "Description"_o= "Only run command on repositories that are currently on specified branch."
 		}
 	;
 
 	auto fFilter_Type = [](CStr const &_Default)
 		{
-			return "RepoType?"_=
+			return "RepoType?"_o=
 				{
-					"Names"_= {"--repo-type"}
-					, "Default"_= _Default
-					, "Description"_= "Only run command no repositories of specified type.\n"
+					"Names"_o= {"--repo-type"}
+					, "Default"_o= _Default
+					, "Description"_o= "Only run command no repositories of specified type.\n"
 					"Repository type is specified in the build system with Repository.Type\n"
 				}
 			;
 		}
 	;
 
-	auto Filter_Tags = "RepoTags?"_=
+	auto Filter_Tags = "RepoTags?"_o=
 		{
-			"Names"_= {"--repo-tags"}
-			, "Default"_= ""
-			, "Description"_= "Only run command on repositories that have all tags specified.\n"
+			"Names"_o= {"--repo-tags"}
+			, "Default"_o= ""
+			, "Description"_o= "Only run command on repositories that have all tags specified.\n"
 			"Format: [Tag1;[Tag2;[...]]]\n"
 			"Only repositories with all tags specified will be included.\n"
 			"Repository tags is specified in the build system with Repository.Tags\n"
@@ -78,11 +78,11 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 
 	auto fFilter_OnlyChanged = [](bool _bDefault)
 		{
-			return "RepoOnlyChanged?"_=
+			return "RepoOnlyChanged?"_o=
 				{
-					"Names"_= {"--repo-only-changed", "-c"}
-					, "Default"_= _bDefault
-					, "Description"_= "Only run command on repositories that have changes.\n"
+					"Names"_o= {"--repo-only-changed", "-c"}
+					, "Default"_o= _bDefault
+					, "Description"_o= "Only run command on repositories that have changes.\n"
 					"The repository is deemed changed if the branch is not the default branch, if any files have been changed"
 					", added or removed (git status -s), or if changes needs to be pushed.\n"
 				}
@@ -93,84 +93,84 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_= {"status"}
-				, "Description"_= "Get the status of all repositories and update repository states.\n"
-				, "Category"_= "Repository management"
-				, "Options"_=
+				"Names"_o= {"status"}
+				, "Description"_o= "Get the status of all repositories and update repository states.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
 				{
-					"OpenEditor?"_=
+					"OpenEditor?"_o=
 					{
-						"Names"_= {"--open-editor", "-e"}
-						, "Default"_= false
-						, "Description"_= "Opens the repositories that require action in your repository editor.\n"
+						"Names"_o= {"--open-editor", "-e"}
+						, "Default"_o= false
+						, "Description"_o= "Opens the repositories that require action in your repository editor.\n"
 						"The editor can be configured in UserSettings.MSettings or UserSettingsGlobal.MSettings. Look for MalterlibRepositoryEditor\n"
 					}
-					, "UpdateRemotes?"_=
+					, "UpdateRemotes?"_o=
 					{
-						"Names"_= {"--update-remotes", "-r"}
-						, "Default"_= false
-						, "Description"_= "Fetch all remotes before showing status.\n"
+						"Names"_o= {"--update-remotes", "-r"}
+						, "Default"_o= false
+						, "Description"_o= "Fetch all remotes before showing status.\n"
 					}
-					, "ShowUnchanged?"_=
+					, "ShowUnchanged?"_o=
 					{
-						"Names"_= {"--show-unchanged", "-u"}
-						, "Default"_= false
-						, "Description"_= "Show status of repositories that does not have any actions you need to take on.\n"
+						"Names"_o= {"--show-unchanged", "-u"}
+						, "Default"_o= false
+						, "Description"_o= "Show status of repositories that does not have any actions you need to take on.\n"
 					}
-					, "Verbose?"_=
+					, "Verbose?"_o=
 					{
-						"Names"_= {"--verbose", "-v"}
-						, "Default"_= false
-						, "Description"_= "Verbose mode, show which files were changed, added or removed and differences to all remotes.\n"
+						"Names"_o= {"--verbose", "-v"}
+						, "Default"_o= false
+						, "Description"_o= "Verbose mode, show which files were changed, added or removed and differences to all remotes.\n"
 					}
-					, "OnlyTracked?"_=
+					, "OnlyTracked?"_o=
 					{
-						"Names"_= {"--only-tracked", "-t"}
-						, "Default"_= false
-						, "Description"_= "Show only tracked changes. Otherwise untraked files will be considered as well.\n"
+						"Names"_o= {"--only-tracked", "-t"}
+						, "Default"_o= false
+						, "Description"_o= "Show only tracked changes. Otherwise untraked files will be considered as well.\n"
 					}
-					, "AllBranches?"_=
+					, "AllBranches?"_o=
 					{
-						"Names"_= {"--all-branches", "-a"}
-						, "Default"_= false
-						, "Description"_= "Show the status of all branches, not just the current branch.\n"
+						"Names"_o= {"--all-branches", "-a"}
+						, "Default"_o= false
+						, "Description"_o= "Show the status of all branches, not just the current branch.\n"
 					}
-					, "UseDefaultUpstreamBranch?"_=
+					, "UseDefaultUpstreamBranch?"_o=
 					{
-						"Names"_= {"--use-default-upstream-branch", "-b"}
-						, "Default"_= false
-						, "Description"_= "Compare to the default upstream branch instead of the current branch.\n"
+						"Names"_o= {"--use-default-upstream-branch", "-b"}
+						, "Default"_o= false
+						, "Description"_o= "Compare to the default upstream branch instead of the current branch.\n"
 					}
-					, "NeedActionOnPush?"_=
+					, "NeedActionOnPush?"_o=
 					{
-						"Names"_= {"--need-action-on-push", "-p"}
-						, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPush", "false") == "true"
-						, "Description"_= "Consider repositories that needs to be pushed as requiring action when --open-editor is specified.\n"
+						"Names"_o= {"--need-action-on-push", "-p"}
+						, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPush", "false") == "true"
+						, "Description"_o= "Consider repositories that needs to be pushed as requiring action when --open-editor is specified.\n"
 					}
-					, "NeedActionOnPull?"_=
+					, "NeedActionOnPull?"_o=
 					{
-						"Names"_= {"--need-action-on-pull"}
-						, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPull", "true") == "true"
-						, "Description"_= "Consider repositories that needs to be pulled as requiring action when --open-editor is specified.\n"
+						"Names"_o= {"--need-action-on-pull"}
+						, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPull", "true") == "true"
+						, "Description"_o= "Consider repositories that needs to be pulled as requiring action when --open-editor is specified.\n"
 					}
-					, "NeedActionOnLocalChanes?"_=
+					, "NeedActionOnLocalChanes?"_o=
 					{
-						"Names"_= {"--need-action-on-local-changes"}
-						, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnLocalChanges", "true") == "true"
-						, "Description"_= "Consider repositories that has local changes as requiring action when --open-editor is specified.\n"
+						"Names"_o= {"--need-action-on-local-changes"}
+						, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnLocalChanges", "true") == "true"
+						, "Description"_o= "Consider repositories that has local changes as requiring action when --open-editor is specified.\n"
 					}
-					, "NonDefaultToAll?"_=
+					, "NonDefaultToAll?"_o=
 					{
-						"Names"_= {"--non-default-to-all", "-d"}
-						, "Default"_= false
-						, "Description"_= "When on a non-default branch, show push state to all remotes, not just origin.\n"
+						"Names"_o= {"--non-default-to-all", "-d"}
+						, "Default"_o= false
+						, "Description"_o= "When on a non-default branch, show push state to all remotes, not just origin.\n"
 					}
-					, "HideBranches?"_=
+					, "HideBranches?"_o=
 					{
-						"Names"_= {"--hide-branches", "-H"}
-						, "Type"_= {""}
-						, "Default"_= _[_]
-						, "Description"_= "Hide these branchs. Supports wildcards.\n"
+						"Names"_o= {"--hide-branches", "-H"}
+						, "Type"_o= {""}
+						, "Default"_o= _[_]
+						, "Description"_o= "Hide these branchs. Supports wildcards.\n"
 					}
 					, Filter_Name
 					, fFilter_Type("")
@@ -180,7 +180,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -233,18 +233,18 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		o_ToolsSection.f_RegisterCommand
 			(
 				{
-					"Names"_= {"git"}
-					, "Description"_= "Run git for all repositories.\n"
-					, "Category"_= "Repository management"
-					, "ErrorOnCommandAsParameter"_= false
-					, "ErrorOnOptionAsParameter"_= false
-					, "Options"_=
+					"Names"_o= {"git"}
+					, "Description"_o= "Run git for all repositories.\n"
+					, "Category"_o= "Repository management"
+					, "ErrorOnCommandAsParameter"_o= false
+					, "ErrorOnOptionAsParameter"_o= false
+					, "Options"_o=
 					{
-						"Synchronous?"_=
+						"Synchronous?"_o=
 						{
-							"Names"_= {"--sync", "-s"}
-							, "Default"_= false
-							, "Description"_= "Run all git commands synchronously. By default all git invocations will bu run in parallel.\n"
+							"Names"_o= {"--sync", "-s"}
+							, "Default"_o= false
+							, "Description"_o= "Run all git commands synchronously. By default all git invocations will bu run in parallel.\n"
 						}
 						, Filter_Name
 						, fFilter_Type("")
@@ -253,17 +253,17 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, fFilter_OnlyChanged(false)
 						, fs_CachedEnvironmentOption(true)
 					}
-					, "Parameters"_=
+					, "Parameters"_o=
 					{
-						"GitParameters...?"_=
+						"GitParameters...?"_o=
 						{
-							"Type"_= {""}
-							, "Default"_= _[_]
-							, "Description"_= "The parameters to send to git.\n"
+							"Type"_o= {""}
+							, "Default"_o= _[_]
+							, "Description"_o= "The parameters to send to git.\n"
 						}
 					}
 				}
-				, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -295,18 +295,18 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		o_ToolsSection.f_RegisterCommand
 			(
 				{
-					"Names"_= {"repo-run"}
-					, "Description"_= "Run commands with git directory as current path.\n"
-					, "Category"_= "Repository management"
-					, "ErrorOnCommandAsParameter"_= false
-					, "ErrorOnOptionAsParameter"_= false
-					, "Options"_=
+					"Names"_o= {"repo-run"}
+					, "Description"_o= "Run commands with git directory as current path.\n"
+					, "Category"_o= "Repository management"
+					, "ErrorOnCommandAsParameter"_o= false
+					, "ErrorOnOptionAsParameter"_o= false
+					, "Options"_o=
 					{
-						"Synchronous?"_=
+						"Synchronous?"_o=
 						{
-							"Names"_= {"--sync", "-s"}
-							, "Default"_= false
-							, "Description"_= "Run all commands synchronously. By default all invocations will bu run in parallel.\n"
+							"Names"_o= {"--sync", "-s"}
+							, "Default"_o= false
+							, "Description"_o= "Run all commands synchronously. By default all invocations will bu run in parallel.\n"
 						}
 						, Filter_Name
 						, fFilter_Type("")
@@ -314,41 +314,41 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, Filter_Branch
 						, fFilter_OnlyChanged(false)
 						, fs_CachedEnvironmentOption(true)
-						, "Shell?"_=
+						, "Shell?"_o=
 						{
-							"Names"_= {"--shell"}
-							, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("SHELL", "")
-							, "Description"_= "Run commands in this shell.\n"
+							"Names"_o= {"--shell"}
+							, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("SHELL", "")
+							, "Description"_o= "Run commands in this shell.\n"
 						}
-						, "ShellOptions?"_=
+						, "ShellOptions?"_o=
 						{
-							"Names"_= {"--shell-options"}
-							, "Default"_= {"-c"}
-							, "Description"_= "The options to send to the shell.\n"
+							"Names"_o= {"--shell-options"}
+							, "Default"_o= {"-c"}
+							, "Description"_o= "The options to send to the shell.\n"
 						}
-						, "ShellParamsInString?"_=
+						, "ShellParamsInString?"_o=
 						{
-							"Names"_= {"--shell-params-in-string"}
-							, "Default"_= true
-							, "Description"_= "If the arguments should be sent in a string to the shell, or if not it will be sent as separate params.\n"
+							"Names"_o= {"--shell-params-in-string"}
+							, "Default"_o= true
+							, "Description"_o= "If the arguments should be sent in a string to the shell, or if not it will be sent as separate params.\n"
 						}
 					}
-					, "Parameters"_=
+					, "Parameters"_o=
 					{
-						"RunCommand"_=
+						"RunCommand"_o=
 						{
-							"Type"_= ""
-							, "Description"_= "The command to run.\n"
+							"Type"_o= ""
+							, "Description"_o= "The command to run.\n"
 						}
-						, "Parameters...?"_=
+						, "Parameters...?"_o=
 						{
-							"Type"_= {""}
-							, "Default"_= _[_]
-							, "Description"_= "The parameters to send to the command.\n"
+							"Type"_o= {""}
+							, "Default"_o= _[_]
+							, "Description"_o= "The parameters to send to the command.\n"
 						}
 					}
 				}
-				, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -402,29 +402,29 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	}
 
 	{
-		auto Option_Pretend = "Pretend?"_=
+		auto Option_Pretend = "Pretend?"_o=
 			{
-				"Names"_= {"--pretend", "-p"}
-				, "Default"_= false
-				, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
+				"Names"_o= {"--pretend", "-p"}
+				, "Default"_o= false
+				, "Description"_o= "Only pretend to run the command, only report the actions that would be taken.\n"
 			}
 		;
 
-		auto Option_Force = "Force?"_=
+		auto Option_Force = "Force?"_o=
 			{
-				"Names"_= {"--force", "-f"}
-				, "Default"_= false
-				, "Description"_= "Overwrite any destination branches that already exists.\n"
+				"Names"_o= {"--force", "-f"}
+				, "Default"_o= false
+				, "Description"_o= "Overwrite any destination branches that already exists.\n"
 			}
 		;
 
 		o_ToolsSection.f_RegisterCommand
 			(
 				{
-					"Names"_= {"branch"}
-					, "Description"_= "Check out branch for matching repositories.\n"
-					, "Category"_= "Repository management"
-					, "Options"_=
+					"Names"_o= {"branch"}
+					, "Description"_o= "Check out branch for matching repositories.\n"
+					, "Category"_o= "Repository management"
+					, "Options"_o=
 					{
 						Option_Pretend
 						, Option_Force
@@ -432,16 +432,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, fFilter_OnlyChanged(true)
 						, fs_CachedEnvironmentOption(true)
 					}
-					, "Parameters"_=
+					, "Parameters"_o=
 					{
-						"Branch"_=
+						"Branch"_o=
 						{
-							"Type"_= ""
-							, "Description"_= "The branch to checkout.\n"
+							"Type"_o= ""
+							, "Description"_o= "The branch to checkout.\n"
 						}
 					}
 				}
-				, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -478,10 +478,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		o_ToolsSection.f_RegisterCommand
 			(
 				{
-					"Names"_= {"unbranch"}
-					, "Description"_= "Check out the default branch for matching repositories.\n"
-					, "Category"_= "Repository management"
-					, "Options"_=
+					"Names"_o= {"unbranch"}
+					, "Description"_o= "Check out the default branch for matching repositories.\n"
+					, "Category"_o= "Repository management"
+					, "Options"_o=
 					{
 						Option_Pretend
 						, Option_Force
@@ -490,7 +490,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, fs_CachedEnvironmentOption(true)
 					}
 				}
-				, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -524,40 +524,40 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_= {"cleanup-branches"}
-				, "Description"_= "Clean up branches that have been pushed.\n"
-				, "Category"_= "Repository management"
-				, "Options"_=
+				"Names"_o= {"cleanup-branches"}
+				, "Description"_o= "Clean up branches that have been pushed.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
 				{
-					"Pretend?"_=
+					"Pretend?"_o=
 					{
-						"Names"_= {"--pretend", "-p"}
-						, "Default"_= false
-						, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
+						"Names"_o= {"--pretend", "-p"}
+						, "Default"_o= false
+						, "Description"_o= "Only pretend to run the command, only report the actions that would be taken.\n"
 					}
-					, "AllRemotes?"_=
+					, "AllRemotes?"_o=
 					{
-						"Names"_= {"--all-remotes", "-a"}
-						, "Default"_= false
-						, "Description"_= "Also delete branches on remotes specified as writable.\n"
+						"Names"_o= {"--all-remotes", "-a"}
+						, "Default"_o= false
+						, "Description"_o= "Also delete branches on remotes specified as writable.\n"
 					}
-					, "UpdateRemotes?"_=
+					, "UpdateRemotes?"_o=
 					{
-						"Names"_= {"--update-remotes", "-r"}
-						, "Default"_= false
-						, "Description"_= "Fetch all remotes before determining what to delete.\n"
+						"Names"_o= {"--update-remotes", "-r"}
+						, "Default"_o= false
+						, "Description"_o= "Fetch all remotes before determining what to delete.\n"
 					}
-					, "Verbose?"_=
+					, "Verbose?"_o=
 					{
-						"Names"_= {"--verbose", "-v"}
-						, "Default"_= false
-						, "Description"_= "List branches that are not deleted and why.\n"
+						"Names"_o= {"--verbose", "-v"}
+						, "Default"_o= false
+						, "Description"_o= "List branches that are not deleted and why.\n"
 					}
-					, "Force?"_=
+					, "Force?"_o=
 					{
-						"Names"_= {"--force", "-f"}
-						, "Default"_= false
-						, "Description"_= "Delete branches even though they are not merged to $(remote)/$(default_branch).\n"
+						"Names"_o= {"--force", "-f"}
+						, "Default"_o= false
+						, "Description"_o= "Delete branches even though they are not merged to $(remote)/$(default_branch).\n"
 					}
 					, Filter_Name
 					, fFilter_Type("")
@@ -566,17 +566,17 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fFilter_OnlyChanged(false)
 					, fs_CachedEnvironmentOption(true)
 				}
-				, "Parameters"_=
+				, "Parameters"_o=
 				{
-					"Branches...?"_=
+					"Branches...?"_o=
 					{
-						"Type"_= {""}
-						, "Default"_= _[_]
-						, "Description"_= "The branches to clean up. Uses wildcards. Leave empty to clean up all branches.\n"
+						"Type"_o= {""}
+						, "Default"_o= _[_]
+						, "Description"_o= "The branches to clean up. Uses wildcards. Leave empty to clean up all branches.\n"
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -618,40 +618,40 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_= {"cleanup-tags"}
-				, "Description"_= "Clean up tags that are ancestors of the default branch.\n"
-				, "Category"_= "Repository management"
-				, "Options"_=
+				"Names"_o= {"cleanup-tags"}
+				, "Description"_o= "Clean up tags that are ancestors of the default branch.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
 				{
-					"Pretend?"_=
+					"Pretend?"_o=
 					{
-						"Names"_= {"--pretend", "-p"}
-						, "Default"_= false
-						, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
+						"Names"_o= {"--pretend", "-p"}
+						, "Default"_o= false
+						, "Description"_o= "Only pretend to run the command, only report the actions that would be taken.\n"
 					}
-					, "AllRemotes?"_=
+					, "AllRemotes?"_o=
 					{
-						"Names"_= {"--all-remotes", "-a"}
-						, "Default"_= false
-						, "Description"_= "Also delete tags on remotes specified as writable.\n"
+						"Names"_o= {"--all-remotes", "-a"}
+						, "Default"_o= false
+						, "Description"_o= "Also delete tags on remotes specified as writable.\n"
 					}
-					, "UpdateRemotes?"_=
+					, "UpdateRemotes?"_o=
 					{
-						"Names"_= {"--update-remotes", "-r"}
-						, "Default"_= false
-						, "Description"_= "Fetch all remotes before determining what to delete.\n"
+						"Names"_o= {"--update-remotes", "-r"}
+						, "Default"_o= false
+						, "Description"_o= "Fetch all remotes before determining what to delete.\n"
 					}
-					, "Verbose?"_=
+					, "Verbose?"_o=
 					{
-						"Names"_= {"--verbose", "-v"}
-						, "Default"_= false
-						, "Description"_= "List tags that are not deleted and why.\n"
+						"Names"_o= {"--verbose", "-v"}
+						, "Default"_o= false
+						, "Description"_o= "List tags that are not deleted and why.\n"
 					}
-					, "Force?"_=
+					, "Force?"_o=
 					{
-						"Names"_= {"--force", "-f"}
-						, "Default"_= false
-						, "Description"_= "Delete tags even though they are not ancestors of $(remote)/$(default_branch).\n"
+						"Names"_o= {"--force", "-f"}
+						, "Default"_o= false
+						, "Description"_o= "Delete tags even though they are not ancestors of $(remote)/$(default_branch).\n"
 					}
 					, Filter_Name
 					, fFilter_Type("")
@@ -660,17 +660,17 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fFilter_OnlyChanged(false)
 					, fs_CachedEnvironmentOption(true)
 				}
-				, "Parameters"_=
+				, "Parameters"_o=
 				{
-					"Tags...?"_=
+					"Tags...?"_o=
 					{
-						"Type"_= {""}
-						, "Default"_= _[_]
-						, "Description"_= "The tags to clean up. Leave empty to clean up all tags. Uses wildcards.\n"
+						"Type"_o= {""}
+						, "Default"_o= _[_]
+						, "Description"_o= "The tags to clean up. Leave empty to clean up all tags. Uses wildcards.\n"
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -712,34 +712,34 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_= {"push"}
-				, "Description"_= "Push all repositories that need pushing.\n"
-				, "Category"_= "Repository management"
-				, "Options"_=
+				"Names"_o= {"push"}
+				, "Description"_o= "Push all repositories that need pushing.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
 				{
-					"Pretend?"_=
+					"Pretend?"_o=
 					{
-						"Names"_= {"--pretend", "-p"}
-						, "Default"_= false
-						, "Description"_= "Only pretend to run the command, only report the actions that would be taken.\n"
+						"Names"_o= {"--pretend", "-p"}
+						, "Default"_o= false
+						, "Description"_o= "Only pretend to run the command, only report the actions that would be taken.\n"
 					}
-					, "FollowTags?"_=
+					, "FollowTags?"_o=
 					{
-						"Names"_= {"--follow-tags"}
-						, "Default"_= true
-						, "Description"_= "Also push tags that are reachable from the refs pushed.\n"
+						"Names"_o= {"--follow-tags"}
+						, "Default"_o= true
+						, "Description"_o= "Also push tags that are reachable from the refs pushed.\n"
 					}
-					, "NonDefaultToAll?"_=
+					, "NonDefaultToAll?"_o=
 					{
-						"Names"_= {"--non-default-to-all", "-d"}
-						, "Default"_= false
-						, "Description"_= "When on a non-default branch, push to all remotes, not just origin.\n"
+						"Names"_o= {"--non-default-to-all", "-d"}
+						, "Default"_o= false
+						, "Description"_o= "When on a non-default branch, push to all remotes, not just origin.\n"
 					}
-					, "Force?"_=
+					, "Force?"_o=
 					{
-						"Names"_= {"--force", "-f"}
-						, "Default"_= false
-						, "Description"_= "Force push to remotes.\n"
+						"Names"_o= {"--force", "-f"}
+						, "Default"_o= false
+						, "Description"_o= "Force push to remotes.\n"
 					}
 					, Filter_Name
 					, fFilter_Type("")
@@ -748,17 +748,17 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fFilter_OnlyChanged(false)
 					, fs_CachedEnvironmentOption(true)
 				}
-				, "Parameters"_=
+				, "Parameters"_o=
 				{
-					"Remotes...?"_=
+					"Remotes...?"_o=
 					{
-						"Type"_= {""}
-						, "Default"_= _[_]
-						, "Description"_= "The remotes to push to. By default pushes to all remotes.\n"
+						"Type"_o= {""}
+						, "Default"_o= _[_]
+						, "Description"_o= "The remotes to push to. By default pushes to all remotes.\n"
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -798,59 +798,59 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_= {"list-commits"}
-				, "Description"_= "List commits in all repositories between two commits in main repository.\n"
-				, "Category"_= "Repository management"
-				, "Options"_=
+				"Names"_o= {"list-commits"}
+				, "Description"_o= "List commits in all repositories between two commits in main repository.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
 				{
-					"Local?"_=
+					"Local?"_o=
 					{
-						"Names"_= {"--local", "-l"}
-						, "Default"_= false
-						, "Description"_= "Don't fetch all remotes before listing commits.\n"
+						"Names"_o= {"--local", "-l"}
+						, "Default"_o= false
+						, "Description"_o= "Don't fetch all remotes before listing commits.\n"
 					}
-					, "Compact?"_=
+					, "Compact?"_o=
 					{
-						"Names"_= {"--compact"}
-						, "Default"_= false
-						, "Description"_= "If possible, make size columns to fit content.\n"
+						"Names"_o= {"--compact"}
+						, "Default"_o= false
+						, "Description"_o= "If possible, make size columns to fit content.\n"
 					}
-					, "ChangeLog?"_=
+					, "ChangeLog?"_o=
 					{
-						"Names"_= {"--changelog"}
-						, "Default"_= false
-						, "Description"_= "List all commits sorted by date.\n"
+						"Names"_o= {"--changelog"}
+						, "Default"_o= false
+						, "Description"_o= "List all commits sorted by date.\n"
 					}
-					, "Columns?"_=
+					, "Columns?"_o=
 					{
-						"Names"_= {"--columns"}
-						, "Default"_= ""
-						, "Description"_= "Add columns that extract data from .\n"
+						"Names"_o= {"--columns"}
+						, "Default"_o= ""
+						, "Description"_o= "Add columns that extract data from .\n"
 						"Format: [Name:Wildcard[;Name:Wildcard]...]\n"
 					}
-					, "Prefix?"_=
+					, "Prefix?"_o=
 					{
-						"Names"_= {"--prefix"}
-						, "Default"_= ""
-						, "Description"_= "Prefix to put in front of every output line.\n"
+						"Names"_o= {"--prefix"}
+						, "Default"_o= ""
+						, "Description"_o= "Prefix to put in front of every output line.\n"
 					}
-					, "MaxCommits?"_=
+					, "MaxCommits?"_o=
 					{
-						"Names"_= {"--max-commits"}
-						, "Default"_= 50
-						, "Description"_= "Max commits to display for non-main repositories.\n"
+						"Names"_o= {"--max-commits"}
+						, "Default"_o= 50
+						, "Description"_o= "Max commits to display for non-main repositories.\n"
 					}
-					, "MaxCommitsMain?"_=
+					, "MaxCommitsMain?"_o=
 					{
-						"Names"_= {"--max-commits-main"}
-						, "Default"_= 500
-						, "Description"_= "Max commits to display for main repository.\n"
+						"Names"_o= {"--max-commits-main"}
+						, "Default"_o= 500
+						, "Description"_o= "Max commits to display for main repository.\n"
 					}
-					, "MaxMessageWidth?"_=
+					, "MaxMessageWidth?"_o=
 					{
-						"Names"_= {"--max-message-width"}
-						, "Default"_= 60
-						, "Description"_= "Max width of the message column.\n"
+						"Names"_o= {"--max-message-width"}
+						, "Default"_o= 60
+						, "Description"_o= "Max width of the message column.\n"
 					}
 					, Filter_Name
 					, fFilter_Type("")
@@ -859,21 +859,21 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fFilter_OnlyChanged(false)
 					, fs_CachedEnvironmentOption(true)
 				}
-				, "Parameters"_=
+				, "Parameters"_o=
 				{
-					"FromReference?"_=
+					"FromReference?"_o=
 					{
-						"Default"_= "origin/master"
-						, "Description"_= "The commit to start showing commits from.\n"
+						"Default"_o= "origin/master"
+						, "Description"_o= "The commit to start showing commits from.\n"
 					}
-					, "ToReference?"_=
+					, "ToReference?"_o=
 					{
-						"Default"_= "HEAD"
-						, "Description"_= "The commit to end showing commits to.\n"
+						"Default"_o= "HEAD"
+						, "Description"_o= "The commit to end showing commits to.\n"
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 

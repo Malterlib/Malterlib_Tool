@@ -6,7 +6,7 @@
 
 void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecification &o_CommandLine)
 {
-	auto fDummyCommand = [](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+	auto fDummyCommand = [](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 		{
 			DMibError("This command is dummy only, run through the ./mib script");
 		}
@@ -18,16 +18,16 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"test"}
-				, "Description"_= "Build and run tests."
-				, "GlobalOptions"_= HelpGlobalOptions
-				, "ShowParametersStart"_= false
-				, "Parameters"_=
+				"Names"_o= {"test"}
+				, "Description"_o= "Build and run tests."
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
+				, "Parameters"_o=
 				{
-					"Configuration?"_=
+					"Configuration?"_o=
 					{
-						"Default"_= "Debug"
-						, "Description"_= "The configuration to build the tests for.\n"
+						"Default"_o= "Debug"
+						, "Description"_o= "The configuration to build the tests for.\n"
 						"For Example: Release (Tests)"
 					}
 				}
@@ -38,10 +38,10 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"test_release"}
-				, "Description"_= "Build and run tests with Release configuration."
-				, "GlobalOptions"_= HelpGlobalOptions
-				, "ShowParametersStart"_= false
+				"Names"_o= {"test_release"}
+				, "Description"_o= "Build and run tests with Release configuration."
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
 			}
 			, fDummyCommand
 		)
@@ -50,35 +50,35 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"setup"}
-				, "Description"_= "Setup prerequisites."
-				, "GlobalOptions"_= HelpGlobalOptions
-				, "ShowParametersStart"_= false
-				, "Options"_=
+				"Names"_o= {"setup"}
+				, "Description"_o= "Setup prerequisites."
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
+				, "Options"_o=
 				{
-					"All?"_=
+					"All?"_o=
 					{
-						"Names"_= {"--all"}
-						, "Default"_= false
-						, "Description"_= "Install all plugins and highlighting for Xcode.\n"
-						, "CanNegate"_= false
+						"Names"_o= {"--all"}
+						, "Default"_o= false
+						, "Description"_o= "Install all plugins and highlighting for Xcode.\n"
+						, "CanNegate"_o= false
 					}
-					, "Default?"_=
+					, "Default?"_o=
 					{
-						"Names"_= {"--default"}
-						, "Default"_= false
-						, "Description"_= "Install default plugins and highlighting for Xcode.\n"
-						, "CanNegate"_= false
+						"Names"_o= {"--default"}
+						, "Default"_o= false
+						, "Description"_o= "Install default plugins and highlighting for Xcode.\n"
+						, "CanNegate"_o= false
 					}
-					, "None?"_=
+					, "None?"_o=
 					{
-						"Names"_= {"--none"}
-						, "Default"_= false
-						, "Description"_= "Install no plugins or highlighting for Xcode.\n"
-						, "CanNegate"_= false
+						"Names"_o= {"--none"}
+						, "Default"_o= false
+						, "Description"_o= "Install no plugins or highlighting for Xcode.\n"
+						, "CanNegate"_o= false
 					}
 				}
-				, "ShowOptionsInCommandEntry"_= true
+				, "ShowOptionsInCommandEntry"_o= true
 			}
 			, fDummyCommand
 		)
@@ -87,33 +87,33 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"build"}
-				, "Description"_= "Build a workspace."
-				, "GlobalOptions"_= HelpGlobalOptions
-				, "ShowParametersStart"_= false
-				, "Parameters"_=
+				"Names"_o= {"build"}
+				, "Description"_o= "Build a workspace."
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
+				, "Parameters"_o=
 				{
-					"Workspace"_=
+					"Workspace"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The workspace to build."
+						"Type"_o= ""
+						, "Description"_o= "The workspace to build."
 					}
-					, "Platform"_=
+					, "Platform"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The platform to build.\n"
+						"Type"_o= ""
+						, "Description"_o= "The platform to build.\n"
 						"For example: " DMibStringize(DPlatform)
 					}
-					, "Architecture"_=
+					, "Architecture"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The architecture to build.\n"
+						"Type"_o= ""
+						, "Description"_o= "The architecture to build.\n"
 						"For example: " DMibStringize(DArchitecture)
 					}
-					, "Configuration"_=
+					, "Configuration"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The configuration to build.\n"
+						"Type"_o= ""
+						, "Description"_o= "The configuration to build.\n"
 						"For example: " DMibStringize(DConfig)
 					}
 				}
@@ -124,38 +124,38 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"build_target"}
-				, "Description"_= "Build a targen in a workspace."
-				, "GlobalOptions"_= HelpGlobalOptions
-				, "ShowParametersStart"_= false
-				, "Parameters"_=
+				"Names"_o= {"build_target"}
+				, "Description"_o= "Build a targen in a workspace."
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
+				, "Parameters"_o=
 				{
-					"Workspace"_=
+					"Workspace"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The workspace to build."
+						"Type"_o= ""
+						, "Description"_o= "The workspace to build."
 					}
-					, "Target"_=
+					, "Target"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The target to build."
+						"Type"_o= ""
+						, "Description"_o= "The target to build."
 					}
-					, "Platform"_=
+					, "Platform"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The platform to build.\n"
+						"Type"_o= ""
+						, "Description"_o= "The platform to build.\n"
 						"For example: " DMibStringize(DPlatform)
 					}
-					, "Architecture"_=
+					, "Architecture"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The architecture to build.\n"
+						"Type"_o= ""
+						, "Description"_o= "The architecture to build.\n"
 						"For example: " DMibStringize(DArchitecture)
 					}
-					, "Configuration"_=
+					, "Configuration"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The configuration to build.\n"
+						"Type"_o= ""
+						, "Description"_o= "The configuration to build.\n"
 						"For example: " DMibStringize(DConfig)
 					}
 				}
@@ -166,37 +166,37 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"prebuild"}
-				, "Description"_= "Run prebuild actions.\n"
+				"Names"_o= {"prebuild"}
+				, "Description"_o= "Run prebuild actions.\n"
 				"Generates the build system and cleans intermediate and output files"
-				, "GlobalOptions"_= HelpGlobalOptions
-				, "ShowParametersStart"_= false
-				, "Options"_=
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
+				, "Options"_o=
 				{
-					"Generator?"_=
+					"Generator?"_o=
 					{
-						"Names"_= {"Generator"}
-						, "Default"_= ""
-						, "Description"_= "The generator to use when generating files."
+						"Names"_o= {"Generator"}
+						, "Default"_o= ""
+						, "Description"_o= "The generator to use when generating files."
 					}
-					, "Extension?"_=
+					, "Extension?"_o=
 					{
-						"Names"_= {"Extension"}
-						, "Default"_= "MBuildSystem"
-						, "Description"_= "The extension of the build system file."
+						"Names"_o= {"Extension"}
+						, "Default"_o= "MBuildSystem"
+						, "Description"_o= "The extension of the build system file."
 					}
 				}
-				, "Parameters"_=
+				, "Parameters"_o=
 				{
-					"BuildSystemName"_=
+					"BuildSystemName"_o=
 					{
-						"Type"_= ""
-						, "Description"_= "The name of the build sytem file, minus the MBuildSystem extension."
+						"Type"_o= ""
+						, "Description"_o= "The name of the build sytem file, minus the MBuildSystem extension."
 					}
-					, "Workspaces..."_=
+					, "Workspaces..."_o=
 					{
-						"Type"_= {""}
-						, "Description"_= "The workspaces to generate build systems for."
+						"Type"_o= {""}
+						, "Description"_o= "The workspaces to generate build systems for."
 					}
 				}
 			}
@@ -206,17 +206,17 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"postbuild"}
-				, "Description"_= "Run postbuild actions.\n"
+				"Names"_o= {"postbuild"}
+				, "Description"_o= "Run postbuild actions.\n"
 				"Cleans intermediate and output files for workspaces."
-				, "GlobalOptions"_= HelpGlobalOptions
-				, "ShowParametersStart"_= false
-				, "Parameters"_=
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
+				, "Parameters"_o=
 				{
-					"Workspaces..."_=
+					"Workspaces..."_o=
 					{
-						"Type"_= {""}
-						, "Description"_= "The workspaces to clean intermediate and output files for."
+						"Type"_o= {""}
+						, "Description"_o= "The workspaces to clean intermediate and output files for."
 					}
 				}
 			}
@@ -226,10 +226,10 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"bootstrap_only"}
-				, "Description"_= "Only bootstrap malterlib."
-				, "GlobalOptions"_= HelpGlobalOptions
-				, "ShowParametersStart"_= false
+				"Names"_o= {"bootstrap_only"}
+				, "Description"_o= "Only bootstrap malterlib."
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
 			}
 			, fDummyCommand
 		)
@@ -237,14 +237,14 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"detect_system"}
-				, "Description"_= "Source this command to get build system info in environment.\n"
+				"Names"_o= {"detect_system"}
+				, "Description"_o= "Source this command to get build system info in environment.\n"
 				"@Indent=21\r"
 				"   MToolPath:        The path to the MTool executable. Is added to PATH as well when sourcing.\r"
 				"   CallDirect:       Helper to call executabels without mangling parameters in MinGW.\r"
 				"   BuildSystemRoot:  The root of the build system.\r"
-				, "GlobalOptions"_= HelpGlobalOptions
-				, "ShowParametersStart"_= false
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
 			}
 			, fDummyCommand
 		)

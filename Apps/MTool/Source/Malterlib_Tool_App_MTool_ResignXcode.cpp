@@ -22,26 +22,26 @@ public:
 		o_ToolsSection.f_RegisterCommand
 			(
 				{
-					"Names"_= {"ResignXcode"}
-					, "Description"_= "Resign Xcode.\n"
-					//, "Category"_= "Development Tools"
-					, "Options"_=
+					"Names"_o= {"ResignXcode"}
+					, "Description"_o= "Resign Xcode.\n"
+					//, "Category"_o= "Development Tools"
+					, "Options"_o=
 					{
-						"Source"_=
+						"Source"_o=
 						{
-							"Names"_= {"--source"}
-							, "Default"_= "/Users/erik/Downloads/Xcode.app"
-							, "Description"_= "Xcode source location.\n"
+							"Names"_o= {"--source"}
+							, "Default"_o= "/Users/erik/Downloads/Xcode.app"
+							, "Description"_o= "Xcode source location.\n"
 						}
-						, "Destination"_=
+						, "Destination"_o=
 						{
-							"Names"_= {"--destination"}
-							, "Default"_= "/Applications/XcodePatched.app"
-							, "Description"_= "Xcode destination location.\n"
+							"Names"_o= {"--destination"}
+							, "Default"_o= "/Applications/XcodePatched.app"
+							, "Description"_o= "Xcode destination location.\n"
 						}
 					}
 				}
-				, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -57,10 +57,10 @@ public:
 
 					CStr StateFile = Destination / "Contents/SignState.json";
 
-					CEJSON SignState = EJSONType_Object;
+					CEJSONSorted SignState = EJSONType_Object;
 
 					if (CFile::fs_FileExists(StateFile))
-						SignState = CEJSON::fs_FromString(CFile::fs_ReadStringFromFile(StateFile, true), StateFile);
+						SignState = CEJSONSorted::fs_FromString(CFile::fs_ReadStringFromFile(StateFile, true), StateFile);
 
 					mint nFiles = 0;
 					mint nFilesSkipped = 0;

@@ -9,7 +9,7 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 	CStr CurrentDirectory = CFile::fs_GetCurrentDirectory();
 	auto BuildSystemFiles = CFile::fs_FindFiles(CurrentDirectory / "*.MBuildSystem");
 
-	CEJSON DetailedPositionsDefault;
+	CEJSONOrdered DetailedPositionsDefault;
 	{
 		auto DetailedPositionsEnv = fg_GetSys()->f_GetEnvironmentVariable("Malterlib_UseDetailedPositions", "OnDemand");
 		if (DetailedPositionsEnv == "true")
@@ -23,72 +23,72 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 	o_ToolsSection.f_RegisterSectionOptions
 		(
 			{
-				"CurrentDirectory?"_=
+				"CurrentDirectory?"_o=
 				{
-					"Names"_= {"--current-directory", "-C"}
-					, "Default"_= CurrentDirectory
-					, "Description"_= "The current directory to interpret other path options in relation to."
+					"Names"_o= {"--current-directory", "-C"}
+					, "Default"_o= CurrentDirectory
+					, "Description"_o= "The current directory to interpret other path options in relation to."
 				}
-				, "BuildSystem?"_=
+				, "BuildSystem?"_o=
 				{
-					"Names"_= {"--build-system"}
-					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_BuildSystem", BuildSystemFiles.f_GetLen() == 1 ? BuildSystemFiles[0] : CStr())
-					, "Description"_= "The root build system file."
+					"Names"_o= {"--build-system"}
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_BuildSystem", BuildSystemFiles.f_GetLen() == 1 ? BuildSystemFiles[0] : CStr())
+					, "Description"_o= "The root build system file."
 				}
-				, "Generator?"_=
+				, "Generator?"_o=
 				{
-					"Names"_= {"--generator"}
-					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_Generator", "")
-					, "Description"_= "The generator to use to generate the build system.\n"
+					"Names"_o= {"--generator"}
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_Generator", "")
+					, "Description"_o= "The generator to use to generate the build system.\n"
 					"Leave empty to use the default generator for the platform or the generator specified in Repo.conf\n"
 				}
-				, "OutputDirectory?"_=
+				, "OutputDirectory?"_o=
 				{
-					"Names"_= {"--output-directory"}
-					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_OutputDirectory", CurrentDirectory / "BuildSystem/Default")
-					, "Description"_= "Where to output the generated build system."
+					"Names"_o= {"--output-directory"}
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_OutputDirectory", CurrentDirectory / "BuildSystem/Default")
+					, "Description"_o= "Where to output the generated build system."
 				}
-				, "AbsoluteFilePaths?"_=
+				, "AbsoluteFilePaths?"_o=
 				{
-					"Names"_= {"--absolute-file-paths"}
-					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_AbsoluteFilePaths", "true") == "true"
-					, "Description"_= "Use absolute file paths when generating."
+					"Names"_o= {"--absolute-file-paths"}
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_AbsoluteFilePaths", "true") == "true"
+					, "Description"_o= "Use absolute file paths when generating."
 				}
-				, "SingleThreaded?"_=
+				, "SingleThreaded?"_o=
 				{
-					"Names"_= {"--single-threaded"}
-					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_SingleThreaded", "false") == "true"
-					, "Description"_= "Only use a single thread when generating."
+					"Names"_o= {"--single-threaded"}
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_SingleThreaded", "false") == "true"
+					, "Description"_o= "Only use a single thread when generating."
 				}
-				, "UseUserSettings?"_=
+				, "UseUserSettings?"_o=
 				{
-					"Names"_= {"--use-user-settings"}
-					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_UseUserSettings", "true") == "true"
-					, "Description"_= "Use user settings."
+					"Names"_o= {"--use-user-settings"}
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_UseUserSettings", "true") == "true"
+					, "Description"_o= "Use user settings."
 				}
-				, "SkipUpdate?"_=
+				, "SkipUpdate?"_o=
 				{
-					"Names"_= {"--skip-update"}
-					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_SkipUpdate", "false") == "true"
-					, "Description"_= "Skip repository updates."
+					"Names"_o= {"--skip-update"}
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_SkipUpdate", "false") == "true"
+					, "Description"_o= "Skip repository updates."
 				}
-				, "ForceUpdateRemotes?"_=
+				, "ForceUpdateRemotes?"_o=
 				{
-					"Names"_= {"--force-update-remotes"}
-					, "Default"_= true
-					, "Description"_= "Force update local tags when updating remotes.\n"
+					"Names"_o= {"--force-update-remotes"}
+					, "Default"_o= true
+					, "Description"_o= "Force update local tags when updating remotes.\n"
 				}
-				, "GitFetchTimeout?"_=
+				, "GitFetchTimeout?"_o=
 				{
-					"Names"_= {"--fetch-timeout"}
-					, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_GitFetchTimeout", "5").f_ToInt()
-					, "Description"_= "The number of seconds to wait before timing out git fetches."
+					"Names"_o= {"--fetch-timeout"}
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_GitFetchTimeout", "5").f_ToInt()
+					, "Description"_o= "The number of seconds to wait before timing out git fetches."
 				}
-				, "Reconcile?"_=
+				, "Reconcile?"_o=
 				{
-					"Names"_= {"--reconcile"}
-					, "Default"_= ""
-					, "Description"_= "Options for how to reconcile repository updates.\n"
+					"Names"_o= {"--reconcile"}
+					, "Default"_o= ""
+					, "Description"_o= "Options for how to reconcile repository updates.\n"
 					"Format: Wildcard:Action[,Wildcard:Action]...\n"
 					"Valid actions\r"
 					"@Indent=12\r"
@@ -96,44 +96,44 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					"   rebase:  Rebase repositories\r"
 					"   reset:   Reset repositories (WARNING changes can be lost)\r"
 				}
-				, "ReconcileRemoved?"_=
+				, "ReconcileRemoved?"_o=
 				{
-					"Names"_= {"--reconcile-removed"}
-					, "Default"_= ""
-					, "Description"_= "Options for how to reconcile repositories that are no longer referenced.\n"
+					"Names"_o= {"--reconcile-removed"}
+					, "Default"_o= ""
+					, "Description"_o= "Options for how to reconcile repositories that are no longer referenced.\n"
 					"Format: Wildcard:Action[,Wildcard:Action]...\n"
 					"Valid actions\r"
 					"@Indent=12\r"
 					"   leave:   Leave removed repositories on disk\r"
 					"   delete:  Delete removed repositories from disk (WARNING repository and all unpushed history will be deleted permanently)\r"
 				}
-				, "ReconcileForce?"_=
+				, "ReconcileForce?"_o=
 				{
-					"Names"_= {"--reconcile-force"}
-					, "Default"_= false
-					, "Description"_= "Force reconcile options to apply to all wildcards, even for repositories that you have not seen recommended actions for.\n"
+					"Names"_o= {"--reconcile-force"}
+					, "Default"_o= false
+					, "Description"_o= "Force reconcile options to apply to all wildcards, even for repositories that you have not seen recommended actions for.\n"
 				}
-				, "ReconcileNoOptions?"_=
+				, "ReconcileNoOptions?"_o=
 				{
-					"Names"_= {"--reconcile-no-options"}
-					, "Default"_= false
-					, "Hidden"_= true
-					, "Description"_= "[INTERNAL] Used internally when relaunching to force reconcile options to be ignored.\n"
+					"Names"_o= {"--reconcile-no-options"}
+					, "Default"_o= false
+					, "Hidden"_o= true
+					, "Description"_o= "[INTERNAL] Used internally when relaunching to force reconcile options to be ignored.\n"
 				}
-				, "DetailedPositions?"_=
+				, "DetailedPositions?"_o=
 				{
-					"Names"_= {"--detailed-positions"}
-					, "Type"_= COneOf{true, false, "OnDemand"}
-					, "Default"_= fg_Move(DetailedPositionsDefault)
-					, "Description"_= "Use detailed positions.\n"
+					"Names"_o= {"--detailed-positions"}
+					, "Type"_o= COneOf{true, false, "OnDemand"}
+					, "Default"_o= fg_Move(DetailedPositionsDefault)
+					, "Description"_o= "Use detailed positions.\n"
 					"Enabling detailed positions is going to significantly affect performance. The default is OnDemand which will re-run the command"
 					" with detailed positions in case of an error."
 				}
-				, "DetailedValues?"_=
+				, "DetailedValues?"_o=
 				{
-					"Names"_= {"--detailed-values"}
-					, "Default"_= false
-					, "Description"_= "Show values for contributing positions.\n"
+					"Names"_o= {"--detailed-values"}
+					, "Default"_o= false
+					, "Description"_o= "Show values for contributing positions.\n"
 					"Enabling detailed values is going to significantly affect performance"
 				}
 			}

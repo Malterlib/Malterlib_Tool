@@ -36,20 +36,20 @@ void CTool::f_Register
 	o_ToolsSection.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {ClassName}
-				, "Description"_= "Runs {} command.\n"_f << ClassName
-				, "Parameters"_=
+				"Names"_o= {ClassName}
+				, "Description"_o= "Runs {} command.\n"_f << ClassName
+				, "Parameters"_o=
 				{
-					"Params...?"_=
+					"Params...?"_o=
 					{
-						"Type"_= {""}
-						, "Description"_= "The params the command take."
+						"Type"_o= {""}
+						, "Description"_o= "The params the command take."
 					}
 				}
-				, "ErrorOnCommandAsParameter"_= false
-				, "ErrorOnOptionAsParameter"_= false
+				, "ErrorOnCommandAsParameter"_o= false
+				, "ErrorOnOptionAsParameter"_o= false
 			}
-			, [this](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [this](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 			{
 				NContainer::CRegistry Params;
 				mint iOut = 0;

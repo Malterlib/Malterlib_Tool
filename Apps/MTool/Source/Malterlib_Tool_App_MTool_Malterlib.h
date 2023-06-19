@@ -10,10 +10,10 @@
 class CTool_Malterlib : public CDistributedTool, public CAllowUnsafeThis
 {
 public:
-	static CStr fs_GetFileNameOrEmpty(CEJSON const &_Param, CStr const &_CurrentDirectory);
+	static CStr fs_GetFileNameOrEmpty(CEJSONSorted const &_Param, CStr const &_CurrentDirectory);
 	static CStr fs_DefaultGenerator(CStr const &_RootPath);
-	static CGenerateOptions fs_ParseSharedOptions(CEJSON const &_Params);
-	static CEJSON::CKeyValue fs_CachedEnvironmentOption(bool _bDefault);
+	static CGenerateOptions fs_ParseSharedOptions(CEJSONSorted const &_Params);
+	static CEJSONOrdered::CKeyValue fs_CachedEnvironmentOption(bool _bDefault);
 
 	TCFuture<uint32> f_RunBuildSystem
 		(

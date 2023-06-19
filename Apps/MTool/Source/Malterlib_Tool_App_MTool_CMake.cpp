@@ -26,21 +26,21 @@ public:
 		auto CmakeCommand = o_ToolsSection.f_RegisterDirectCommand
 			(
 				{
-					"Names"_= {"CMake"}
-					, "Description"_= "Runs cmake command line.\n"
-					, "Parameters"_=
+					"Names"_o= {"CMake"}
+					, "Description"_o= "Runs cmake command line.\n"
+					, "Parameters"_o=
 					{
-						"Params...?"_=
+						"Params...?"_o=
 						{
-							"Type"_= {""}
-							, "Description"_= "The cmake params."
+							"Type"_o= {""}
+							, "Description"_o= "The cmake params."
 						}
 					}
-					, "ErrorOnCommandAsParameter"_= false
-					, "ErrorOnOptionAsParameter"_= false
-					, "GreedyDefaultCommand"_= true
+					, "ErrorOnCommandAsParameter"_o= false
+					, "ErrorOnOptionAsParameter"_o= false
+					, "GreedyDefaultCommand"_o= true
 				}
-				, [](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				, [](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 				{
 					TCVector<CStr> Commands;
 					TCVector<const ch8 *> ArgV;

@@ -4,7 +4,7 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
 
-CStr CTool_Malterlib::fs_GetFileNameOrEmpty(NEncoding::CEJSON const &_Param, CStr const &_CurrentDirectory)
+CStr CTool_Malterlib::fs_GetFileNameOrEmpty(NEncoding::CEJSONSorted const &_Param, CStr const &_CurrentDirectory)
 {
 	CStr FileName = _Param.f_String();
 	if (!FileName)
@@ -95,7 +95,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 #endif
 }
 
-CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJSON const &_Params)
+CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJSONSorted const &_Params)
 {
 	CStr CurrentDirectory = _Params["CurrentDirectory"].f_String();
 
@@ -141,13 +141,13 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJSON const 
 	return GenerateOptions;
 }
 
-CEJSON::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefault)
+CEJSONOrdered::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefault)
 {
-	return "UseCachedEnvironment?"_=
+	return "UseCachedEnvironment?"_o=
 		{
-			"Names"_= {"--use-cached-environment"}
-			, "Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_UseCachedEnvironment", _bDefault ? "true" : "false") == "true"
-			, "Description"_= "Use the cached environment instead of current environment."
+			"Names"_o= {"--use-cached-environment"}
+			, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_UseCachedEnvironment", _bDefault ? "true" : "false") == "true"
+			, "Description"_o= "Use the cached environment instead of current environment."
 		}
 	;
 }

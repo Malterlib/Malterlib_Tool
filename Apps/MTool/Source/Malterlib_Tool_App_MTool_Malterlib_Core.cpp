@@ -9,30 +9,30 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_= {"generate"}
-				, "Description"_= "Generate build system.\n"
-				, "Category"_= "Core"
-				, "Options"_=
+				"Names"_o= {"generate"}
+				, "Description"_o= "Generate build system.\n"
+				, "Category"_o= "Core"
+				, "Options"_o=
 				{
-					"Action?"_=
+					"Action?"_o=
 					{
-						"Names"_= {"--action"}
-						, "Type"_= COneOf{"Build", "Clean", "ReBuild"}
-						, "Description"_= "Action from build system when generating as part of build.\n"
+						"Names"_o= {"--action"}
+						, "Type"_o= COneOf{"Build", "Clean", "ReBuild"}
+						, "Description"_o= "Action from build system when generating as part of build.\n"
 						"One of: Build, Clean or ReBuild\n"
 					}
 					, fs_CachedEnvironmentOption(false)
 				}
-				, "Parameters"_=
+				, "Parameters"_o=
 				{
-					"Workspace?"_=
+					"Workspace?"_o=
 					{
-						"Default"_= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_Workspace", "")
-						, "Description"_= "Generate only this specific workspace."
+						"Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_Workspace", "")
+						, "Description"_o= "Generate only this specific workspace."
 					}
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -122,15 +122,15 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 	o_ToolsSection.f_RegisterDirectCommand
 		(
 			{
-				"Names"_= {"create"}
-				, "Description"_= "Create a new Malterlib build system.\n"
-				, "Category"_= "Core"
-				, "Options"_=
+				"Names"_o= {"create"}
+				, "Description"_o= "Create a new Malterlib build system.\n"
+				, "Category"_o= "Core"
+				, "Options"_o=
 				{
 					fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=](NEncoding::CEJSON const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [=](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 			{
 				return f_RunBuildSystem
 					(
