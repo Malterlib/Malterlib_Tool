@@ -44,10 +44,8 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Source/kwsys/MD5.h.in
 ../../../../External/CMake/Source/kwsys/Process.h.in
 ../../../../External/CMake/Source/kwsys/RegularExpression.hxx.in
-../../../../External/CMake/Source/kwsys/SharedForward.h.in
 ../../../../External/CMake/Source/kwsys/Status.hxx.in
 ../../../../External/CMake/Source/kwsys/String.h.in
-../../../../External/CMake/Source/kwsys/String.hxx.in
 ../../../../External/CMake/Source/kwsys/System.h.in
 ../../../../External/CMake/Source/kwsys/SystemInformation.hxx.in
 ../../../../External/CMake/Source/kwsys/SystemTools.hxx.in
@@ -56,7 +54,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Source/kwsys/kwsysPlatformTestsC.c
 ../../../../External/CMake/Source/kwsys/kwsysPlatformTestsCXX.cxx
 ../../../../External/CMake/Source/kwsys/kwsysPrivate.h
-../../../../External/CMake/Source/kwsys/testSharedForward.c.in
 ../../../../External/CMake/Source/kwsys/testSystemTools.h.in
 ../../../../External/CMake/Templates/CTestScript.cmake.in
 ../../../../External/CMake/Tests/.NoDartCoverage
@@ -123,7 +120,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CTestTestTimeout/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestUpload/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestVerboseOutput/test.cmake.in
-../../../../External/CMake/Tests/CTestTestZeroTimeout/test.cmake.in
 ../../../../External/CMake/Tests/CTestUpdateGIT.cmake.in
 ../../../../External/CMake/Tests/CheckFortran.cmake
 ../../../../External/CMake/Tests/CheckSourceTree/CMakeLists.txt
@@ -165,10 +161,12 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Utilities/cmThirdParty.h.in
 ../../../../External/CMake/Utilities/cmThirdPartyChecks.cmake
 ../../../../External/CMake/Utilities/cmbzip2/CMakeLists.txt
+../../../../External/CMake/Utilities/cmcppdap/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmcurl/CMake/CurlTests.c
 ../../../../External/CMake/Utilities/cmcurl/CMake/FindNGHTTP2.cmake
 ../../../../External/CMake/Utilities/cmcurl/CMake/Macros.cmake
 ../../../../External/CMake/Utilities/cmcurl/CMake/OtherTests.cmake
+../../../../External/CMake/Utilities/cmcurl/CMake/PickyWarnings.cmake
 ../../../../External/CMake/Utilities/cmcurl/CMake/Platforms/WindowsCache.cmake
 ../../../../External/CMake/Utilities/cmcurl/CMake/Utilities.cmake
 ../../../../External/CMake/Utilities/cmcurl/CMakeLists.txt

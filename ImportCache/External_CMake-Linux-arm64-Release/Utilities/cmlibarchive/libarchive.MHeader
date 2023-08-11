@@ -298,6 +298,10 @@ Property.CMakeOutputPath_libarchive: string = `@('../..'->MakeAbsolute())`->Make
 			{
 				Compile.Type "C"
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_read_support_filter_by_code.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_read_support_filter_bzip2.c`
 			{
 				Compile.Type "C"

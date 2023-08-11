@@ -14,10 +14,8 @@
 ../../../../../../External/CMake/Source/kwsys/MD5.h.in
 ../../../../../../External/CMake/Source/kwsys/Process.h.in
 ../../../../../../External/CMake/Source/kwsys/RegularExpression.hxx.in
-../../../../../../External/CMake/Source/kwsys/SharedForward.h.in
 ../../../../../../External/CMake/Source/kwsys/Status.hxx.in
 ../../../../../../External/CMake/Source/kwsys/String.h.in
-../../../../../../External/CMake/Source/kwsys/String.hxx.in
 ../../../../../../External/CMake/Source/kwsys/System.h.in
 ../../../../../../External/CMake/Source/kwsys/SystemInformation.hxx.in
 ../../../../../../External/CMake/Source/kwsys/SystemTools.hxx.in
@@ -26,5 +24,4 @@
 ../../../../../../External/CMake/Source/kwsys/kwsysPlatformTestsC.c
 ../../../../../../External/CMake/Source/kwsys/kwsysPlatformTestsCXX.cxx
 ../../../../../../External/CMake/Source/kwsys/kwsysPrivate.h
-../../../../../../External/CMake/Source/kwsys/testSharedForward.c.in
 ../../../../../../External/CMake/Source/kwsys/testSystemTools.h.in

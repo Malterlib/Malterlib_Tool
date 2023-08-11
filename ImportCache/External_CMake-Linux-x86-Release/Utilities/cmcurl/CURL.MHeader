@@ -15,7 +15,6 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 		PreprocessorDefines += [
 			"CURL_STATICLIB",
 			"HAVE_CONFIG_H",
-			"OPENSSL_SUPPRESS_DEPRECATED",
 			"_BSD_SOURCE",
 			"_DEFAULT_SOURCE",
 			"_FILE_OFFSET_BITS=64",
@@ -67,7 +66,6 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			"BUILDING_LIBCURL",
 			"HAVE_CONFIG_H",
 			"NGHTTP2_STATICLIB",
-			"OPENSSL_SUPPRESS_DEPRECATED",
 			"_BSD_SOURCE",
 			"_DEFAULT_SOURCE",
 			"_FILE_OFFSET_BITS=64",
@@ -103,11 +101,35 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/bufq.h`
+			{
+				Compile.Disabled true
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/bufref.h`
 			{
 				Compile.Disabled true
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/c-hyper.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-h1-proxy.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-h2-proxy.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-haproxy.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-https-connect.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-socket.h`
 			{
 				Compile.Disabled true
 			}
@@ -176,6 +198,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				Compile.Disabled true
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_ldap.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_log.h`
 			{
 				Compile.Disabled true
 			}
@@ -263,6 +289,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dynhds.h`
+			{
+				Compile.Disabled true
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/easy_lock.h`
 			{
 				Compile.Disabled true
@@ -315,10 +345,6 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			{
 				Compile.Disabled true
 			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/h2h3.h`
-			{
-				Compile.Disabled true
-			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hash.h`
 			{
 				Compile.Disabled true
@@ -336,6 +362,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				Compile.Disabled true
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http1.h`
 			{
 				Compile.Disabled true
 			}
@@ -440,10 +470,6 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				Compile.Disabled true
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/psl.h`
-			{
-				Compile.Disabled true
-			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/quic.h`
 			{
 				Compile.Disabled true
 			}
@@ -576,10 +602,6 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				Compile.Disabled true
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/warnless.h`
-			{
-				Compile.Disabled true
-			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/wildcard.h`
 			{
 				Compile.Disabled true
 			}
@@ -787,15 +809,15 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			}
 			%Group "vquic"
 			{
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/msh3.h`
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/curl_msh3.h`
 				{
 					Compile.Disabled true
 				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/ngtcp2.h`
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/curl_ngtcp2.h`
 				{
 					Compile.Disabled true
 				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/quiche.h`
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/curl_quiche.h`
 				{
 					Compile.Disabled true
 				}
@@ -803,15 +825,19 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				{
 					Compile.Disabled true
 				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/msh3.c`
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/vquic_int.h`
+				{
+					Compile.Disabled true
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/curl_msh3.c`
 				{
 					Compile.Type "C"
 				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/ngtcp2.c`
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/curl_ngtcp2.c`
 				{
 					Compile.Type "C"
 				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/quiche.c`
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/vquic/curl_quiche.c`
 				{
 					Compile.Type "C"
 				}
@@ -859,11 +885,35 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			{
 				Compile.Type "C"
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/bufq.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/bufref.c`
 			{
 				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/c-hyper.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-h1-proxy.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-h2-proxy.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-haproxy.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-https-connect.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/cf-socket.c`
 			{
 				Compile.Type "C"
 			}
@@ -912,6 +962,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_gssapi.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/curl_log.c`
 			{
 				Compile.Type "C"
 			}
@@ -967,6 +1021,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			{
 				Compile.Type "C"
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/dynhds.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/easy.c`
 			{
 				Compile.Type "C"
@@ -1019,10 +1077,6 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			{
 				Compile.Type "C"
 			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/h2h3.c`
-			{
-				Compile.Type "C"
-			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/hash.c`
 			{
 				Compile.Type "C"
@@ -1060,6 +1114,10 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/http1.c`
 			{
 				Compile.Type "C"
 			}
@@ -1316,10 +1374,6 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/warnless.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/lib/wildcard.c`
 			{
 				Compile.Type "C"
 			}

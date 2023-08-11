@@ -20,13 +20,14 @@
 
 #define HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE
 /* #undef HAVE_UNSETENV */
+#define CMake_ENABLE_DEBUGGER
 /* #undef CMake_USE_MACH_PARSER */
 /* #undef CMake_USE_XCOFF_PARSER */
 #define CMAKE_USE_WMAKE
-#define CMake_DEFAULT_RECURSION_LIMIT 1000
+/* #undef CMake_DEFAULT_RECURSION_LIMIT */
 #define CMAKE_BIN_DIR "/bin"
-#define CMAKE_DATA_DIR "/share/cmake-3.26"
-#define CMAKE_DOC_DIR "/doc/cmake-3.26"
+#define CMAKE_DATA_DIR "/share/cmake-3.27"
+#define CMAKE_DOC_DIR "/doc/cmake-3.27"
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 
