@@ -48,7 +48,7 @@ Property
 		"HAVE_ZLIB_H=1"
 		, `ZLIB_INCLUDE_DIR=@("../../External/zlib"->MakeAbsolute())`
 		, `ZSTD_INCLUDE_DIRS=@("../../External/zstd/lib"->MakeAbsolute())`
-		, "ZLIB_LIBRARY=/dev/null"
+		, `ZLIB_LIBRARY=@(Malterlib_DummmyLibrary)`
 	]
 
 	Import.CMake_Variables =+ [
