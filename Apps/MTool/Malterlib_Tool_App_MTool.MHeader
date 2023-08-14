@@ -64,7 +64,7 @@ Property
 			!!MToolEmbeddCMake true
 		}
 
-		PreprocessorDefines += "_HAS_AUTO_PTR_ETC=1"
+		PreprocessorDefines += ["_HAS_AUTO_PTR_ETC=1", "_SILENCE_CXX20_MOVE_ITERATOR_ARROW_DEPRECATION_WARNING"]
 		{
 			!!GeneratorFamily "VisualStudio"
 		}
