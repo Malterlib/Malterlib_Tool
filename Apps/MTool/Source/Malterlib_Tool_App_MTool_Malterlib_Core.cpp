@@ -32,7 +32,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 					}
 				}
 			}
-			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 

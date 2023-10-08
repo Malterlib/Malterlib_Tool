@@ -16,7 +16,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				, "Category"_o= "Repository management"
 				, "Options"_o= {fs_CachedEnvironmentOption(true)}
 			}
-			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -180,7 +180,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -263,7 +263,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						}
 					}
 				}
-				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -348,7 +348,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						}
 					}
 				}
-				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -441,7 +441,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						}
 					}
 				}
-				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -490,7 +490,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, fs_CachedEnvironmentOption(true)
 					}
 				}
-				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -576,7 +576,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -670,7 +670,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -758,7 +758,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -873,7 +873,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
