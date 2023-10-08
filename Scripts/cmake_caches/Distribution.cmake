@@ -30,7 +30,7 @@ else()
   endif()
   if (NOT APPLE)
     # Since LLVM_ENABLE_LTO is ON we need a LTO capable linker
-    set(BOOTSTRAP_LLVM_ENABLE_LLD ON CACHE BOOL "")
+    set(BOOTSTRAP_LLVM_ENABLE_LLD "Thin" CACHE BOOL "")
   endif()
 endif()
 
