@@ -13,9 +13,7 @@ Property.CMakeOutputPath_CMAKE_FORM: string = `@('../../..'->MakeAbsolute())`->M
 			`@('../../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
-		PreprocessorDefines += [
-			"LIBARCHIVE_STATIC"
-		]
+		PreprocessorDefines += []
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
