@@ -33,12 +33,16 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 	{
 		CStr XcodePath = "/Applications/Xcode.app/Contents";
 
-		try
+		for (auto &pXcodeLink : {"/var/select/developer_dir", "/var/db/xcode_select_link", "/usr/share/xcode-select/xcode_dir_link", "/usr/share/xcode-select/xcode_dir_path"})
 		{
-			XcodePath = CFile::fs_GetPath(CFile::fs_ResolveSymbolicLink("/private/var/db/xcode_select_link"));
-		}
-		catch (CException const &)
-		{
+			try
+			{
+				XcodePath = CFile::fs_GetPath(CFile::fs_ResolveSymbolicLink(pXcodeLink));
+				break;
+			}
+			catch (CException const &)
+			{
+			}
 		}
 
 		if (CFile::fs_FileExists(XcodePath))
