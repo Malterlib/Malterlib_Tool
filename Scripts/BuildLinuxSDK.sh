@@ -17,8 +17,8 @@ export MalterlibImportUpdateCache=false
 echo "DestinationDir: $DestinationDir"
 echo "Architecture: $Architecture"
 
-sudo apt install -y build-essential cmake ninja-build python3-distutils libacl1-dev libext2fs-dev libudev-dev libssl-dev uuid-dev libdbus-1-dev libsecret-1-dev libxcb-xinerama0-dev libunity-dev libxkbcommon-x11-dev libxkbcommon-dev
-sudo apt-get build-dep qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools qt5dxcb-plugin -y
+sudo apt install -y build-essential cmake ninja-build python3-distutils libacl1-dev libext2fs-dev libudev-dev libssl-dev uuid-dev libdbus-1-dev libsecret-1-dev libxcb-xinerama0-dev libunity-dev libxkbcommon-x11-dev libxkbcommon-dev libxcb-cursor0 libxcb-cursor-dev
+sudo apt-get build-dep qtbase-opensource-src qtchooser -y
 
 mkdir -p "$DestinationDir"
 pushd "$DestinationDir"
