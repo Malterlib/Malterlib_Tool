@@ -668,13 +668,16 @@ Property.CMakeOutputPath_libarchive: string = `@('../..'->MakeAbsolute())`->Make
 	%Dependency "Lib_bzip2_cmbzip2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 }

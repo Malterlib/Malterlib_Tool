@@ -2440,6 +2440,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 	%Dependency "Lib_CMake_cmnghttp2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 }
 %Target "Lib_CMake_cmnghttp2"
@@ -3892,14 +3893,17 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 	%Dependency "Lib_bzip2_cmbzip2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 }
 %Target "Lib_JsonCpp_cmjsoncpp"
@@ -4432,6 +4436,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 }
 %Target "Lib_CMake_CMakeLib"
@@ -7336,54 +7341,67 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 	%Dependency "Lib_bzip2_cmbzip2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmcppdap"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CURL_cmcurl"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmexpat"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_libarchive_cmlibarchive"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_librhash_cmlibrhash"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_libuv_cmlibuv"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmnghttp2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmstd"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_cmsys_cmsys"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 }
 %Target "Lib_CMake_CTestLib"
@@ -7685,58 +7703,72 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 	%Dependency "Lib_CMake_CMakeLib"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_bzip2_cmbzip2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmcppdap"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CURL_cmcurl"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmexpat"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_libarchive_cmlibarchive"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_librhash_cmlibrhash"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_libuv_cmlibuv"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmnghttp2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmstd"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_cmsys_cmsys"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 }
 %Target "Lib_CMake_CPackLib"
@@ -7888,58 +7920,72 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 	%Dependency "Lib_CMake_CMakeLib"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_bzip2_cmbzip2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmcppdap"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CURL_cmcurl"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmexpat"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_JsonCpp_cmjsoncpp"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_libarchive_cmlibarchive"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMLIBLZMA_cmliblzma"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_librhash_cmlibrhash"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_libuv_cmlibuv"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmnghttp2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_CMake_cmstd"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_cmsys_cmsys"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 	%Dependency "Lib_zstd_cmzstd"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 }
 %Target "Com_CMake_cmake"

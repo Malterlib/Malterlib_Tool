@@ -1404,5 +1404,6 @@ Property.CMakeOutputPath_CURL: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 	%Dependency "Lib_CMake_cmnghttp2"
 	{
 		Dependency.Indirect true
+		Dependency.IndirectOrdered true
 	}
 }

@@ -22,10 +22,18 @@ int testTerminal(int, char*[]);
 #  else
 #    define CM_NULL NULL
 #  endif
+#  define CM_NAMESPACE_BEGIN namespace {
+#  define CM_NAMESPACE_END }
+#  define CM_LOCAL
 #else
 #  define CM_CAST(TYPE, EXPR) (TYPE)(EXPR)
 #  define CM_NULL NULL
+#  define CM_NAMESPACE_BEGIN
+#  define CM_NAMESPACE_END
+#  define CM_LOCAL static
 #endif
+
+CM_NAMESPACE_BEGIN
 
 /* Create map.  */
 
@@ -36,7 +44,7 @@ typedef struct /* NOLINT */
   MainFuncPointer func;
 } functionMapEntry;
 
-static functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
+CM_LOCAL const functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
     {
     "testEncode",
     testEncode
@@ -49,12 +57,12 @@ static functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
   { CM_NULL, CM_NULL } /* NOLINT */
 };
 
-static const int NumTests = CM_CAST(int,
+CM_LOCAL const int NumTests = CM_CAST(int,
   sizeof(cmakeGeneratedFunctionMapEntries) / sizeof(functionMapEntry)) - 1;
 
 /* Allocate and create a lowercased copy of string
    (note that it has to be free'd manually) */
-static char* lowercase(const char* string)
+CM_LOCAL char* lowercase(const char* string)
 {
   char *new_string;
   char *p;
@@ -73,7 +81,7 @@ static char* lowercase(const char* string)
   return new_string;
 }
 
-static int isTestSkipped(const char *name, int n_skipped_tests, char *skipped_tests[]) {
+CM_LOCAL int isTestSkipped(const char *name, int n_skipped_tests, char *skipped_tests[]) {
   int i;
   for (i = 0; i < n_skipped_tests; i++) {
     if (strcmp(name, skipped_tests[i]) == 0) {
@@ -83,6 +91,8 @@ static int isTestSkipped(const char *name, int n_skipped_tests, char *skipped_te
 
   return 0;
 }
+
+CM_NAMESPACE_END
 
 int main(int ac, char* av[])
 {
