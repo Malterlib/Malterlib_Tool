@@ -25,14 +25,32 @@
 
 #include <cm3p/kwiml/abi.h>
 
+/* Default SSL backend */
+/* #undef CURL_DEFAULT_SSL_BACKEND */
+
 /* disables alt-svc */
 #define CURL_DISABLE_ALTSVC 1
 
 /* disables cookies support */
 /* #undef CURL_DISABLE_COOKIES */
 
-/* disables cryptographic authentication */
-/* #undef CURL_DISABLE_CRYPTO_AUTH */
+/* disables Basic authentication */
+/* #undef CURL_DISABLE_BASIC_AUTH */
+
+/* disables Bearer authentication */
+/* #undef CURL_DISABLE_BEARER_AUTH */
+
+/* disables Digest authentication */
+/* #undef CURL_DISABLE_DIGEST_AUTH */
+
+/* disables Kerberos authentication */
+/* #undef CURL_DISABLE_KERBEROS_AUTH */
+
+/* disables negotiate authentication */
+/* #undef CURL_DISABLE_NEGOTIATE_AUTH */
+
+/* disables AWS-SIG4 */
+/* #undef CURL_DISABLE_AWS */
 
 /* disables DICT */
 #define CURL_DISABLE_DICT 1
@@ -43,6 +61,9 @@
 /* disables FILE */
 /* #undef CURL_DISABLE_FILE */
 
+/* disables form api */
+/* #undef CURL_DISABLE_FORM_API */
+
 /* disables FTP */
 /* #undef CURL_DISABLE_FTP */
 
@@ -50,7 +71,7 @@
 #define CURL_DISABLE_GOPHER 1
 
 /* disables HSTS support */
-#define CURL_DISABLE_HSTS 1
+/* #undef CURL_DISABLE_HSTS */
 
 /* disables HTTP */
 /* #undef CURL_DISABLE_HTTP */
@@ -125,29 +146,26 @@
 /* Use Windows LDAP implementation */
 /* #undef USE_WIN32_LDAP */
 
-/* when not building a shared library */
-#define CURL_STATICLIB 1
-
-/* your Entropy Gathering Daemon socket pathname */
-/* #undef EGD_SOCKET */
-
 /* Define if you want to enable IPv6 support */
 #define ENABLE_IPV6 1
 
 /* Define to 1 if you have the alarm function. */
 #define HAVE_ALARM 1
 
+/* Define to 1 if you have the arc4random function. */
+#define HAVE_ARC4RANDOM 1
+
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #define HAVE_ARPA_INET_H 1
-
-/* Define to 1 if you have the <arpa/tftp.h> header file. */
-#define HAVE_ARPA_TFTP_H 1
 
 /* Define to 1 if you have _Atomic support. */
 /* #undef HAVE_ATOMIC */
 
 /* Define to 1 if you have the `fchmod' function. */
 #define HAVE_FCHMOD 1
+
+/* Define to 1 if you have the `fnmatch' function. */
+#define HAVE_FNMATCH 1
 
 /* Define to 1 if you have the `basename' function. */
 #define HAVE_BASENAME 1
@@ -161,11 +179,15 @@
 /* Define to 1 if you have the clock_gettime function and monotonic timer. */
 #define HAVE_CLOCK_GETTIME_MONOTONIC 1
 
+/* Define to 1 if you have the clock_gettime function and raw monotonic timer.
+   */
+#define HAVE_CLOCK_GETTIME_MONOTONIC_RAW 1
+
 /* Define to 1 if you have the `closesocket' function. */
 /* #undef HAVE_CLOSESOCKET */
 
 /* Define to 1 if you have the fcntl function. */
-/* #undef HAVE_FCNTL */
+#define HAVE_FCNTL 1
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
@@ -176,6 +198,12 @@
 /* Define to 1 if you have the freeaddrinfo function. */
 #define HAVE_FREEADDRINFO 1
 
+/* Define to 1 if you have the fseeko function. */
+#define HAVE_FSEEKO 1
+
+/* Define to 1 if you have the _fseeki64 function. */
+/* #undef HAVE__FSEEKI64 */
+
 /* Define to 1 if you have the ftruncate function. */
 #define HAVE_FTRUNCATE 1
 
@@ -183,7 +211,7 @@
 #define HAVE_GETADDRINFO 1
 
 /* Define to 1 if the getaddrinfo function is threadsafe. */
-/* #undef HAVE_GETADDRINFO_THREADSAFE */
+#define HAVE_GETADDRINFO_THREADSAFE 1
 
 /* Define to 1 if you have the `geteuid' function. */
 #define HAVE_GETEUID 1
@@ -207,13 +235,10 @@
 #define HAVE_GETHOSTNAME 1
 
 /* Define to 1 if you have a working getifaddrs function. */
-/* #undef HAVE_GETIFADDRS */
+#define HAVE_GETIFADDRS 1
 
 /* Define to 1 if you have the `getpass_r' function. */
 /* #undef HAVE_GETPASS_R */
-
-/* Define to 1 if you have the `getppid' function. */
-#define HAVE_GETPPID 1
 
 /* Define to 1 if you have the `getpeername' function. */
 #define HAVE_GETPEERNAME 1
@@ -319,7 +344,7 @@
 /* #undef HAVE_LDAP_SSL_H */
 
 /* Define to 1 if you have the `ldap_url_parse' function. */
-#define HAVE_LDAP_URL_PARSE 1
+/* #undef HAVE_LDAP_URL_PARSE */
 
 /* Define to 1 if you have the <libgen.h> header file. */
 #define HAVE_LIBGEN_H 1
@@ -353,6 +378,9 @@
 #  define HAVE_LONGLONG 1
 #endif
 
+/* Define to 1 if you have the 'suseconds_t' data type. */
+#define HAVE_SUSECONDS_T 1
+
 /* Define to 1 if you have the MSG_NOSIGNAL flag. */
 #define HAVE_MSG_NOSIGNAL 1
 
@@ -364,6 +392,9 @@
 
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #define HAVE_NETINET_TCP_H 1
+
+/* Define to 1 if you have the <netinet/udp.h> header file. */
+#define HAVE_NETINET_UDP_H 1
 
 /* Define to 1 if you have the <linux/tcp.h> header file. */
 /* #undef HAVE_LINUX_TCP_H */
@@ -392,8 +423,8 @@
 /* Define to 1 if you have the <pwd.h> header file. */
 #define HAVE_PWD_H 1
 
-/* Define to 1 if you have the `RAND_egd' function. */
-/* #undef HAVE_RAND_EGD */
+/* Define to 1 if OpenSSL has the `SSL_set0_wbio` function. */
+/* #undef HAVE_SSL_SET0_WBIO */
 
 /* Define to 1 if you have the recv function. */
 #define HAVE_RECV 1
@@ -401,8 +432,14 @@
 /* Define to 1 if you have the select function. */
 #define HAVE_SELECT 1
 
+/* Define to 1 if you have the sched_yield function. */
+#define HAVE_SCHED_YIELD 1
+
 /* Define to 1 if you have the send function. */
 #define HAVE_SEND 1
+
+/* Define to 1 if you have the sendmsg function. */
+#define HAVE_SENDMSG 1
 
 /* Define to 1 if you have the 'fsetxattr' function. */
 #define HAVE_FSETXATTR 1
@@ -412,9 +449,6 @@
 
 /* fsetxattr() takes 6 args */
 #define HAVE_FSETXATTR_6 1
-
-/* Define to 1 if you have the <setjmp.h> header file. */
-#define HAVE_SETJMP_H 1
 
 /* Define to 1 if you have the `setlocale' function. */
 #define HAVE_SETLOCALE 1
@@ -437,11 +471,11 @@
 /* Define to 1 if you have the signal function. */
 #define HAVE_SIGNAL 1
 
-/* Define to 1 if you have the <signal.h> header file. */
-#define HAVE_SIGNAL_H 1
-
 /* Define to 1 if you have the sigsetjmp function or macro. */
 #define HAVE_SIGSETJMP 1
+
+/* Define to 1 if you have the `snprintf' function. */
+#define HAVE_SNPRINTF 1
 
 /* Define to 1 if struct sockaddr_in6 has the sin6_scope_id member */
 #define HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 1
@@ -452,9 +486,6 @@
 /* Define to 1 if you have the socketpair function. */
 #define HAVE_SOCKETPAIR 1
 
-/* Define to 1 if you have the <ssl.h> header file. */
-/* #undef HAVE_SSL_H */
-
 /* Define to 1 if you have the <stdatomic.h> header file. */
 /* #undef HAVE_STDATOMIC_H */
 
@@ -463,9 +494,6 @@
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
-
-/* Define to 1 if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the strcasecmp function. */
 /* #undef HAVE_STRCASECMP */
@@ -485,9 +513,6 @@
 /* Define to 1 if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H 1
 
-/* Define to 1 if you have the <string.h> header file. */
-#define HAVE_STRING_H 1
-
 /* Define to 1 if you have the <stropts.h> header file. */
 /* #undef HAVE_STROPTS_H */
 
@@ -497,6 +522,9 @@
 /* Define to 1 if you have the strtoll function. */
 #define HAVE_STRTOLL 1
 
+/* Define to 1 if you have the memrchr function. */
+/* #undef HAVE_MEMRCHR */
+
 /* if struct sockaddr_storage is defined */
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
 
@@ -505,6 +533,9 @@
 
 /* Define to 1 if you have the <sys/filio.h> header file. */
 #define HAVE_SYS_FILIO_H 1
+
+/* Define to 1 if you have the <sys/wait.h> header file. */
+#define HAVE_SYS_WAIT_H 1
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #define HAVE_SYS_IOCTL_H 1
@@ -548,9 +579,6 @@
 /* Define to 1 if you have the <termio.h> header file. */
 /* #undef HAVE_TERMIO_H */
 
-/* Define to 1 if you have the <time.h> header file. */
-#define HAVE_TIME_H 1
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
@@ -571,9 +599,6 @@
 
 /* Define to 1 if you have the windows.h header file. */
 /* #undef HAVE_WINDOWS_H */
-
-/* Define to 1 if you have the winldap.h header file. */
-/* #undef HAVE_WINLDAP_H */
 
 /* Define to 1 if you have the winsock2.h header file. */
 /* #undef HAVE_WINSOCK2_H */
@@ -643,11 +668,17 @@
 #  define SIZEOF___INT64 KWIML_ABI_SIZEOF___INT64
 #endif
 
+/* The size of `long long', as computed by sizeof. */
+
+
 /* The size of `off_t', as computed by sizeof. */
 #define SIZEOF_OFF_T 8
 
 /* The size of `curl_off_t', as computed by sizeof. */
 #define SIZEOF_CURL_OFF_T 8
+
+/* The size of `curl_socket_t', as computed by sizeof. */
+#define SIZEOF_CURL_SOCKET_T 4
 
 /* The size of `size_t', as computed by sizeof. */
 #define SIZEOF_SIZE_T 8
@@ -660,9 +691,6 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
-
-/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
-#define TIME_WITH_SYS_TIME 1
 
 /* Define if you want to enable c-ares support */
 /* #undef USE_ARES */
@@ -699,12 +727,6 @@
 
 /* If you want to build curl with the built-in manual */
 /* #undef USE_MANUAL */
-
-/* if NSS is enabled */
-/* #undef USE_NSS */
-
-/* if you have the PK11_CreateManagedGenericObject function */
-/* #undef HAVE_PK11_CREATEMANAGEDGENERICOBJECT */
 
 /* if you want to use OpenLDAP code instead of legacy ldap implementation */
 /* #undef USE_OPENLDAP */
@@ -799,3 +821,12 @@
 
 /* Define to 1 to enable websocket support. */
 /* #undef USE_WEBSOCKETS */
+
+/* Define to 1 if OpenSSL has the SSL_CTX_set_srp_username function. */
+/* #undef HAVE_OPENSSL_SRP */
+
+/* Define to 1 if GnuTLS has the gnutls_srp_verifier function. */
+/* #undef HAVE_GNUTLS_SRP */
+
+/* Define to 1 to enable TLS-SRP support. */
+/* #undef USE_TLS_SRP */

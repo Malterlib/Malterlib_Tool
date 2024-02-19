@@ -104,8 +104,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CTestTestCycle/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestDepends/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestEmptyBinaryDirectory/test.cmake.in
-../../../../External/CMake/Tests/CTestTestFailure/testNoBuild.cmake.in
-../../../../External/CMake/Tests/CTestTestFailure/testNoExe.cmake.in
 ../../../../External/CMake/Tests/CTestTestFdSetSize/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestLabelRegExp/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestParallel/test.cmake.in

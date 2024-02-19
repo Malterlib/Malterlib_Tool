@@ -7,10 +7,10 @@ string(REPLACE "\n" ";" files "${files}")
 foreach(file ${files})
   message(STATUS "Uninstalling \"$ENV{DESTDIR}${file}\"")
   if(EXISTS "$ENV{DESTDIR}${file}")
-    exec_program(
-      "../../../../BuildSystem/SafeMib/Binaries/MToolCMake.exe" ARGS "-E rm -f \"$ENV{DESTDIR}${file}\""
+    execute_process(
+      COMMAND "../../../../BuildSystem/SafeMib/Binaries/MToolCMake.exe" -E rm -f "$ENV{DESTDIR}${file}"
       OUTPUT_VARIABLE rm_out
-      RETURN_VALUE rm_retval
+      RESULT_VARIABLE rm_retval
       )
     if("${rm_retval}" STREQUAL 0)
     else()

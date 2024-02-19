@@ -26,8 +26,8 @@
 #define CMAKE_USE_WMAKE
 /* #undef CMake_DEFAULT_RECURSION_LIMIT */
 #define CMAKE_BIN_DIR "/bin"
-#define CMAKE_DATA_DIR "/share/cmake-3.27"
-#define CMAKE_DOC_DIR "/doc/cmake-3.27"
+#define CMAKE_DATA_DIR "/share/cmake-3.28"
+#define CMAKE_DOC_DIR "/doc/cmake-3.28"
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 

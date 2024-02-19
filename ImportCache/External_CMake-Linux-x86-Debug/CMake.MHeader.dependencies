@@ -20,6 +20,7 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Source/Checks/cm_c11_thread_local.cmake
 ../../../../External/CMake/Source/Checks/cm_cxx17_check.cmake
 ../../../../External/CMake/Source/Checks/cm_cxx17_check.cpp
+../../../../External/CMake/Source/Checks/cm_cxx_atomic_builtin.cxx
 ../../../../External/CMake/Source/Checks/cm_cxx_features.cmake
 ../../../../External/CMake/Source/Checks/cm_cxx_filesystem.cxx
 ../../../../External/CMake/Source/Checks/cm_cxx_make_unique.cxx
@@ -107,8 +108,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CTestTestCycle/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestDepends/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestEmptyBinaryDirectory/test.cmake.in
-../../../../External/CMake/Tests/CTestTestFailure/testNoBuild.cmake.in
-../../../../External/CMake/Tests/CTestTestFailure/testNoExe.cmake.in
 ../../../../External/CMake/Tests/CTestTestFdSetSize/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestLabelRegExp/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestParallel/test.cmake.in
@@ -135,6 +134,7 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/EnforceConfig.cmake.in
 ../../../../External/CMake/Tests/FindPackageModeMakefileTest/CMakeLists.txt
 ../../../../External/CMake/Tests/FindThreads/CMakeLists.txt
+../../../../External/CMake/Tests/FortranC/Flags.cmake.in
 ../../../../External/CMake/Tests/JacocoCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/JavascriptCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/JavascriptCoverage/output.json.in
