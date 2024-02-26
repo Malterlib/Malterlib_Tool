@@ -112,6 +112,37 @@ Property
 	Property
 	{
 		ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake
+
+		/*
+
+		To generate
+
+		* Set in UserSettings.MSettings:
+			Use Release config
+			MalterlibProfileGuidedOptimization "generate"
+
+		* Build MTool
+
+		* Delete old profiles
+			rm -rf /opt/Temp/MTool
+
+		* Run profiles
+			LLVM_PROFILE_FILE="/opt/Temp/MTool/mtool-%p.profraw" ./Binaries/Malterlib/macOS/arm64/mib generate --action=ReBuild
+			LLVM_PROFILE_FILE="/opt/Temp/MTool/mtool-%p.profraw" ./Binaries/Malterlib/macOS/arm64/mib generate
+			LLVM_PROFILE_FILE="/opt/Temp/MTool/mtool-%p.profraw" ./Binaries/Malterlib/macOS/arm64/mib update_repos
+			LLVM_PROFILE_FILE="/opt/Temp/MTool/mtool-%p.profraw" ./Binaries/Malterlib/macOS/arm64/mib status
+
+		* Merge profiles
+			./Binaries/MalterlibLLVM/macOS/arm64/bin/llvm-profdata merge -output=./Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata /opt/Temp/MTool/*.profraw
+
+		* Copy to other platforms
+			cp Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata Binaries/Malterlib/macOS/x64/ProfileData/
+			cp Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata Binaries/Malterlib/Linux/x86/ProfileData/
+			cp Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata Binaries/Malterlib/Linux/x64/ProfileData/
+			cp Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata Binaries/Malterlib/Linux/arm64/ProfileData/
+
+		*/
+
 		MToolProfDataPath: string = MToolDirectory / "ProfileData/MTool.profdata"
 		MalterlibProfileGuidedOptimization MToolProfDataPath
 		{
