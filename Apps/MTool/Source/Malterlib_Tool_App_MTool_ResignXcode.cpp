@@ -51,10 +51,6 @@ public:
 					*_pCommandLine %= "Source      : {}\n"_f << Source;
 					*_pCommandLine %= "Destination : {}\n"_f << Destination;
 
-					TCActor<CSeparateThreadActor> FileActor{fg_Construct(), "File Actor"};
-
-					CClock Clock{true};
-
 					CStr StateFile = Destination / "Contents/SignState.json";
 
 					CEJSONSorted SignState = EJSONType_Object;
@@ -62,13 +58,9 @@ public:
 					if (CFile::fs_FileExists(StateFile))
 						SignState = CEJSONSorted::fs_FromString(CFile::fs_ReadStringFromFile(StateFile, true), StateFile);
 
-					mint nFiles = 0;
-					mint nFilesSkipped = 0;
-
 					bool bCopyDone = false;
 					if (auto *pValue = SignState.f_GetMember("CopyDone"))
 						bCopyDone = pValue->f_Boolean();
-
 
 					TCSet<CStr> ToSignExecutables;
 
@@ -99,12 +91,21 @@ public:
 
 					TCSet<CStr> SigningWhiteList = {Destination, "/xcodebuild", "/llbuild.framework", "/XCBBuildService.framework", "/XCBBuildService.bundle"};
 
+					mint nFiles = 0;
+					mint nFilesSkipped = 0;
+
 					if (!bCopyDone)
 					{
-						co_await
+						auto BlockingActorCheckout = fg_BlockingActor();
+						auto [nFilesRet, ToSignExecutablesRet, ToSignRet] = co_await
 							(
-								g_Dispatch(FileActor) / [&]
+								g_Dispatch(BlockingActorCheckout) / [Source, Destination, StateFile, SigningWhiteList, pCommandLine = _pCommandLine]
 								{
+									CClock Clock{true};
+									mint nFiles = 0;
+									TCSet<CStr> ToSignExecutables;
+									TCSet<CStr> ToSign;
+
 									CFile::fs_DiffCopyFileOrDirectory
 										(
 											Source
@@ -158,7 +159,7 @@ public:
 												{
 													CUStr ToOutput = CStr("  {} files done"_f << nFiles);
 
-													*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
+													*pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
 													Clock.f_AddOffset(1.0);
 												}
 
@@ -168,11 +169,17 @@ public:
 											}
 											, {} // ExcludePatterns
 											, 0.0
-										 )
+										)
 									;
+
+									return fg_Tuple(nFiles, ToSignExecutables, ToSign);
 								}
 							)
 						;
+
+						nFiles = nFilesRet;
+						ToSignExecutables += ToSignExecutablesRet;
+						ToSign += ToSignRet;
 
 						SignState["CopyDone"] = true;
 						*_pCommandLine %= "\n";
