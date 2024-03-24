@@ -99,6 +99,7 @@ Property
 	}
 	%Dependency "Lib_Malterlib_Perforce"
 	%Dependency "Lib_Malterlib_BuildSystem"
+	%Dependency "Lib_Malterlib_Git"
 	%Dependency "Lib_Malterlib"
 }
 
