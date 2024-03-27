@@ -3,8 +3,8 @@
 #pragma once
 
 #define CMake_VERSION_MAJOR 3
-#define CMake_VERSION_MINOR 27
-#define CMake_VERSION_PATCH 2
-#define CMake_VERSION_SUFFIX "g7331a06"
+#define CMake_VERSION_MINOR 28
+#define CMake_VERSION_PATCH 3
+#define CMake_VERSION_SUFFIX "g93e7993"
 #define CMake_VERSION_IS_DIRTY 0
-#define CMake_VERSION "3.27.2-g7331a06"
+#define CMake_VERSION "3.28.3-g93e7993"

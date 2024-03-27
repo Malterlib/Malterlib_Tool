@@ -7,10 +7,10 @@ string(REPLACE "\n" ";" files "${files}")
 foreach(file ${files})
   message(STATUS "Uninstalling \"$ENV{DESTDIR}${file}\"")
   if(EXISTS "$ENV{DESTDIR}${file}")
-    exec_program(
-      "../../../../Binaries/Malterlib/macOS/arm64/MToolCMake" ARGS "-E rm -f \"$ENV{DESTDIR}${file}\""
+    execute_process(
+      COMMAND "../../../../Binaries/Malterlib/macOS/arm64/MToolCMake" -E rm -f "$ENV{DESTDIR}${file}"
       OUTPUT_VARIABLE rm_out
-      RETURN_VALUE rm_retval
+      RESULT_VARIABLE rm_retval
       )
     if("${rm_retval}" STREQUAL 0)
     else()
