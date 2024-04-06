@@ -372,7 +372,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						CommandParameters.f_Insert(Parameters);
 
 						if (bShellParamsInString)
-							Options.m_Params.f_Insert(CStr::fs_Join(CommandParameters, " "));
+							Options.m_Params.f_Insert(CProcessLaunchParams::fs_GetParamsBash(CommandParameters));
 						else
 							Options.m_Params.f_Insert(CommandParameters);
 					}
