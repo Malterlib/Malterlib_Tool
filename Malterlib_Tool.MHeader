@@ -123,7 +123,7 @@ Property
 		&
 		{
 			CompileDialect "C"
-			GeneratorFamily "Xcode"
+			Compiler "Clang"
 		}
 		Warnings_UnusedFunction false
 		Warnings_VarArgs false
@@ -161,6 +161,7 @@ Property
 			{
 				PlatformType "Windows"
 				!Target.VisualStudioPlatform "Clang"
+				!Target.PlatformToolset "ClangCL"
 			}
 		}
 	}
@@ -173,7 +174,7 @@ Property
 			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
 			Warnings_SingleBitBitfieldConstantConversion false
 			{
-				!!GeneratorFamily "Xcode"
+				!!Compiler "Clang"
 			}
 		}
 		%Dependency "Lib_zlib"
