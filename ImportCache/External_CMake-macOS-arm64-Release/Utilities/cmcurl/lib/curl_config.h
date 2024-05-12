@@ -619,7 +619,7 @@
 /* #undef NEED_REENTRANT */
 
 /* cpu-machine-OS */
-#define OS "arm64-apple-macos10.13"
+#define OS "arm64-apple-macos10.15"
 
 /* Name of package */
 /* #undef PACKAGE */
