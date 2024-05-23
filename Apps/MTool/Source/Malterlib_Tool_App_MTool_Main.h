@@ -9,6 +9,7 @@
 #include <Mib/Container/Registry>
 
 bool fg_IsCMake();
+bool fg_IsLibTool();
 bool fg_IsMalterlib();
 
 class CTool : public CDistributedTool

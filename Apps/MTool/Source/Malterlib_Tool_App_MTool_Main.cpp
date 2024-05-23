@@ -12,6 +12,11 @@ bool fg_IsCMake()
 	return bIsCmake;
 }
 
+bool fg_IsLibTool()
+{
+	return CFile::fs_GetFileNoExt(CFile::fs_GetProgramPath()) == "libtool";
+}
+
 bool fg_IsMalterlib()
 {
 	static bool bIsMalterlb = fg_GetSys()->f_GetProtectedEnvironmentVariable("MToolIsMalterlib", "false") == "true" || CFile::fs_GetFileNoExt(CFile::fs_GetProgramPath()) == "mib";

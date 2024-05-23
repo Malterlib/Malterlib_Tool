@@ -157,71 +157,135 @@ public:
 
 DMibRuntimeClass(CTool, CTool_DoxygenCompile);
 
-class CTool_DoxygenLibTool : public CTool
+class CTool_DoxygenLibTool : public CDistributedTool
 {
 public:
-
-	aint f_Run(NContainer::CRegistry &_Params)
+	void f_Register
+		(
+			TCActor<CDistributedToolAppActor> const &_ToolActor
+			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+			, CDistributedAppCommandLineSpecification &o_CommandLine
+			, NStr::CStr const &_ClassName
+		)
 	{
-		CDependencyFile DependencyFile;
-		DependencyFile.f_AddTool("libtool");
+		if (!fg_IsLibTool())
+			return;
 
-		CRegistry Registry = fg_ExtractOptions(_Params);
-
-		auto pFilesReg = Registry.f_CreateChild("Files");
-
-		auto pFileFile = Registry.f_GetChild("-filelist");
-		if (pFileFile)
-		{
-			CStr FileContents = CFile::fs_ReadStringFromFile(CStr(pFileFile->f_GetThisValue()));
-			while (!FileContents.f_IsEmpty())
-			{
-				CStr FileName = fg_GetStrLineSep(FileContents);
-				DependencyFile.f_AddInput(FileName);
-
-				if (CFile::fs_GetExtension(FileName).f_CmpNoCase("o") == 0)
-					pFilesReg->f_CreateChildNoPath(FileName, true);
-				else if (CFile::fs_GetExtension(FileName).f_CmpNoCase("a") == 0)
+		o_ToolsSection.f_RegisterDirectCommand
+			(
 				{
-					CRegistry LibraryContents;
-					LibraryContents.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
+					"Names"_o= {"-V"}
+					, "Description"_o= "Libtool version.\n"
+					, "ErrorOnCommandAsParameter"_o= false
+					, "ErrorOnOptionAsParameter"_o= false
+					, "GreedyDefaultCommand"_o= true
+				}
+				, [](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				{
+					DMibConOut2("Apple Inc. version cctools-1010.6\n");
+					return 0;
+				}
+			)
+		;
 
-					auto pFiles = LibraryContents.f_GetChildNoPath("Files");
-					if (pFiles)
+		auto LibToolCommand = o_ToolsSection.f_RegisterDirectCommand
+			(
+				{
+					"Names"_o= {"libtool"}
+					, "Description"_o= "Runs libtool command line.\n"
+					, "Parameters"_o=
 					{
-						for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
+						"Params...?"_o=
 						{
-							DependencyFile.f_AddInput(iFile->f_GetName());
-							pFilesReg->f_CreateChildNoPath(iFile->f_GetName(), true);
+							"Type"_o= {""}
+							, "Description"_o= "The cmake params."
 						}
 					}
+					, "ErrorOnCommandAsParameter"_o= false
+					, "ErrorOnOptionAsParameter"_o= false
+					, "GreedyDefaultCommand"_o= true
 				}
-			}
-		}
+				, [](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				{
+					CDependencyFile DependencyFile;
+					DependencyFile.f_AddTool("libtool");
 
-//		DConOut("\n{}\n", Registry.f_GenerateStr());
 
-		CStr OutputFile = Registry.f_GetValue("-o", "");
-		if (OutputFile.f_IsEmpty())
-			DError("No output file found in command line options");
+					CRegistry Params;
 
-		DependencyFile.f_AddOutput(OutputFile);
+					if (auto pParams = _Params.f_GetMember("Params"))
+					{
+						mint iParam = 0;
+						for (auto &Param : pParams->f_Array())
+						{
+							Params.f_SetValue(CStr::fs_ToStr(iParam), Param.f_String());
+							++iParam;
+						}
+					}
 
-		{
-			//DConOut("Writing to: {}{\n}", OutputFile);
-			CStr Data = Registry.f_GenerateStr();
-			CFile::fs_WriteStringToFile(CStr(OutputFile), Data);
-		}
+					CRegistry Registry = fg_ExtractOptions(Params);
 
-		if (auto pDependenciesFile = Registry.f_GetChild("-dependency_info"))
-			CFile::fs_WriteFile(pDependenciesFile->f_GetThisValue(), DependencyFile.m_Stream.f_MoveVector());
+					auto pFilesReg = Registry.f_CreateChild("Files");
 
-		return 0;
+					if (Registry.f_GetChild("-V"))
+					{
+						DMibConOut2("Apple Inc. version cctools-1010.6\n");
+						return 0;
+					}
+
+					auto pFileFile = Registry.f_GetChild("-filelist");
+					if (pFileFile)
+					{
+						CStr FileContents = CFile::fs_ReadStringFromFile(CStr(pFileFile->f_GetThisValue()));
+						while (!FileContents.f_IsEmpty())
+						{
+							CStr FileName = fg_GetStrLineSep(FileContents);
+							DependencyFile.f_AddInput(FileName);
+
+							if (CFile::fs_GetExtension(FileName).f_CmpNoCase("o") == 0)
+								pFilesReg->f_CreateChildNoPath(FileName, true);
+							else if (CFile::fs_GetExtension(FileName).f_CmpNoCase("a") == 0)
+							{
+								CRegistry LibraryContents;
+								LibraryContents.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
+
+								auto pFiles = LibraryContents.f_GetChildNoPath("Files");
+								if (pFiles)
+								{
+									for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
+									{
+										DependencyFile.f_AddInput(iFile->f_GetName());
+										pFilesReg->f_CreateChildNoPath(iFile->f_GetName(), true);
+									}
+								}
+							}
+						}
+					}
+
+					CStr OutputFile = Registry.f_GetValue("-o", "");
+					if (OutputFile.f_IsEmpty())
+						DError("No output file found in command line options");
+
+					DependencyFile.f_AddOutput(OutputFile);
+
+					{
+						CStr Data = Registry.f_GenerateStr();
+						CFile::fs_WriteStringToFile(CStr(OutputFile), Data);
+					}
+
+					if (auto pDependenciesFile = Registry.f_GetChild("-dependency_info"))
+						CFile::fs_WriteFile(pDependenciesFile->f_GetThisValue(), DependencyFile.m_Stream.f_MoveVector());
+
+					return 0;
+				}
+			)
+		;
+
+		o_CommandLine.f_SetDefaultCommand(LibToolCommand);
 	}
 };
 
 DMibRuntimeClass(CTool, CTool_DoxygenLibTool);
-
 
 class CTool_DoxygenLD : public CTool
 {
