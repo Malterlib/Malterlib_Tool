@@ -14,7 +14,28 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				"Names"_o= {"update_repos"}
 				, "Description"_o= "Update repositories.\n"
 				, "Category"_o= "Repository management"
-				, "Options"_o= {fs_CachedEnvironmentOption(true)}
+				, "Options"_o= 
+				{
+					"ApplyRepoPolicy?"_o=
+					{
+						"Names"_o= {"--apply-policy"}
+						, "Default"_o= false
+						, "Description"_o= "Apply repo policies.\n"
+					}
+					, "ApplyRepoPolicyPretend?"_o=
+					{
+						"Names"_o= {"--apply-policy-pretend"}
+						, "Default"_o= true
+						, "Description"_o= "Instead of applying repo policy, show what would be changed.\n"
+					}
+					, "ApplyRepoPolicyCreateMissing?"_o=
+					{
+						"Names"_o= {"--apply-policy-create-missing"}
+						, "Default"_o= false
+						, "Description"_o= "Create missing repositories when applying policies.\n"
+					}
+					, fs_CachedEnvironmentOption(true)
+				}
 			}
 			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
 			{
