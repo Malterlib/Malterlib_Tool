@@ -150,7 +150,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, "NeedActionOnPull?"_o=
 					{
 						"Names"_o= {"--need-action-on-pull"}
-						, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPull", "true") == "true"
+						, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPull", "false") == "true"
 						, "Description"_o= "Consider repositories that needs to be pulled as requiring action when --open-editor is specified.\n"
 					}
 					, "NeedActionOnLocalChanes?"_o=
