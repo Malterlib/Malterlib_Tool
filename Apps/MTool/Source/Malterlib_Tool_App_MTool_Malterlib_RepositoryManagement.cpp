@@ -34,6 +34,24 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_o= false
 						, "Description"_o= "Create missing repositories when applying policies.\n"
 					}
+					, "UpdateLfsReleaseIndexes?"_o=
+					{
+						"Names"_o= {"--update-lfs-release-indexes"}
+						, "Default"_o= false
+						, "Description"_o= "Update lfs release indexes on remotes.\n"
+					}
+					, "UpdateLfsReleaseIndexesPretend?"_o=
+					{
+						"Names"_o= {"--update-lfs-release-indexes-pretend"}
+						, "Default"_o= false
+						, "Description"_o= "Don't do any actions, just log what would be done.\n"
+					}
+					, "UpdateLfsReleaseIndexesPruneOrphanedAssets?"_o=
+					{
+						"Names"_o= {"--update-lfs-release-indexes-prune-orphaned-assets"}
+						, "Default"_o= false
+						, "Description"_o= "Remove orphaned LFS assets from releases on hosting provider.\n"
+					}
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
