@@ -110,9 +110,15 @@ Property
 		!!CompileDialect "C"
 		PreprocessorDefines += "CMAKE_MALTERLIB_EXEFS"
 	}
+	
 	Property
 	{
 		ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake
+
+		MalterlibLog_Severities ["Error", "Critical", "Warning"]
+		{
+			!!Configuration "Release"
+		}		
 
 		/*
 
