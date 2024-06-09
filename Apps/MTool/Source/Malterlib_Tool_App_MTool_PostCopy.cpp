@@ -99,7 +99,7 @@ public:
 
 		CBuildSystemRegistry Registry;
 		CStringCache StringCache;
-		TCSet<CStr> SourceFiles;
+		TCMap<CStr, TCSharedPointer<CHashDigest_SHA256>> SourceFiles;
 		NBuildSystem::CFindCache FindCache;
 		if (CFile::fs_FileExists(ConfigFile))
 		{
