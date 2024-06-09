@@ -123,6 +123,15 @@ Property
 		&
 		{
 			CompileDialect "C"
+			Compiler "MSVC"
+		}
+		Warnings_ConversionToSmallerInt false
+	}
+	Compile
+	{
+		&
+		{
+			CompileDialect "C"
 			Compiler "Clang"
 		}
 		Warnings_UnusedFunction false
@@ -130,6 +139,7 @@ Property
 		Warnings_UnusedValue false
 		Warnings_TautolagicalPointerCompare false
 		Warnings_DeprecatedDeclarations false
+
 		PreprocessorDefines += ["_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR=1", "_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS=1"]
 
 		PreprocessorDefines += ["_GNU_SOURCE"]
