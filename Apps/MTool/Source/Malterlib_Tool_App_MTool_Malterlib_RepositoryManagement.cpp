@@ -977,4 +977,48 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			}
 		)
 	;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= {"release-package"}
+				, "Description"_o= "Release package to repository hosting provider.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
+				{
+					Filter_Name
+					, fFilter_Type("")
+					, Filter_Tags
+					, Filter_Branch
+					, fFilter_OnlyChanged(false)
+					, fs_CachedEnvironmentOption(true)
+				}
+			}
+			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				co_return co_await f_RunBuildSystem
+					(
+						[&](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+						{
+							co_await ECoroutineFlag_AllowReferences;
+							co_return co_await _BuildSystem.f_Action_Repository_ReleasePackage
+								(
+									GenerateOptions
+									, RepoFilter
+									, _pCommandLine
+								)
+							;
+						}
+						, _pCommandLine
+						, &GenerateOptions
+					)
+				;
+			}
+		)
+	;
 }
