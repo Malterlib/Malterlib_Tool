@@ -13,6 +13,7 @@ Property.CMakeOutputPath_libarchive: string = `@('../..'->MakeAbsolute())`->Make
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmbzip2`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/api`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd`->MakeAbsolute(),
+			`@('../../../../../..'->MakeAbsolute())/External/boringssl/include`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@('../../../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()

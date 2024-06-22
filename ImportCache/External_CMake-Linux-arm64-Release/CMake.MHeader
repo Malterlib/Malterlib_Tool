@@ -1048,6 +1048,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/include`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/boringssl/include`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmnghttp2/lib/includes`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
@@ -1088,6 +1089,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('.'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmcurl/include`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/boringssl/include`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmnghttp2/lib/includes`->MakeAbsolute(),
 			`@('.'->MakeAbsolute())/Utilities/cmcurl/include`->MakeAbsolute(),
 			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
@@ -3244,6 +3246,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmbzip2`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/api`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/boringssl/include`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
