@@ -145,4 +145,39 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 		)
 	;
 #endif
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= {"install-binaries"}
+				, "Description"_o= "Install binaries used for bootstrap and LFS storage.\n"
+				, "Category"_o= "Core"
+				, "Options"_o=
+				{
+					fs_CachedEnvironmentOption(true)
+				}
+			}
+			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			{
+				TCSharedPointer<TCAtomic<bool>> pCancelled = fg_Construct();
+				CBuildSystem BuildSystem
+					(
+						_pCommandLine->f_AnsiEncoding().f_Flags()
+						, [_pCommandLine](NStr::CStr const &_Output, bool _bError)
+						{
+							if (_bError)
+								*_pCommandLine %= _Output;
+							else
+								*_pCommandLine += _Output;
+						}
+						, pCancelled
+					)
+				;
+
+				co_await BuildSystem.f_SetupGlobalMTool();
+				co_await BuildSystem.f_SetupBootstrapMTool();
+
+				co_return 0;
+			}
+		)
+	;
 }
