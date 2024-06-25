@@ -120,6 +120,11 @@ Property
 			!!Configuration "Release"
 		}		
 
+		MalterlibLog_Severities ["Error", "Critical", "Warning", "Info", "Debug"]
+		{
+			!Configuration "Release"
+		}
+
 		/*
 
 		To generate
