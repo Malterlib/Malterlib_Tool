@@ -1,0 +1,1329 @@
+Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute()
+%Target "Com_ninja_ninja"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../../../../External/ninja'->MakeAbsolute())/src`->MakeAbsolute()
+		]
+		PreprocessorDefines += [
+			"NINJA_HAVE_BROWSE"
+		]
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "ninja_ninja"
+	Target.BaseFileName "ninja"
+	%Group "src"
+	{
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/ninja.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/browse.cc`
+		{
+			Compile.Type "C++"
+			Compile.PreprocessorDefines += [
+				"NINJA_PYTHON=\"python3\""
+			]
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/browse.py`
+		{
+			Compile
+			{
+				Type "Custom"
+				Custom_CommandLine `MToolCMake -E make_directory @(`@('.'->MakeAbsolute())/build`->MakeAbsolute()->EscapeHost()) && src/inline.sh kBrowsePy < src/browse.py > @(`@(CMakeIntermediateDirectory)/External_ninja/build/browse_py.h`->MakeAbsolute()->EscapeHost())`
+				AllowNonExisting true
+				Custom_WorkingDirectory `@('../../../../External/ninja'->MakeAbsolute())`->MakeAbsolute()
+				Custom_Outputs [
+					`@(CMakeIntermediateDirectory)/External_ninja/build/browse_py.h`->MakeAbsolute()
+				]
+				Custom_Inputs [
+					`@('../../../../External/ninja'->MakeAbsolute())/src/browse.py`->MakeAbsolute(),
+					`@('../../../../External/ninja'->MakeAbsolute())/src/inline.sh`->MakeAbsolute()
+				]
+			}
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clean.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/debug_flags.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/deps_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/disk_interface.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/edit_distance.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/eval_env.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graphviz.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/json.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/line_printer.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/metrics.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/missing_deps.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/null_terminated_string_array.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/state.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/status.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/string_piece_util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/version.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/subprocess-posix.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/lexer.cc`
+		{
+			Compile.Type "C++"
+		}
+	}
+}
+%Target "Tool_ninja_Experimental"
+{
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Compile.Disabled true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "Tool"
+	Target.BaseName "ninja_Experimental"
+	Target.BaseFileName "Experimental"
+	%Group "macOS"
+	{
+		%Group "arm64e"
+		{
+			%Group `@(FullConfiguration)`
+			{
+				%Group "CMakeFiles"
+				{
+					%File `@('.'->MakeAbsolute())/CMakeFiles/Experimental.rule`
+					{
+						Compile
+						{
+							Type "Custom"
+							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/macOS/arm64/ctest`->MakeAbsolute()->EscapeHost()) -D Experimental`
+							AllowNonExisting true
+							Disabled false
+							Custom_WorkingDirectory `@('.'->MakeAbsolute())`->MakeAbsolute()
+							Custom_Outputs []
+							Custom_Inputs []
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target "Tool_ninja_Nightly"
+{
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Compile.Disabled true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "Tool"
+	Target.BaseName "ninja_Nightly"
+	Target.BaseFileName "Nightly"
+	%Group "macOS"
+	{
+		%Group "arm64e"
+		{
+			%Group `@(FullConfiguration)`
+			{
+				%Group "CMakeFiles"
+				{
+					%File `@('.'->MakeAbsolute())/CMakeFiles/Nightly.rule`
+					{
+						Compile
+						{
+							Type "Custom"
+							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/macOS/arm64/ctest`->MakeAbsolute()->EscapeHost()) -D Nightly`
+							AllowNonExisting true
+							Disabled false
+							Custom_WorkingDirectory `@('.'->MakeAbsolute())`->MakeAbsolute()
+							Custom_Outputs []
+							Custom_Inputs []
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target "Tool_ninja_Continuous"
+{
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Compile.Disabled true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "Tool"
+	Target.BaseName "ninja_Continuous"
+	Target.BaseFileName "Continuous"
+	%Group "macOS"
+	{
+		%Group "arm64e"
+		{
+			%Group `@(FullConfiguration)`
+			{
+				%Group "CMakeFiles"
+				{
+					%File `@('.'->MakeAbsolute())/CMakeFiles/Continuous.rule`
+					{
+						Compile
+						{
+							Type "Custom"
+							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/macOS/arm64/ctest`->MakeAbsolute()->EscapeHost()) -D Continuous`
+							AllowNonExisting true
+							Disabled false
+							Custom_WorkingDirectory `@('.'->MakeAbsolute())`->MakeAbsolute()
+							Custom_Outputs []
+							Custom_Inputs []
+						}
+					}
+				}
+			}
+		}
+	}
+}
+%Target "Com_ninja_ninja_test"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../../../../External/ninja'->MakeAbsolute())/src`->MakeAbsolute()
+		]
+		PreprocessorDefines += []
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "ninja_ninja_test"
+	Target.BaseFileName "ninja_test"
+	%Group "src"
+	{
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clean_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/deps_log_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/disk_interface_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep_parser_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/edit_distance_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/json_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/lexer_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/missing_deps_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/ninja_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/state_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/string_piece_util_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/subprocess_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/util_test.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clean.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/debug_flags.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/deps_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/disk_interface.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/edit_distance.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/eval_env.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graphviz.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/json.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/line_printer.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/metrics.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/missing_deps.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/null_terminated_string_array.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/state.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/status.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/string_piece_util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/version.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/subprocess-posix.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/lexer.cc`
+		{
+			Compile.Type "C++"
+		}
+	}
+}
+%Target "Com_ninja_build_log_perftest"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../../../../External/ninja'->MakeAbsolute())/src`->MakeAbsolute()
+		]
+		PreprocessorDefines += []
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "ninja_build_log_perftest"
+	Target.BaseFileName "build_log_perftest"
+	%Group "src"
+	{
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log_perftest.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clean.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/debug_flags.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/deps_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/disk_interface.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/edit_distance.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/eval_env.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graphviz.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/json.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/line_printer.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/metrics.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/missing_deps.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/null_terminated_string_array.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/state.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/status.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/string_piece_util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/version.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/subprocess-posix.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/lexer.cc`
+		{
+			Compile.Type "C++"
+		}
+	}
+}
+%Target "Com_ninja_canon_perftest"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../../../../External/ninja'->MakeAbsolute())/src`->MakeAbsolute()
+		]
+		PreprocessorDefines += []
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "ninja_canon_perftest"
+	Target.BaseFileName "canon_perftest"
+	%Group "src"
+	{
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/canon_perftest.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clean.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/debug_flags.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/deps_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/disk_interface.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/edit_distance.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/eval_env.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graphviz.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/json.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/line_printer.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/metrics.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/missing_deps.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/null_terminated_string_array.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/state.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/status.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/string_piece_util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/version.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/subprocess-posix.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/lexer.cc`
+		{
+			Compile.Type "C++"
+		}
+	}
+}
+%Target "Com_ninja_clparser_perftest"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../../../../External/ninja'->MakeAbsolute())/src`->MakeAbsolute()
+		]
+		PreprocessorDefines += []
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "ninja_clparser_perftest"
+	Target.BaseFileName "clparser_perftest"
+	%Group "src"
+	{
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser_perftest.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clean.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/debug_flags.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/deps_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/disk_interface.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/edit_distance.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/eval_env.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graphviz.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/json.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/line_printer.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/metrics.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/missing_deps.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/null_terminated_string_array.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/state.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/status.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/string_piece_util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/version.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/subprocess-posix.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/lexer.cc`
+		{
+			Compile.Type "C++"
+		}
+	}
+}
+%Target "Com_ninja_depfile_parser_perftest"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../../../../External/ninja'->MakeAbsolute())/src`->MakeAbsolute()
+		]
+		PreprocessorDefines += []
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "ninja_depfile_parser_perftest"
+	Target.BaseFileName "depfile_parser_perftest"
+	%Group "src"
+	{
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser_perftest.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clean.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/debug_flags.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/deps_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/disk_interface.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/edit_distance.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/eval_env.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graphviz.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/json.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/line_printer.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/metrics.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/missing_deps.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/null_terminated_string_array.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/state.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/status.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/string_piece_util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/version.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/subprocess-posix.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/lexer.cc`
+		{
+			Compile.Type "C++"
+		}
+	}
+}
+%Target "Com_ninja_hash_collision_bench"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../../../../External/ninja'->MakeAbsolute())/src`->MakeAbsolute()
+		]
+		PreprocessorDefines += []
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "ninja_hash_collision_bench"
+	Target.BaseFileName "hash_collision_bench"
+	%Group "src"
+	{
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/hash_collision_bench.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clean.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/debug_flags.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/deps_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/disk_interface.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/edit_distance.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/eval_env.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graphviz.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/json.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/line_printer.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/metrics.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/missing_deps.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/null_terminated_string_array.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/state.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/status.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/string_piece_util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/version.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/subprocess-posix.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/lexer.cc`
+		{
+			Compile.Type "C++"
+		}
+	}
+}
+%Target "Com_ninja_manifest_parser_perftest"
+{
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@('../../../../External/ninja'->MakeAbsolute())/src`->MakeAbsolute()
+		]
+		PreprocessorDefines += []
+	}
+	Property.MalterlibTargetNameType "Normal"
+	Compile.AllowNonExisting true
+	Target.Group "External/ninja"
+	{
+		!!Target.Group undefined
+	}
+	Target.Type "ConsoleExecutable"
+	Target.BaseName "ninja_manifest_parser_perftest"
+	Target.BaseFileName "manifest_parser_perftest"
+	%Group "src"
+	{
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser_perftest.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/build.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clean.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/clparser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/dyndep_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/debug_flags.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/deps_log.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/disk_interface.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/edit_distance.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/eval_env.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graphviz.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/json.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/line_printer.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/manifest_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/metrics.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/missing_deps.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/null_terminated_string_array.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/state.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/status.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/string_piece_util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/util.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/version.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/subprocess-posix.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/depfile_parser.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/lexer.cc`
+		{
+			Compile.Type "C++"
+		}
+	}
+}
