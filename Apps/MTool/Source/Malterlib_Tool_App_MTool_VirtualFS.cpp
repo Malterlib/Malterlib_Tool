@@ -519,7 +519,7 @@ public:
 		VirtualFS.f_Create(pActiveTargetStream, ClusterSize, GrowSize, GrowSize);
 
 #if defined(DPlatformFamily_Windows)
-		CStr TLogFileName = CStr::CFormat("{}/{}.read.1.appendtlog") << CFile::fs_GetPath(TargetFilename) << CFile::fs_GetFileNoExt(CFile::fs_GetProgramPath());
+		CStr TLogFileName = CStr::CFormat("{}/{}.read.1.appendtlog") << CFile::fs_GetPath(TargetFilename) << CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath());
 		CFile TLogFile;
 		TLogFile.f_Open(TLogFileName, EFileOpen_Write | EFileOpen_ShareAll);
 		CByteVector Data;

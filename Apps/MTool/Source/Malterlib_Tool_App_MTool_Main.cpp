@@ -3,23 +3,24 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include <Mib/Core/Application>
+#include <Mib/Process/Platform>
 
 DMibRuntimeClass(NMib::NConcurrency::CDistributedTool, CTool);
 
 bool fg_IsCMake()
 {
-	static bool bIsCmake = CFile::fs_GetFileNoExt(CFile::fs_GetProgramPath()) == "MToolCMake";
+	static bool bIsCmake = CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "MToolCMake";
 	return bIsCmake;
 }
 
 bool fg_IsLibTool()
 {
-	return CFile::fs_GetFileNoExt(CFile::fs_GetProgramPath()) == "libtool";
+	return CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "libtool";
 }
 
 bool fg_IsMalterlib()
 {
-	static bool bIsMalterlb = fg_GetSys()->f_GetProtectedEnvironmentVariable("MToolIsMalterlib", "false") == "true" || CFile::fs_GetFileNoExt(CFile::fs_GetProgramPath()) == "mib";
+	static bool bIsMalterlb = fg_GetSys()->f_GetProtectedEnvironmentVariable("MToolIsMalterlib", "false") == "true" || CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "mib";
 	return bIsMalterlb;
 }
 
