@@ -13,7 +13,7 @@ popd
 source "$MalterlibRoot/Malterlib/Core/Scripts/Detect.sh"
 DistributionDir="$MalterlibRoot/Binaries/MalterlibLLVM/$MalterlibPlatform/$MalterlibArch"
 
-LLVMVersion=18.1.8
+LLVMVersion=19.1.0
 
 ExtraCMake="-G Ninja"
 RootDir="$ScriptDir"
