@@ -178,6 +178,8 @@ BuildCompiler()
 	popd
 	pushd "$RootDir/build/dist_temp2"
 		ExtraCMake="$ExtraCMake -DBOOTSTRAP_CMAKE_INSTALL_PREFIX=$DistributionDir"
+		ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_PGO=OFF"
+		ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_LTO=OFF"
 
 		(cmake $ExtraCMake -C "$MalterlibRoot/External/llvm-project/clang/cmake/caches/Release.cmake" "$MalterlibRoot/External/llvm-project/llvm")
 
