@@ -97,13 +97,6 @@ Property
 		}
 	}
 
-	Target.ExtraGroups =+ "~Automatic/DependBoringSSL"
-	{
-		&
-		{
-			TargetIsExecutable true
-		}
-	}
 	Target.LinkerGroup "CMake"
 	Compile
 	{
