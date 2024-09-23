@@ -4,7 +4,7 @@
 #define BYTEORDER 1234
 
 /* Define to 1 if you have the `arc4random' function. */
-#define HAVE_ARC4RANDOM
+/* #undef HAVE_ARC4RANDOM */
 
 /* Define to 1 if you have the `arc4random_buf' function. */
 #define HAVE_ARC4RANDOM_BUF

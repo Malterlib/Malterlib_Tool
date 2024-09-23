@@ -14,8 +14,13 @@
 #pragma warning(disable : 1572) /* floating-point equality test */
 #endif
 
-#if defined(__LCC__) && defined(__EDG__) && (__LCC__ == 123)
+#if defined(__LCC__) && defined(__EDG__)
+#if __LCC__ == 123
 #pragma diag_suppress 2910 /* excess -Wunused-function in 1.23.x */
+#elif __LCC__ == 121
+#pragma diag_suppress 2727 /* excess -Wunused-function in 1.21.x */
+#include <limits.h>        /* ..._MIN, ..._MAX constants */
+#endif
 #endif
 
 #define HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE
@@ -26,8 +31,8 @@
 #define CMAKE_USE_WMAKE
 /* #undef CMake_DEFAULT_RECURSION_LIMIT */
 #define CMAKE_BIN_DIR "/bin"
-#define CMAKE_DATA_DIR "/share/cmake-3.28"
-#define CMAKE_DOC_DIR "/doc/cmake-3.28"
+#define CMAKE_DATA_DIR "/share/cmake-3.30"
+#define CMAKE_DOC_DIR "/doc/cmake-3.30"
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 

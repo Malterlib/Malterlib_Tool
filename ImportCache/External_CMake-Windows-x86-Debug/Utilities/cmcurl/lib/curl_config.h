@@ -67,8 +67,14 @@
 /* disables FTP */
 /* #undef CURL_DISABLE_FTP */
 
+/* disables curl_easy_options API for existing options to curl_easy_setopt */
+/* #undef CURL_DISABLE_GETOPTIONS */
+
 /* disables GOPHER */
 #define CURL_DISABLE_GOPHER 1
+
+/* disables headers-api support */
+/* #undef CURL_DISABLE_HEADERS_API */
 
 /* disables HSTS support */
 /* #undef CURL_DISABLE_HSTS */
@@ -90,6 +96,9 @@
 
 /* disables MIME support */
 /* #undef CURL_DISABLE_MIME */
+
+/* disables local binding support */
+/* #undef CURL_DISABLE_BINDLOCAL */
 
 /* disables MQTT */
 #define CURL_DISABLE_MQTT 1
@@ -147,7 +156,7 @@
 /* #undef USE_WIN32_LDAP */
 
 /* Define if you want to enable IPv6 support */
-#define ENABLE_IPV6 1
+#define USE_IPV6 1
 
 /* Define to 1 if you have the alarm function. */
 /* #undef HAVE_ALARM */
@@ -160,9 +169,6 @@
 
 /* Define to 1 if you have _Atomic support. */
 /* #undef HAVE_ATOMIC */
-
-/* Define to 1 if you have the `fchmod' function. */
-/* #undef HAVE_FCHMOD */
 
 /* Define to 1 if you have the `fnmatch' function. */
 /* #undef HAVE_FNMATCH */
@@ -186,6 +192,12 @@
 /* Define to 1 if you have the `closesocket' function. */
 #define HAVE_CLOSESOCKET 1
 
+/* Define to 1 if you have the <dirent.h> header file. */
+/* #undef HAVE_DIRENT_H */
+
+/* Define to 1 if you have the `opendir' function. */
+/* #undef HAVE_OPENDIR */
+
 /* Define to 1 if you have the fcntl function. */
 /* #undef HAVE_FCNTL */
 
@@ -200,6 +212,9 @@
 
 /* Define to 1 if you have the fseeko function. */
 /* #undef HAVE_FSEEKO */
+
+/* Define to 1 if you have the fseeko declaration. */
+/* #undef HAVE_DECL_FSEEKO */
 
 /* Define to 1 if you have the _fseeki64 function. */
 #define HAVE__FSEEKI64 1
@@ -282,12 +297,6 @@
 /* if you have the GNU gssapi libraries */
 /* #undef HAVE_GSSGNU */
 
-/* if you have the Heimdal gssapi libraries */
-/* #undef HAVE_GSSHEIMDAL */
-
-/* if you have the MIT gssapi libraries */
-/* #undef HAVE_GSSMIT */
-
 /* Define to 1 if you have the `idna_strerror' function. */
 /* #undef HAVE_IDNA_STRERROR */
 
@@ -306,9 +315,6 @@
 /* Define to 1 if symbol `ADDRESS_FAMILY' exists */
 /* #undef HAVE_ADDRESS_FAMILY */
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-#define HAVE_INTTYPES_H 1
-
 /* Define to 1 if you have the ioctlsocket function. */
 #define HAVE_IOCTLSOCKET 1
 
@@ -317,7 +323,7 @@
 
 /* Define to 1 if you have a working IoctlSocket camel case FIONBIO function.
    */
-#define HAVE_IOCTLSOCKET_CAMEL_FIONBIO 1
+/* #undef HAVE_IOCTLSOCKET_CAMEL_FIONBIO */
 
 /* Define to 1 if you have a working ioctlsocket FIONBIO function. */
 #define HAVE_IOCTLSOCKET_FIONBIO 1
@@ -492,9 +498,6 @@
 /* Define to 1 if you have the <stdbool.h> header file. */
 #define HAVE_STDBOOL_H 1
 
-/* Define to 1 if you have the <stdint.h> header file. */
-#define HAVE_STDINT_H 1
-
 /* Define to 1 if you have the strcasecmp function. */
 /* #undef HAVE_STRCASECMP */
 
@@ -591,23 +594,8 @@
 /* Define to 1 if you have the <utime.h> header file. */
 /* #undef HAVE_UTIME_H */
 
-/* Define to 1 if compiler supports C99 variadic macro style. */
-#define HAVE_VARIADIC_MACROS_C99 1
-
-/* Define to 1 if compiler supports old gcc variadic macro style. */
-/* #undef HAVE_VARIADIC_MACROS_GCC */
-
-/* Define to 1 if you have the windows.h header file. */
-#define HAVE_WINDOWS_H 1
-
-/* Define to 1 if you have the winsock2.h header file. */
-#define HAVE_WINSOCK2_H 1
-
 /* Define this symbol if your OS supports changing the contents of argv */
 /* #undef HAVE_WRITABLE_ARGV */
-
-/* Define to 1 if you have the ws2tcpip.h header file. */
-#define HAVE_WS2TCPIP_H 1
 
 /* Define to 1 if you need the lber.h header file even with ldap.h */
 /* #undef NEED_LBER_H */
@@ -725,14 +713,14 @@
 /* if libPSL is in use */
 /* #undef USE_LIBPSL */
 
-/* If you want to build curl with the built-in manual */
-/* #undef USE_MANUAL */
-
 /* if you want to use OpenLDAP code instead of legacy ldap implementation */
 /* #undef USE_OPENLDAP */
 
 /* if OpenSSL is in use */
 /* #undef USE_OPENSSL */
+
+/* if librtmp/rtmpdump is in use */
+/* #undef USE_LIBRTMP */
 
 /* Define to 1 if you don't want the OpenSSL configuration to be loaded
    automatically */
@@ -749,6 +737,9 @@
 
 /* to enable quiche */
 /* #undef USE_QUICHE */
+
+/* to enable openssl + nghttp3 */
+/* #undef USE_OPENSSL_QUIC */
 
 /* Define to 1 if you have the quiche_conn_set_qlog_fd function. */
 /* #undef HAVE_QUICHE_CONN_SET_QLOG_FD */
@@ -791,12 +782,6 @@
 /* Type to use in place of in_addr_t when system does not provide it. */
 #define in_addr_t unsigned long
 
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-#undef inline
-#endif
-
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 /* #undef size_t */
 
@@ -819,6 +804,9 @@
 /* to enable Windows IDN */
 /* #undef USE_WIN32_IDN */
 
+/* to enable Apple IDN */
+/* #undef USE_APPLE_IDN */
+
 /* Define to 1 to enable websocket support. */
 /* #undef USE_WEBSOCKETS */
 
@@ -830,3 +818,9 @@
 
 /* Define to 1 to enable TLS-SRP support. */
 /* #undef USE_TLS_SRP */
+
+/* Define to 1 to query for HTTPSRR when using DoH */
+/* #undef USE_HTTPSRR */
+
+/* if ECH support is available */
+/* #undef USE_ECH */

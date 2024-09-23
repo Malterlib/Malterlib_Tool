@@ -13,6 +13,7 @@ Property.CMakeOutputPath_librhash: string = `@('../..'->MakeAbsolute())`->MakeAb
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
+			"NO_IMPORT_EXPORT",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE"
 		]
@@ -105,6 +106,10 @@ Property.CMakeOutputPath_librhash: string = `@('../..'->MakeAbsolute())`->MakeAb
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibrhash/librhash/ustd.h`
 			{
 				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibrhash/librhash/util.c`
+			{
+				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibrhash/librhash/util.h`
 			{

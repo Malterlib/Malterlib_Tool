@@ -38,6 +38,9 @@
 /* MD5 via ARCHIVE_CRYPTO_MD5_LIBSYSTEM supported. */
 /* #undef ARCHIVE_CRYPTO_MD5_LIBSYSTEM */
 
+/* MD5 via ARCHIVE_CRYPTO_MD5_MBEDTLS supported. */
+/* #undef ARCHIVE_CRYPTO_MD5_MBEDTLS */
+
 /* MD5 via ARCHIVE_CRYPTO_MD5_NETTLE supported. */
 /* #undef ARCHIVE_CRYPTO_MD5_NETTLE */
 
@@ -53,6 +56,9 @@
 /* RMD160 via ARCHIVE_CRYPTO_RMD160_NETTLE supported. */
 /* #undef ARCHIVE_CRYPTO_RMD160_NETTLE */
 
+/* RMD160 via ARCHIVE_CRYPTO_RMD160_MBEDTLS supported. */
+/* #undef ARCHIVE_CRYPTO_RMD160_MBEDTLS */
+
 /* RMD160 via ARCHIVE_CRYPTO_RMD160_OPENSSL supported. */
 /* #undef ARCHIVE_CRYPTO_RMD160_OPENSSL */
 
@@ -61,6 +67,9 @@
 
 /* SHA1 via ARCHIVE_CRYPTO_SHA1_LIBSYSTEM supported. */
 /* #undef ARCHIVE_CRYPTO_SHA1_LIBSYSTEM */
+
+/* SHA1 via ARCHIVE_CRYPTO_SHA1_MBEDTLS supported. */
+/* #undef ARCHIVE_CRYPTO_SHA1_MBEDTLS */
 
 /* SHA1 via ARCHIVE_CRYPTO_SHA1_NETTLE supported. */
 /* #undef ARCHIVE_CRYPTO_SHA1_NETTLE */
@@ -83,6 +92,9 @@
 /* SHA256 via ARCHIVE_CRYPTO_SHA256_LIBSYSTEM supported. */
 /* #undef ARCHIVE_CRYPTO_SHA256_LIBSYSTEM */
 
+/* SHA256 via ARCHIVE_CRYPTO_SHA256_MBEDTLS supported. */
+/* #undef ARCHIVE_CRYPTO_SHA256_MBEDTLS */
+
 /* SHA256 via ARCHIVE_CRYPTO_SHA256_NETTLE supported. */
 /* #undef ARCHIVE_CRYPTO_SHA256_NETTLE */
 
@@ -104,6 +116,9 @@
 /* SHA384 via ARCHIVE_CRYPTO_SHA384_LIBSYSTEM supported. */
 /* #undef ARCHIVE_CRYPTO_SHA384_LIBSYSTEM */
 
+/* SHA384 via ARCHIVE_CRYPTO_SHA384_MBEDTLS supported. */
+/* #undef ARCHIVE_CRYPTO_SHA384_MBEDTLS */
+
 /* SHA384 via ARCHIVE_CRYPTO_SHA384_NETTLE supported. */
 /* #undef ARCHIVE_CRYPTO_SHA384_NETTLE */
 
@@ -124,6 +139,9 @@
 
 /* SHA512 via ARCHIVE_CRYPTO_SHA512_LIBSYSTEM supported. */
 /* #undef ARCHIVE_CRYPTO_SHA512_LIBSYSTEM */
+
+/* SHA512 via ARCHIVE_CRYPTO_SHA512_MBEDTLS supported. */
+/* #undef ARCHIVE_CRYPTO_SHA512_MBEDTLS */
 
 /* SHA512 via ARCHIVE_CRYPTO_SHA512_NETTLE supported. */
 /* #undef ARCHIVE_CRYPTO_SHA512_NETTLE */
@@ -147,13 +165,16 @@
 /* #undef ARCHIVE_XATTR_LINUX */
 
 /* Version number of bsdcpio */
-#define BSDCPIO_VERSION_STRING "3.6.2"
+#define BSDCPIO_VERSION_STRING "3.7.2"
 
 /* Version number of bsdtar */
-#define BSDTAR_VERSION_STRING "3.6.2"
+#define BSDTAR_VERSION_STRING "3.7.2"
 
 /* Version number of bsdcat */
-#define BSDCAT_VERSION_STRING "3.6.2"
+#define BSDCAT_VERSION_STRING "3.7.2"
+
+/* Version number of bsdunzip */
+#define BSDUNZIP_VERSION_STRING "3.7.2"
 
 /* Define to 1 if you have the `acl_create_entry' function. */
 /* #undef HAVE_ACL_CREATE_ENTRY */
@@ -197,7 +218,7 @@
 /* Define to 1 if you have the <attr/xattr.h> header file. */
 /* #undef HAVE_ATTR_XATTR_H */
 
-/* Define to 1 if you have the <Bcrypt.h> header file. */
+/* Define to 1 if you have the <bcrypt.h> header file. */
 /* #undef HAVE_BCRYPT_H */
 
 /* Define to 1 if you have the <bsdxml.h> header file. */
@@ -357,6 +378,12 @@
 /* Define to 1 if you have the `flistxattr' function. */
 /* #undef HAVE_FLISTXATTR */
 
+/* Define to 1 if you have the `fnmatch' function. */
+/* #undef HAVE_FNMATCH */
+
+/* Define to 1 if you have the <fnmatch.h> header file. */
+/* #undef HAVE_FNMATCH_H */
+
 /* Define to 1 if you have the `fork' function. */
 /* #undef HAVE_FORK */
 
@@ -404,6 +431,9 @@
 
 /* Define to 1 if you have the `getgrnam_r' function. */
 /* #undef HAVE_GETGRNAM_R */
+
+/* Define to 1 if you have the `getline' function. */
+/* #undef HAVE_GETLINE */
 
 /* Define to 1 if you have the `getpid' function. */
 #define HAVE_GETPID 1
@@ -611,6 +641,15 @@
 /* Define to 1 if you have the <lzo/lzoconf.h> header file. */
 /* #undef HAVE_LZO_LZOCONF_H */
 
+/* Define to 1 if you have the <mbedtls/aes.h> header file. */
+/* #undef HAVE_MBEDTLS_AES_H */
+
+/* Define to 1 if you have the <mbedtls/md.h> header file. */
+/* #undef HAVE_MBEDTLS_MD_H */
+
+/* Define to 1 if you have the <mbedtls/pkcs5.h> header file. */
+/* #undef HAVE_MBEDTLS_PKCS5_H */
+
 /* Define to 1 if you have the `mbrtowc' function. */
 #define HAVE_MBRTOWC 1
 
@@ -661,6 +700,9 @@
 
 /* Define to 1 if you have the `openat' function. */
 /* #undef HAVE_OPENAT */
+
+/* Define to 1 if you have the <openssl/evp.h> header file. */
+/* #undef HAVE_OPENSSL_EVP_H */
 
 /* Define to 1 if you have the <paths.h> header file. */
 /* #undef HAVE_PATHS_H */
@@ -771,6 +813,12 @@
 /* Define to 1 if you have the `strrchr' function. */
 #define HAVE_STRRCHR 1
 
+/* Define to 1 if the system has the type `struct statfs'. */
+/* #undef HAVE_STRUCT_STATFS */
+
+/* Define to 1 if `f_iosize' is a member of `struct statfs'. */
+/* #undef HAVE_STRUCT_STATFS_F_IOSIZE */
+
 /* Define to 1 if `f_namemax' is a member of `struct statfs'. */
 /* #undef HAVE_STRUCT_STATFS_F_NAMEMAX */
 
@@ -853,6 +901,9 @@
 
 /* Define to 1 if you have the <sys/poll.h> header file. */
 /* #undef HAVE_SYS_POLL_H */
+
+/* Define to 1 if you have the <sys/queue.h> header file. */
+/* #undef HAVE_SYS_QUEUE_H */
 
 /* Define to 1 if you have the <sys/richacl.h> header file. */
 /* #undef HAVE_SYS_RICHACL_H */
@@ -993,8 +1044,8 @@
 /* Define to 1 if you have the <zstd.h> header file. */
 #define HAVE_ZSTD_H 1
 
-/* Define to 1 if you have the `_ctime64_s' function. */
-#define HAVE__CTIME64_S 1
+/* Define to 1 if you have the `ctime_s' function. */
+#define HAVE_CTIME_S 1
 
 /* Define to 1 if you have the `_fseeki64' function. */
 #define HAVE__FSEEKI64 1
@@ -1002,23 +1053,23 @@
 /* Define to 1 if you have the `_get_timezone' function. */
 #define HAVE__GET_TIMEZONE 1
 
-/* Define to 1 if you have the `_gmtime64_s' function. */
-#define HAVE__GMTIME64_S 1
+/* Define to 1 if you have the `gmtime_s' function. */
+#define HAVE_GMTIME_S 1
 
-/* Define to 1 if you have the `_localtime64_s' function. */
-#define HAVE__LOCALTIME64_S 1
+/* Define to 1 if you have the `localtime_s' function. */
+/* #undef HAVE_LOCALTIME_S */
 
-/* Define to 1 if you have the `_mkgmtime64' function. */
-#define HAVE__MKGMTIME64 1
+/* Define to 1 if you have the `_mkgmtime' function. */
+#define HAVE__MKGMTIME 1
 
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST 
 
 /* Version number of libarchive as a single integer */
-#define LIBARCHIVE_VERSION_NUMBER "3006002"
+#define LIBARCHIVE_VERSION_NUMBER "3007002"
 
 /* Version number of libarchive */
-#define LIBARCHIVE_VERSION_STRING "3.6.2"
+#define LIBARCHIVE_VERSION_STRING "3.7.2"
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
@@ -1072,7 +1123,7 @@
 #endif /* SAFE_TO_DEFINE_EXTENSIONS */
 
 /* Version number of package */
-#define VERSION "3.6.2"
+#define VERSION "3.7.2"
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 /* #undef _FILE_OFFSET_BITS */

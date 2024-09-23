@@ -1,4 +1,3 @@
-Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/.clang-tidy
 ../../../../External/CMake/Auxiliary/CMakeLists.txt
 ../../../../External/CMake/Auxiliary/bash-completion/CMakeLists.txt
@@ -57,7 +56,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Source/kwsys/kwsysPlatformTests.cmake
 ../../../../External/CMake/Source/kwsys/kwsysPlatformTestsC.c
 ../../../../External/CMake/Source/kwsys/kwsysPlatformTestsCXX.cxx
-../../../../External/CMake/Source/kwsys/kwsysPrivate.h
 ../../../../External/CMake/Source/kwsys/testSystemTools.h.in
 ../../../../External/CMake/Templates/CTestScript.cmake.in
 ../../../../External/CMake/Tests/.NoDartCoverage
@@ -110,11 +108,9 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CTestTestFdSetSize/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestLabelRegExp/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestParallel/test.cmake.in
-../../../../External/CMake/Tests/CTestTestResourceLock/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestRunScript/hello.cmake.in
 ../../../../External/CMake/Tests/CTestTestRunScript/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestScheduler/test.cmake.in
-../../../../External/CMake/Tests/CTestTestSkipReturnCode/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestStopTime/GetDate.cmake
 ../../../../External/CMake/Tests/CTestTestStopTime/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestSubdir/test.cmake.in
@@ -133,7 +129,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/EnforceConfig.cmake.in
 ../../../../External/CMake/Tests/FindPackageModeMakefileTest/CMakeLists.txt
 ../../../../External/CMake/Tests/FindThreads/CMakeLists.txt
-../../../../External/CMake/Tests/FortranC/Flags.cmake.in
 ../../../../External/CMake/Tests/JacocoCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/JavascriptCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/JavascriptCoverage/output.json.in
@@ -168,16 +163,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Utilities/cmThirdPartyChecks.cmake
 ../../../../External/CMake/Utilities/cmbzip2/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmcppdap/CMakeLists.txt
-../../../../External/CMake/Utilities/cmcurl/CMake/CurlTests.c
-../../../../External/CMake/Utilities/cmcurl/CMake/FindNGHTTP2.cmake
-../../../../External/CMake/Utilities/cmcurl/CMake/Macros.cmake
-../../../../External/CMake/Utilities/cmcurl/CMake/OtherTests.cmake
-../../../../External/CMake/Utilities/cmcurl/CMake/PickyWarnings.cmake
-../../../../External/CMake/Utilities/cmcurl/CMake/Utilities.cmake
-../../../../External/CMake/Utilities/cmcurl/CMakeLists.txt
-../../../../External/CMake/Utilities/cmcurl/lib/CMakeLists.txt
-../../../../External/CMake/Utilities/cmcurl/lib/Makefile.inc
-../../../../External/CMake/Utilities/cmcurl/lib/curl_config.h.cmake
 ../../../../External/CMake/Utilities/cmexpat/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmexpat/ConfigureChecks.cmake
 ../../../../External/CMake/Utilities/cmexpat/expat_config.h.cmake
@@ -196,8 +181,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Utilities/cmliblzma/config.h.in
 ../../../../External/CMake/Utilities/cmlibrhash/CMakeLists.txt
 ../../../../External/CMake/Utilities/cmlibuv/CMakeLists.txt
-../../../../External/CMake/Utilities/cmnghttp2/CMakeLists.txt
-../../../../External/CMake/Utilities/cmnghttp2/cmakeconfig.h.in
 ../../../../External/CMake/Utilities/cmzstd/CMakeLists.txt
 ../../../../External/CMake/Utilities/std/CMakeLists.txt
 ../../../../External/CMake/Utilities/std/cmSTL.hxx.in

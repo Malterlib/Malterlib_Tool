@@ -44,6 +44,7 @@ SET(LIB_VAUTH_HFILES
 
 SET(LIB_VTLS_CFILES 
   vtls/bearssl.c            
+  vtls/cipher_suite.c       
   vtls/gtls.c               
   vtls/hostcheck.c          
   vtls/keylog.c             
@@ -60,6 +61,7 @@ SET(LIB_VTLS_CFILES
 
 SET(LIB_VTLS_HFILES 
   vtls/bearssl.h            
+  vtls/cipher_suite.h       
   vtls/gtls.h               
   vtls/hostcheck.h          
   vtls/keylog.h             
@@ -78,15 +80,19 @@ SET(LIB_VTLS_HFILES
 SET(LIB_VQUIC_CFILES 
   vquic/curl_msh3.c   
   vquic/curl_ngtcp2.c   
+  vquic/curl_osslq.c   
   vquic/curl_quiche.c   
-  vquic/vquic.c)
+  vquic/vquic.c 
+  vquic/vquic-tls.c)
 
 SET(LIB_VQUIC_HFILES 
   vquic/curl_msh3.h   
   vquic/curl_ngtcp2.h   
+  vquic/curl_osslq.h   
   vquic/curl_quiche.h   
   vquic/vquic.h    
-  vquic/vquic_int.h)
+  vquic/vquic_int.h 
+  vquic/vquic-tls.h)
 
 SET(LIB_VSSH_CFILES 
   vssh/libssh.c    
@@ -125,15 +131,17 @@ SET(LIB_CFILES
   curl_memrchr.c     
   curl_multibyte.c   
   curl_ntlm_core.c   
-  curl_ntlm_wb.c     
   curl_path.c        
   curl_range.c       
   curl_rtmp.c        
   curl_sasl.c        
+  curl_sha512_256.c  
   curl_sspi.c        
   curl_threads.c     
   curl_trc.c         
+  cw-out.c           
   dict.c             
+  dllmain.c          
   doh.c              
   dynbuf.c           
   dynhds.c           
@@ -195,6 +203,7 @@ SET(LIB_CFILES
   psl.c              
   rand.c             
   rename.c           
+  request.c          
   rtsp.c             
   select.c           
   sendf.c            
@@ -264,7 +273,6 @@ SET(LIB_HFILES
   curl_memrchr.h     
   curl_multibyte.h   
   curl_ntlm_core.h   
-  curl_ntlm_wb.h     
   curl_path.h        
   curl_printf.h      
   curl_range.h       
@@ -273,10 +281,12 @@ SET(LIB_HFILES
   curl_setup.h       
   curl_setup_once.h  
   curl_sha256.h      
+  curl_sha512_256.h  
   curl_sspi.h        
   curl_threads.h     
   curl_trc.h         
   curlx.h            
+  cw-out.h           
   dict.h             
   doh.h              
   dynbuf.h           
@@ -329,6 +339,7 @@ SET(LIB_HFILES
   psl.h              
   rand.h             
   rename.h           
+  request.h          
   rtsp.h             
   select.h           
   sendf.h            

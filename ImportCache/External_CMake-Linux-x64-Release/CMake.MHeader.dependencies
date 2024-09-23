@@ -57,7 +57,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Source/kwsys/kwsysPlatformTests.cmake
 ../../../../External/CMake/Source/kwsys/kwsysPlatformTestsC.c
 ../../../../External/CMake/Source/kwsys/kwsysPlatformTestsCXX.cxx
-../../../../External/CMake/Source/kwsys/kwsysPrivate.h
 ../../../../External/CMake/Source/kwsys/testSystemTools.h.in
 ../../../../External/CMake/Templates/CTestScript.cmake.in
 ../../../../External/CMake/Tests/.NoDartCoverage
@@ -110,11 +109,9 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/CTestTestFdSetSize/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestLabelRegExp/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestParallel/test.cmake.in
-../../../../External/CMake/Tests/CTestTestResourceLock/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestRunScript/hello.cmake.in
 ../../../../External/CMake/Tests/CTestTestRunScript/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestScheduler/test.cmake.in
-../../../../External/CMake/Tests/CTestTestSkipReturnCode/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestStopTime/GetDate.cmake
 ../../../../External/CMake/Tests/CTestTestStopTime/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestSubdir/test.cmake.in
@@ -133,7 +130,6 @@ Utilities/cmcurl/lib/Makefile.inc.cmake
 ../../../../External/CMake/Tests/EnforceConfig.cmake.in
 ../../../../External/CMake/Tests/FindPackageModeMakefileTest/CMakeLists.txt
 ../../../../External/CMake/Tests/FindThreads/CMakeLists.txt
-../../../../External/CMake/Tests/FortranC/Flags.cmake.in
 ../../../../External/CMake/Tests/JacocoCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/JavascriptCoverage/DartConfiguration.tcl.in
 ../../../../External/CMake/Tests/JavascriptCoverage/output.json.in

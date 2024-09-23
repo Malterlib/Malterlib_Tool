@@ -13,7 +13,8 @@ Property.CMakeOutputPath_zstd: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
-			"DYNAMIC_BMI2=0"
+			"DYNAMIC_BMI2=0",
+			"ZSTD_DISABLE_ASM=1"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
