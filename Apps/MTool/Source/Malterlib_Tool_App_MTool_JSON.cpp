@@ -21,9 +21,9 @@ public:
 		Params.f_Remove(0);
 
 		auto WorkActor = fg_ConcurrentActor();
-		CCurrentActorScope ActorScope{WorkActor};
+		CCurrentActorScope ActorScope{fg_ConcurrencyThreadLocal(), WorkActor};
 
-		TCPromise<CStr> Contents;
+		TCPromiseFuturePair<CStr> Contents;
 		TCActor<CCurlActor> CurlActor;
 
 		if (SourcePath.f_StartsWith("https://") || SourcePath.f_StartsWith("http://"))
@@ -45,19 +45,20 @@ public:
 
 			TCMap<CStr, CStr> Headers;
 
-			CurlActor(&CCurlActor::f_Request, CCurlActor::EMethod_GET, SourcePath, Headers, CByteVector{}, Cookies) > Contents / [Contents](CCurlActor::CResult &&_Result)
+			CurlActor(&CCurlActor::f_Request, CCurlActor::EMethod_GET, SourcePath, Headers, CByteVector{}, Cookies) > fg_Move(Contents.m_Promise) / [ContentsPromise = Contents.m_Promise]
+				(CCurlActor::CResult &&_Result)
 				{
 					if (_Result.m_StatusCode >= 300)
-						Contents.f_SetException(DMibErrorInstance("Error status: {}: {}"_f << _Result.m_StatusCode << _Result.m_Body));
+						ContentsPromise.f_SetException(DMibErrorInstance("Error status: {}: {}"_f << _Result.m_StatusCode << _Result.m_Body));
 					else
-						Contents.f_SetResult(_Result.m_Body);
+						ContentsPromise.f_SetResult(_Result.m_Body);
 				}
 			;
 		}
 		else
-			Contents.f_SetResult(CFile::fs_ReadStringFromFile(CFile::fs_GetExpandedPath(SourcePath, true)));
+			Contents.m_Promise.f_SetResult(CFile::fs_ReadStringFromFile(CFile::fs_GetExpandedPath(SourcePath, true)));
 
-		CEJSONSorted JSON = CEJSONSorted::fs_FromString(Contents.f_MoveFuture().f_CallSync(60.0));
+		CEJSONSorted JSON = CEJSONSorted::fs_FromString(fg_Move(Contents.m_Future).f_CallSync(60.0));
 
 		if (Params.f_IsEmpty())
 		{

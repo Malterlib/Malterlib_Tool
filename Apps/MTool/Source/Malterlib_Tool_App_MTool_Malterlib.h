@@ -19,7 +19,7 @@ public:
 
 	TCFuture<uint32> f_RunBuildSystem
 		(
-			NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem &_BuildSystem)> _fCommand
+			NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem *_pBuildSystem)> _fCommand
 			, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine
 			, CGenerateOptions const *_pGenerateOptions
 		)

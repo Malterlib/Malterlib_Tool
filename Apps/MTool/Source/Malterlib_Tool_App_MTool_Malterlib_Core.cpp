@@ -32,7 +32,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 					}
 				}
 			}
-			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -94,13 +94,11 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 
 				auto ExitValue = co_await f_RunBuildSystem
 					(
-						[&](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+						[&](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_await ECoroutineFlag_AllowReferences;
-
 							CBuildSystem::ERetry Retry = CBuildSystem::ERetry_None;
 
-							if (co_await _BuildSystem.f_Action_Generate(GenerateOptions, Retry))
+							if (co_await _pBuildSystem->f_Action_Generate(GenerateOptions, Retry))
 								bChanged = true;
 
 							co_return Retry;
@@ -134,9 +132,9 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 			{
 				return f_RunBuildSystem
 					(
-						[GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem &_BuildSystem)
+						[GenerateOptions = fs_ParseSharedOptions(_Params)](NBuildSystem::CBuildSystem *_pBuildSystem)
 						{
-							return _BuildSystem.f_Action_Create(GenerateOptions);
+							return _pBuildSystem->f_Action_Create(GenerateOptions);
 						}
 						, _CommandLineClient.f_AnsiEncodingFlags()
 					)
@@ -156,7 +154,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 					fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				TCSharedPointer<TCAtomic<bool>> pCancelled = fg_Construct();
 				CBuildSystem BuildSystem

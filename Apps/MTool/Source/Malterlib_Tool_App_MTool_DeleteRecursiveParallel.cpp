@@ -11,9 +11,9 @@ namespace NDeleteRecursive
 
 	template <typename tf_CResult, typename tf_CContainer, typename tf_CFunctor>
 	auto DMibWorkaroundUBSanSectionErrorsDisable fg_ParallelForEachBlocking(tf_CContainer &&_Container, tf_CFunctor &&_fFunctor, mint _MaxConcurrency)
-		-> TCFuture<typename TCChooseType<NTraits::TCIsVoid<tf_CResult>::mc_Value, tf_CResult, TCVector<tf_CResult>>::CType>
+		-> TCUnsafeFuture<typename TCChooseType<NTraits::TCIsVoid<tf_CResult>::mc_Value, tf_CResult, TCVector<tf_CResult>>::CType>
 	{
-		co_await (ECoroutineFlag_AllowReferences | ECoroutineFlag_CaptureMalterlibExceptions);
+		co_await ECoroutineFlag_CaptureMalterlibExceptions;
 
 		if (_Container.f_IsEmpty())
 			co_return {};
@@ -35,7 +35,7 @@ namespace NDeleteRecursive
 			}
 		}
 
-		TCActorResultVector<tf_CResult> Results;
+		TCFutureVector<tf_CResult> Results;
 
 		if (nSplit > 1)
 		{
@@ -68,7 +68,7 @@ namespace NDeleteRecursive
 					{
 						return _fFunctor(*pValue);
 					}
-					> Results.f_AddResult()
+					> Results
 				;
 			}
 
@@ -81,17 +81,17 @@ namespace NDeleteRecursive
 					; pValue += nSplit
 				)
 			{
-				_fFunctor(*pValue) > Results.f_AddResult();
+				_fFunctor(*pValue) > Results;
 			}
 
-			co_return co_await Results.f_GetUnwrappedResults();
+			co_return co_await fg_AllDone(Results);
 		}
 		else
 		{
 			for (auto &Value : _Container)
-				_fFunctor(Value) > Results.f_AddResult();
+				_fFunctor(Value) > Results;
 
-			co_return co_await Results.f_GetUnwrappedResults();
+			co_return co_await fg_AllDone(Results);
 		}
 	}
 
@@ -237,7 +237,7 @@ public:
 						}
 					}
 				}
-				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -334,10 +334,8 @@ public:
 										auto AllFoundFiles = co_await fg_ParallelForEachBlocking<CFoundFiles>
 											(
 												RootDirectories
-												, [&](CStr const &_Destination) -> TCFuture<CFoundFiles>
+												, [&](CStr const &_Destination) -> TCUnsafeFuture<CFoundFiles>
 												{
-													co_await ECoroutineFlag_AllowReferences;
-													
 													co_return co_await fg_FindFilesRecursiveParallel(_Destination, MaxConcurrency);
 												}
 												, MaxConcurrency
@@ -386,10 +384,8 @@ public:
 									co_await fg_ParallelForEachBlocking<void>
 										(
 											FilesChunks
-											, [&](TCVector<CFileToDelete> const &_Files) -> TCFuture<void>
+											, [&](TCVector<CFileToDelete> const &_Files) -> TCUnsafeFuture<void>
 											{
-												co_await ECoroutineFlag_AllowReferences;
-
 												for (auto &File : _Files)
 												{
 													try
@@ -439,10 +435,8 @@ public:
 										co_await fg_ParallelForEachBlocking<void>
 											(
 												Directories
-												, [&](TCVector<CStr> const &_Directories) -> TCFuture<void>
+												, [&](TCVector<CStr> const &_Directories) -> TCUnsafeFuture<void>
 												{
-													co_await ECoroutineFlag_AllowReferences;
-
 													for (auto &Directory : _Directories)
 													{
 														try
@@ -540,7 +534,7 @@ public:
 						}
 					}
 				}
-				, [=](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 

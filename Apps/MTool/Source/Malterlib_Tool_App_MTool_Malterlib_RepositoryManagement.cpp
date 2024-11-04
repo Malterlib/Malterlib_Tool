@@ -55,17 +55,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
 				co_return co_await f_RunBuildSystem
 					(
-						[GenerateOptions](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+						[GenerateOptions](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_await ECoroutineFlag_AllowReferences;
-							co_return co_await _BuildSystem.f_Action_Repository_Update(GenerateOptions);
+							co_return co_await _pBuildSystem->f_Action_Repository_Update(GenerateOptions);
 						}
 						, _pCommandLine
 						, &GenerateOptions
@@ -219,7 +218,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -255,10 +254,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
 				co_return co_await f_RunBuildSystem
 					(
-						[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_await ECoroutineFlag_AllowReferences;
-							co_return co_await _BuildSystem.f_Action_Repository_Status(GenerateOptions, RepoFilter, Flags, HideBranches, _pCommandLine);
+							co_return co_await _pBuildSystem->f_Action_Repository_Status(GenerateOptions, RepoFilter, Flags, HideBranches, _pCommandLine);
 						}
 						, _pCommandLine
 						, &GenerateOptions
@@ -302,7 +300,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						}
 					}
 				}
-				, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -316,10 +314,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					auto GenerateOptions = fs_ParseSharedOptions(_Params);
 					co_return co_await f_RunBuildSystem
 						(
-							[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+							[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 							{
-								co_await ECoroutineFlag_AllowReferences;
-								co_return co_await _BuildSystem.f_Action_Repository_ForEachRepo(GenerateOptions, RepoFilter, bParallel, GitParameters);
+								co_return co_await _pBuildSystem->f_Action_Repository_ForEachRepo(GenerateOptions, RepoFilter, bParallel, GitParameters);
 							}
 							, _pCommandLine
 							, &GenerateOptions
@@ -387,7 +384,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						}
 					}
 				}
-				, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -426,10 +423,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					auto GenerateOptions = fs_ParseSharedOptions(_Params);
 					co_return co_await f_RunBuildSystem
 						(
-							[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+							[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 							{
-								co_await ECoroutineFlag_AllowReferences;
-								co_return co_await _BuildSystem.f_Action_Repository_ForEachRepoDir(GenerateOptions, RepoFilter, Options);
+								co_return co_await _pBuildSystem->f_Action_Repository_ForEachRepoDir(GenerateOptions, RepoFilter, Options);
 							}
 							, _pCommandLine
 							, &GenerateOptions
@@ -480,7 +476,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						}
 					}
 				}
-				, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -501,10 +497,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					auto GenerateOptions = fs_ParseSharedOptions(_Params);
 					co_return co_await f_RunBuildSystem
 						(
-							[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+							[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 							{
-								co_await ECoroutineFlag_AllowReferences;
-								co_return co_await _BuildSystem.f_Action_Repository_Branch(GenerateOptions, RepoFilter, Branch, Flags);
+								co_return co_await _pBuildSystem->f_Action_Repository_Branch(GenerateOptions, RepoFilter, Branch, Flags);
 							}
 							, _pCommandLine
 							, &GenerateOptions
@@ -529,7 +524,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, fs_CachedEnvironmentOption(true)
 					}
 				}
-				, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+				, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -546,10 +541,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					auto GenerateOptions = fs_ParseSharedOptions(_Params);
 					co_return co_await f_RunBuildSystem
 						(
-							[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+							[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 							{
-								co_await ECoroutineFlag_AllowReferences;
-								co_return co_await _BuildSystem.f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
+								co_return co_await _pBuildSystem->f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
 							}
 							, _pCommandLine
 							, &GenerateOptions
@@ -615,7 +609,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -641,10 +635,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
 				co_return co_await f_RunBuildSystem
 					(
-						[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_await ECoroutineFlag_AllowReferences;
-							co_return co_await _BuildSystem.f_Action_Repository_CleanupBranches(GenerateOptions, RepoFilter, Flags, Branches);
+							co_return co_await _pBuildSystem->f_Action_Repository_CleanupBranches(GenerateOptions, RepoFilter, Flags, Branches);
 						}
 						, _pCommandLine
 						, &GenerateOptions
@@ -709,7 +702,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -735,10 +728,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
 				co_return co_await f_RunBuildSystem
 					(
-						[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_await ECoroutineFlag_AllowReferences;
-							co_return co_await _BuildSystem.f_Action_Repository_CleanupTags(GenerateOptions, RepoFilter, Flags, Tags);
+							co_return co_await _pBuildSystem->f_Action_Repository_CleanupTags(GenerateOptions, RepoFilter, Flags, Tags);
 						}
 						, _pCommandLine
 						, &GenerateOptions
@@ -797,7 +789,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -821,10 +813,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
 				co_return co_await f_RunBuildSystem
 					(
-						[=](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_await ECoroutineFlag_AllowReferences;
-							co_return co_await _BuildSystem.f_Action_Repository_Push(GenerateOptions, RepoFilter, Remotes, Flags);
+							co_return co_await _pBuildSystem->f_Action_Repository_Push(GenerateOptions, RepoFilter, Remotes, Flags);
 						}
 						, _pCommandLine
 						, &GenerateOptions
@@ -912,7 +903,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					}
 				}
 			}
-			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -951,10 +942,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
 				co_return co_await f_RunBuildSystem
 					(
-						[&](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+						[&](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_await ECoroutineFlag_AllowReferences;
-							co_return co_await _BuildSystem.f_Action_Repository_ListCommits
+							co_return co_await _pBuildSystem->f_Action_Repository_ListCommits
 								(
 									GenerateOptions
 									, RepoFilter
@@ -994,7 +984,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=, this](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -1003,10 +993,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
 				co_return co_await f_RunBuildSystem
 					(
-						[&](NBuildSystem::CBuildSystem &_BuildSystem) -> TCFuture<CBuildSystem::ERetry>
+						[&](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_await ECoroutineFlag_AllowReferences;
-							co_return co_await _BuildSystem.f_Action_Repository_ReleasePackage
+							co_return co_await _pBuildSystem->f_Action_Repository_ReleasePackage
 								(
 									GenerateOptions
 									, RepoFilter

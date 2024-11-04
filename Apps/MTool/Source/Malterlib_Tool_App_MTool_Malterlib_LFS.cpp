@@ -29,7 +29,7 @@ void CTool_Malterlib::f_Register_LfsReleaseStore(CDistributedAppCommandLineSpeci
 					Option_WorkingDirectory
 				}
 			}
-			, [](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				TCActor<NGit::CLfsReleaseStoreService> LfsService = fg_Construct(_pCommandLine, _Params["WorkingDirectory"].f_String());
 
@@ -72,7 +72,7 @@ void CTool_Malterlib::f_Register_LfsReleaseStore(CDistributedAppCommandLineSpeci
 					}
 				}
 			}
-			, [](NEncoding::CEJSONSorted const &_Params, NStorage::TCSharedPointer<CCommandLineControl> const &_pCommandLine) -> TCFuture<uint32>
+			, [](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				TCActor<NGit::CLfsReleaseStoreService> LfsService = fg_Construct(_pCommandLine, _Params["WorkingDirectory"].f_String());
 
