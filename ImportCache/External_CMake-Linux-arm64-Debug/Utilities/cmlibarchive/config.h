@@ -45,7 +45,7 @@
 /* #undef ARCHIVE_CRYPTO_MD5_NETTLE */
 
 /* MD5 via ARCHIVE_CRYPTO_MD5_OPENSSL supported. */
-#define ARCHIVE_CRYPTO_MD5_OPENSSL 1
+/* #undef ARCHIVE_CRYPTO_MD5_OPENSSL */
 
 /* MD5 via ARCHIVE_CRYPTO_MD5_WIN supported. */
 /* #undef ARCHIVE_CRYPTO_MD5_WIN */
@@ -75,7 +75,7 @@
 /* #undef ARCHIVE_CRYPTO_SHA1_NETTLE */
 
 /* SHA1 via ARCHIVE_CRYPTO_SHA1_OPENSSL supported. */
-#define ARCHIVE_CRYPTO_SHA1_OPENSSL 1
+/* #undef ARCHIVE_CRYPTO_SHA1_OPENSSL */
 
 /* SHA1 via ARCHIVE_CRYPTO_SHA1_WIN supported. */
 /* #undef ARCHIVE_CRYPTO_SHA1_WIN */
@@ -99,7 +99,7 @@
 /* #undef ARCHIVE_CRYPTO_SHA256_NETTLE */
 
 /* SHA256 via ARCHIVE_CRYPTO_SHA256_OPENSSL supported. */
-#define ARCHIVE_CRYPTO_SHA256_OPENSSL 1
+/* #undef ARCHIVE_CRYPTO_SHA256_OPENSSL */
 
 /* SHA256 via ARCHIVE_CRYPTO_SHA256_WIN supported. */
 /* #undef ARCHIVE_CRYPTO_SHA256_WIN */
@@ -123,7 +123,7 @@
 /* #undef ARCHIVE_CRYPTO_SHA384_NETTLE */
 
 /* SHA384 via ARCHIVE_CRYPTO_SHA384_OPENSSL supported. */
-#define ARCHIVE_CRYPTO_SHA384_OPENSSL 1
+/* #undef ARCHIVE_CRYPTO_SHA384_OPENSSL */
 
 /* SHA384 via ARCHIVE_CRYPTO_SHA384_WIN supported. */
 /* #undef ARCHIVE_CRYPTO_SHA384_WIN */
@@ -147,7 +147,7 @@
 /* #undef ARCHIVE_CRYPTO_SHA512_NETTLE */
 
 /* SHA512 via ARCHIVE_CRYPTO_SHA512_OPENSSL supported. */
-#define ARCHIVE_CRYPTO_SHA512_OPENSSL 1
+/* #undef ARCHIVE_CRYPTO_SHA512_OPENSSL */
 
 /* SHA512 via ARCHIVE_CRYPTO_SHA512_WIN supported. */
 /* #undef ARCHIVE_CRYPTO_SHA512_WIN */
@@ -394,7 +394,7 @@
 /* #undef HAVE_FSETEA */
 
 /* Define to 1 if you have the `fsetxattr' function. */
-#define HAVE_FSETXATTR 1
+/* #undef HAVE_FSETXATTR */
 
 /* Define to 1 if you have the `fstat' function. */
 #define HAVE_FSTAT 1
@@ -505,7 +505,7 @@
 /* #undef HAVE_LIBCHARSET */
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
-#define HAVE_LIBCRYPTO 1
+/* #undef HAVE_LIBCRYPTO */
 
 /* Define to 1 if you have the `expat' library (-lexpat). */
 /* #undef HAVE_LIBEXPAT */
@@ -702,7 +702,7 @@
 #define HAVE_OPENAT 1
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
-#define HAVE_OPENSSL_EVP_H 1
+/* #undef HAVE_OPENSSL_EVP_H */
 
 /* Define to 1 if you have the <paths.h> header file. */
 #define HAVE_PATHS_H 1

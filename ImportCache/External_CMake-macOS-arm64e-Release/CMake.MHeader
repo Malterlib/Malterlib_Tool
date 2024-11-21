@@ -2928,6 +2928,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -2946,6 +2947,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -5994,6 +5996,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -6360,6 +6363,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -6563,6 +6567,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -6621,6 +6626,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -6674,6 +6680,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -6727,6 +6734,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -6879,6 +6887,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -6932,6 +6941,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -7184,6 +7194,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -7236,6 +7247,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -7288,6 +7300,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -7340,6 +7353,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -7407,6 +7421,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -7474,6 +7489,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -7541,6 +7557,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -7608,6 +7625,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
@@ -7985,6 +8003,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			`@('../../../../External/CMake'->MakeAbsolute())/Source/LexerParser`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute(),
+			`@('../../../..'->MakeAbsolute())/External/curl/include`->MakeAbsolute(),
 			`@('../../../..'->MakeAbsolute())/External/zlib`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
