@@ -47,8 +47,11 @@ Property
 	Import.CMake_Variables =+ [
 		"HAVE_ZLIB_H=1"
 		, `ZLIB_INCLUDE_DIR=@("../../External/zlib"->MakeAbsolute())`
-		, `ZSTD_INCLUDE_DIRS=@("../../External/zstd/lib"->MakeAbsolute())`
 		, `ZLIB_LIBRARY=@(Malterlib_DummmyLibrary)`
+		, `ZSTD_INCLUDE_DIRS=@("../../External/zstd/lib"->MakeAbsolute())`
+		, `CURL_INCLUDE_DIR=@("../../External/curl/include"->MakeAbsolute())`
+		, `CURL_LIBRARY=@(Malterlib_DummmyLibrary)`
+		, "CURL_FOUND=1"
 	]
 
 	Import.CMake_Variables =+ [
@@ -70,6 +73,7 @@ Property
 		, "ENABLE_BZip2=0"
 		, "ENABLE_EXPAT=0"
 		, "CMAKE_USE_SYSTEM_ZLIB=1"
+		, "CMAKE_USE_SYSTEM_CURL=1"
 	]
 
 	Import.CMake_Variables =+ ["HAVE_OPENSSL_ENGINE_H=0", "ENABLE_LZMA=0"]
@@ -203,14 +207,10 @@ Property
 			!!CompileDialect "C"
 			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
 		}
-	}
-
-	%Target "Lib_CURL_cmcurl"
-	{
-		Compile
+		%Dependency "Lib_CURL_libcurl_static"
 		{
-			!!CompileDialect "C"
-			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
+			!DocumentationEnabled true
+			Dependency.Indirect true
 		}
 	}
 
