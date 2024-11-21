@@ -380,7 +380,7 @@ public:
 											; pFiles += ItemChunkSize
 										)
 									{
-										FilesChunks.f_Insert().f_InsertMove(pFiles, fg_Min(ItemChunkSize, pFilesEnd - pFiles));
+										FilesChunks.f_Insert().f_InsertMove(pFiles, fg_Min(ItemChunkSize, mint(pFilesEnd - pFiles)));
 									}
 
 									co_await fg_ParallelForEachBlocking<void>
@@ -552,8 +552,8 @@ public:
 
 					CStr FileContents;
 					CStr FileLine = gc_Str<"0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789\n">;
-					while (FileContents.f_GetLen() < FileSize)
-						FileContents += FileLine.f_Left(fg_Min(FileLine.f_GetLen(), FileSize - FileContents.f_GetLen()));
+					while (mint(FileContents.f_GetLen()) < FileSize)
+						FileContents += FileLine.f_Left(fg_Min(mint(FileLine.f_GetLen()), FileSize - FileContents.f_GetLen()));
 
 					{
 						auto BlockingActorCheckout = fg_BlockingActor();
@@ -565,7 +565,7 @@ public:
 
 									auto nLeftToCreate = NumDirectories;
 
-									auto fCreateDirectories = [&](this auto &_fThis, CStr const &_Path)
+									auto fCreateDirectories = [&](CStr const &_Path)
 										{
 											TCVector<CStr> Directories;
 											for (mint iDirectory = 0; iDirectory < FanOut; ++iDirectory)
