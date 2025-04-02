@@ -35,6 +35,14 @@ Property
 		!!PlatformFamily "macOS"
 	}
 
+	Property
+	{
+		!!PlatformFamily "Windows"
+
+		MalterlibWindowsNtVersion "0x0600"
+		MalterlibWindowsVersion "NTDDI_VISTA"
+	}
+
 	Import.CMake_Variables =+ [
 		"ARCHIVE_CRYPTO_MD5_OPENSSL=1"
 		, "ARCHIVE_CRYPTO_RMD160_OPENSSL=0"
@@ -132,6 +140,9 @@ Property
 			Compiler "Clang"
 		}
 		Warnings_UnusedFunction false
+		Warnings_UnusedVariable false
+		Warnings_UnusedButSetVariable false
+		Warnings_MissingBraces false
 		Warnings_VarArgs false
 		Warnings_UnusedValue false
 		Warnings_TautolagicalPointerCompare false
@@ -200,11 +211,21 @@ Property
 		}
 	}
 
+	%Target "Lib_CMake_cmexpat"
+	{
+		Compile
+		{
+			!!CompileDialect "C"
+			PrefixHeader undefined
+		}
+	}
+
 	%Target "Lib_cmsys_cmsys"
 	{
 		Compile
 		{
 			!!CompileDialect "C"
+			PrefixHeader undefined
 			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
 		}
 		%Dependency "Lib_CURL_libcurl_static"

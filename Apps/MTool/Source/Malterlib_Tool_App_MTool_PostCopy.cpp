@@ -164,7 +164,7 @@ public:
 				}
 			}
 			else if (pTags->f_GetThisValue().m_Value.f_IsConstantString())
-				pTags->f_SetThisValue(CBuildSystemSyntax::CRootValue{CBuildSystemSyntax::CArray{}});
+				pTags->f_SetThisValue(CBuildSystemSyntax::CRootValue{.m_Value = {CBuildSystemSyntax::CArray{}}});
 			else
 			{
 				for (auto iTag = pTags->f_GetChildIterator(TagKey); iTag && iTag->f_GetName() == TagKey; ++iTag)
@@ -193,7 +193,7 @@ public:
 		if (!DefaultRootDefault)
 			DefaultRootDefault = "/opt/Deploy";
 #endif
-		CBuildSystemSyntax::CRootValue DefaultRootDefaultRootValue{DefaultRootDefault};
+		CBuildSystemSyntax::CRootValue DefaultRootDefaultRootValue{.m_Value = {DefaultRootDefault}};
 
 		CStr DefaultRoot;
 		if (auto DefaultRootJSON = Registry.f_GetValueNoPath(fs_GetIdentifierKey("DefaultRoot"), DefaultRootDefaultRootValue); DefaultRootJSON.m_Value.f_IsConstantString())
@@ -210,7 +210,7 @@ public:
 		{
 			pProject = pProjects->f_CreateChildNoPath(DestinationProjectKey);
 			auto pDestination = pProject->f_CreateChildNoPath(DestinationKey, true);
-			pDestination->f_SetThisValue(CBuildSystemSyntax::CRootValue{CFile::fs_AppendPath(DefaultRoot, DestinationProject)});
+			pDestination->f_SetThisValue(CBuildSystemSyntax::CRootValue{.m_Value = {CFile::fs_AppendPath(DefaultRoot, DestinationProject)}});
 			DConOut("Added {} post copy project to config file" DNewLine, DestinationProject);
 		}
 
@@ -257,7 +257,7 @@ public:
 					if (!bEnabledIf)
 						continue;
 
-					auto SetNewfileName = iDest->f_GetValueNoPath(fs_GetIdentifierKey("Rename"), CBuildSystemSyntax::CRootValue{SourceFileName});
+					auto SetNewfileName = iDest->f_GetValueNoPath(fs_GetIdentifierKey("Rename"), CBuildSystemSyntax::CRootValue{.m_Value = {SourceFileName}});
 					CStr NewFileName = SourceFileName;
 					if (SetNewfileName.m_Value.f_IsConstantString())
 						NewFileName = SetNewfileName.m_Value.f_ConstantString();

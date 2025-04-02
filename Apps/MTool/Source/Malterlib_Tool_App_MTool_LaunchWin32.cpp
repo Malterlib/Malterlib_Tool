@@ -77,6 +77,9 @@ public:
 				case EProcessLaunchOutputType_StdOut:
 					DConOutRaw(_Output);
 					break;
+				case EProcessLaunchOutputType_Max:
+					DNeverGetHere;
+					break;
 				}
 			}
 		;
@@ -172,8 +175,6 @@ public:
 			// CreateProcess() call will use CREATE_NEW_CONSOLE.
 
 			// Launch the child process.
-
-			int ProcPriority = 0;
 
 			CStr WorkingDir = NFile::CFile::fs_GetCurrentDirectory();
 

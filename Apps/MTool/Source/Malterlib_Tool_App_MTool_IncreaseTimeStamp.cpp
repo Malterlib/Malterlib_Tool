@@ -56,8 +56,6 @@ public:
 		IMAGE_NT_HEADERS *pHeader2 = pHeader;
 		if (pHeader)
 		{
-			bool bFound = false;
-
 			if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 || pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_IA64)
 			{
 				IMAGE_NT_HEADERS64 *pHeader = (IMAGE_NT_HEADERS64 *)pHeader2;
@@ -159,8 +157,6 @@ public:
 		IMAGE_NT_HEADERS *pHeader2 = pHeader;
 		if (pHeader)
 		{
-			bool bFound = false;
-
 			if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 || pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_IA64)
 			{
 				IMAGE_NT_HEADERS64 *pHeader = (IMAGE_NT_HEADERS64 *)pHeader2;
