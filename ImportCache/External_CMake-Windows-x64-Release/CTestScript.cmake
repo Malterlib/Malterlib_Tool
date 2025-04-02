@@ -2,20 +2,20 @@ cmake_minimum_required(VERSION 2.4)
 
 # This is a template for the CTest script for this system
 
-set(CTEST_SITE                          "erikwindev02")
+set(CTEST_SITE                          "erikwindev03")
 set(CTEST_BUILD_NAME                    "Win32-ninja")
 
 # ---
 set(CTEST_SOURCE_DIRECTORY              "../../../../External/CMake")
 set(CTEST_BINARY_DIRECTORY              ".")
-set(CTEST_UPDATE_COMMAND                "C:/Program Files/Git/mingw64/bin/git.exe")
+set(CTEST_UPDATE_COMMAND                "C:/Program Files/Git/cmd/git.exe")
 set(CTEST_UPDATE_OPTIONS                "")
 set(CTEST_CMAKE_GENERATOR               "Ninja")
 set(CTEST_BUILD_CONFIGURATION           "Release")
 #set(CTEST_MEMORYCHECK_COMMAND           "MEMORYCHECK_COMMAND-NOTFOUND")
 #set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE "")
 #set(CTEST_MEMORYCHECK_COMMAND_OPTIONS   "")
-#set(CTEST_COVERAGE_COMMAND              "C:/Strawberry/c/bin/gcov.exe")
+#set(CTEST_COVERAGE_COMMAND              "COVERAGE_COMMAND-NOTFOUND")
 set(CTEST_NOTES_FILES                   "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}")
 
 #CTEST_EMPTY_BINARY_DIRECTORY(${CTEST_BINARY_DIRECTORY})

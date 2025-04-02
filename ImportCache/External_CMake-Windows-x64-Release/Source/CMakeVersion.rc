@@ -9,8 +9,8 @@ BEGIN
     BEGIN
         BLOCK "040904E4"
         BEGIN
-            VALUE "FileVersion",      "3.30.3-ga2c2755\0"
-            VALUE "ProductVersion",   "3.30.3-ga2c2755\0"
+            VALUE "FileVersion",      "3.30.3-ga2c2755-dirty\0"
+            VALUE "ProductVersion",   "3.30.3-ga2c2755-dirty\0"
         END
     END
 

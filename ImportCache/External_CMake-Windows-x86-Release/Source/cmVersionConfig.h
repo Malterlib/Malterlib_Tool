@@ -5,6 +5,6 @@
 #define CMake_VERSION_MAJOR 3
 #define CMake_VERSION_MINOR 30
 #define CMake_VERSION_PATCH 3
-#define CMake_VERSION_SUFFIX "ga2c2755"
+#define CMake_VERSION_SUFFIX "g7207d4f"
 #define CMake_VERSION_IS_DIRTY 0
-#define CMake_VERSION "3.30.3-ga2c2755"
+#define CMake_VERSION "3.30.3-g7207d4f"
