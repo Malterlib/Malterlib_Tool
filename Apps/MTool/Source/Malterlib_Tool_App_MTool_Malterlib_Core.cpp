@@ -9,14 +9,14 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_o= {"generate"}
+				"Names"_o= _o["generate"]
 				, "Description"_o= "Generate build system.\n"
 				, "Category"_o= "Core"
 				, "Options"_o=
 				{
 					"Action?"_o=
 					{
-						"Names"_o= {"--action"}
+						"Names"_o= _o["--action"]
 						, "Type"_o= COneOf{"Build", "Clean", "ReBuild"}
 						, "Description"_o= "Action from build system when generating as part of build.\n"
 						"One of: Build, Clean or ReBuild\n"
@@ -120,7 +120,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 	o_ToolsSection.f_RegisterDirectCommand
 		(
 			{
-				"Names"_o= {"create"}
+				"Names"_o= _o["create"]
 				, "Description"_o= "Create a new Malterlib build system.\n"
 				, "Category"_o= "Core"
 				, "Options"_o=
@@ -146,7 +146,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_o= {"install-binaries"}
+				"Names"_o= _o["install-binaries"]
 				, "Description"_o= "Install binaries used for bootstrap and LFS storage.\n"
 				, "Category"_o= "Core"
 				, "Options"_o=

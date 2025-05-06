@@ -13,7 +13,7 @@ void CTool_Malterlib::f_Register_LfsReleaseStore(CDistributedAppCommandLineSpeci
 
 	auto Option_WorkingDirectory = "WorkingDirectory?"_o=
 		{
-			"Names"_o= {"--working-directory", "-C"}
+			"Names"_o= _o["--working-directory", "-C"]
 			, "Default"_o= CFile::fs_GetCurrentDirectory()
 			, "Description"_o= "The directory of the git repository.\n"
 		}
@@ -22,7 +22,7 @@ void CTool_Malterlib::f_Register_LfsReleaseStore(CDistributedAppCommandLineSpeci
 	Section.f_RegisterCommand
 		(
 			{
-				"Names"_o= {"lfs-release-store"}
+				"Names"_o= _o["lfs-release-store"]
 				, "Description"_o= "Command for running lfs release store.\n"
 				, "Options"_o=
 				{
@@ -47,26 +47,26 @@ void CTool_Malterlib::f_Register_LfsReleaseStore(CDistributedAppCommandLineSpeci
 	Section.f_RegisterCommand
 		(
 			{
-				"Names"_o= {"lfs-release-update-index"}
+				"Names"_o= _o["lfs-release-update-index"]
 				, "Description"_o= "Update LFS release store index.\n"
 				, "Options"_o=
 				{
 					Option_WorkingDirectory
 					, "Remote?"_o=
 					{
-						"Names"_o= {"--remote", "-r"}
+						"Names"_o= _o["--remote", "-r"]
 						, "Default"_o= "origin"
 						, "Description"_o= "The remote to update the index on.\n"
 					}
 					, "Pretend?"_o=
 					{
-						"Names"_o= {"--pretend"}
+						"Names"_o= _o["--pretend"]
 						, "Default"_o= true
 						, "Description"_o= "Only log the operations that would have been done, don't do them.\n"
 					}
 					, "PruneOrphanedAssets?"_o=
 					{
-						"Names"_o= {"--prune-orphaned-assets"}
+						"Names"_o= _o["--prune-orphaned-assets"]
 						, "Default"_o= false
 						, "Description"_o= "Remove LFS assets that are not used anywhere in the repository.\n"
 					}

@@ -26,13 +26,13 @@ public:
 		auto CmakeCommand = o_ToolsSection.f_RegisterDirectCommand
 			(
 				{
-					"Names"_o= {"CMake"}
+					"Names"_o= _o["CMake"]
 					, "Description"_o= "Runs cmake command line.\n"
 					, "Parameters"_o=
 					{
 						"Params...?"_o=
 						{
-							"Type"_o= {""}
+							"Type"_o= _o[""]
 							, "Description"_o= "The cmake params."
 						}
 					}

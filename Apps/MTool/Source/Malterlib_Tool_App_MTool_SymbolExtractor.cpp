@@ -410,7 +410,15 @@ public:
 					auto &FileTime = m_SymbolFilesByTime.fs_GetKey(Files);
 
 					for (auto &File : Files)
-						OutFiles.f_Insert() = {"Time"_= FileTime, "BasePath"_= File.m_BasePath, "FileName"_= File.m_FileName};
+					{
+						OutFiles.f_Insert() = _=
+							{
+								"Time"_= FileTime
+								, "BasePath"_= File.m_BasePath
+								, "FileName"_= File.m_FileName
+							}
+						;
+					}
 				}
 			}
 
@@ -428,7 +436,12 @@ public:
 
 				for (auto &File : m_OutstandingPDPFiles)
 				{
-					OutFiles[m_OutstandingPDPFiles.fs_GetKey(File)] = {"BasePath"_= File.m_BasePath, "FileName"_= File.m_FileName};
+					OutFiles[m_OutstandingPDPFiles.fs_GetKey(File)] = _=
+						{
+							"BasePath"_= File.m_BasePath
+							, "FileName"_= File.m_FileName
+						}
+					;
 				}
 			}
 

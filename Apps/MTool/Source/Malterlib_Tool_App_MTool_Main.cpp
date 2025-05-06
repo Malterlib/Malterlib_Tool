@@ -42,13 +42,13 @@ void CTool::f_Register
 	o_ToolsSection.f_RegisterDirectCommand
 		(
 			{
-				"Names"_o= {ClassName}
+				"Names"_o= _o[ClassName]
 				, "Description"_o= "Runs {} command.\n"_f << ClassName
 				, "Parameters"_o=
 				{
 					"Params...?"_o=
 					{
-						"Type"_o= {""}
+						"Type"_o= _o[""]
 						, "Description"_o= "The params the command take."
 					}
 				}

@@ -22,20 +22,20 @@ public:
 		o_ToolsSection.f_RegisterCommand
 			(
 				{
-					"Names"_o= {"ResignXcode"}
+					"Names"_o= _o["ResignXcode"]
 					, "Description"_o= "Resign Xcode.\n"
 					//, "Category"_o= "Development Tools"
 					, "Options"_o=
 					{
 						"Source"_o=
 						{
-							"Names"_o= {"--source"}
+							"Names"_o= _o["--source"]
 							, "Default"_o= "/Users/erik/Downloads/Xcode.app"
 							, "Description"_o= "Xcode source location.\n"
 						}
 						, "Destination"_o=
 						{
-							"Names"_o= {"--destination"}
+							"Names"_o= _o["--destination"]
 							, "Default"_o= "/Applications/XcodePatched.app"
 							, "Description"_o= "Xcode destination location.\n"
 						}

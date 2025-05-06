@@ -149,7 +149,7 @@ CEJSONOrdered::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefa
 {
 	return "UseCachedEnvironment?"_o=
 		{
-			"Names"_o= {"--use-cached-environment"}
+			"Names"_o= _o["--use-cached-environment"]
 			, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_UseCachedEnvironment", _bDefault ? "true" : "false") == "true"
 			, "Description"_o= "Use the cached environment instead of current environment."
 		}

@@ -192,37 +192,37 @@ public:
 		o_ToolsSection.f_RegisterCommand
 			(
 				{
-					"Names"_o= {"DeleteRecursiveParallel"}
+					"Names"_o= _o["DeleteRecursiveParallel"]
 					, "Description"_o= "Delete files or directories recursively.\n"
 					, "Options"_o=
 					{
 						"Verbose?"_o=
 						{
-							"Names"_o= {"--verbose", "-v"}
+							"Names"_o= _o["--verbose", "-v"]
 							, "Default"_o= false
 							, "Description"_o= "Show which files are deleted.\n"
 						}
 						, "ShowProgress?"_o=
 						{
-							"Names"_o= {"--show-progress"}
+							"Names"_o= _o["--show-progress"]
 							, "Default"_o= false
 							, "Description"_o= "Log progress of deleted items every second.\n"
 						}
 						, "ShowSummary?"_o=
 						{
-							"Names"_o= {"--show-summary"}
+							"Names"_o= _o["--show-summary"]
 							, "Default"_o= true
 							, "Description"_o= "Log summary of what is going to be deleted and time to finish.\n"
 						}
 						, "MaxConcurrency?"_o=
 						{
-							"Names"_o= {"--max-concurrency"}
+							"Names"_o= _o["--max-concurrency"]
 							, "Default"_o= 64
 							, "Description"_o= "The maximum number of simultaneous operations that should be done in parallel.\n"
 						}
 						, "ItemChunkSize?"_o=
 						{
-							"Names"_o= {"--item-chunk-size"}
+							"Names"_o= _o["--item-chunk-size"]
 							, "Default"_o= 100
 							, "Description"_o= "The smallest number of items to schedule in one concurrent operation.\n"
 							"Decreasing will improve load balancing, while increasing processing overhead.\n"
@@ -232,7 +232,7 @@ public:
 					{
 						"Destinations..."_o=
 						{
-							"Type"_o= {""}
+							"Type"_o= _o[""]
 							, "Description"_o= "The destinations to delete.\n"
 						}
 					}
@@ -496,31 +496,31 @@ public:
 		o_ToolsSection.f_RegisterCommand
 			(
 				{
-					"Names"_o= {"CreateDirectoryTree"}
+					"Names"_o= _o["CreateDirectoryTree"]
 					, "Description"_o= "Create directory tree.\n"
 					, "Options"_o=
 					{
 						"NumFiles?"_o=
 						{
-							"Names"_o= {"--files"}
+							"Names"_o= _o["--files"]
 							, "Default"_o= 1'000'000
 							, "Description"_o= "The number of files to create.\n"
 						}
 						, "NumDirectories?"_o=
 						{
-							"Names"_o= {"--directories"}
+							"Names"_o= _o["--directories"]
 							, "Default"_o= 100'000
 							, "Description"_o= "The number of directories to create.\n"
 						}
 						, "FanOut?"_o=
 						{
-							"Names"_o= {"--fan-out"}
+							"Names"_o= _o["--fan-out"]
 							, "Default"_o= 8
 							, "Description"_o= "How many directories that should be created in each directory.\n"
 						}
 						, "FileSize?"_o=
 						{
-							"Names"_o= {"--file-size"}
+							"Names"_o= _o["--file-size"]
 							, "Default"_o= 1024
 							, "Description"_o= "How big each file should be.\n"
 						}

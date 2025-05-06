@@ -174,7 +174,7 @@ public:
 		o_ToolsSection.f_RegisterDirectCommand
 			(
 				{
-					"Names"_o= {"-V"}
+					"Names"_o= _o["-V"]
 					, "Description"_o= "Libtool version.\n"
 					, "ErrorOnCommandAsParameter"_o= false
 					, "ErrorOnOptionAsParameter"_o= false
@@ -191,13 +191,13 @@ public:
 		auto LibToolCommand = o_ToolsSection.f_RegisterDirectCommand
 			(
 				{
-					"Names"_o= {"libtool"}
+					"Names"_o= _o["libtool"]
 					, "Description"_o= "Runs libtool command line.\n"
 					, "Parameters"_o=
 					{
 						"Params...?"_o=
 						{
-							"Type"_o= {""}
+							"Type"_o= _o[""]
 							, "Description"_o= "The cmake params."
 						}
 					}
