@@ -3,7 +3,7 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-#include <Mib/Encoding/EJSON>
+#include <Mib/Encoding/EJson>
 
 #ifdef DMToolEmbedCMake
 
@@ -40,7 +40,7 @@ public:
 					, "ErrorOnOptionAsParameter"_o= false
 					, "GreedyDefaultCommand"_o= true
 				}
-				, [](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 				{
 					TCVector<CStr> Commands;
 					TCVector<const ch8 *> ArgV;

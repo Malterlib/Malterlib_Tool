@@ -9,7 +9,7 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 	CStr CurrentDirectory = CFile::fs_GetCurrentDirectory();
 	auto BuildSystemFiles = CFile::fs_FindFiles(CurrentDirectory / "*.MBuildSystem");
 
-	CEJSONOrdered DetailedPositionsDefault;
+	CEJsonOrdered DetailedPositionsDefault;
 	{
 		auto DetailedPositionsEnv = fg_GetSys()->f_GetEnvironmentVariable("Malterlib_UseDetailedPositions", "OnDemand");
 		if (DetailedPositionsEnv == "true")

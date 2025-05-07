@@ -8,7 +8,7 @@
 #include <Mib/Perforce/Wrapper>
 #include <Mib/Cryptography/MD5Cache>
 #include <Mib/Container/Convert>
-#include <Mib/Encoding/JSONShortcuts>
+#include <Mib/Encoding/JsonShortcuts>
 
 class CTool_PostCopy : public CTool
 {
@@ -121,7 +121,7 @@ public:
 				if (!pValue->f_GetThisValue().m_Value.f_ConstantString().f_IsEmpty())
 					ExcludePatterns = pValue->f_GetThisValue().m_Value.f_ConstantString().f_Split<true>(";");
 
-				CEJSONSorted Array;
+				CEJsonSorted Array;
 				for (auto &Pattern : ExcludePatterns)
 					Array.f_Insert(Pattern);
 
@@ -140,7 +140,7 @@ public:
 		{
 			ExcludePatterns = {"*/.git", "*/.DS_Store"};
 
-			CEJSONSorted Array;
+			CEJsonSorted Array;
 			for (auto &Pattern : ExcludePatterns)
 				Array.f_Insert(Pattern);
 			Registry.f_SetValueNoPath(ExcludePatternsKey, {{Array}});
@@ -175,7 +175,7 @@ public:
 					Tags[iTag->f_GetThisValue().m_Value.f_ConstantString()];
 				}
 
-				CEJSONSorted Array;
+				CEJsonSorted Array;
 				for (auto &Tag : Tags)
 					Array.f_Insert(Tag);
 
@@ -196,8 +196,8 @@ public:
 		CBuildSystemSyntax::CRootValue DefaultRootDefaultRootValue{.m_Value = {DefaultRootDefault}};
 
 		CStr DefaultRoot;
-		if (auto DefaultRootJSON = Registry.f_GetValueNoPath(fs_GetIdentifierKey("DefaultRoot"), DefaultRootDefaultRootValue); DefaultRootJSON.m_Value.f_IsConstantString())
-			DefaultRoot = DefaultRootJSON.m_Value.f_ConstantString();
+		if (auto DefaultRootJson = Registry.f_GetValueNoPath(fs_GetIdentifierKey("DefaultRoot"), DefaultRootDefaultRootValue); DefaultRootJson.m_Value.f_IsConstantString())
+			DefaultRoot = DefaultRootJson.m_Value.f_ConstantString();
 		else
 			DefaultRoot = DefaultRootDefault;
 

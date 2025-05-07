@@ -3,11 +3,11 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-#include <Mib/Encoding/EJSON>
+#include <Mib/Encoding/EJson>
 #include <Mib/Concurrency/ConcurrencyManager>
 #include <Mib/Web/Curl>
 
-class CTool_ReadJSON : public CTool2
+class CTool_ReadJson : public CTool2
 {
 public:
 
@@ -58,17 +58,17 @@ public:
 		else
 			Contents.m_Promise.f_SetResult(CFile::fs_ReadStringFromFile(CFile::fs_GetExpandedPath(SourcePath, true)));
 
-		CEJSONSorted JSON = CEJSONSorted::fs_FromString(fg_Move(Contents.m_Future).f_CallSync(60.0));
+		CEJsonSorted Json = CEJsonSorted::fs_FromString(fg_Move(Contents.m_Future).f_CallSync(60.0));
 
 		if (Params.f_IsEmpty())
 		{
-			DConOut("{}\n", JSON.f_ToString());
+			DConOut("{}\n", Json.f_ToString());
 			return 0;
 		}
 
 		for (auto &Param : Params)
 		{
-			CEJSONSorted const *pValue = &JSON;
+			CEJsonSorted const *pValue = &Json;
 			CStr CurrentPath;
 			for (auto &Path : Param.f_Split<true>("."))
 			{
@@ -84,5 +84,5 @@ public:
 	}
 };
 
-DMibRuntimeClass(CTool, CTool_ReadJSON);
+DMibRuntimeClass(CTool, CTool_ReadJson);
 

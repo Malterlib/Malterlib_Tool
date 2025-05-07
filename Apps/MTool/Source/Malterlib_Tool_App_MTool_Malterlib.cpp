@@ -4,7 +4,7 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
 
-CStr CTool_Malterlib::fs_GetFileNameOrEmpty(NEncoding::CEJSONSorted const &_Param, CStr const &_CurrentDirectory)
+CStr CTool_Malterlib::fs_GetFileNameOrEmpty(NEncoding::CEJsonSorted const &_Param, CStr const &_CurrentDirectory)
 {
 	CStr FileName = _Param.f_String();
 	if (!FileName)
@@ -99,7 +99,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 #endif
 }
 
-CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJSONSorted const &_Params)
+CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJsonSorted const &_Params)
 {
 	CStr CurrentDirectory = _Params["CurrentDirectory"].f_String();
 
@@ -145,7 +145,7 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJSONSorted 
 	return GenerateOptions;
 }
 
-CEJSONOrdered::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefault)
+CEJsonOrdered::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefault)
 {
 	return "UseCachedEnvironment?"_o=
 		{

@@ -6,7 +6,7 @@
 
 void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecification &o_CommandLine)
 {
-	auto fDummyCommand = [](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+	auto fDummyCommand = [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 		{
 			DMibError("This command is dummy only, run through the ./mib script");
 		}

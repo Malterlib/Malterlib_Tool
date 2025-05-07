@@ -41,7 +41,7 @@ public:
 						}
 					}
 				}
-				, [=](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+				, [=](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 				{
 					co_await ECoroutineFlag_CaptureExceptions;
 
@@ -53,10 +53,10 @@ public:
 
 					CStr StateFile = Destination / "Contents/SignState.json";
 
-					CEJSONSorted SignState = EJSONType_Object;
+					CEJsonSorted SignState = EJsonType_Object;
 
 					if (CFile::fs_FileExists(StateFile))
-						SignState = CEJSONSorted::fs_FromString(CFile::fs_ReadStringFromFile(StateFile, true), StateFile);
+						SignState = CEJsonSorted::fs_FromString(CFile::fs_ReadStringFromFile(StateFile, true), StateFile);
 
 					bool bCopyDone = false;
 					if (auto *pValue = SignState.f_GetMember("CopyDone"))

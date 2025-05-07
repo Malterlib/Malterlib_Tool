@@ -32,7 +32,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 					}
 				}
 			}
-			, [=, this](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			, [=, this](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
@@ -128,7 +128,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 					fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [=](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 			{
 				return f_RunBuildSystem
 					(
@@ -154,7 +154,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 					fs_CachedEnvironmentOption(true)
 				}
 			}
-			, [=](NEncoding::CEJSONSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			, [=](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
 				TCSharedPointer<TCAtomic<bool>> pCancelled = fg_Construct();
 				CBuildSystem BuildSystem

@@ -7,8 +7,8 @@
 #include "contrib/minizip/ioapi.h"
 #include "contrib/minizip/unzip.h"
 
-#include <Mib/Encoding/EJSON>
-#include <Mib/Encoding/JSONShortcuts>
+#include <Mib/Encoding/EJson>
+#include <Mib/Encoding/JsonShortcuts>
 #include <Mib/Container/Regions>
 #include <Mib/Cryptography/RandomID>
 
@@ -334,10 +334,10 @@ public:
 
 		void f_Read(CStr const &_FileName)
 		{
-			CEJSONSorted Database;
+			CEJsonSorted Database;
 
 			if (CFile::fs_FileExists(_FileName))
-				Database = CEJSONSorted::fs_FromString(CFile::fs_ReadStringFromFile(_FileName, true), _FileName);
+				Database = CEJsonSorted::fs_FromString(CFile::fs_ReadStringFromFile(_FileName, true), _FileName);
 			else
 				return;
 
@@ -362,16 +362,16 @@ public:
 
 		void f_Write(CStr const &_FileName) const
 		{
-			CEJSONSorted Database;
+			CEJsonSorted Database;
 
 			{
-				auto &OutRegions = Database["SourceRegions"] = EJSONType_Array;
+				auto &OutRegions = Database["SourceRegions"] = EJsonType_Array;
 
 				for (auto &Time : m_SourceTimes)
 				{
-					CEJSONSorted TimeData = {"Start"_= Time.f_Start(), "End"_= Time.f_End()};
+					CEJsonSorted TimeData = {"Start"_= Time.f_Start(), "End"_= Time.f_End()};
 
-					auto &Files = TimeData["Files"] = EJSONType_Array;
+					auto &Files = TimeData["Files"] = EJsonType_Array;
 
 					TCSet<CStr> FileNames;
 					auto iFiles = m_SourceFilesByTime.f_GetIterator_SmallestGreaterThanEqual(Time.f_Start());
@@ -389,13 +389,13 @@ public:
 			}
 
 			{
-				auto &OutFiles = Database["SourceFiles"] = EJSONType_Array;
+				auto &OutFiles = Database["SourceFiles"] = EJsonType_Array;
 
 				for (auto &Files : m_SourceFilesByTime)
 				{
 					for (auto &File : Files)
 					{
-						CEJSONSorted FileData = {"Time"_= m_SourceFilesByTime.fs_GetKey(Files), "FileName"_= File};
+						CEJsonSorted FileData = {"Time"_= m_SourceFilesByTime.fs_GetKey(Files), "FileName"_= File};
 
 						OutFiles.f_Insert(fg_Move(FileData));
 					}
@@ -403,7 +403,7 @@ public:
 			}
 
 			{
-				auto &OutFiles = Database["SymbolFiles"] = EJSONType_Array;
+				auto &OutFiles = Database["SymbolFiles"] = EJsonType_Array;
 
 				for (auto &Files : m_SymbolFilesByTime)
 				{
@@ -423,7 +423,7 @@ public:
 			}
 
 			{
-				auto &Timestamps = Database["PDBTimeStamps"] = EJSONType_Object;
+				auto &Timestamps = Database["PDBTimeStamps"] = EJsonType_Object;
 
 				for (auto &Time : m_PDBTimeStamps)
 				{
@@ -432,7 +432,7 @@ public:
 			}
 
 			{
-				auto &OutFiles = Database["OutstandingPDBFiles"] = EJSONType_Object;
+				auto &OutFiles = Database["OutstandingPDBFiles"] = EJsonType_Object;
 
 				for (auto &File : m_OutstandingPDPFiles)
 				{

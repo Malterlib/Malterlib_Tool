@@ -5,7 +5,7 @@
 
 #include <Mib/Core/RuntimeType>
 #include <Mib/Concurrency/DistributedTool>
-#include <Mib/Encoding/JSONShortcuts>
+#include <Mib/Encoding/JsonShortcuts>
 #include <Mib/Container/Registry>
 
 bool fg_IsCMake();

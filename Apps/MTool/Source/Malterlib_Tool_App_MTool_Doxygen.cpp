@@ -180,7 +180,7 @@ public:
 					, "ErrorOnOptionAsParameter"_o= false
 					, "GreedyDefaultCommand"_o= true
 				}
-				, [](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 				{
 					DMibConOut2("Apple Inc. version cctools-1010.6\n");
 					return 0;
@@ -205,7 +205,7 @@ public:
 					, "ErrorOnOptionAsParameter"_o= false
 					, "GreedyDefaultCommand"_o= true
 				}
-				, [](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 				{
 					CDependencyFile DependencyFile;
 					DependencyFile.f_AddTool("libtool");

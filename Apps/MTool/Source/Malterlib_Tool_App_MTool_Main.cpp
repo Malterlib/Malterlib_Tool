@@ -55,7 +55,7 @@ void CTool::f_Register
 				, "ErrorOnCommandAsParameter"_o= false
 				, "ErrorOnOptionAsParameter"_o= false
 			}
-			, [this](NEncoding::CEJSONSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			, [this](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 			{
 				NContainer::CRegistry Params;
 				mint iOut = 0;
