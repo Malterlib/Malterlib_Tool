@@ -24,7 +24,7 @@ public:
 				{
 					"Names"_o= _o["ResignXcode"]
 					, "Description"_o= "Resign Xcode.\n"
-					//, "Category"_o= "Development Tools"
+					, "Category"_o= "Legacy"
 					, "Options"_o=
 					{
 						"Source"_o=

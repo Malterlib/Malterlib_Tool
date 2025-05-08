@@ -194,6 +194,7 @@ public:
 				{
 					"Names"_o= _o["DeleteRecursiveParallel"]
 					, "Description"_o= "Delete files or directories recursively.\n"
+					, "Category"_o= "Legacy"
 					, "Options"_o=
 					{
 						"Verbose?"_o=
@@ -498,6 +499,7 @@ public:
 				{
 					"Names"_o= _o["CreateDirectoryTree"]
 					, "Description"_o= "Create directory tree.\n"
+					, "Category"_o= "Legacy"
 					, "Options"_o=
 					{
 						"NumFiles?"_o=

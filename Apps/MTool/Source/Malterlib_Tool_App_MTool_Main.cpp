@@ -44,6 +44,7 @@ void CTool::f_Register
 			{
 				"Names"_o= _o[ClassName]
 				, "Description"_o= "Runs {} command.\n"_f << ClassName
+				, "Category"_o= "Legacy"
 				, "Parameters"_o=
 				{
 					"Params...?"_o=
