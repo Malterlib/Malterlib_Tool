@@ -47,7 +47,7 @@ namespace
 			}
 			catch (CException const &_Exception)
 			{
-				DConErrOut("Excepton opening zip file: {}", _Exception);
+				DConErrOut("Exception opening zip file: {}", _Exception);
 			}
 
 			return pFile;
@@ -329,7 +329,7 @@ public:
 		TCMap<CTime, TCSet<CStr>> m_SourceFilesByTime;
 
 		TCMap<CTime, TCSet<CSymbolFile>> m_SymbolFilesByTime;
-		TCMap<CStr, CTime> m_PDBTimeStamps;
+		TCMap<CStr, CTime> m_PDBTimestamps;
 		TCMap<CStr, CSymbolFile> m_OutstandingPDPFiles;
 
 		void f_Read(CStr const &_FileName)
@@ -354,7 +354,7 @@ public:
 				m_SymbolFilesByTime[File["Time"].f_Date()][CDatabase::CSymbolFile{File["BasePath"].f_String(), File["FileName"].f_String()}];
 
 			for (auto &Timestamp : Database["PDBTimeStamps"].f_Object())
-				m_PDBTimeStamps[Timestamp.f_Name()] = Timestamp.f_Value().f_Date();
+				m_PDBTimestamps[Timestamp.f_Name()] = Timestamp.f_Value().f_Date();
 
 			for (auto &File : Database["OutstandingPDBFiles"].f_Object())
 				m_OutstandingPDPFiles[File.f_Name()] = CDatabase::CSymbolFile{File.f_Value()["BasePath"].f_String(), File.f_Value()["FileName"].f_String()};
@@ -425,9 +425,9 @@ public:
 			{
 				auto &Timestamps = Database["PDBTimeStamps"] = EJsonType_Object;
 
-				for (auto &Time : m_PDBTimeStamps)
+				for (auto &Time : m_PDBTimestamps)
 				{
-					Timestamps[m_PDBTimeStamps.fs_GetKey(Time)] = Time;
+					Timestamps[m_PDBTimestamps.fs_GetKey(Time)] = Time;
 				}
 			}
 
@@ -528,7 +528,7 @@ public:
 						CStr PDBGuid;
 						WriteTime = f_GetExecutableTimestamp(File, PDBGuid);
 						if (!PDBGuid.f_IsEmpty())
-							Database.m_PDBTimeStamps[PDBGuid] = WriteTime;
+							Database.m_PDBTimestamps[PDBGuid] = WriteTime;
 					}
 					else if (Extension == "zip")
 						WriteTime = f_GetZipTimestamp(File);
@@ -566,7 +566,7 @@ public:
 			for (auto &SymbolFile : Database.m_OutstandingPDPFiles)
 			{
 				auto &PDBGuid = Database.m_OutstandingPDPFiles.fs_GetKey(SymbolFile);
-				auto *pTimestamp = Database.m_PDBTimeStamps.f_FindEqual(PDBGuid);
+				auto *pTimestamp = Database.m_PDBTimestamps.f_FindEqual(PDBGuid);
 				if (!pTimestamp)
 					continue;
 
