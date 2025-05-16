@@ -27,8 +27,17 @@ if [[ "$BuildIncremental" != "true" ]]; then
 	rm -rf "$DistributionDir/"*
 fi
 
+if [[ "$MalterlibPlatform" == "macOS" ]] ; then
+	export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+	"$MalterlibRoot/External/llvm-project/lldb/scripts/macos-setup-codesign.sh"
+fi
+
 ExtraCMake="-G Ninja"
 
+LLVMProjects="clang;clang-tools-extra;lld;lldb"
+LLVMRuntimes="compiler-rt;libcxx;libcxxabi;libunwind"
+
+ExtraCMake="$ExtraCMake -DLLVM_ENABLE_CURL=ON"
 ExtraCMake="$ExtraCMake -DLLVM_USE_STATIC_ZSTD=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_USE_STATIC_ZSTD=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLVM_USE_STATIC_ZSTD=ON"
@@ -37,8 +46,8 @@ ExtraCMake="$ExtraCMake -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_INSTALL_TOOLCHAIN_ONLY=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLVM_INSTALL_TOOLCHAIN_ONLY=ON"
 
-ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_RUNTIMES=compiler-rt;libcxx;libcxxabi;libunwind"
-ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_PROJECTS=clang;clang-tools-extra;lld"
+ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_RUNTIMES=$LLVMRuntimes"
+ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_PROJECTS=$LLVMProjects"
 
 if [[ "$MalterlibPlatform" == "Linux" ]] && [[ "$MalterlibArch" == "x86" ]]; then
 	ExtraCMake="$ExtraCMake -DLLVM_ENABLE_LTO=OFF"
@@ -187,7 +196,32 @@ BuildCompiler()
 	popd
 }
 
-if [[ "$MalterlibPlatform/$MalterlibArch" == "Linux/x86" ]] || [[ "$1" == "debug" ]]; then
+BuildDevCompiler()
+{
+	BuildType="${BuildType:-Debug}"
+	export StandaloneBuild=true
+	mkdir -p "$RootDir/build/dist_temp2"
+	pushd "$RootDir/build"
+		local BuildDir="$PWD"
+	popd
+	pushd "$RootDir/build/dist_temp2"
+		ExtraCMake="$ExtraCMake -DCMAKE_INSTALL_PREFIX=$DistributionDir"
+		ExtraCMake="$ExtraCMake -DLLVM_ENABLE_PGO=OFF"
+		ExtraCMake="$ExtraCMake -DLLVM_ENABLE_LTO=OFF"
+		ExtraCMake="$ExtraCMake -DLLVM_ENABLE_RUNTIMES=$LLVMRuntimes"
+		ExtraCMake="$ExtraCMake -DLLVM_ENABLE_PROJECTS=$LLVMProjects"
+		ExtraCMake="$ExtraCMake -DCMAKE_BUILD_TYPE=$BuildType"
+		ExtraCMake="$ExtraCMake -DLLVM_ENABLE_ASSERTIONS=ON"
+
+		(cmake $ExtraCMake "$MalterlibRoot/External/llvm-project/llvm")
+
+		time ninja -j${NCPUS} install
+	popd
+}
+
+if [[ "$1" == "dev" ]]; then
+	BuildDevCompiler
+elif [[ "$MalterlibPlatform/$MalterlibArch" == "Linux/x86" ]] || [[ "$1" == "debug" ]]; then
 	BuildCompiler
 else
 	BuildCompilerLTO

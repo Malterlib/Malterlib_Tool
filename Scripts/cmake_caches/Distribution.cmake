@@ -10,7 +10,7 @@ set(CMAKE_BUILD_TYPE Release CACHE STRING "")
 set(PACKAGE_VENDOR malterlib.org CACHE STRING "")
 
 #Enable LLVM projects and runtimes
-set(LLVM_ENABLE_PROJECTS "clang;clang-tools-extra;lld;polly" CACHE STRING "")
+set(LLVM_ENABLE_PROJECTS "clang;clang-tools-extra;lld;polly;lldb" CACHE STRING "")
 set(LLVM_ENABLE_RUNTIMES "compiler-rt;libcxx;libcxxabi;libunwind" CACHE STRING "")
 
 if ($ENV{MalterlibPlatform} MATCHES "Linux" AND $ENV{MalterlibArch} MATCHES "x86")

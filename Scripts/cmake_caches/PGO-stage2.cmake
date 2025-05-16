@@ -1,6 +1,6 @@
 set(CMAKE_BUILD_TYPE RELEASE CACHE STRING "")
 
-set(LLVM_ENABLE_PROJECTS "clang;clang-tools-extra;lld;polly" CACHE STRING "")
+set(LLVM_ENABLE_PROJECTS "clang;clang-tools-extra;lld;polly;lldb" CACHE STRING "")
 set(LLVM_ENABLE_RUNTIMES "compiler-rt;libcxx;libcxxabi;libunwind" CACHE STRING "")
 set(LLVM_TARGETS_TO_BUILD X86;ARM;AArch64 CACHE STRING "")
 

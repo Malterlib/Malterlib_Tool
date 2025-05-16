@@ -3,7 +3,7 @@
 
 set(LLVM_INSTALL_TOOLCHAIN_ONLY ON CACHE BOOL "")
 
-set(LLVM_ENABLE_PROJECTS "clang;clang-tools-extra;lld;polly" CACHE STRING "")
+set(LLVM_ENABLE_PROJECTS "clang;clang-tools-extra;lld;polly;lldb" CACHE STRING "")
 set(LLVM_ENABLE_RUNTIMES "compiler-rt;libcxx;libcxxabi;libunwind" CACHE STRING "")
 
 if ($ENV{MalterlibPlatform} MATCHES "Linux" AND $ENV{MalterlibArch} MATCHES "x86")
