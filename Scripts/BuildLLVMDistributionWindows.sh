@@ -11,9 +11,10 @@ pushd ../../..
 popd
 
 source "$MalterlibRoot/Malterlib/Core/Scripts/Detect.sh"
+
 DistributionDir="$MalterlibRoot/Binaries/MalterlibLLVM/$MalterlibPlatform/$MalterlibArch"
 
-LLVMVersion=19.1.0
+LLVMVersion=20.1.0
 
 ExtraCMake="-G Ninja"
 RootDir="$ScriptDir"
@@ -30,21 +31,24 @@ PerlPath=`find /c/Apps/strawberry-perl-*-portable/perl -maxdepth 1 -name bin`
 echo "PerlPath: $PerlPath"
 export PATH="$PerlPath:$PATH"
 
+BuildDir="$RootOutputDir/build"
+
 echo "RootDir: $RootDir"
 echo "RootOutputDir: $RootOutputDir"
 echo "DistributionDir: $DistributionDir"
+echo "BuildDir: $BuildDir"
 
 pushd "$ScriptDir"
 
 if [[ "$BuildIncremental" != "true" ]]; then
-	rm -rf "$RootOutputDir/build"
+	rm -rf "$BuildDir"
 	rm -rf "$DistributionDir/"*
 fi
 
-mkdir -p "$RootOutputDir/build"
-pushd "$RootOutputDir/build"
+mkdir -p "$BuildDir"
+pushd "$BuildDir"
 	cmd.exe //C `cygpath -m "$MalterlibRoot/External/llvm-project/llvm/utils/release/build_llvm_release.bat"` --version $LLVMVersion --$MalterlibArch --skip-checkout --local-python
-	SourceDistributionDir=`find "$RootOutputDir/build"/llvm_package*/build*/_CPack_Packages/*/NSIS/LLVM* -maxdepth 0 -type d`
+	SourceDistributionDir=`find "$BuildDir"/llvm_package*/build*/_CPack_Packages/*/NSIS/LLVM* -maxdepth 0 -type d`
 
 	"$MToolExecutable" DiffCopy `cygpath -m "$SourceDistributionDir/"`"*" "$DistributionDir"
 popd

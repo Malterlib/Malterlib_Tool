@@ -37,6 +37,10 @@ ExtraCMake="-G Ninja"
 LLVMProjects="clang;clang-tools-extra;lld;lldb"
 LLVMRuntimes="compiler-rt;libcxx;libcxxabi;libunwind"
 
+if [[ "$MalterlibPlatform" == "Linux" ]] && [[ "$MalterlibArch" != "x86" ]]; then
+	LLVMProjects="$LLVMProjects;bolt"
+fi
+
 ExtraCMake="$ExtraCMake -DLLVM_ENABLE_CURL=ON"
 ExtraCMake="$ExtraCMake -DLLVM_USE_STATIC_ZSTD=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_USE_STATIC_ZSTD=ON"
@@ -52,6 +56,7 @@ ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_PROJECTS=$LLVMProjects"
 if [[ "$MalterlibPlatform" == "Linux" ]] && [[ "$MalterlibArch" == "x86" ]]; then
 	ExtraCMake="$ExtraCMake -DLLVM_ENABLE_LTO=OFF"
 	ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_ENABLE_LTO=OFF"
+ 	ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_BOLTOPT=OFF"
 
 	ExtraCMake="$ExtraCMake -DSANITIZER_ALLOW_CXXABI=OFF"
 	ExtraCMake="$ExtraCMake -DBOOTSTRAP_SANITIZER_ALLOW_CXXABI=OFF"
@@ -66,6 +71,7 @@ if [[ "$MalterlibPlatform" == "Linux" ]] && [[ "$MalterlibArch" == "x86" ]]; the
 
 	ExtraCMake="$ExtraCMake -DLLVM_TARGETS_TO_BUILD=X86"
 	ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_TARGETS_TO_BUILD=X86"
+
 fi
 
 BuildCompilerLTO()
