@@ -11,7 +11,7 @@ namespace NDeleteRecursive
 
 	template <typename tf_CResult, typename tf_CContainer, typename tf_CFunctor>
 	auto DMibWorkaroundUBSanSectionErrorsDisable fg_ParallelForEachBlocking(tf_CContainer &&_Container, tf_CFunctor &&_fFunctor, mint _MaxConcurrency)
-		-> TCUnsafeFuture<typename TCChooseType<NTraits::TCIsVoid<tf_CResult>::mc_Value, tf_CResult, TCVector<tf_CResult>>::CType>
+		-> TCUnsafeFuture<TCConditional<NTraits::cIsVoid<tf_CResult>, tf_CResult, TCVector<tf_CResult>>>
 	{
 		co_await ECoroutineFlag_CaptureMalterlibExceptions;
 
