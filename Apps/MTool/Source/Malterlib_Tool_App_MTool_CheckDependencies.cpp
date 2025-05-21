@@ -12,7 +12,7 @@ namespace NMib
 		template <typename tf_CStr, typename tf_FOnLine>
 		void fg_StrForEachLine(tf_CStr const& _Str, tf_FOnLine && _fOnLine)
 		{
-			typedef typename NMib::NStr::TCStrPtrFromCharType<typename tf_CStr::CChar>::CType CStrPtrType;
+			using CStrPtrType = typename NMib::NStr::TCStrPtrFromCharType<typename tf_CStr::CChar>::CType;
 			auto const* pParse = _Str.f_GetStr();
 			while (*pParse)
 			{

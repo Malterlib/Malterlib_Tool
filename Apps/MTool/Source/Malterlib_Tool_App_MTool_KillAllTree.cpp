@@ -33,7 +33,7 @@ public:
 
 		DLinkDS_Link(CProcessEntry, m_LinkAll);
 		DLinkDS_List(CProcessEntry, m_LinkAll) m_AllProcess;
-		typedef DLinkDS_Iter(CProcessEntry, m_LinkAll) CAllIter;
+		using CAllIter = DLinkDS_Iter(CProcessEntry, m_LinkAll);
 
 		bool operator == (uint32 _Process) const
 		{
