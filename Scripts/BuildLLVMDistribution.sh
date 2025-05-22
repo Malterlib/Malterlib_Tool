@@ -42,6 +42,9 @@ if [[ "$MalterlibPlatform" == "Linux" ]] && [[ "$MalterlibArch" != "x86" ]]; the
 fi
 
 ExtraCMake="$ExtraCMake -DLLVM_ENABLE_CURL=ON"
+ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_ENABLE_CURL=ON"
+ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLVM_ENABLE_CURL=ON"
+
 ExtraCMake="$ExtraCMake -DLLVM_USE_STATIC_ZSTD=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_USE_STATIC_ZSTD=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLVM_USE_STATIC_ZSTD=ON"
