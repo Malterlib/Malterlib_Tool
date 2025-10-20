@@ -61,10 +61,13 @@ public:
 
 		CAnsiProperties m_AnsiProperties;
 		CAnsiEncodingParse::CParseState m_AnsiParseState;
+		bool m_bEndOfFileReceived = false;
 
-		CStr f_AddInput(CStr &&_Line, bool _bFlush)
+		CSequencer m_InputSequencer{"Input sequencer"};
+
+		CStr f_AddInput(CIOByteVector &&_Input, bool _bFlush)
 		{
-			m_BufferedInput += fg_Move(_Line);
+			m_BufferedInput.f_AddStr((ch8 const *)_Input.f_GetArray(), _Input.f_GetLen());
 
 			NStr::CStr FinishedInput;
 
@@ -149,7 +152,7 @@ public:
 			co_return {};
 		}
 
-		TCFuture<void> f_ProcessInput(CStr _Line, bool _bFlush)
+		TCFuture<void> f_ProcessInput(CIOByteVector _Input, bool _bFlush)
 		{
 			auto &pCommandLine = m_Config.m_pCommandLine;
 			auto bVerbose = m_Config.m_bVerbose;
@@ -157,7 +160,7 @@ public:
 			auto bOrder = m_Config.m_bOrder;
 			auto bFilterColored = m_Config.m_bFilterColored;
 
-			CStr ToProcess = f_AddInput(fg_Move(_Line), _bFlush);
+			CStr ToProcess = f_AddInput(fg_Move(_Input), _bFlush);
 
 			if (!ToProcess)
 				co_return {};
@@ -539,7 +542,7 @@ public:
 
 					if (InputFile)
 					{
-						auto Contents = CFile::fs_ReadStringFromFile(*InputFile, true);
+						auto Contents = CFile::fs_ReadFile(*InputFile);
 
 						co_await pState->f_ProcessInput(fg_Move(Contents), true);
 					}
@@ -547,7 +550,7 @@ public:
 					{
 						auto Subscription = co_await StdInActor
 							(
-								&CStdInActor::f_RegisterForInput
+								&CStdInActor::f_RegisterForInputBinary
 								, g_ActorFunctor /
 								[
 									pCommandLine = _pCommandLine
@@ -556,10 +559,15 @@ public:
 									, EofPromise = fg_Move(EofDone.m_Promise)
 									, pState
 								]
-								(NProcess::EStdInReaderOutputType _Type, NStr::CStrIO _Input) -> TCFuture<void>
+								(EStdInReaderOutputType _Type, CIOByteVector _Input, CStr _Error) -> TCFuture<void>
 								{
 									using namespace NMib::NStr;
 									auto &State = *pState;
+
+									auto Subscription = co_await State.m_InputSequencer.f_Sequence();
+
+									if (State.m_bEndOfFileReceived)
+										co_return {};
 
 									switch (_Type)
 									{
@@ -567,7 +575,7 @@ public:
 										{
 											if (bPassThrough)
 											{
-												co_await pCommandLine->f_StdOut(_Input);
+												co_await pCommandLine->f_StdOutBinary(fg_Move(_Input));
 												co_return {};
 											}
 
@@ -576,11 +584,13 @@ public:
 										break;
 									case NProcess::EStdInReaderOutputType_GeneralError:
 										{
-											co_await pCommandLine->f_StdErr("[ERROR] {}\n"_f << _Input);
+											co_await pCommandLine->f_StdErr("[ERROR] {}\n"_f << _Error);
 										}
 										break;
 									case NProcess::EStdInReaderOutputType_EndOfFile:
 										{
+											State.m_bEndOfFileReceived = true;
+
 											co_await State.f_ProcessInput({}, true);
 
 											if (bVerbose)
