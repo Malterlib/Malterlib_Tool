@@ -166,6 +166,7 @@ public:
 				co_return {};
 
 			auto Lines = ToProcess.f_SplitLine();
+			Lines.f_PopBack();
 
 			CAnsiEncoding AnsiEncoding(EAnsiEncodingFlag_Color);
 

@@ -418,6 +418,7 @@ public:
 			}
 
 			auto Lines = ToProcess.f_SplitLine();
+			Lines.f_PopBack();
 
 			for (auto &Line : Lines)
 			{
