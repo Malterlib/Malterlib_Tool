@@ -73,6 +73,8 @@ public:
 		mint m_BufferedInputParsedChars = 0;
 		bool m_bEndOfFileReceived = false;
 
+		CStr *m_pPendingIncludeLineFix = nullptr;
+
 		CSequencer m_InputSequencer{"Input sequencer"};
 
 		static bool fs_IsCommandLine(CStr const &_Line)
@@ -127,9 +129,30 @@ public:
 			return fs_IsCommandLine(_Line);
 		}
 
+		static bool fs_IsSplitIncludeFirstLine(CStr const &_Trimmed)
+		{
+			constexpr static auto c_Prefix = gc_Str<"In file included from ">.m_Str;
+			if (!_Trimmed.f_StartsWith(c_Prefix) && !c_Prefix.f_StartsWith(_Trimmed))
+				return false;
+
+			mint nColonCount = 0;
+			for (auto Char : _Trimmed)
+			{
+				if (Char == ':')
+					++nColonCount;
+			}
+
+			return nColonCount != 2;
+		}
+
+		static bool fs_IsSplitIncludeLineNumber(CStr const &_Trimmed)
+		{
+			return _Trimmed.f_EndsWith(":");
+		}
+
 		void f_IncrementCommandCount(CStr const &_CommandLine)
 		{
-			if (_CommandLine.f_StartsWith("Compile") || _CommandLine.f_StartsWith("SwiftCompile"))
+			if (_CommandLine.f_StartsWith("Compile") || _CommandLine.f_StartsWith("SwiftCompile"))\
 				++m_CommandCounts.m_nCompile;
 			else if (_CommandLine.f_StartsWith("Ld ") || _CommandLine.f_StartsWith("Link"))
 				++m_CommandCounts.m_nLink;
@@ -230,6 +253,7 @@ public:
 			CommandInfo.m_CommandLine = _CommandLine;
 
 			f_IncrementCommandCount(_CommandLine);
+			m_pPendingIncludeLineFix = nullptr;
 		}
 
 		static CStr fs_ExtractCommandKey(CStr const &_Line)
@@ -237,17 +261,22 @@ public:
 			return _Line.f_Trim();
 		}
 
-		void f_AddCommandOutput(CStr const &_Line)
+		CStr *f_AddCommandOutput(CStr const &_Line)
 		{
 			if (m_CurrentCommandKey.f_IsEmpty())
 			{
 				m_NonCommandBufferedOutput.f_Insert(_Line);
-				return;
+				return &m_NonCommandBufferedOutput.f_GetLast();
 			}
 
 			auto *pCommand = m_Commands.f_FindEqual(m_CurrentCommandKey);
 			if (pCommand)
+			{
 				pCommand->m_BufferedOutput.f_Insert(_Line);
+				return &pCommand->m_BufferedOutput.f_GetLast();
+			}
+
+			return nullptr;
 		}
 
 		TCFuture<void> f_OutputLinesBatched(TCVector<CStr> _Lines)
@@ -281,6 +310,8 @@ public:
 
 		TCFuture<void> f_OutputFailedCommands()
 		{
+			m_pPendingIncludeLineFix = nullptr;
+
 			co_await f_ClearProgress();
 
 			if (m_Config.m_bVerbose)
@@ -416,29 +447,47 @@ public:
 			{
 				if (Config.m_bPassThrough)
 				{
+					m_pPendingIncludeLineFix = nullptr;
 					co_await pCommandLine->f_StdOut("{}\n"_f << fg_Move(Line));
 					continue;
 				}
 
 				auto CleanLine = CAnsiEncodingParse::fs_StripEncoding(Line);
 
+				if (m_pPendingIncludeLineFix)
+				{
+					if (fs_IsSplitIncludeLineNumber(CleanLine))
+					{
+						*m_pPendingIncludeLineFix += CleanLine;
+						m_pPendingIncludeLineFix = nullptr;
+						continue;
+					}
+
+					m_pPendingIncludeLineFix = nullptr;
+				}
+
 				if
 				(
 					CleanLine.f_StartsWith("    Target ")
 					|| CleanLine.f_StartsWith(str_utf8("        ➜ Explicit dependency on target"))
-					|| CleanLine.f_StartsWith(str_utf8("         Explicit dependency on target"))
 				)
 				{
 					continue; // Ignore
 				}
 
-				auto Trimmed = CleanLine.f_Trim();
+				auto fMaybeTrackSplitInclude = [&](CStr *_pStoredLine)
+					{
+						if (!_pStoredLine)
+							return;
 
+						if (fs_IsSplitIncludeFirstLine(Line))
+							m_pPendingIncludeLineFix = _pStoredLine;
+					}
+				;
+
+				auto Trimmed = CleanLine.f_Trim();
 				if (Trimmed.f_IsEmpty())
-				{
-					f_AddCommandOutput(Line);
 					continue;
-				}
 
 				if (Trimmed.f_StartsWith("The following build commands failed:"))
 				{
@@ -473,13 +522,12 @@ public:
 
 					co_await f_UpdateProgress(false);
 
-					f_AddCommandOutput(Line);
 					if (Config.m_bShowCommands)
 						co_await pCommandLine->f_StdOut("{}\n"_f << Line);
 					continue;
 				}
 
-				f_AddCommandOutput(Line);
+				fMaybeTrackSplitInclude(f_AddCommandOutput(Line));
 				if (Config.m_bShowCommands)
 					co_await pCommandLine->f_StdOut("{}\n"_f << Line);
 
