@@ -162,15 +162,15 @@ public:
 
 			CTableRenderHelper::CColumnHelper Columns(1);
 
-			Columns.f_AddHeading("", 0);
-			Columns.f_AddHeading("Finished", 0);
+			mint nOutputRows = 5;
+
+			Columns.f_AddHeading("Total", 0);
+			Columns.f_AddHeading("{}{}{ns }{}"_f << AnsiEncoding.f_StatusNormal() << AnsiEncoding.f_Bold() << m_CommandCounts.f_GetTotal() << AnsiEncoding.f_Default(), 0);
 
 			Columns.f_SetSortByColumns({"Timestamp"});
 
 			TableRenderer.f_AddHeadings(&Columns);
 			TableRenderer.f_SetOptions(CTableRenderHelper::EOption_Rounded | CTableRenderHelper::EOption_AvoidRowSeparators);
-
-			mint nOutputRows = 7;
 
 			auto UnimportantRGB = AnsiEncoding.f_ForegroundRGB(128, 128, 128);
 
@@ -191,14 +191,6 @@ public:
 			fAddCategory("Link", m_CommandCounts.m_nLink, true);
 			fAddCategory("Script", m_CommandCounts.m_nPhaseScript, false);
 			fAddCategory("Other", m_CommandCounts.m_nOther, false);
-
-			TableRenderer.f_ForceRowSeparator();
-			TableRenderer.f_AddRow
-				(
-					"{}Total{}"_f << AnsiEncoding.f_Bold() << AnsiEncoding.f_Default()
-					, "{}{ns }{}"_f << AnsiEncoding.f_StatusNormal() << m_CommandCounts.f_GetTotal() << AnsiEncoding.f_Default()
-				)
-			;
 
 			if (m_LastOutputProgressRows)
 				*m_Config.m_pCommandLine += "{}\r"_f << AnsiEncoding.f_MovePreviousLine(m_LastOutputProgressRows);
