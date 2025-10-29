@@ -565,7 +565,7 @@ public:
 	{
 		bool bDefaultShowProgress = true;
 
-		if (auto Value = fg_GetSys()->f_GetEnvironmentVariable("MalterlibEnableBuildProgress", "").f_LowerCase(); Value)
+		if (auto Value = fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildShowProgress", "").f_LowerCase(); Value)
 			bDefaultShowProgress = Value == "true";
 		else
 		{
@@ -588,19 +588,19 @@ public:
 						"Verbose?"_o=
 						{
 							"Names"_o= _o["--verbose", "-v"]
-							, "Default"_o= false
+							, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildVerbose", "false").f_LowerCase() == "true"
 							, "Description"_o= "Show verbose trace information.\n"
 						}
 						, "PassThrough?"_o=
 						{
 							"Names"_o= _o["--pass-through"]
-							, "Default"_o= false
+							, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildPassThrough", "false").f_LowerCase() == "true"
 							, "Description"_o= "Pass through all input without filtering (for testing).\n"
 						}
 						, "ShowCommands?"_o=
 						{
 							"Names"_o= _o["--show-commands"]
-							, "Default"_o= false
+							, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildShowCommands", "false").f_LowerCase() == "true"
 							, "Description"_o= "Keep raw build command lines (CompileC, Ld, etc.).\n"
 						}
 						, "ShowProgress?"_o=
