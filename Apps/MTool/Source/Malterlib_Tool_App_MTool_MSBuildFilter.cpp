@@ -10,6 +10,8 @@
 #include <Mib/Container/Vector>
 #include <Mib/String/String>
 #include <Mib/CommandLine/AnsiEncodingParse>
+#include <Mib/CommandLine/TableRenderer>
+#include <Mib/Time/ClockTimer>
 
 struct CTool_MSBuildFilter : public CDistributedTool, public CAllowUnsafeThis
 {
@@ -28,9 +30,25 @@ public:
 	{
 		NContainer::TCVector<NStr::CStr> m_BufferedLines;
 		CStr m_ProjectName;
+		CStr m_LastInvocation;
+		CStr m_LastLinkInvocation;
 		bool m_bIsCompleted = false;
 		bool m_bHasBeenOutput = false;
 		bool m_bLastWasLink = false;
+		bool m_bFailed = false;
+	};
+
+	struct CCommandCounts
+	{
+		mint m_nCompile = 0;
+		mint m_nLink = 0;
+		mint m_nOther = 0;
+		mint m_nProjectsCompleted = 0;
+
+		mint f_GetTotal() const
+		{
+			return m_nCompile + m_nLink + m_nOther + m_nProjectsCompleted;
+		}
 	};
 
 	struct CConfig
@@ -40,6 +58,8 @@ public:
 		bool m_bPassThrough = false;
 		bool m_bOrder = false;
 		bool m_bFilterColored = false;
+		bool m_bShowProgress = true;
+		bool m_bOnlyFailed = true;
 	};
 
 	struct CProjectsState : public CAllowUnsafeThis
@@ -62,6 +82,12 @@ public:
 		CAnsiProperties m_AnsiProperties;
 		CAnsiEncodingParse::CParseState m_AnsiParseState;
 		bool m_bEndOfFileReceived = false;
+
+		CCommandCounts m_CommandCounts;
+		CClock m_LastProgressUpdate{true};
+		CClock m_BuildTimer{true};
+		bool m_bProgressShown = false;
+		mint m_LastOutputProgressRows = 0;
 
 		CSequencer m_InputSequencer{"Input sequencer"};
 
@@ -107,7 +133,106 @@ public:
 			return FinishedInput;
 		}
 
-		TCFuture<void> f_OutputProject(mint _iProject)
+		void f_IncrementCommandCount(CStr const &_CommandLine)
+		{
+			// Check for compile commands
+			if (_CommandLine.f_Find("\\CL.exe") > 0 || _CommandLine.f_Find("\\clang-cl.exe") > 0)
+				++m_CommandCounts.m_nCompile;
+			// Check for link/lib commands
+			else if
+			(
+				_CommandLine.f_Find("\\link.exe") > 0
+				|| _CommandLine.f_Find("\\Lib.exe") > 0
+				|| _CommandLine.f_Find("\\lld-link.exe") > 0
+				|| _CommandLine.f_Find("\\llvm-lib.exe") > 0
+			)
+				++m_CommandCounts.m_nLink;
+			else
+				++m_CommandCounts.m_nOther;
+		}
+
+		TCFuture<void> f_UpdateProgress(bool _bForce)
+		{
+			if (!m_Config.m_bShowProgress && !_bForce)
+				co_return {};
+
+			auto CurrentTime = m_LastProgressUpdate.f_GetTime();
+
+			constexpr static auto c_TimeInterval = 33.3333333333_ms;
+
+			if (m_bProgressShown && CurrentTime < c_TimeInterval && !_bForce)
+				co_return {};
+
+			m_LastProgressUpdate.f_AddOffset(c_TimeInterval);
+			m_bProgressShown = true;
+
+			auto AnsiEncoding = m_Config.m_pCommandLine->f_AnsiEncoding();
+
+			auto TableRenderer = m_Config.m_pCommandLine->f_TableRenderer();
+
+			CTableRenderHelper::CColumnHelper Columns(1);
+
+			mint nOutputRows = 5;
+
+			Columns.f_AddHeading("Total", 0);
+			Columns.f_AddHeading("{}{}{ns }{}"_f << AnsiEncoding.f_StatusNormal() << AnsiEncoding.f_Bold() << m_CommandCounts.f_GetTotal() << AnsiEncoding.f_Default(), 0);
+
+			Columns.f_SetSortByColumns({"Timestamp"});
+
+			TableRenderer.f_AddHeadings(&Columns);
+			TableRenderer.f_SetOptions(CTableRenderHelper::EOption_Rounded | CTableRenderHelper::EOption_AvoidRowSeparators);
+
+			auto UnimportantRGB = AnsiEncoding.f_ForegroundRGB(128, 128, 128);
+
+			auto fAddCategory = [&](ch8 const *_pName, mint _nCount, bool _bImportant)
+				{
+					++nOutputRows;
+					TableRenderer.f_AddRow
+						(
+							_pName
+							, _nCount ? (_bImportant ? CStr("{ns }"_f << _nCount) : CStr("{}{ns }{}"_f << UnimportantRGB << _nCount << AnsiEncoding.f_Default())) : CStr()
+						)
+					;
+				}
+			;
+
+			fAddCategory("Compile", m_CommandCounts.m_nCompile, true);
+			fAddCategory("Link", m_CommandCounts.m_nLink, true);
+			fAddCategory("Projects", m_CommandCounts.m_nProjectsCompleted, true);
+			fAddCategory("Other", m_CommandCounts.m_nOther, false);
+
+			if (m_LastOutputProgressRows)
+				*m_Config.m_pCommandLine += "{}\r"_f << AnsiEncoding.f_MovePreviousLine(m_LastOutputProgressRows);
+			else if (m_Config.m_bShowProgress)
+				*m_Config.m_pCommandLine += "\n{}"_f << AnsiEncoding.f_ShowCursor(false);
+			else
+				*m_Config.m_pCommandLine += "\n";
+
+			TableRenderer.f_Output(CTableRenderHelper::EOutputType_HumanReadable);
+			m_LastOutputProgressRows = nOutputRows;
+
+			co_return {};
+		}
+
+		TCFuture<void> f_ClearProgress()
+		{
+			if (!m_bProgressShown && m_CommandCounts.f_GetTotal() == 0)
+				co_return {};
+
+			co_await f_UpdateProgress(true);
+
+			auto AnsiEncoding = m_Config.m_pCommandLine->f_AnsiEncoding();
+			if (m_Config.m_bShowProgress)
+				co_await m_Config.m_pCommandLine->f_StdOut("\n{}"_f << AnsiEncoding.f_ShowCursor(true));
+			else
+				co_await m_Config.m_pCommandLine->f_StdOut("\n");
+
+			m_bProgressShown = false;
+
+			co_return {};
+		}
+
+		TCFuture<void>  f_OutputProject(mint _iProject)
 		{
 			auto *pProject = m_ProjectMap.f_FindEqual(_iProject);
 			if (!pProject)
@@ -116,6 +241,9 @@ public:
 			auto &ProjectInfo = *pProject;
 
 			ProjectInfo.m_bHasBeenOutput = true;
+
+			if (m_Config.m_bOnlyFailed && !ProjectInfo.m_bFailed)
+				co_return {};
 
 			bool bAllEmpty = true;
 			for (auto const &BufferedLine : ProjectInfo.m_BufferedLines)
@@ -127,10 +255,10 @@ public:
 				}
 			}
 
-			if (bAllEmpty)
+			if (bAllEmpty && !ProjectInfo.m_bFailed)
 				co_return {};
 
-			co_await m_Config.m_pCommandLine->f_StdErr("\n=== {} ({}) ===\n"_f << ProjectInfo.m_ProjectName << m_iLastProject);
+			co_await m_Config.m_pCommandLine->f_StdOut("\n=== {} ({}) ==={}\n"_f << ProjectInfo.m_ProjectName << _iProject << (ProjectInfo.m_bFailed ? " FAILED" : ""));
 
 			mint nBufferedLines = 0;
 			CStr Output;
@@ -365,8 +493,18 @@ public:
 					}
 
 
-					if (bSkipThisLine || CleanTrimmed == ":VCEnd" || CleanTrimmed.f_Find("\\CL.exe /c") > 0 || CleanTrimmed.f_Find("\\clang-cl.exe /c ") > 0)
-						;
+					if (bSkipThisLine || CleanTrimmed == ":VCEnd")
+					{
+						ProjectInfo.m_LastInvocation.f_Clear();
+						if (CleanTrimmed == ":VCEnd")
+							ProjectInfo.m_LastLinkInvocation.f_Clear();
+					}
+					else if (CleanTrimmed.f_Find("\\CL.exe /c") > 0 || CleanTrimmed.f_Find("\\clang-cl.exe /c ") > 0)
+					{
+						ProjectInfo.m_LastInvocation = OutputLine;
+						f_IncrementCommandCount(CleanTrimmed);
+						co_await f_UpdateProgress(false);
+					}
 					else if
 					(
 						CleanTrimmed.f_Find("\\link.exe /ERRORREPORT:QUEUE") > 0
@@ -374,14 +512,36 @@ public:
 						|| CleanTrimmed.f_Find("\\lld-link.exe /OUT") > 0
 						|| CleanTrimmed.f_Find("\\llvm-lib.exe /OUT") > 0
 					)
+					{
+						ProjectInfo.m_LastLinkInvocation = OutputLine;
 						ProjectInfo.m_bLastWasLink = true;
+						f_IncrementCommandCount(CleanTrimmed);
+						co_await f_UpdateProgress(false);
+					}
 					else if (bFilterColored && Color && Color->m_bEnabled && !(*Color == c_ErrorColor || *Color == c_WarningColor))
 					{
 						if (bVerbose)
-							co_await pCommandLine->f_StdErr("\n=== Skip color ({} {} {}) === {}\n"_f << Color->m_Red << Color->m_Green << Color->m_Blue << OutputLine);
+							co_await pCommandLine->f_StdOut("\n=== Skip color ({} {} {}) === {}\n"_f << Color->m_Red << Color->m_Green << Color->m_Blue << OutputLine);
+						ProjectInfo.m_LastInvocation.f_Clear();
 					}
 					else
+					{
+						bool bIsErrorOrWarning = Color && Color->m_bEnabled && (*Color == c_ErrorColor || *Color == c_WarningColor);
+
+						if (bIsErrorOrWarning)
+						{
+							if (!ProjectInfo.m_LastInvocation.f_IsEmpty())
+								ProjectInfo.m_BufferedLines.f_Insert(fg_Move(ProjectInfo.m_LastInvocation));
+							else if (!ProjectInfo.m_LastLinkInvocation.f_IsEmpty())
+								ProjectInfo.m_BufferedLines.f_Insert(fg_Move(ProjectInfo.m_LastLinkInvocation));
+
+							ProjectInfo.m_LastLinkInvocation.f_Clear();
+						}
+
+						ProjectInfo.m_LastInvocation.f_Clear();
+
 						ProjectInfo.m_BufferedLines.f_Insert(fg_Move(OutputLine));
+					}
 
 					if (CleanLine.f_StartsWith("Done Building Project "))
 					{
@@ -389,35 +549,44 @@ public:
 						fg_GetStrSep(ProjectNameParse, "\"");
 						ProjectInfo.m_ProjectName = fg_GetStrSep(ProjectNameParse, "\"");
 
+						if (CleanLine.f_EndsWith("-- FAILED."))
+							ProjectInfo.m_bFailed = true;
+
 						ProjectInfo.m_bIsCompleted = true;
+						++m_CommandCounts.m_nProjectsCompleted;
 
 						if (bVerbose)
-							co_await pCommandLine->f_StdErr("\n=== Completed {} ({}) ===\n"_f << ProjectInfo.m_ProjectName << m_iLastProject);
+							co_await pCommandLine->f_StdOut("\n=== Completed {} ({}) ===\n"_f << ProjectInfo.m_ProjectName << m_iLastProject);
 
-						if (!bOrder)
-						{
-							ProjectInfo.m_bHasBeenOutput = true;
+						co_await f_UpdateProgress(false);
 
-							co_await f_OutputProject(m_iLastProject);
-						}
-						else
+						if (!m_Config.m_bShowProgress)
 						{
-							for
-							(
-								auto iProject = m_ProjectMap.f_GetIterator_SmallestGreaterThanEqual(m_iLastOutput)
-								; iProject && iProject->m_bIsCompleted
-								; ++iProject
-							)
+							if (!bOrder)
 							{
-								auto &ProjectInfo = *iProject;
-
-								if (ProjectInfo.m_bHasBeenOutput)
-									continue;
-
 								ProjectInfo.m_bHasBeenOutput = true;
-								m_iLastOutput = iProject.f_GetKey();
 
-								co_await f_OutputProject(iProject.f_GetKey());
+								co_await f_OutputProject(m_iLastProject);
+							}
+							else
+							{
+								for
+								(
+									auto iProject = m_ProjectMap.f_GetIterator_SmallestGreaterThanEqual(m_iLastOutput)
+									; iProject && iProject->m_bIsCompleted
+									; ++iProject
+								)
+								{
+									auto &ProjectInfo = *iProject;
+
+									if (ProjectInfo.m_bHasBeenOutput)
+										continue;
+
+									ProjectInfo.m_bHasBeenOutput = true;
+									m_iLastOutput = iProject.f_GetKey();
+
+									co_await f_OutputProject(iProject.f_GetKey());
+								}
 							}
 						}
 					}
@@ -428,7 +597,7 @@ public:
 					if (bFilterColored && Color && Color->m_bEnabled && (*Color == c_ErrorColor || *Color == c_WarningColor))
 					{
 						if (bVerbose)
-							co_await pCommandLine->f_StdErr("\n=== Skip color ({} {} {}) === {}\n"_f << Color->m_Red << Color->m_Green << Color->m_Blue << OutputLine);
+							co_await pCommandLine->f_StdOut("\n=== Skip color ({} {} {}) === {}\n"_f << Color->m_Red << Color->m_Green << Color->m_Blue << OutputLine);
 					}
 					else
 						co_await pCommandLine->f_StdOut("{}\n"_f << fg_Move(OutputLine)); // Output unordered lines immediately to maintain build progress visibility
@@ -437,17 +606,38 @@ public:
 
 			if (_bFlush)
 			{
+				co_await f_ClearProgress();
+
+				bool bAnyFailed = false;
 				// Output any remaining incomplete projects
 				for (auto &[iProject, ProjectInfo] : m_ProjectMap.f_Entries())
 				{
-					if (ProjectInfo.m_bHasBeenOutput || ProjectInfo.m_BufferedLines.f_IsEmpty())
+					if (ProjectInfo.m_bFailed)
+						bAnyFailed = true;
+
+					if (ProjectInfo.m_bHasBeenOutput || (ProjectInfo.m_BufferedLines.f_IsEmpty() && !ProjectInfo.m_bFailed))
 						continue;
 
-					if (bVerbose)
-						co_await pCommandLine->f_StdErr("\n=== Incomplete Project {} ({}) ===\n"_f << ProjectInfo.m_ProjectName << iProject);
-					for (auto const &BufferedLine : ProjectInfo.m_BufferedLines)
-						co_await pCommandLine->f_StdOut("{}\n"_f << BufferedLine);
+					if (ProjectInfo.m_bIsCompleted)
+					{
+						ProjectInfo.m_bHasBeenOutput = true;
+
+						co_await f_OutputProject(iProject);
+					}
+					else
+					{
+
+						if (bVerbose)
+							co_await pCommandLine->f_StdOut("\n=== Incomplete Project {} ({}) ===\n"_f << ProjectInfo.m_ProjectName << iProject);
+						for (auto const &BufferedLine : ProjectInfo.m_BufferedLines)
+							co_await pCommandLine->f_StdOut("{}\n"_f << BufferedLine);
+					}
 				}
+
+				if (bAnyFailed)
+					co_await m_Config.m_pCommandLine->f_StdOut("\nBuild failed after {}\n\n"_f << fg_SecondsDurationToHumanReadable(m_BuildTimer.f_GetTime()));
+				else
+					co_await m_Config.m_pCommandLine->f_StdOut("Build completed in {}\n\n"_f << fg_SecondsDurationToHumanReadable(m_BuildTimer.f_GetTime()));
 			}
 
 			co_return {};
@@ -462,6 +652,19 @@ public:
 			, NStr::CStr const &_ClassName
 		)
 	{
+		bool bDefaultShowProgress = true;
+
+		if (auto Value = fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildShowProgress", "").f_LowerCase(); Value)
+			bDefaultShowProgress = Value == "true";
+		else
+		{
+			if (fg_GetSys()->f_GetEnvironmentVariable("BUILDSERVER", "").f_LowerCase() == "true")
+				bDefaultShowProgress = false;
+
+			if (fg_GetSys()->f_GetEnvironmentVariable("GITHUB_ACTION", "").f_LowerCase() != "")
+				bDefaultShowProgress = false;
+		}
+
 		o_ToolsSection.f_RegisterCommand
 			(
 				{
@@ -474,26 +677,38 @@ public:
 						"Verbose?"_o=
 						{
 							"Names"_o= _o["--verbose", "-v"]
-							, "Default"_o= false
+							, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildVerbose", "false").f_LowerCase() == "true"
 							, "Description"_o= "Show verbose output for debugging.\n"
 						}
 						, "PassThrough?"_o=
 						{
 							"Names"_o= _o["--pass-through"]
-							, "Default"_o= false
+							, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildPassThrough", "false").f_LowerCase() == "true"
 							, "Description"_o= "Pass through all input without filtering (for testing).\n"
 						}
 						, "Order?"_o=
 						{
 							"Names"_o= _o["--order"]
-							, "Default"_o= false
+							, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildOrder", "false").f_LowerCase() == "true"
 							, "Description"_o= "Order output of projects.\n"
 						}
 						, "FilterColored?"_o=
 						{
 							"Names"_o= _o["--filter-colored"]
-							, "Default"_o= true
+							, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildFilterColored", "true").f_LowerCase() == "true"
 							, "Description"_o= "Filter out colored lines (except for errors).\n"
+						}
+						, "ShowProgress?"_o=
+						{
+							"Names"_o= _o["--show-progress"]
+							, "Default"_o= bDefaultShowProgress
+							, "Description"_o= "Show progress while build is ongoing\n"
+						}
+						, "OnlyFailed?"_o=
+						{
+							"Names"_o= _o["--only-failed", "--failed"]
+							, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildOnlyFailed", "true").f_LowerCase() == "true"
+							, "Description"_o= "Only output projects that failed. Set to false to show all projects.\n"
 						}
 					}
 					, "Parameters"_o=
@@ -513,6 +728,8 @@ public:
 					bool bPassThrough = _Params["PassThrough"].f_Boolean();
 					bool bOrder = _Params["Order"].f_Boolean();
 					bool bFilterColored = _Params["FilterColored"].f_Boolean();
+					bool bShowProgress = _Params["ShowProgress"].f_Boolean();
+					bool bOnlyFailed = _Params["OnlyFailed"].f_Boolean();
 
 					TCOptional<CStr> InputFile;
 
@@ -535,6 +752,8 @@ public:
 								, .m_bPassThrough = bPassThrough
 								, .m_bOrder = bOrder
 								, .m_bFilterColored = bFilterColored
+								, .m_bShowProgress = bShowProgress
+								, .m_bOnlyFailed = bOnlyFailed
 							}
 						)
 					;
