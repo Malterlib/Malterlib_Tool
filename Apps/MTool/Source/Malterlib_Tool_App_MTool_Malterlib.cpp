@@ -81,7 +81,15 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 
 #elif defined(DPlatformFamily_Windows)
 	CStr RepoConfigFile = _RootPath / "Repo.conf";
-	CStr Version = "2022";
+
+	CStr Errors;
+	auto Versions = CBuildSystem::fs_GetVisualStudioVersions(Errors);
+
+	CStr Version;
+	if (Versions.f_FindEqual(18u))
+		Version = "2026";
+	else
+		Version = "2022";
 
 	if (CFile::fs_FileExists(RepoConfigFile))
 	{
