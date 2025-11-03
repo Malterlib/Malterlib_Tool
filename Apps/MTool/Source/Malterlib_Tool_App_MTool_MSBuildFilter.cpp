@@ -404,6 +404,16 @@ public:
 								if (pNumberStart == pParse)
 									break;
 
+								// Check for colon-separated format (ProjectKey:EntryPointKey)
+								if (*pParse == ':')
+								{
+									++pParse;
+
+									// Parse second number (EntryPointKey)
+									while (*pParse && fg_CharIsNumber(*pParse))
+										++pParse;
+								}
+
 								if (*pParse != '>')
 									break;
 
