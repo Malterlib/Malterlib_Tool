@@ -233,6 +233,16 @@ Property
 			!DocumentationEnabled true
 			Dependency.Indirect true
 		}
+		%Dependency "powrprof.lib"
+		{
+			!!PlatformFamily "Windows"
+
+			Dependency
+			{
+				Type "Library"
+				Indirect true
+			}
+		}
 	}
 
 	%Target "Lib_CMLIBLZMA_cmliblzma"
