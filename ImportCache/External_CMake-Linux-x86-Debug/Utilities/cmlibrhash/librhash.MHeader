@@ -14,7 +14,8 @@ Property.CMakeOutputPath_librhash: string = `@('../..'->MakeAbsolute())`->MakeAb
 		]
 		PreprocessorDefines += [
 			"NO_IMPORT_EXPORT",
-			"_FILE_OFFSET_BITS=64"
+			"_FILE_OFFSET_BITS=64",
+			"_TIME_BITS=64"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"

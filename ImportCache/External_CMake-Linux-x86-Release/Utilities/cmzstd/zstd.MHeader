@@ -15,7 +15,8 @@ Property.CMakeOutputPath_zstd: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 		PreprocessorDefines += [
 			"DYNAMIC_BMI2=0",
 			"ZSTD_DISABLE_ASM=1",
-			"_FILE_OFFSET_BITS=64"
+			"_FILE_OFFSET_BITS=64",
+			"_TIME_BITS=64"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"

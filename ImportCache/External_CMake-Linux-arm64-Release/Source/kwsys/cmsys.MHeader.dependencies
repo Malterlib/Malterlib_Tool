@@ -4,7 +4,6 @@
 ../../../../../../External/CMake/Source/kwsys/CommandLineArguments.hxx.in
 ../../../../../../External/CMake/Source/kwsys/Configure.h.in
 ../../../../../../External/CMake/Source/kwsys/Configure.hxx.in
-../../../../../../External/CMake/Source/kwsys/ConsoleBuf.hxx.in
 ../../../../../../External/CMake/Source/kwsys/Directory.hxx.in
 ../../../../../../External/CMake/Source/kwsys/DynamicLoader.hxx.in
 ../../../../../../External/CMake/Source/kwsys/Encoding.h.in
@@ -19,7 +18,6 @@
 ../../../../../../External/CMake/Source/kwsys/System.h.in
 ../../../../../../External/CMake/Source/kwsys/SystemInformation.hxx.in
 ../../../../../../External/CMake/Source/kwsys/SystemTools.hxx.in
-../../../../../../External/CMake/Source/kwsys/Terminal.h.in
 ../../../../../../External/CMake/Source/kwsys/kwsysPlatformTests.cmake
 ../../../../../../External/CMake/Source/kwsys/kwsysPlatformTestsC.c
 ../../../../../../External/CMake/Source/kwsys/kwsysPlatformTestsCXX.cxx

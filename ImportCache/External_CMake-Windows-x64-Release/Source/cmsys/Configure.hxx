@@ -6,14 +6,9 @@
 /* Include C configuration.  */
 #include <cmsys/Configure.h>
 
-/* Whether wstring is available.  */
-#define cmsys_STL_HAS_WSTRING 1
 /* Whether <ext/stdio_filebuf.h> is available. */
 #define cmsys_CXX_HAS_EXT_STDIO_FILEBUF_H                         \
   0
-/* Whether the translation map is available or not. */
-#define cmsys_SYSTEMTOOLS_USE_TRANSLATION_MAP                     \
-  1
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC > 0x5130 && defined(__has_attribute)
 #  define cmsys_has_cpp_attribute(x) __has_attribute(x)
@@ -54,12 +49,9 @@
 #    define kwsys cmsys
 #  endif
 #  define KWSYS_NAME_IS_KWSYS cmsys_NAME_IS_KWSYS
-#  define KWSYS_STL_HAS_WSTRING cmsys_STL_HAS_WSTRING
 #  define KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H                                   \
     cmsys_CXX_HAS_EXT_STDIO_FILEBUF_H
 #  define KWSYS_FALLTHROUGH cmsys_FALLTHROUGH
-#  define KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP                               \
-    cmsys_SYSTEMTOOLS_USE_TRANSLATION_MAP
 #endif
 
 #endif

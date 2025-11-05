@@ -165,16 +165,16 @@
 /* #undef ARCHIVE_XATTR_LINUX */
 
 /* Version number of bsdcpio */
-#define BSDCPIO_VERSION_STRING "3.7.2"
+#define BSDCPIO_VERSION_STRING "3.7.9"
 
 /* Version number of bsdtar */
-#define BSDTAR_VERSION_STRING "3.7.2"
+#define BSDTAR_VERSION_STRING "3.7.9"
 
 /* Version number of bsdcat */
-#define BSDCAT_VERSION_STRING "3.7.2"
+#define BSDCAT_VERSION_STRING "3.7.9"
 
 /* Version number of bsdunzip */
-#define BSDUNZIP_VERSION_STRING "3.7.2"
+#define BSDUNZIP_VERSION_STRING "3.7.9"
 
 /* Define to 1 if you have the `acl_create_entry' function. */
 /* #undef HAVE_ACL_CREATE_ENTRY */
@@ -213,7 +213,7 @@
 /* #undef HAVE_ACL_SET_FILE */
 
 /* Define to 1 if you have the `arc4random_buf' function. */
-/* #undef HAVE_ARC4RANDOM_BUF */
+#define HAVE_ARC4RANDOM_BUF 1
 
 /* Define to 1 if you have the <attr/xattr.h> header file. */
 /* #undef HAVE_ATTR_XATTR_H */
@@ -472,7 +472,7 @@
 /* #undef HAVE_LCHFLAGS */
 
 /* Define to 1 if you have the `lchmod' function. */
-/* #undef HAVE_LCHMOD */
+#define HAVE_LCHMOD 1
 
 /* Define to 1 if you have the `lchown' function. */
 #define HAVE_LCHOWN 1
@@ -519,9 +519,6 @@
 /* Define to 1 if you have the `lzma' library (-llzma). */
 #define HAVE_LIBLZMA 1
 
-/* Define to 1 if you have the `lzmadec' library (-llzmadec). */
-/* #undef HAVE_LIBLZMADEC */
-
 /* Define to 1 if you have the `lzo2' library (-llzo2). */
 /* #undef HAVE_LIBLZO2 */
 
@@ -536,6 +533,12 @@
 
 /* Define to 1 if you have the `pcreposix' library (-lpcreposix). */
 /* #undef HAVE_LIBPCREPOSIX */
+
+/* Define to 1 if you have the `pcre2-8' library (-lpcre2-8). */
+/* #undef HAVE_LIBPCRE2 */
+
+/* Define to 1 if you have the `pcreposix' library (-lpcre2posix). */
+/* #undef HAVE_LIBPCRE2POSIX */
 
 /* Define to 1 if you have the `xml2' library (-lxml2). */
 /* #undef HAVE_LIBXML2 */
@@ -552,9 +555,8 @@
 /* Define to 1 if you have the `zstd' library (-lzstd). */
 #define HAVE_LIBZSTD 1
 
-/* Define to 1 if you have the `zstd' library (-lzstd) with compression
-   support. */
-#define HAVE_LIBZSTD_COMPRESSOR 1
+/* Define to 1 if you have the ZSTD_compressStream function. */
+#define HAVE_ZSTD_compressStream 1
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
@@ -625,9 +627,6 @@
 
 /* Define to 1 if you have the <lz4.h> header file. */
 /* #undef HAVE_LZ4_H */
-
-/* Define to 1 if you have the <lzmadec.h> header file. */
-/* #undef HAVE_LZMADEC_H */
 
 /* Define to 1 if you have the <lzma.h> header file. */
 #define HAVE_LZMA_H 1
@@ -709,6 +708,9 @@
 
 /* Define to 1 if you have the <pcreposix.h> header file. */
 /* #undef HAVE_PCREPOSIX_H */
+
+/* Define to 1 if you have the <pcre2posix.h> header file. */
+/* #undef HAVE_PCRE2POSIX_H */
 
 /* Define to 1 if you have the `pipe' function. */
 #define HAVE_PIPE 1
@@ -867,6 +869,9 @@
 /* Define to 1 if you have the `symlink' function. */
 #define HAVE_SYMLINK 1
 
+/* Define to 1 if you have the `sysconf' function. */
+#define HAVE_SYSCONF 1
+
 /* Define to 1 if you have the <sys/acl.h> header file. */
 #define HAVE_SYS_ACL_H 1
 
@@ -890,7 +895,7 @@
 /* #undef HAVE_SYS_MKDEV_H */
 
 /* Define to 1 if you have the <sys/mount.h> header file. */
-/* #undef HAVE_SYS_MOUNT_H */
+#define HAVE_SYS_MOUNT_H 1
 
 /* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
    */
@@ -901,9 +906,6 @@
 
 /* Define to 1 if you have the <sys/poll.h> header file. */
 #define HAVE_SYS_POLL_H 1
-
-/* Define to 1 if you have the <sys/queue.h> header file. */
-#define HAVE_SYS_QUEUE_H 1
 
 /* Define to 1 if you have the <sys/richacl.h> header file. */
 /* #undef HAVE_SYS_RICHACL_H */
@@ -944,6 +946,12 @@
 
 /* Define to 1 if you have the <sys/xattr.h> header file. */
 #define HAVE_SYS_XATTR_H 1
+
+/* Define to 1 if you have the `tcgetattr' function. */
+#define HAVE_TCGETATTR 1
+
+/* Define to 1 if you have the `tcsetattr' function. */
+#define HAVE_TCSETATTR 1
 
 /* Define to 1 if you have the `timegm' function. */
 #define HAVE_TIMEGM 1
@@ -1066,10 +1074,10 @@
 #define ICONV_CONST 
 
 /* Version number of libarchive as a single integer */
-#define LIBARCHIVE_VERSION_NUMBER "3007002"
+#define LIBARCHIVE_VERSION_NUMBER "3007009"
 
 /* Version number of libarchive */
-#define LIBARCHIVE_VERSION_STRING "3.7.2"
+#define LIBARCHIVE_VERSION_STRING "3.7.9"
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
@@ -1123,7 +1131,7 @@
 #endif /* SAFE_TO_DEFINE_EXTENSIONS */
 
 /* Version number of package */
-#define VERSION "3.7.2"
+#define VERSION "3.7.9"
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #define _FILE_OFFSET_BITS 64

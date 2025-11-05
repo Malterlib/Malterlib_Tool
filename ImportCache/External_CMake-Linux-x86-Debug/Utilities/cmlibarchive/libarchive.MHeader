@@ -23,6 +23,7 @@ Property.CMakeOutputPath_libarchive: string = `@('../..'->MakeAbsolute())`->Make
 			"_BSD_SOURCE",
 			"_DEFAULT_SOURCE",
 			"_FILE_OFFSET_BITS=64",
+			"_TIME_BITS=64",
 			"_XOPEN_SOURCE=600"
 		]
 	}

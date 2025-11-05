@@ -17,7 +17,8 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		]
 		PreprocessorDefines += [
 			"_FILE_OFFSET_BITS=64",
-			"_GNU_SOURCE"
+			"_GNU_SOURCE",
+			"_TIME_BITS=64"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"

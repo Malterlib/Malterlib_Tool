@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "Source/cmsys/Configure.hxx"
@@ -31,8 +31,8 @@
 #define CMAKE_USE_WMAKE
 /* #undef CMake_DEFAULT_RECURSION_LIMIT */
 #define CMAKE_BIN_DIR "/bin"
-#define CMAKE_DATA_DIR "/share/cmake-3.30"
-#define CMAKE_DOC_DIR "/doc/cmake-3.30"
+#define CMAKE_DATA_DIR "/share/cmake-4.1"
+#define CMAKE_DOC_DIR "/doc/cmake-4.1"
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 

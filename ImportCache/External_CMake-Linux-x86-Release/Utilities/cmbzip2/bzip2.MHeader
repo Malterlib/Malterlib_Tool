@@ -12,6 +12,7 @@ Property.CMakeOutputPath_bzip2: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		]
 		PreprocessorDefines += [
 			"_FILE_OFFSET_BITS=64",
+			"_TIME_BITS=64",
 			"_XOPEN_SOURCE=600"
 		]
 	}

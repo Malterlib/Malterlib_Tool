@@ -19,7 +19,6 @@ int testCommandLineArguments1(int, char*[]);
 int testDirectory(int, char*[]);
 int testEncoding(int, char*[]);
 int testFStream(int, char*[]);
-int testConsoleBuf(int, char*[]);
 int testSystemInformation(int, char*[]);
 int testDynamicLoader(int, char*[]);
 
@@ -85,10 +84,6 @@ CM_LOCAL const functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
   {
     "testFStream",
     testFStream
-  },
-  {
-    "testConsoleBuf",
-    testConsoleBuf
   },
   {
     "testSystemInformation",

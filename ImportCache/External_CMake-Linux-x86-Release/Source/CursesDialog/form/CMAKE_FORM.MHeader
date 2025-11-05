@@ -14,7 +14,8 @@ Property.CMakeOutputPath_CMAKE_FORM: string = `@('../../..'->MakeAbsolute())`->M
 			`@('../../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
-			"_FILE_OFFSET_BITS=64"
+			"_FILE_OFFSET_BITS=64",
+			"_TIME_BITS=64"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
