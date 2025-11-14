@@ -24,7 +24,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 						Compile
 						{
 							Type "Custom"
-							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/macOS/arm64/ctest`->MakeAbsolute()->EscapeHost()) -D Experimental`
+							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/macOS/arm64/ctest`->MakeAbsolute()->EscapeHost()) -DMODEL=Experimental -S CMakeFiles/CTestScript.cmake -V`
 							AllowNonExisting true
 							Disabled false
 							Custom_WorkingDirectory `@('.'->MakeAbsolute())`->MakeAbsolute()
@@ -62,7 +62,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 						Compile
 						{
 							Type "Custom"
-							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/macOS/arm64/ctest`->MakeAbsolute()->EscapeHost()) -D Nightly`
+							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/macOS/arm64/ctest`->MakeAbsolute()->EscapeHost()) -DMODEL=Nightly -S CMakeFiles/CTestScript.cmake -V`
 							AllowNonExisting true
 							Disabled false
 							Custom_WorkingDirectory `@('.'->MakeAbsolute())`->MakeAbsolute()
@@ -100,7 +100,7 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 						Compile
 						{
 							Type "Custom"
-							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/macOS/arm64/ctest`->MakeAbsolute()->EscapeHost()) -D Continuous`
+							Custom_CommandLine `@(`@('../../../..'->MakeAbsolute())/Binaries/Malterlib/macOS/arm64/ctest`->MakeAbsolute()->EscapeHost()) -DMODEL=Continuous -S CMakeFiles/CTestScript.cmake -V`
 							AllowNonExisting true
 							Disabled false
 							Custom_WorkingDirectory `@('.'->MakeAbsolute())`->MakeAbsolute()

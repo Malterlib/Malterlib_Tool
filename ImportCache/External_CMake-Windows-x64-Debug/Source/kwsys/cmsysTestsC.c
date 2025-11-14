@@ -11,7 +11,7 @@
 
 
 /* Forward declare test functions. */
-int testEncode(int, char*[]);
+extern int testEncode(int, char*[]);
 
 
 #ifdef __cplusplus
@@ -102,7 +102,7 @@ int main(int ac, char* av[])
 
   /* If no test name was given */
   /* process command line with user function.  */
-  if (ac < 2) {
+  if (ac > 0 && ac < 2) {
     /* Ask for a test.  */
     printf("Available tests:\n");
     for (i = 0; i < NumTests; ++i) {

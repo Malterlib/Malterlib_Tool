@@ -5,6 +5,6 @@
 #define CMake_VERSION_MAJOR 4
 #define CMake_VERSION_MINOR 1
 #define CMake_VERSION_PATCH 2
-#define CMake_VERSION_SUFFIX "g59d8e02"
+#define CMake_VERSION_SUFFIX "g916337e"
 #define CMake_VERSION_IS_DIRTY 0
-#define CMake_VERSION "4.1.2-g59d8e02"
+#define CMake_VERSION "4.1.2-g916337e"

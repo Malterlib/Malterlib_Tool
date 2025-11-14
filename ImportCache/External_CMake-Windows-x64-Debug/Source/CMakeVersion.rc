@@ -9,8 +9,8 @@ BEGIN
     BEGIN
         BLOCK "040904E4"
         BEGIN
-            VALUE "FileVersion",      "4.1.2-g4130e87\0"
-            VALUE "ProductVersion",   "4.1.2-g4130e87\0"
+            VALUE "FileVersion",      "4.1.2-g916337e\0"
+            VALUE "ProductVersion",   "4.1.2-g916337e\0"
         END
     END
 

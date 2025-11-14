@@ -11,16 +11,16 @@
 
 
 /* Forward declare test functions. */
-int testConfigure(int, char*[]);
-int testStatus(int, char*[]);
-int testSystemTools(int, char*[]);
-int testCommandLineArguments(int, char*[]);
-int testCommandLineArguments1(int, char*[]);
-int testDirectory(int, char*[]);
-int testEncoding(int, char*[]);
-int testFStream(int, char*[]);
-int testSystemInformation(int, char*[]);
-int testDynamicLoader(int, char*[]);
+extern int testConfigure(int, char*[]);
+extern int testStatus(int, char*[]);
+extern int testSystemTools(int, char*[]);
+extern int testCommandLineArguments(int, char*[]);
+extern int testCommandLineArguments1(int, char*[]);
+extern int testDirectory(int, char*[]);
+extern int testEncoding(int, char*[]);
+extern int testFStream(int, char*[]);
+extern int testSystemInformation(int, char*[]);
+extern int testDynamicLoader(int, char*[]);
 
 
 #ifdef __cplusplus
@@ -147,7 +147,7 @@ int main(int ac, char* av[])
 
   /* If no test name was given */
   /* process command line with user function.  */
-  if (ac < 2) {
+  if (ac > 0 && ac < 2) {
     /* Ask for a test.  */
     printf("Available tests:\n");
     for (i = 0; i < NumTests; ++i) {
