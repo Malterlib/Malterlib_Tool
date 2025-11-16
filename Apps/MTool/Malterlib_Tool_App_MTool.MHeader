@@ -3,12 +3,7 @@
 
 Property
 {
-	MToolEmbeddCMake: bool = true
-}
-Property
-{
-	!!MToolEmbeddCMake true
-	MalterlibBuildSystemEmbedCMake true
+	MToolEmbedCMake: bool = true
 }
 
 %Target "Malterlib_Tool_MTool"
@@ -24,7 +19,7 @@ Property
 			, {Pattern: `@("../../../../External/CMake/Modules"->MakeAbsolute())/*`, Destination: "Modules", Recursive: true }
 		]
 		{
-			!!MToolEmbeddCMake true
+			!!MToolEmbedCMake true
 		}
 		MalterlibCloudTarBinDirectory "."
 	}
@@ -56,12 +51,12 @@ Property
 			, "../../../../External/CMake"->MakeAbsolute()
 		]
 		{
-			!!MToolEmbeddCMake true
+			!!MToolEmbedCMake true
 		}
 
 		PreprocessorDefines += ["CMAKE_BUILD_WITH_CMAKE", "CURL_STATICLIB", "LIBARCHIVE_STATIC", "CMAKE_DISABLE_MAIN", "DMToolEmbedCMake=1"]
 		{
-			!!MToolEmbeddCMake true
+			!!MToolEmbedCMake true
 		}
 
 		PreprocessorDefines += ["_HAS_AUTO_PTR_ETC=1", "_SILENCE_CXX20_MOVE_ITERATOR_ARROW_DEPRECATION_WARNING"]
@@ -78,7 +73,7 @@ Property
 		%File "Source/*"
 		%Group "CMake"
 		{
-			!!MToolEmbeddCMake true
+			!!MToolEmbedCMake true
 
 			%File "../../../../External/CMake/Source/cmakemain.cxx"
 			%File "../../../../External/CMake/Source/cmcmd.cxx"
@@ -110,7 +105,13 @@ Property
 		!!CompileDialect "C"
 		PreprocessorDefines += "CMAKE_MALTERLIB_EXEFS"
 	}
-	
+
+	Property
+	{
+		!!MToolEmbedCMake true
+		MalterlibBuildSystemEmbedCMake true
+	}
+
 	Property
 	{
 		ForceEnableDynamicTypeInfoLibCXX true // Needed for CMake
@@ -118,7 +119,7 @@ Property
 		MalterlibLog_Severities ["Error", "Critical", "Warning"]
 		{
 			!!Configuration "Release"
-		}		
+		}
 
 		MalterlibLog_Severities ["Error", "Critical", "Warning", "Info", "Debug"]
 		{

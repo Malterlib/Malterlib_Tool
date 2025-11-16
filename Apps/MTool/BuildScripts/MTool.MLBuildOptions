@@ -1,4 +1,4 @@
-// Copyright © 2015-2018 Nonna Holding AB 
+// Copyright © 2015-2018 Nonna Holding AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 BuildTarget "Malterlib Tool"
@@ -30,7 +30,7 @@ BuildTarget "Malterlib Tool"
 				"" "Release"
 			}
 		}
-		MToolEmbeddCMake StringChoice
+		MToolEmbedCMake StringChoice
 		{
 			Default ""
 			Choices
@@ -71,7 +71,7 @@ BuildTarget "Malterlib Tool"
 			Params "Malterlib MTool"
 		}
 	}
-	
+
 	Stages Build
 	{
 		Stage Build
@@ -110,7 +110,7 @@ BuildTarget "Malterlib Tool"
 			}
 		}
 	}
-	
+
 	PostStage "Post Build Clean"
 	{
 		Command "../../../Core/BuildScripts/Postbuild.sh"
