@@ -39,8 +39,8 @@ Property
 	{
 		!!PlatformFamily "Windows"
 
-		MalterlibWindowsNtVersion "0x0600"
-		MalterlibWindowsVersion "NTDDI_VISTA"
+		MalterlibWindowsNtVersion "_WIN32_WINNT_WIN8"
+		MalterlibWindowsVersion "NTDDI_WIN8"
 	}
 
 	Import.CMake_Variables =+ [
@@ -180,6 +180,19 @@ Property
 				PlatformType "Windows"
 				!Target.VisualStudioPlatform "Clang"
 				!Target.PlatformToolset "ClangCL"
+			}
+		}
+	}
+
+	%Target "Lib_libuv_cmlibuv"
+	{
+		Compile
+		{
+			!!CompileDialect "C"
+
+			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_WIN32_WINNT=0x0600")
+			{
+				!!PlatformFamily "Windows"
 			}
 		}
 	}
