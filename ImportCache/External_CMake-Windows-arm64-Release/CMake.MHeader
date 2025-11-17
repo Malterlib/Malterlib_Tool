@@ -2598,6 +2598,10 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/thread-common.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/threadpool.c`
 			{
 				Compile.Type "C"

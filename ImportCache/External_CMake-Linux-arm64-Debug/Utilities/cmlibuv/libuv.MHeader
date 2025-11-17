@@ -72,6 +72,10 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/thread-common.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/threadpool.c`
 			{
 				Compile.Type "C"
@@ -101,10 +105,6 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/async.c`
 				{
 					Compile.Type "C"
-				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/atomic-ops.h`
-				{
-					Compile.Disabled true
 				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/core.c`
 				{
@@ -154,10 +154,6 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 				{
 					Compile.Type "C"
 				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/spinlock.h`
-				{
-					Compile.Disabled true
-				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/stream.c`
 				{
 					Compile.Type "C"
@@ -178,25 +174,9 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 				{
 					Compile.Type "C"
 				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/epoll.c`
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/linux.c`
 				{
 					Compile.Type "C"
-				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/linux-core.c`
-				{
-					Compile.Type "C"
-				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/linux-inotify.c`
-				{
-					Compile.Type "C"
-				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/linux-syscalls.c`
-				{
-					Compile.Type "C"
-				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/linux-syscalls.h`
-				{
-					Compile.Disabled true
 				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/procfs-exepath.c`
 				{

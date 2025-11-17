@@ -2436,6 +2436,10 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/thread-common.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/threadpool.c`
 			{
 				Compile.Type "C"
@@ -2465,10 +2469,6 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/async.c`
 				{
 					Compile.Type "C"
-				}
-				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/atomic-ops.h`
-				{
-					Compile.Disabled true
 				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/core.c`
 				{
@@ -2517,10 +2517,6 @@ Property.CMakeOutputPath_CMake: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/signal.c`
 				{
 					Compile.Type "C"
-				}
-				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/spinlock.h`
-				{
-					Compile.Disabled true
 				}
 				%File `@('../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix/stream.c`
 				{

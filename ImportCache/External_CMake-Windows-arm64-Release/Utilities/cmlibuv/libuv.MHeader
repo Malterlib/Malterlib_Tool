@@ -75,6 +75,10 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			{
 				Compile.Disabled true
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/thread-common.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/threadpool.c`
 			{
 				Compile.Type "C"
