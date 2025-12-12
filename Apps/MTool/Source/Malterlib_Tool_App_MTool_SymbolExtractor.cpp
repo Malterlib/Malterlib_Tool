@@ -654,7 +654,7 @@ public:
 					{
 						CStr SourceFile = CFile::fs_AppendPath(FileName.m_BasePath, FileName.m_FileName);
 						CStr DestPath = CFile::fs_GetPath(DestinationFile);
-						CStr TempFileName = DestPath + "/" + fg_RandomID();
+						CStr TempFileName = DestPath + "/" + fg_FastRandomID();
 						CFile::fs_CreateDirectory(DestPath);
 						CFile::fs_CopyFile(SourceFile, TempFileName);
 						CFile::fs_RenameFile(TempFileName, DestinationFile);

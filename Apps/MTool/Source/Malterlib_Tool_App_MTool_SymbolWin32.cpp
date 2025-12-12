@@ -29,7 +29,7 @@ public:
 #else
 			CStr TempDir = CFile::fs_GetTemporaryDirectory();
 			CFile::fs_CreateDirectory(TempDir);
-			CStr TempFile = CFile::fs_AppendPath(TempDir, fg_RandomID()) + "." + CFile::fs_GetExtension(_Destination);
+			CStr TempFile = CFile::fs_AppendPath(TempDir, fg_FastRandomID()) + "." + CFile::fs_GetExtension(_Destination);
 			CStr TempFileCompressed = TempFile + "_";
 
 			CFile::fs_CopyFile(_Source, TempFile);
