@@ -326,7 +326,7 @@ public:
 							bSetProperties = true;
 						}
 
-						if (m_AnsiProperties.m_Italic && m_AnsiProperties.m_Bold->m_bEnabled)
+						if (m_AnsiProperties.m_Italic && m_AnsiProperties.m_Italic->m_bEnabled)
 						{
 							OutputLine += AnsiEncoding.f_Italic();
 							bSetProperties = true;
