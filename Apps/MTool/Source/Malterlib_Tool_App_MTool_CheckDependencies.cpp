@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "Malterlib_Tool_App_MTool_Main.h"
@@ -8,7 +8,7 @@
 namespace NMib
 {
 	namespace NStr
-	{	
+	{
 		template <typename tf_CStr, typename tf_FOnLine>
 		void fg_StrForEachLine(tf_CStr const& _Str, tf_FOnLine && _fOnLine)
 		{
@@ -31,7 +31,7 @@ namespace NMib
 class CTool_CheckDependencies : public CTool2
 {
 public:
-	
+
 	struct CDirectory
 	{
 		CStr m_Path;
@@ -43,7 +43,7 @@ public:
 		TCVector<CStr> m_Excluded;
 		TCVector<CStr> m_FoundFiles;
 	};
-	
+
 	struct CDependencyFile
 	{
 		CStr m_Path;
@@ -51,13 +51,13 @@ public:
 		CHashDigest_MD5 m_Digest;
 		bool m_bDigest = false;
 	};
-	
+
 	struct CDependency
 	{
 		TCVector<CStr> m_Outputs;
 		TCVector<CDirectory> m_Directories;
 		TCVector<CDependencyFile> m_Files;
-		
+
 		void f_NeedsUpdating() const
 		{
 			for (auto & File : m_Outputs)
@@ -67,9 +67,9 @@ public:
 			}
 		}
 	};
-	
+
 	TCThreadLocal<TCMap<CStr, NTime::CTime>> m_WriteTimes;
-	
+
 	~CTool_CheckDependencies()
 	{
 		m_WriteTimes.f_Destroy();
@@ -84,7 +84,7 @@ public:
 		return *WriteTime;
 	}
 
-	
+
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr const *pOneDir = _Params.f_FindEqual("Directory");
@@ -92,9 +92,9 @@ public:
 		Clock.f_Start();
 		if (_Files.f_GetLen() != 1 && !pOneDir)
 			DError("You need to specify ONE file");
-		
+
 		CStr const *pVerbose = _Params.f_FindEqual("Verbose");
-		
+
 		bool bVerbose = pVerbose ? *pVerbose == "true" : false;
 
 		CStr const *pRelative = _Params.f_FindEqual("Relative");
@@ -111,31 +111,31 @@ public:
 		;
 
 		TCVector<CStr> Directories;
-		
+
 		if (pOneDir)
 		{
 			if (CFile::fs_FileExists(*pOneDir, EFileAttrib_Directory))
 				Directories.f_Insert(*pOneDir);
 		}
 		else
-		{		
+		{
 			CStr File = _Files[0];
 			CStr Contents = CFile::fs_ReadStringFromFile(CStr(File));
-			
+
 			while (!Contents.f_IsEmpty())
 			{
 				CStr Line = fg_GetStrLineSep(Contents);
-				
+
 				if (Line.f_IsEmpty())
 					continue;
-				
+
 				if (Line[Line.f_GetLen()-1] == '/')
 					Line = Line.f_Left(Line.f_GetLen() - 1);
-				
+
 				Directories.f_Insert(Line);
 			}
 		}
-		
+
 		TCVector<CStr> Files;
 		for (auto & Dir : Directories)
 		{
@@ -156,7 +156,7 @@ public:
 				, [&Dependencies, &DependenciesLock, &UsesDigest](CStr const& _File)
 				{
 					CStr const& File = _File;
-					
+
 					CDirectory *pLastDirectory = nullptr;
 					CDependency Dependency;
 					CStr Contents = CFile::fs_ReadStringFromFile(CStr(File));
@@ -197,13 +197,13 @@ public:
 										pLastDirectory = nullptr;
 									}
 								}
-									
+
 
 								if (Line.f_StartsWith("Output "))
 								{
 									CStr Path;
 									Path.f_AddStr(Line.f_GetStr() + 7, Line.f_GetLen() - 7);
-									
+
 									Dependency.m_Outputs.f_Insert(Path);
 								}
 								else if (Line.f_StartsWith("Directory "))
@@ -218,13 +218,13 @@ public:
 									uint32 Attributes;
 									int32 bFollowLinks;
 									aint nChars = (CStrPtr::CParse("Directory {} {nfh} {} {nfh} {nfh} ") >> bRecursive >> Attributes >> bFollowLinks >> Seconds >> Fraction).f_Parse(Line, nParsed);
-									
+
 									if (nParsed != 5)
 										DError("Invalid 'Directory' entry in dependency file");
-									
+
 									CStr Path;
 									Path.f_AddStr(Line.f_GetStr() + nChars, Line.f_GetLen() - nChars);
-									
+
 									Directory.m_Path = fg_GetStrSepEscaped<'\"'>(Path, " ");
 									Directory.m_Pattern = fg_GetStrSepEscaped<'\"'>(Path, " ");
 									Directory.m_bRecursive = bRecursive;
@@ -265,7 +265,7 @@ public:
 									uint64 Seconds;
 									uint64 Fraction;
 									aint nChars = (CStr::CParse("File {nfh} {nfh} ") >> Seconds >> Fraction).f_Parse(Line, nParsed);
-									
+
 									if (nParsed != 2)
 										DError("Invalid 'File' entry in dependency file");
 
@@ -286,7 +286,7 @@ public:
 						pLastDirectory->m_FoundFiles.f_Sort();
 						pLastDirectory = nullptr;
 					}
-					
+
 					{
 						DLock(DependenciesLock);
 						Dependencies.f_Insert(fg_Move(Dependency));
@@ -296,7 +296,7 @@ public:
 		;
 
 		bool bUsesDigest = UsesDigest.f_Load();
-		
+
 		fg_ParallellForEach
 			(
 				Dependencies
@@ -382,23 +382,23 @@ public:
 							Options.m_AttribMask = Directory.m_Attributes;
 							Options.m_bFollowLinks = Directory.m_bFollowLinks;
 							Options.m_ExcludePatterns = Directory.m_Excluded;
-							
+
 							auto FoundFiles = CFile::fs_FindFiles(Options);
-							
+
 							TCVector<CStr> Files;
-							
+
 							for (auto File : FoundFiles)
 								Files.f_Insert(fConvertPath(File.m_Path));
 
 							Files.f_Sort();
-							
+
 							if (Files != Directory.m_FoundFiles)
 							{
 								if (bVerbose)
 									DConOut("Dependency check: Found files differ ({}): {} != {}\n", Directory.m_Path << Files.f_GetLen() << Directory.m_FoundFiles.f_GetLen());
 								bNeedsUpdating = true;
 								break;
-							}					
+							}
 						}
 
 						if (bNeedsUpdating)
@@ -406,16 +406,16 @@ public:
 					}
 					while (false)
 						;
-					
+
 					if (bNeedsUpdating)
 						Dependency.f_NeedsUpdating();
 				}
 			)
 		;
-		
+
 		if (!pOneDir)
 			DConOut("Dependency check: Checked dependencies {fe1} ms\n", Clock.f_GetTime() * 1000.0);
-		
+
 		return 0;
 	}
 };

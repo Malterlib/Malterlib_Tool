@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "Malterlib_Tool_App_MTool_Main.h"
@@ -14,30 +14,30 @@ public:
 		{
 			DError("DestinationDir not specified");
 		}
-		
+
 		CStr DestinationDir = _Params["DestinationDir"];
 		CStr Exclude = _Params["Exclude"];
-		
+
 		TCVector<CStr> Excluded;
 		while (!Exclude.f_IsEmpty())
 		{
 			Excluded.f_Insert(fg_GetStrSep(Exclude, ";"));
 		}
-		
+
 		if (CFile::fs_FileExists(DestinationDir))
 			CFile::fs_DeleteDirectoryRecursive(DestinationDir);
 
 		TCMap<CStr, TCVector<CStr>> FilesToLipo;
-		
+
 		for (auto iFile = _Files.f_GetIterator(); iFile; ++iFile)
 		{
 			CStr Source = CFile::fs_GetExpandedPath(*iFile, true);
-			
+
 			TCVector<CStr> Files = NFile::CFile::fs_FindFiles(Source + "/*", EFileAttrib_File | EFileAttrib_Directory, true, false);
-			
+
 			if (Files.f_IsEmpty())
 				DError(CStr::CFormat("No files found for source: {}") << Source);
-			
+
 			for (auto iFoundFile = Files.f_GetIterator(); iFoundFile; ++iFoundFile)
 			{
 				CStr RelativePath = CFile::fs_MakePathRelative(*iFoundFile, Source);
@@ -59,7 +59,7 @@ public:
 						bLipoFile = true;
 					}
 				}
-				
+
 				if (bLipoFile)
 				{
 					for (auto iExclude = Excluded.f_GetIterator(); iExclude; ++iExclude)
@@ -71,7 +71,7 @@ public:
 						}
 					}
 				}
-				
+
 				if (bLipoFile)
 					FilesToLipo[RelativePath].f_Insert(*iFoundFile);
 				else
@@ -87,7 +87,7 @@ public:
 				}
 			}
 		}
-		
+
 		for (auto iLipo = FilesToLipo.f_GetIterator(); iLipo; ++iLipo)
 		{
 			CStr RelativePath = iLipo.f_GetKey();
@@ -96,15 +96,15 @@ public:
 			{
 				Params.f_Insert(*iFile);
 			}
-			
+
 			CStr Output = CFile::fs_AppendPath(DestinationDir, RelativePath);
 			CFile::fs_CreateDirectory(CFile::fs_GetPath(Output));
 			Params.f_Insert("-create");
 			Params.f_Insert("-output");
 			Params.f_Insert(Output);
-			
+
 			int Ret = 0;
-			
+
 			CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
 				(
 					"lipo"
@@ -124,10 +124,10 @@ public:
 					}
 				)
 			;
-			
+
 			LaunchParams.m_bAllowExecutableLocate = true;
-			
-			LaunchParams.m_fOnOutput 
+
+			LaunchParams.m_fOnOutput
 				= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 				{
 					switch (_OutputType)
@@ -152,8 +152,8 @@ public:
 
 			if (Ret)
 				DError("lipo launch failed");
-				
-			
+
+
 		}
 		return 0;
 	}

@@ -5,7 +5,7 @@
 class CTool_BuildDependencies : public CTool2
 {
 public:
-	
+
 	~CTool_BuildDependencies()
 	{
 	}

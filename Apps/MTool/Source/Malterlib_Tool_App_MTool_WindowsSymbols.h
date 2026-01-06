@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include <Mib/Core/Core>
@@ -36,7 +36,7 @@ namespace NMib::NTool
 			case EPEImageFileMachine_ARM64:
 				return true;
 			default:
-				return false; 
+				return false;
 			}
 			return false;
 		}
@@ -52,13 +52,13 @@ namespace NMib::NTool
 			case EPEImageFileMachine_POWERPC:
 				return true;
 			default:
-				return false; 
+				return false;
 			}
 			return false;
 		}
 	};
 
-	struct CPEImageDataDirectory 
+	struct CPEImageDataDirectory
 	{
 		uint32 m_VirtualAddress;
 		uint32 m_Size;
@@ -170,7 +170,7 @@ namespace NMib::NTool
 	struct CImageSectionHeader
 	{
 		uint8 m_Name[8];
-		union 
+		union
 		{
 			uint32 m_PhysicalAddress;
 			uint32 m_VirtualSize;
@@ -199,10 +199,10 @@ namespace NMib::NTool
 
 	struct CV_INFO_PDB70
 	{
-		uint32 m_CvSignature; 
-		CGuid m_Signature;     // unique identifier 
-		uint32 m_Age;          // an always-incrementing value 
-		ch8 m_PdbFileName[65535];  // zero terminated string with the name of the PDB file 
+		uint32 m_CvSignature;
+		CGuid m_Signature;     // unique identifier
+		uint32 m_Age;          // an always-incrementing value
+		ch8 m_PdbFileName[65535];  // zero terminated string with the name of the PDB file
 	};
 
 	struct CWindowsExecutableInfo

@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "Malterlib_Tool_App_MTool_Main.h"
@@ -39,8 +39,8 @@ namespace
 				OpenMode |= EFileOpen_DontOpenExisting;
 
 			if (!(mode & ZLIB_FILEFUNC_MODE_CREATE))
-				OpenMode |= EFileOpen_DontCreate;			
-			
+				OpenMode |= EFileOpen_DontCreate;
+
 			try
 			{
 				pFile->f_Open(FileName, OpenMode);
@@ -174,7 +174,7 @@ namespace
 			_pFileFunc->zclose_file = fp_fclose_func;
 			_pFileFunc->zerror_file = fp_ferror_func;
 			_pFileFunc->opaque = this;
-		}		
+		}
 	};
 }
 
@@ -251,7 +251,7 @@ public:
 
 		unz_file_info64 FileInfo;
 		CStr FileName;
-		CByteVector ExtraField; 
+		CByteVector ExtraField;
 		ExtraField.f_SetLen(65536);
 		CStr Comment;
 		fs_CheckUnzipError
@@ -263,9 +263,9 @@ public:
 
 		auto &Date = FileInfo.tmu_date;
 
-		if 
+		if
 			(
-				fg_Clamp(Date.tm_mon, 0, 11) != Date.tm_mon 
+				fg_Clamp(Date.tm_mon, 0, 11) != Date.tm_mon
 				|| fg_Clamp(Date.tm_mday, 1, int32(CTimeConvert::fs_GetDaysInMonth(Date.tm_year, Date.tm_mon))) != Date.tm_mday
 				|| fg_Clamp(Date.tm_hour, 0, 23) != Date.tm_hour
 				|| fg_Clamp(Date.tm_min, 0, 59) != Date.tm_min

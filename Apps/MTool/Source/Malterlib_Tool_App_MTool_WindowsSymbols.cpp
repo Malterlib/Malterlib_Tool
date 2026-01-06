@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include <Mib/Core/Core>
@@ -33,7 +33,7 @@ namespace NMib::NTool
 		mint HeadersStart = 0;
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
 		for (int i = 0; i < FLen; i += 4, pData += 1)
-		{				
+		{
 			if (*pData == Find)
 			{
 				pGeneralHeaders = (CNTImageHeaders *)pData;
@@ -57,7 +57,7 @@ namespace NMib::NTool
 
 				CFilePos SectionsStart = CFilePos(HeadersStart) + sizeof(CNTImageHeaders) + _Header.m_FileHeader.m_SizeOfOptionalHeader;
 				fReadData(SectionsStart, SectionHeaders.f_GetArray(), SectionHeaders.f_GetLen() * sizeof(CImageSectionHeader));
-			
+
 				mint DebugRva = _Header.m_Optional.m_DataDirectory[6].m_VirtualAddress;
 
 				CImageSectionHeader *pDebugSection = nullptr;
@@ -66,26 +66,26 @@ namespace NMib::NTool
 				{
 					auto SectionSize = Section.m_Misc.m_VirtualSize;
 
-					if( SectionSize == 0 ) // compensate for Watcom linker strangeness, according to Matt Pietrek 
-						SectionSize = Section.m_SizeOfRawData; 
+					if( SectionSize == 0 ) // compensate for Watcom linker strangeness, according to Matt Pietrek
+						SectionSize = Section.m_SizeOfRawData;
 
-					if( ( DebugRva >= Section.m_VirtualAddress ) && 
-						( DebugRva < Section.m_VirtualAddress + SectionSize ) ) 
+					if( ( DebugRva >= Section.m_VirtualAddress ) &&
+						( DebugRva < Section.m_VirtualAddress + SectionSize ) )
 					{
-						// Yes, the RVA belongs to this section 
+						// Yes, the RVA belongs to this section
 						pDebugSection = &Section;
-						break; 
+						break;
 					}
 				}
 
 				if (!pDebugSection)
 					return;
 
-				// Look up the file offset using the section header 
+				// Look up the file offset using the section header
 
-				mint Diff = (mint)( pDebugSection->m_VirtualAddress - pDebugSection->m_PointerToRawData); 
+				mint Diff = (mint)( pDebugSection->m_VirtualAddress - pDebugSection->m_PointerToRawData);
 
-				mint FileOffset = DebugRva - Diff; 
+				mint FileOffset = DebugRva - Diff;
 
 				CImageDebugDirectory DebugInfo;
 				fReadData(FileOffset, &DebugInfo, sizeof(DebugInfo));
@@ -99,13 +99,13 @@ namespace NMib::NTool
 					<< PDB.m_Signature.m_Data2
 					<< PDB.m_Signature.m_Data3
 					<< PDB.m_Signature.m_Data4[0]
-					<< PDB.m_Signature.m_Data4[1] 
-					<< PDB.m_Signature.m_Data4[2] 
-					<< PDB.m_Signature.m_Data4[3] 
-					<< PDB.m_Signature.m_Data4[4] 
-					<< PDB.m_Signature.m_Data4[5] 
-					<< PDB.m_Signature.m_Data4[6] 
-					<< PDB.m_Signature.m_Data4[7] 
+					<< PDB.m_Signature.m_Data4[1]
+					<< PDB.m_Signature.m_Data4[2]
+					<< PDB.m_Signature.m_Data4[3]
+					<< PDB.m_Signature.m_Data4[4]
+					<< PDB.m_Signature.m_Data4[5]
+					<< PDB.m_Signature.m_Data4[6]
+					<< PDB.m_Signature.m_Data4[7]
 					<< PDB.m_Age
 				;
 			}

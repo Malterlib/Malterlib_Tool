@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "Malterlib_Tool_App_MTool_Main.h"
@@ -14,7 +14,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				"Names"_o= _o["update_repos"]
 				, "Description"_o= "Update repositories.\n"
 				, "Category"_o= "Repository management"
-				, "Options"_o= 
+				, "Options"_o=
 				{
 					"ApplyRepoPolicy?"_o=
 					{

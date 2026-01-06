@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "Malterlib_Tool_App_MTool_Main.h"
@@ -29,29 +29,29 @@ struct CPerforceHelper
 		ConnectionInfo.m_Server = m_Tool.f_GetOption(_Params, "Server");
 		ConnectionInfo.m_User = m_Tool.f_GetOption(_Params, "User");
 		ConnectionInfo.m_Host = m_Tool.f_GetOption(_Params, "Host", NProcess::NPlatform::fg_Process_GetComputerName());
-		
+
 		CUniversallyUniqueIdentifier UUID(EUniversallyUniqueIdentifierGenerate_StringHash, CUniversallyUniqueIdentifier("{fcf99ea6-0d44-45de-89a6-13f0b16bdab4}"), Root);
-		
+
 		ConnectionInfo.m_Client = fg_Format("{}_{}_{}", ConnectionInfo.m_User, ConnectionInfo.m_Host, UUID.f_GetAsString(EUniversallyUniqueIdentifierFormat_AlphaNum));
 		_ClientName = ConnectionInfo.m_Client;
 
 		CFile::fs_CreateDirectory(Root);
-		
+
 		pClient = fg_Construct(ConnectionInfo);
 		pClient->f_Login(Password);
-		
+
 		//DConOut("Root: {}{\n}", Root);
 		//DConOut("ClientName: {}{\n}", ConnectionInfo.m_Client);
 		//DConOut("User: {}{\n}", ConnectionInfo.m_User);
 		//DConOut("Host: {}{\n}", ConnectionInfo.m_Host);
-		
+
 		CStr ClientText;
-		
+
 		if (!pClient->f_NoThrow().f_GetClient(ConnectionInfo.m_Client, ClientText) || ClientText.f_IsEmpty())
 			pClient->f_CreateClient(ConnectionInfo.m_Client, Root, CStr(), Template);
 		else
 			pClient->f_UpdateClient(ConnectionInfo.m_Client, Root, CStr(), Template);
-		
+
 		return pClient;
 	}
 };
@@ -63,7 +63,7 @@ struct CPerforceHelper
 bool fg_Confirm(CStr const &_Text)
 {
 	NSys::fg_Thread_Sleep(0.2f); // Allow stdout to flush before error output so order is preserved
-	
+
 	DConErrOut(_Text, 0);
 	std::string ReplyStd;
 	std::cin >> ReplyStd;
@@ -78,15 +78,15 @@ CStr fg_AskUser(CBlockingStdInReader &_StdIn, CStr const &_Text)
 	DConErrOut(_Text, 0);
 	NSys::fg_ConsoleErrorOutputFlush();
 	NSys::fg_Thread_Sleep(0.2f); // Allow stdout to flush before error output so order is preserved
-	
+
 	ch8 ToTrim[] = {32, 8, 9, 10, 13, 3, 0};
-	
+
 	CStr Value = fg_GetSys()->f_GetEnvironmentVariable("MTool_AskUser");
 	if (Value == "EMPTY")
 		return {};
 	if (!Value.f_IsEmpty())
 		return Value;
-	
+
 	return _StdIn.f_ReadLine().f_Trim(ToTrim);
 }
 
@@ -101,7 +101,7 @@ public:
 		CStr ClientName;
 		TCUniquePointer<CPerforceClientThrow> pClient = PerforceHelper.f_GetClient(_Params, ClientName);
 		DConOut("{}", ClientName);
-		
+
 		return 0;
 	}
 };
@@ -128,22 +128,22 @@ public:
 				, [&](int64 _TotalBytes, int64 _SyncedBytes)
 				{
 					fp64 Now = Timer.f_GetTime();
-					
+
 					if (Now > NextUpdate)
 					{
 						if (_TotalBytes > 0)
 							DConOut("{sj12} bytes synced ({fe1} %){\n}", _SyncedBytes << (fp64(_SyncedBytes) / fp64(_TotalBytes)) * 100.0);
 						else
 							DConOut("{sj12} bytes synced{\n}", _SyncedBytes);
-							
+
 						NextUpdate = Now + 5.0;
 					}
-					
+
 					return true;
 				}
 			)
 		;
-		
+
 		return 0;
 	}
 };
@@ -153,7 +153,7 @@ DMibRuntimeClass(CTool, CTool_SyncPerforce);
 class CTool_PerforceRunScript : public CTool2
 {
 public:
-	
+
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
@@ -164,37 +164,37 @@ public:
 			}
 		;
 		CStr File = f_GetOption(_Params, "File").f_Trim();
-		
+
 		CStr P4Port = fg_GetSys()->f_GetEnvironmentVariable("P4PORT");
 		CStr P4User = fg_GetSys()->f_GetEnvironmentVariable("P4USER");
 		CStr P4Client = fg_GetSys()->f_GetEnvironmentVariable("P4CLIENT");
-		
+
 		fg_GetSys()->f_SetEnvironmentVariable("P4CHARSET", "");
-		
+
 		DConOut("File: {}{\n}", File);
-		
+
 		DConOut("P4PORT: {}{\n}", P4Port);
 		DConOut("P4USER: {}{\n}", P4User);
 		DConOut("P4CLIENT: {}{\n}", P4Client);
-		
+
 		TCUniquePointer<CPerforceClientThrow> pClient;
 		CPerforceClient::CConnectionInfo ConnectionInfo;
 		ConnectionInfo.m_Server = P4Port;
 		ConnectionInfo.m_User = P4User;
 		ConnectionInfo.m_Client = P4Client;
-		
+
 		pClient = fg_Construct(ConnectionInfo);
 		pClient->f_Login(CStr());
-		
+
 		if (pClient->f_IsUTF8())
 			fg_GetSys()->f_SetEnvironmentVariable("P4CHARSET", "utf8");
 		else
 			fg_GetSys()->f_SetEnvironmentVariable("P4CHARSET", "");
-		
+
 		DConOut("Logged in to perforce{\n}", 0);
-		
+
 		CStr ClientPath = pClient->f_GetClientPath(File);
-		
+
 		TCVector<CStr> Params;
 
 		CStr Path;
@@ -301,7 +301,7 @@ public:
 		LaunchParams.m_bSeparateStdErr = true;
 		LaunchParams.m_bShowLaunched = false;
 		if (bIsCygwin)
-			LaunchParams.m_Environment["CYGWIN"] = "nodosfilewarning";			
+			LaunchParams.m_Environment["CYGWIN"] = "nodosfilewarning";
 
 		if (!Path.f_IsEmpty())
 		{
@@ -310,8 +310,8 @@ public:
 //			DConOut("Setting path to: {}\n", Path);
 		}
 
-		
-		LaunchParams.m_fOnOutput 
+
+		LaunchParams.m_fOnOutput
 			= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				switch (_OutputType)
@@ -353,7 +353,7 @@ public:
 
 			FinishedEvent.f_Wait();
 		}
-		
+
 		return Ret;
 	}
 };

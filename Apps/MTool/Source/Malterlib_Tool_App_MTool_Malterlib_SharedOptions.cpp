@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "Malterlib_Tool_App_MTool_Main.h"
@@ -19,7 +19,7 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 		else
 			DetailedPositionsDefault = DetailedPositionsEnv;
 	}
-	
+
 	o_ToolsSection.f_RegisterSectionOptions
 		(
 			{

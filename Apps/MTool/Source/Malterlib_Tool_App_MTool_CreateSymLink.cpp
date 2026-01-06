@@ -1,4 +1,4 @@
-// Copyright © 2015 Hansoft AB 
+// Copyright © 2015 Hansoft AB
 // Distributed under the MIT license, see license text in LICENSE.Malterlib
 
 #include "Malterlib_Tool_App_MTool_Main.h"
@@ -36,7 +36,7 @@ public:
 					Flags |= ESymbolicLinkFlag_Relative;
 			}
 		}
-		
+
 		bool bElevate = false;
 		{
 			auto DPIter = _Params.f_FindEqual("Elevate");
