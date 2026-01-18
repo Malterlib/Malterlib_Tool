@@ -256,29 +256,29 @@ public:
 	{
 
 		static char const* sc_pHelpText =
-			"Usage:" DNewLine
-			"MTool VirtualFS <Flags> <SourceFile>" DNewLine
-			DNewLine
-			"Where:" DNewLine
-			"  <Flags> is made up of:" DNewLine
-			"      -o <TargetFile> - Specify the target file to be written" DNewLine
-			"      -ocpp <TargetFile> - Specify the target file to be written (cpp when -obj or -asm is specified)" DNewLine
-			"    and either:" DNewLine
-			"      -binary         - TargetFile will be written as a binary file." DNewLine
-			"    or" DNewLine
-			"      -obj			   - TargetFile will be written as a COFF object file." DNewLine
-			"    or" DNewLine
-			"      -asm			   - TargetFile will be written as a S file." DNewLine
-			"    or" DNewLine
-			"      -cpp            - TargetFile will be written as a cpp file (the default)." DNewLine
-			"    and optionally:" DNewLine
-			"      -verbose        - Detailed information on all operations performed will be displayed." DNewLine
-			"      -odepend        - Output dependency in make format to file." DNewLine
-			"      -platform       - The target platform. Currently this only matters for -asm and 'macOS' and 'Linux' is supported" DNewLine
-			"      -oidsdepend     - Output dependency in ids dependency format to file." DNewLine
-			"      -dest <Path>    - Path within VFS to prefix included files with" DNewLine
-			"      -symbol <Name>  - The name of the exported symbol (decorated)" DNewLine
-			"  <SourceFile> is the name of a registry file specifying the files to add" DNewLine;
+			"Usage:\n"
+			"MTool VirtualFS <Flags> <SourceFile>\n"
+			"\n"
+			"Where:\n"
+			"  <Flags> is made up of:\n"
+			"      -o <TargetFile> - Specify the target file to be written\n"
+			"      -ocpp <TargetFile> - Specify the target file to be written (cpp when -obj or -asm is specified)\n"
+			"    and either:\n"
+			"      -binary         - TargetFile will be written as a binary file.\n"
+			"    or\n"
+			"      -obj			   - TargetFile will be written as a COFF object file.\n"
+			"    or\n"
+			"      -asm			   - TargetFile will be written as a S file.\n"
+			"    or\n"
+			"      -cpp            - TargetFile will be written as a cpp file (the default).\n"
+			"    and optionally:\n"
+			"      -verbose        - Detailed information on all operations performed will be displayed.\n"
+			"      -odepend        - Output dependency in make format to file.\n"
+			"      -platform       - The target platform. Currently this only matters for -asm and 'macOS' and 'Linux' is supported\n"
+			"      -oidsdepend     - Output dependency in ids dependency format to file.\n"
+			"      -dest <Path>    - Path within VFS to prefix included files with\n"
+			"      -symbol <Name>  - The name of the exported symbol (decorated)\n"
+			"  <SourceFile> is the name of a registry file specifying the files to add\n";
 
 
 
@@ -328,7 +328,7 @@ public:
 					TargetFilename = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 					if (TargetFilename.f_IsEmpty())
 					{
-						DConOutRaw("VirtualFS: No out file specified after -o[utput] flag" DNewLine);
+						DConOutRaw("VirtualFS: No out file specified after -o[utput] flag\n");
 					DConOutRaw(sc_pHelpText);
 						return -1;
 					}
@@ -339,7 +339,7 @@ public:
 					DependencyFile = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 					if (DependencyFile.f_IsEmpty())
 					{
-						DConOutRaw("VirtualFS: No out file specified after -odepend flag" DNewLine);
+						DConOutRaw("VirtualFS: No out file specified after -odepend flag\n");
 						DConOutRaw(sc_pHelpText);
 						return -1;
 					}
@@ -350,7 +350,7 @@ public:
 					MalterlibDependencyFile = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 					if (MalterlibDependencyFile.f_IsEmpty())
 					{
-						DConOutRaw("VirtualFS: No out file specified after -oidsdepend flag" DNewLine);
+						DConOutRaw("VirtualFS: No out file specified after -oidsdepend flag\n");
 						DConOutRaw(sc_pHelpText);
 						return -1;
 					}
@@ -361,7 +361,7 @@ public:
 					TargetFilenameCpp = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 					if (TargetFilenameCpp.f_IsEmpty())
 					{
-						DConOutRaw("VirtualFS: No out file specified after -ocpp flag" DNewLine);
+						DConOutRaw("VirtualFS: No out file specified after -ocpp flag\n");
 					DConOutRaw(sc_pHelpText);
 						return -1;
 					}
@@ -372,7 +372,7 @@ public:
 					DestPath = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 					if (DestPath.f_IsEmpty())
 					{
-						DConOutRaw("VirtualFS: No dest path specified after -dest path" DNewLine);
+						DConOutRaw("VirtualFS: No dest path specified after -dest path\n");
 					DConOutRaw(sc_pHelpText);
 						return -1;
 					}
@@ -383,7 +383,7 @@ public:
 					SymbolName = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 					if (SymbolName.f_IsEmpty())
 					{
-						DConOutRaw("VirtualFS: No symbol name specified after -symbol name" DNewLine);
+						DConOutRaw("VirtualFS: No symbol name specified after -symbol name\n");
 						DConOutRaw(sc_pHelpText);
 						return -1;
 					}
@@ -394,7 +394,7 @@ public:
 					Platform = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 					if (Platform.f_IsEmpty())
 					{
-						DConOutRaw("VirtualFS: No platform specified after -platform" DNewLine);
+						DConOutRaw("VirtualFS: No platform specified after -platform\n");
 						DConOutRaw(sc_pHelpText);
 						return -1;
 					}
@@ -403,7 +403,7 @@ public:
 
 				else
 				{
-					DConOut("VirtualFS: Unrecognised flag: {}" DNewLine, CurArg);
+					DConOut("VirtualFS: Unrecognised flag: {}\n", CurArg);
 					DConOutRaw(sc_pHelpText);
 					return -1;
 				}
@@ -414,14 +414,14 @@ public:
 
 		if (TargetFilename.f_IsEmpty())
 		{
-			DConOutRaw("No target file specified." DNewLine);
+			DConOutRaw("No target file specified.\n");
 			DConOutRaw(sc_pHelpText);
 			return -1;
 		}
 
 		if (TargetFilenameCpp.f_IsEmpty() && (TargetFormat == ETargetFormat_COFF || TargetFormat == ETargetFormat_ASM || TargetFormat == ETargetFormat_CPP))
 		{
-			DConOutRaw("No cpp target file specified." DNewLine);
+			DConOutRaw("No cpp target file specified.\n");
 			DConOutRaw(sc_pHelpText);
 			return -1;
 		}
@@ -435,7 +435,7 @@ public:
 
 		if (!NFile::CFile::fs_FileExists(SourceFilename, EFileAttrib_File))
 		{
-			DConOut("Source file {} does not exist." DNewLine, SourceFilename);
+			DConOut("Source file {} does not exist.\n", SourceFilename);
 			return 1;
 		}
 
@@ -455,7 +455,7 @@ public:
 		}
 		catch(NFile::CExceptionFile& _Ex)
 		{
-			DConOut("Failed to read source file {}: {}" DNewLine, SourceFilename << _Ex.f_GetErrorStr());
+			DConOut("Failed to read source file {}: {}\n", SourceFilename << _Ex.f_GetErrorStr());
 			return 1;
 		}
 
@@ -510,7 +510,7 @@ public:
 
 		if (!pActiveTargetStream)
 		{
-			DConOutRaw("Internal error: No valid target format." DNewLine);
+			DConOutRaw("Internal error: No valid target format.\n");
 			return 1;
 		}
 
@@ -523,7 +523,7 @@ public:
 		CFile TLogFile;
 		TLogFile.f_Open(TLogFileName, EFileOpen_Write | EFileOpen_ShareAll);
 		CByteVector Data;
-		//CStr InitialData = CStr::CFormat("^{}" DNewLine) << SourceFilename.f_ReplaceChar('/', '\\').f_UpperCase();
+		//CStr InitialData = CStr::CFormat("^{}\n") << SourceFilename.f_ReplaceChar('/', '\\').f_UpperCase();
 		CStr InitialData;
 		CFile::fs_WriteStringToVector(Data, InitialData);
 		try
@@ -532,7 +532,7 @@ public:
 		}
 		catch (NException::CException const &_Exception)
 		{
-			DConOut("Exception writing tlog: {}" DNewLine, _Exception.f_GetErrorStr());
+			DConOut("Exception writing tlog: {}\n", _Exception.f_GetErrorStr());
 		}
 #endif
 
@@ -546,7 +546,7 @@ public:
 			;++CurInclude)
 		{
 			if (bVerbose)
-				DConOut("{}{}" DNewLine, CurInclude->m_Pattern << (CurInclude->m_bRecurse ? " (Recursive)" : ""));
+				DConOut("{}{}\n", CurInclude->m_Pattern << (CurInclude->m_bRecurse ? " (Recursive)" : ""));
 
 			TCVector<CStr> lSourceFiles = NFile::CFile::fs_FindFiles(CurInclude->m_Pattern, EFileAttrib_File | EFileAttrib_Link, CurInclude->m_bRecurse, false);
 
@@ -608,7 +608,7 @@ public:
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(CurInclude->m_Destination, SourceName);
 
 				if (bVerbose)
-					DConOut("Adding '{}' as '{}'" DNewLine, SourceFile << AddPath);
+					DConOut("Adding '{}' as '{}'\n", SourceFile << AddPath);
 
 				++nFilesAdded;
 
@@ -623,7 +623,7 @@ public:
 				VirtualFS.f_CopyFileToFS(SourceFile, AddPath);
 			}
 		}
-		DConOut("{} files added to VFS" DNewLine, nFilesAdded);
+		DConOut("{} files added to VFS\n", nFilesAdded);
 
 		for (auto iDepend = DependentDirectories.f_GetIterator(); iDepend; ++iDepend)
 		{
@@ -637,7 +637,7 @@ public:
 					Test.f_GetAttributes();
 
 #if defined(DPlatformFamily_Windows)
-					CStr ToLog = DependDir.f_ReplaceChar('/', '\\').f_UpperCase() + "\\" DNewLine;
+					CStr ToLog = DependDir.f_ReplaceChar('/', '\\').f_UpperCase() + "\\\n";
 					TLogFile.f_Write(ToLog.f_GetStr(), ToLog.f_GetLen());
 #endif
 //					DependencyContents += CStr::CFormat(" \\\n  {}") << DependDir;
@@ -646,7 +646,7 @@ public:
 			}
 			catch (NException::CException const &_Exception)
 			{
-				DConOut("Exception reading depend path: {}" DNewLine, _Exception.f_GetErrorStr());
+				DConOut("Exception reading depend path: {}\n", _Exception.f_GetErrorStr());
 			}
 		}
 
@@ -665,14 +665,14 @@ public:
 			CStr UniqueName = Hash.f_GetString();
 
 			CStr CppOutput = CStr::CFormat(
-						"// VFS Blob generated by MTool from {}" DNewLine //  @ {}" DNewLine
-						"namespace NAOCC" DNewLine
-						"{{" DNewLine
-						"	void fg_SetExeFSData(int _nBytes, void const *_pData);" DNewLine
-						"}" DNewLine
-						DNewLine
-						"int const gc_VFS_{1}_nBytes = {2};" DNewLine
-						"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];" DNewLine DNewLine
+						"// VFS Blob generated by MTool from {}\n"
+						"namespace NAOCC\n"
+						"{{\n"
+						"	void fg_SetExeFSData(int _nBytes, void const *_pData);\n"
+						"}\n"
+						"\n"
+						"int const gc_VFS_{1}_nBytes = {2};\n"
+						"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];\n\n"
 					)
 					<< SourceFilename
 					<< UniqueName
@@ -682,22 +682,22 @@ public:
 			CppOutput +=
 				CStr::CFormat
 				(
-					"struct CExeFSSetter" DNewLine
-					"{{" DNewLine
-					"	CExeFSSetter() {{ NAOCC::fg_SetExeFSData(gc_VFS_{0}_nBytes, gc_VFS_{0}_Bytes); }" DNewLine
-					"};" DNewLine
-					DNewLine
-					"CExeFSSetter g_SetExeFS;" DNewLine DNewLine
+					"struct CExeFSSetter\n"
+					"{{\n"
+					"	CExeFSSetter() {{ NAOCC::fg_SetExeFSData(gc_VFS_{0}_nBytes, gc_VFS_{0}_Bytes); }\n"
+					"};\n"
+					"\n"
+					"CExeFSSetter g_SetExeFS;\n\n"
 				) << UniqueName
 			;
 
 			try
 			{
-				NFile::CFile::fs_WriteStringToFile(CStr(TargetFilenameCpp), CppOutput);
+				NFile::CFile::fs_WriteStringToFile(CStr(TargetFilenameCpp), CppOutput, false);
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target CPP file {}: {}" DNewLine, TargetFilenameCpp << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp << _Ex.f_GetErrorStr());
 				return 1;
 			}
 
@@ -711,7 +711,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target OBJ file {}: {}" DNewLine, TargetFilename << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target OBJ file {}: {}\n", TargetFilename << _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}
@@ -724,14 +724,14 @@ public:
 			CStr UniqueName = Hash.f_GetString();
 
 			CStr CppOutput = CStr::CFormat(
-						"// VFS Blob generated by MTool from {}" DNewLine //  @ {}" DNewLine
-						"namespace NAOCC" DNewLine
-						"{{" DNewLine
-						"	void fg_SetExeFSData(int _nBytes, void const *_pData);" DNewLine
-						"}" DNewLine
-						DNewLine
-						"int const gc_VFS_{1}_nBytes = {2};" DNewLine
-						"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];" DNewLine DNewLine
+						"// VFS Blob generated by MTool from {}\n"
+						"namespace NAOCC\n"
+						"{{\n"
+						"	void fg_SetExeFSData(int _nBytes, void const *_pData);\n"
+						"}\n"
+						"\n"
+						"int const gc_VFS_{1}_nBytes = {2};\n"
+						"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];\n\n"
 					)
 					<< SourceFilename
 					<< UniqueName
@@ -741,22 +741,22 @@ public:
 			CppOutput +=
 				CStr::CFormat
 				(
-					"struct CExeFSSetter" DNewLine
-					"{{" DNewLine
-					"	CExeFSSetter() {{ NAOCC::fg_SetExeFSData(gc_VFS_{0}_nBytes, gc_VFS_{0}_Bytes); }" DNewLine
-					"};" DNewLine
-					DNewLine
-					"CExeFSSetter g_SetExeFS;" DNewLine DNewLine
+					"struct CExeFSSetter\n"
+					"{{\n"
+					"	CExeFSSetter() {{ NAOCC::fg_SetExeFSData(gc_VFS_{0}_nBytes, gc_VFS_{0}_Bytes); }\n"
+					"};\n"
+					"\n"
+					"CExeFSSetter g_SetExeFS;\n\n"
 				) << UniqueName
 			;
 
 			try
 			{
-				NFile::CFile::fs_WriteStringToFile(TargetFilenameCpp, CppOutput);
+				NFile::CFile::fs_WriteStringToFile(TargetFilenameCpp, CppOutput, false);
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target CPP file {}: {}" DNewLine, TargetFilenameCpp << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp << _Ex.f_GetErrorStr());
 				return 1;
 			}
 
@@ -770,7 +770,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target BIN file {}: {}" DNewLine, TargetFilename << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target BIN file {}: {}\n", TargetFilename << _Ex.f_GetErrorStr());
 				return 1;
 			}
 
@@ -782,11 +782,11 @@ public:
 				{
 					ASMOutput = CStr::CFormat
 						(
-							"{\n}"
-							"	.global _gc_VFS_{0}_Bytes{\n}"
-							"	.static_const{\n}"
-							"_gc_VFS_{0}_Bytes:{\n}"
-							"	.incbin \"{1}\"{\n}"
+							"\n"
+							"	.global _gc_VFS_{0}_Bytes\n"
+							"	.static_const\n"
+							"_gc_VFS_{0}_Bytes:\n"
+							"	.incbin \"{1}\"\n"
 						)
 						<< UniqueName
 						<< BinFileName
@@ -796,21 +796,21 @@ public:
 				{
 					ASMOutput = CStr::CFormat
 						(
-							"{\n}"
-							"	.global gc_VFS_{0}_Bytes{\n}"
-							"	.section .rodata{\n}"
-							"gc_VFS_{0}_Bytes:{\n}"
-							"	.incbin \"{1}\"{\n}"
+							"\n"
+							"	.global gc_VFS_{0}_Bytes\n"
+							"	.section .rodata\n"
+							"gc_VFS_{0}_Bytes:\n"
+							"	.incbin \"{1}\"\n"
 						)
 						<< UniqueName
 						<< BinFileName
 					;
 				}
-				NFile::CFile::fs_WriteStringToFile(TargetFilename, ASMOutput);
+				NFile::CFile::fs_WriteStringToFile(TargetFilename, ASMOutput, false);
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target BIN file {}: {}" DNewLine, TargetFilename << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target BIN file {}: {}\n", TargetFilename << _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}
@@ -819,20 +819,20 @@ public:
 			CByteVector lData = TargetMemoryStream.f_MoveVector();
 
 			CStr CppOutput = CStr::CFormat(
-						"// VFS Blob generated by MTool from {}" DNewLine //  @ {}" DNewLine
-						"namespace NAOCC" DNewLine
-						"{{" DNewLine
-						"	void fg_SetExeFSData(int _nBytes, void const *_pData);" DNewLine
-						"}" DNewLine
-						DNewLine
-						"int const gc_VFS_nBytes = {};" DNewLine
-						"unsigned char const gc_VFS_Bytes[] = {{" DNewLine
+						"// VFS Blob generated by MTool from {}\n"
+						"namespace NAOCC\n"
+						"{{\n"
+						"	void fg_SetExeFSData(int _nBytes, void const *_pData);\n"
+						"}\n"
+						"\n"
+						"int const gc_VFS_nBytes = {};\n"
+						"unsigned char const gc_VFS_Bytes[] = {{\n"
 					)
 					<< SourceFilename
 //					<< NTime::fg_GetFullTimeStr(NTime::CTime::fs_NowLocal())
 					<< lData.f_GetLen();
 
-			auto Formatter = CStr::CFormat("\t0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}," DNewLine);
+			auto Formatter = CStr::CFormat("\t0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0},\n");
 			auto ByteFormatter = CStr::CFormat("0x{nfh,sz2,sf0}, ");
 
 			uint8 Input[16];
@@ -865,26 +865,26 @@ public:
 					CppOutput += ByteFormatter;
 					++DataIter;
 				}
-				CppOutput += DNewLine;
+				CppOutput += "\n";
 			}
 
-			CppOutput += "};" DNewLine DNewLine;
+			CppOutput += "};\n\n";
 
 			CppOutput +=
-				"struct CExeFSSetter" DNewLine
-				"{" DNewLine
-				"	CExeFSSetter() { NAOCC::fg_SetExeFSData(gc_VFS_nBytes, gc_VFS_Bytes); }" DNewLine
-				"};" DNewLine
-				DNewLine
-				"CExeFSSetter g_SetExeFS;" DNewLine DNewLine;
+				"struct CExeFSSetter\n"
+				"{\n"
+				"	CExeFSSetter() { NAOCC::fg_SetExeFSData(gc_VFS_nBytes, gc_VFS_Bytes); }\n"
+				"};\n"
+				"\n"
+				"CExeFSSetter g_SetExeFS;\n\n";
 
 			try
 			{
-				NFile::CFile::fs_WriteStringToFile(CStr(TargetFilenameCpp), CppOutput);
+				NFile::CFile::fs_WriteStringToFile(CStr(TargetFilenameCpp), CppOutput, false);
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target CPP file {}: {}" DNewLine, TargetFilenameCpp << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp << _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}
@@ -899,7 +899,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write dependency file file {}: {}" DNewLine, DependencyFile << _Ex.f_GetErrorStr());
+				DConOut("Failed to write dependency file file {}: {}\n", DependencyFile << _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}
@@ -912,7 +912,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write dependency file file {}: {}" DNewLine, DependencyFile << _Ex.f_GetErrorStr());
+				DConOut("Failed to write dependency file file {}: {}\n", DependencyFile << _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}
