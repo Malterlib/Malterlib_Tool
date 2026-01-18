@@ -317,6 +317,210 @@ Property
 	}
 }
 
+// Copy temp
+Property
+{
+	MalterlibLLVM_CopyToolsTempPath: string = `@(MalterlibCompiledFilesWarkspaceBase)/Tools/@(Platform)/@(Architecture)`
+
+	MalterlibLLVM_CopyToolsCopyTempContentsTemplate function(type(CFileCopyOptionsDetailed) _CopyOptions) string
+	MalterlibLLVM_CopyToolsCopyTempContentsTemplate =+	`MTool DiffCopy @(_CopyOptions<Pattern>->EscapeHost()) @(MalterlibLLVM_CopyToolsTempPath->AppendPath(_CopyOptions<Destination>)->EscapeHost()) "" @(_CopyOptions<Recursive> ? "1" : "0") 0 @(_CopyOptions<FindDirectory> ? "1" : "0") @(_CopyOptions<AbsoluteDestination> ? "1" : "0")\r\n`
+	MalterlibLLVM_CopyToolsCopyTempContents: string = fg_ExpandCopyOptions(MalterlibLLVM_CopyToolsSources)->ForEach(&MalterlibLLVM_CopyToolsCopyTempContentsTemplate)
+	MalterlibLLVM_CopyToolsSources: [type(CFileCopyOptions)] = []
+
+	MalterlibLLVM_ToolsPath: string
+	MalterlibLLVM_ToolsPath MalterlibLLVM_CopyToolsTempPath
+
+	MalterlibLLVM_EnableIntegration: bool = false
+}
+
+Target
+{
+	ToolPath =+ MalterlibLLVM_ToolsPath
+}
+
+%Group "{Malterlib}/{Lib_Malterlib_Tool}/{LLVMTargetInjection}"
+{
+	%Dependency "Lib_Malterlib"
+}
+
+%Import "../../External/llvm-project/llvm/CMakeLists.txt"
+{
+	!!MalterlibLLVM_EnableIntegration true
+
+	Import.CMake_CacheExcludePatterns =+ []
+
+	Import.CMake_FullRebuildVersion `@(Import.CMake_FullRebuildVersion).2`
+
+	Import.CMake_Variables =+ [
+		"LLVM_ENABLE_PROJECTS=clang;lldb"
+		, "LLVM_ENABLE_RUNTIMES="
+		, "LLVM_ENABLE_PGO=OFF"
+		, "LLVM_ENABLE_LTO=OFF"
+		, "LLVM_ENABLE_ASSERTIONS=OFF"
+		, "LLDB_INCLUDE_TESTS=OFF"
+	]
+
+	//Import.CMake_CacheReplaceContents += {Find: '#include "llvm/Config/llvm-config.h"', Replace: '#include "WHAT"'}
+
+	Import.CMake_Variables =+ "CMAKE_CXX_FLAGS=-stdlib=libc++"
+	{
+		!!PlatformFamily "macOS"
+		!!PlatformFamily "Linux"
+	}
+
+	Compile
+	{
+		!!Compile.Type "C++"
+
+		CxxLanguage "C++17"
+	}
+
+	Import.CMake_CacheReplaceContents =+ [
+		{Find: `@(Import.TempDirectory)/bin/`, Replace: "@(MalterlibLLVM_ToolsPath)/", FilePatterns: ["*.MHeader"]}
+	]
+
+	Property.MalterlibLLVM_CopyToolsSources =+ MalterlibBuildServerPutSources
+
+	Property.MalterlibPostBuildScript_Last =+	`@(ScriptMkDir(MalterlibLLVM_CopyToolsTempPath))\r\n`\
+												`@(MalterlibLLVM_CopyToolsCopyTempContents)\r\n`
+	{
+		&
+		{
+			TargetIsExecutable true
+		}
+	}
+
+	///opt/CompiledFiles/Malterlib-a7902a63/Malterlib/Generated/External_llvm-project_llvm/macOS/arm64/Debug/bin/llvm-min-tblgen
+
+	Compile
+	{
+		!!CompileDialect "C"
+
+		PrefixHeader "Source/Malterlib_Tool_LLVM_PrefixHeader.h"->MakeAbsolute()
+
+		PreprocessorDefines =+ "_LIBCPP_DISABLE_DEPRECATION_WARNINGS"
+		PreprocessorDefines =+ "LLVM_DISABLE_CRASHREPORTER_INFO=1"
+		PreprocessorDefines =+ "LLDB_API=__attribute__((visibility(\"default\")))"
+
+		Analyzer false
+		Warnings "Minimal"
+		{
+			!!GeneratorFamily "VisualStudio"
+		}
+		Warnings_DeprecatedDeclarations false
+		{
+			!!Compiler "Clang"
+		}
+
+		Warnings_UnusedButSetVariable false
+		{
+			!!Compiler "Clang"
+		}
+
+		Warnings_UnusedVariable false
+		{
+			!!Compiler "Clang"
+		}
+	}
+
+	Target.ExtraGroups =+ "{Malterlib}/{Lib_Malterlib_Tool}/{LLVMTargetInjection}"
+	{
+		!!TargetIsExecutable true
+	}
+
+	Compile
+	{
+		!!Compile.Type "C++"
+		SearchPath += [
+			`@(CMakeIntermediateDirectory)/External_llvm-project_llvm/include`
+		]
+	}
+
+	%Target "Lib_LLVM_obj.clangBasic"
+	{
+		Compile
+		{
+			!!Compile.Type "C++"
+
+			SearchPath += [
+				`@(CMakeIntermediateDirectory)/External_llvm-project_llvm/tools/clang/lib/Basic`
+			]
+		}
+	}
+
+	%Target "Lib_LLVM_lldbVersion"
+	{
+	}
+
+	%Target "Lib_LLVM_obj.clangFormat"
+	{
+		Compile.PrefixHeader undefined
+		{
+			!!CompileDialect "C"
+		}
+
+		%Group "opt"
+		{
+			%Group "Format"
+			{
+				%File "../../External/llvm-project/clang/lib/Format/Format.cpp"
+				{
+					Compile
+					{
+						CxxLanguage "C++26"
+					}
+				}
+			}
+		}
+	}
+
+	%Target "Lib_LLVM_lldbHostMacOSXObjCXX"
+	{
+		Compile
+		{
+			!!Compile.Type "ObjC++"
+
+			ObjectiveCARC false
+			ObjectiveCExceptions false
+		}
+	}
+
+	%Target "Dll_LLVM_liblldb"
+	{
+		Compile
+		{
+			!!CompileDialect "C"
+
+			Warnings_FormatSecurity false
+		}
+
+		%Dependency [
+			"/opt/homebrew/lib/liblua.a"
+			, "/opt/homebrew/Cellar/python@3.13/3.13.5/Frameworks/Python.framework/Versions/3.13/lib/python3.13/config-3.13-darwin/libpython3.13.a"
+			, "xml2"
+			, "lzma"
+			, "compression"
+			, "edit"
+			, "curses"
+			, "panel"
+		]
+		{
+			Dependency.Type "Library"
+		}
+
+		%Dependency "Lib_zlib"
+	}
+
+	%Target "Com_LLVM_lldb"
+	{
+		%Dependency GetProperty(&MalterlibFinalModuleDestination, "Target:Dll_LLVM_liblldb.Import:\"../../External/llvm-project/llvm/CMakeLists.txt\".Target:Dll_LLVM_liblldb")
+		{
+			Dependency.Type "Library"
+		}
+	}
+}
+
+
 Property.MalterlibEnableCMakeProject: bool = false
 
 %Workspace "CMake"

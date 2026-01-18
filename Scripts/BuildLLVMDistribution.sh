@@ -134,7 +134,7 @@ BuildCompilerLTO()
 				export EnableReleaseConfig=false
 				export EnableReleaseTestingConfig=true
 
-				./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
+				./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave || true
 
 				#./mib build "Tests" "macOS" "arm64" "Release (Tests)" || true # Crashes
 				./mib build "Tests" "macOS" "arm64" "Debug" || true
@@ -222,7 +222,9 @@ BuildDevCompiler()
 		ExtraCMake="$ExtraCMake -DCMAKE_BUILD_TYPE=$BuildType"
 		ExtraCMake="$ExtraCMake -DLLVM_ENABLE_ASSERTIONS=ON"
 
-		(cmake $ExtraCMake "$MalterlibRoot/External/llvm-project/llvm")
+		if [[ "$NoCmake" != "true" ]]; then
+			(cmake $ExtraCMake "$MalterlibRoot/External/llvm-project/llvm")
+		fi
 
 		time ninja -j${NCPUS} install
 	popd

@@ -112,6 +112,56 @@ Property
 	{
 		Dependency.Link false
 	}
+
+	%Dependency {
+		Name: "Com_LLVM_clang-format"
+		, Properties: {
+			Dependency.Target: "Com_LLVM_clang-format"
+			, Dependency.TargetProperties: {
+				MalterlibPostCopyProject: MalterlibPostCopyProject
+				, MalterlibPostCopyDestination: `@(MalterlibPostCopyDestination)/`
+				, Target.Name: "Com_LLVM_clang-format"
+				, Target.Group: "ExternalBinaries/clang-format"
+			}
+		}
+	}
+	{
+		Dependency.Link false
+	}
+
+/*	%Dependency {
+		Name: "Dll_LLVM_liblldb"
+		, Properties: {
+			Dependency.Target: "Dll_LLVM_liblldb"
+			, Dependency.TargetProperties: {
+				MalterlibPostCopyProject: MalterlibPostCopyProject
+				, MalterlibPostCopyDestination: `@(MalterlibPostCopyDestination)/`
+				, Target.Name: "Dll_LLVM_liblldb"
+				, Target.Group: "ExternalBinaries/lldb"
+				, Target.GenerateScheme: true
+			}
+		}
+	}
+	{
+		Dependency.Link false
+	}
+
+	%Dependency {
+		Name: "Com_LLVM_lldb"
+		, Properties: {
+			Dependency.Target: "Com_LLVM_lldb"
+			, Dependency.TargetProperties: {
+				MalterlibPostCopyProject: MalterlibPostCopyProject
+				, MalterlibPostCopyDestination: `@(MalterlibPostCopyDestination)/`
+				, Target.Name: "Com_LLVM_lldb"
+				, Target.Group: "ExternalBinaries/lldb"
+				, Target.GenerateScheme: true
+			}
+		}
+	}
+	{
+		Dependency.Link false
+	}*/
 }
 
 %Workspace "MTool"
