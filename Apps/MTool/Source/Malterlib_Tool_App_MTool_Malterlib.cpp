@@ -12,6 +12,36 @@ CStr CTool_Malterlib::fs_GetFileNameOrEmpty(NEncoding::CEJsonSorted const &_Para
 	return CFile::fs_GetExpandedPath(FileName, _CurrentDirectory);
 }
 
+CStr CTool_Malterlib::fs_DefaultVisualStudioVersion(CStr const &_RootPath)
+{
+#ifdef DPlatformFamily_Windows
+	CStr RepoConfigFile = _RootPath / "Repo.conf";
+
+	CStr Errors;
+	auto Versions = CBuildSystem::fs_GetVisualStudioVersions(Errors);
+
+	CStr Version;
+	if (Versions.f_FindEqual(18u))
+		Version = "2026";
+	else
+		Version = "2022";
+
+	if (CFile::fs_FileExists(RepoConfigFile))
+	{
+		for (auto Line : CFile::fs_ReadStringFromFile(RepoConfigFile).f_SplitLine<true>())
+		{
+			CStr Key = fg_GetStrSep(Line, " ");
+			if (Key == "VisualStudioVersion")
+				Version = Line;
+		}
+	}
+
+	return Version;
+#else
+	return "2022";
+#endif
+}
+
 CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 {
 #if defined(DPlatformFamily_macOS) || defined(DPlatformFamily_Linux)
@@ -80,28 +110,7 @@ CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
 	return "Xcode{}"_f << Version;
 
 #elif defined(DPlatformFamily_Windows)
-	CStr RepoConfigFile = _RootPath / "Repo.conf";
-
-	CStr Errors;
-	auto Versions = CBuildSystem::fs_GetVisualStudioVersions(Errors);
-
-	CStr Version;
-	if (Versions.f_FindEqual(18u))
-		Version = "2026";
-	else
-		Version = "2022";
-
-	if (CFile::fs_FileExists(RepoConfigFile))
-	{
-		for (auto Line : CFile::fs_ReadStringFromFile(RepoConfigFile).f_SplitLine<true>())
-		{
-			CStr Key = fg_GetStrSep(Line, " ");
-			if (Key == "VisualStudioVersion")
-				Version = Line;
-		}
-	}
-
-	return "VisualStudio{}"_f << Version;
+	return "VisualStudio{}"_f << fs_DefaultVisualStudioVersion(_RootPath);
 #else
 	return "Xcode";
 #endif
@@ -118,6 +127,10 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJsonSorted 
 	GenerateSettings.m_Generator = _Params["Generator"].f_String();
 	if (GenerateSettings.m_Generator.f_IsEmpty())
 		GenerateSettings.m_Generator = fs_DefaultGenerator(CFile::fs_GetPath(GenerateSettings.m_SourceFile));
+
+	// If using Ninja generator and MalterlibVisualStudioVersion is not set, determine it from installed VS versions
+	if (GenerateSettings.m_Generator.f_StartsWith("Ninja") && !GenerateSettings.m_Environment.f_FindEqual("MalterlibVisualStudioVersion"))
+		GenerateSettings.m_Environment["MalterlibVisualStudioVersion"] = fs_DefaultVisualStudioVersion(CFile::fs_GetPath(GenerateSettings.m_SourceFile));
 
 	if (GenerateSettings.m_SourceFile.f_IsEmpty())
 		DMibError("You must specify a valid build sytem file with --build-system");
