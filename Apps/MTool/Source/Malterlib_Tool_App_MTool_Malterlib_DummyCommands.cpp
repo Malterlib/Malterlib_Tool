@@ -19,29 +19,17 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 		(
 			{
 				"Names"_o= _o["test"]
-				, "Description"_o= "Build and run tests."
+				, "Description"_o= "Build and run tests. Will use the Single* variables in UserSettings.MSettings to determine the built and tested configuration."
 				, "GlobalOptions"_o= HelpGlobalOptions
 				, "ShowParametersStart"_o= false
 				, "Parameters"_o=
 				{
-					"Configuration?"_o=
+					"RunAllTestsParams..."_o=
 					{
-						"Default"_o= "Debug"
-						, "Description"_o= "The configuration to build the tests for.\n"
-						"For Example: Release (Tests)"
+						"Type"_o= _o[""]
+						, "Description"_o= "Parameters to send to the RunAllTests executable when running tests."
 					}
 				}
-			}
-			, fDummyCommand
-		)
-	;
-	Section.f_RegisterDirectCommand
-		(
-			{
-				"Names"_o= _o["test_release"]
-				, "Description"_o= "Build and run tests with Release configuration."
-				, "GlobalOptions"_o= HelpGlobalOptions
-				, "ShowParametersStart"_o= false
 			}
 			, fDummyCommand
 		)
