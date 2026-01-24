@@ -42,80 +42,6 @@ CStr CTool_Malterlib::fs_DefaultVisualStudioVersion(CStr const &_RootPath)
 #endif
 }
 
-CStr CTool_Malterlib::fs_DefaultGenerator(CStr const &_RootPath)
-{
-#if defined(DPlatformFamily_macOS) || defined(DPlatformFamily_Linux)
-	CStr RepoConfigFile = _RootPath / "Repo.conf";
-	CStr Version;
-
-	if (CFile::fs_FileExists(RepoConfigFile))
-	{
-		for (auto Line : CFile::fs_ReadStringFromFile(RepoConfigFile).f_SplitLine<true>())
-		{
-			CStr Key = fg_GetStrSep(Line, " ");
-			if (Key == "XcodeVersion")
-				Version = Line;
-		}
-	}
-
-#if defined(DPlatformFamily_macOS)
-	if (Version.f_IsEmpty())
-	{
-		CStr XcodePath = "/Applications/Xcode.app/Contents";
-
-		for (auto &pXcodeLink : {"/var/select/developer_dir", "/var/db/xcode_select_link", "/usr/share/xcode-select/xcode_dir_link", "/usr/share/xcode-select/xcode_dir_path"})
-		{
-			try
-			{
-				XcodePath = CFile::fs_GetPath(CFile::fs_ResolveSymbolicLink(pXcodeLink));
-				break;
-			}
-			catch (CException const &)
-			{
-			}
-		}
-
-		if (CFile::fs_FileExists(XcodePath))
-		{
-			try
-			{
-				CStr StringContents = CFile::fs_ReadStringFromFile(XcodePath / "version.plist", true);
-
-				bool bNextIsVersion = false;
-				for (auto &Line : StringContents.f_SplitLine<true>())
-				{
-					if (bNextIsVersion)
-					{
-						CStr Major;
-						CStr Minor;
-						(CStr::CParse("<string>{}.{}</string>") >> Major >> Minor).f_Parse(Line.f_Trim());
-						if (!Major.f_IsEmpty())
-							Version = Major;
-						break;
-					}
-					if (Line.f_Trim() == "<key>CFBundleShortVersionString</key>")
-						bNextIsVersion = true;
-				}
-			}
-			catch (CException const &)
-			{
-			}
-		}
-	}
-#endif
-
-	if (Version.f_IsEmpty())
-		Version = "12";
-
-	return "Xcode{}"_f << Version;
-
-#elif defined(DPlatformFamily_Windows)
-	return "VisualStudio{}"_f << fs_DefaultVisualStudioVersion(_RootPath);
-#else
-	return "Xcode";
-#endif
-}
-
 CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJsonSorted const &_Params)
 {
 	CStr CurrentDirectory = _Params["CurrentDirectory"].f_String();
@@ -126,7 +52,7 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJsonSorted 
 	GenerateSettings.m_OutputDir = fs_GetFileNameOrEmpty(_Params["OutputDirectory"], CurrentDirectory);
 	GenerateSettings.m_Generator = _Params["Generator"].f_String();
 	if (GenerateSettings.m_Generator.f_IsEmpty())
-		GenerateSettings.m_Generator = fs_DefaultGenerator(CFile::fs_GetPath(GenerateSettings.m_SourceFile));
+		GenerateSettings.m_Generator = gc_Str<"Ninja">;
 
 	// If using Ninja generator and MalterlibVisualStudioVersion is not set, determine it from installed VS versions
 	if (GenerateSettings.m_Generator.f_StartsWith("Ninja") && !GenerateSettings.m_Environment.f_FindEqual("MalterlibVisualStudioVersion"))

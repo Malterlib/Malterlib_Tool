@@ -14,7 +14,6 @@ class CTool_Malterlib : public CDistributedTool, public CAllowUnsafeThis
 public:
 	static CStr fs_GetFileNameOrEmpty(CEJsonSorted const &_Param, CStr const &_CurrentDirectory);
 	static CStr fs_DefaultVisualStudioVersion(CStr const &_RootPath);
-	static CStr fs_DefaultGenerator(CStr const &_RootPath);
 	static CGenerateOptions fs_ParseSharedOptions(CEJsonSorted const &_Params);
 	static CEJsonOrdered::CKeyValue fs_CachedEnvironmentOption(bool _bDefault);
 

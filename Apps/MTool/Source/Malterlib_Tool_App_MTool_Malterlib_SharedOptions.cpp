@@ -40,7 +40,7 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					"Names"_o= _o["--generator"]
 					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_Generator", "")
 					, "Description"_o= "The generator to use to generate the build system.\n"
-					"Leave empty to use the default generator for the platform or the generator specified in Repo.conf\n"
+					"Leave empty to use the default generator (Ninja) or the generator specified in Repo.conf\n"
 				}
 				, "OutputDirectory?"_o=
 				{
