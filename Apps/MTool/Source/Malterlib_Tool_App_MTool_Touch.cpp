@@ -66,6 +66,30 @@ class CTool_TouchOrCreate : public CTool
 
 DMibRuntimeClass(CTool, CTool_TouchOrCreate);
 
+class CTool_CreateFile : public CTool
+{
+	public:
+
+	aint f_Run(NContainer::CRegistry &_Params)
+	{
+		CStr File = _Params.f_GetValue("0", "NotExist");
+
+		if (!CFile::fs_FileExists(File))
+		{
+			NTime::CTime Now = NTime::CTime::fs_NowUTC();
+
+			CFile::fs_CreateDirectory(CFile::fs_GetPath(File));
+			NFile::CFile Temp;
+			Temp.f_Open(File, EFileOpen_Read | EFileOpen_Write | EFileOpen_ShareAll | EFileOpen_DontTruncate);
+			Temp.f_SetWriteTime(Now);
+		}
+
+		return 0;
+	}
+};
+
+DMibRuntimeClass(CTool, CTool_CreateFile);
+
 class CTool_CopyWriteTime : public CTool
 {
 public:
