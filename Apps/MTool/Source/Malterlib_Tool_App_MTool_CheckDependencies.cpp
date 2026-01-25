@@ -146,7 +146,12 @@ public:
 			}
 		}
 
+		if (Files.f_IsEmpty())
+			return 0;
+
 		TCAtomic<bool> UsesDigest;
+
+		CThreadPool ThreadPool(fg_Max(fg_Min(aint(NSys::fg_Thread_GetVirtualCores()) - 3, Files.f_GetLen() / 10), 0));
 
 		CMutual DependenciesLock;
 		TCVector<CDependency> Dependencies;
@@ -292,6 +297,7 @@ public:
 						Dependencies.f_Insert(fg_Move(Dependency));
 					}
 				}
+				, ThreadPool
 			)
 		;
 
@@ -410,6 +416,7 @@ public:
 					if (bNeedsUpdating)
 						Dependency.f_NeedsUpdating();
 				}
+				, ThreadPool
 			)
 		;
 
