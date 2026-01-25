@@ -22,6 +22,12 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 						"One of: Build, Clean or ReBuild\n"
 					}
 					, fs_CachedEnvironmentOption(false)
+					, "SignalChanged?"_o=
+					{
+						"Names"_o= _o["--signal-changed"]
+						, "Default"_o= true
+						, "Description"_o= "Return exit code 2 if the build system was changed."
+					}
 				}
 				, "Parameters"_o=
 				{
@@ -37,6 +43,8 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 				co_await ECoroutineFlag_CaptureExceptions;
 
 				CGenerateOptions GenerateOptions = fs_ParseSharedOptions(_Params);
+
+				bool bSignalChanged = _Params["SignalChanged"].f_Boolean();
 
 				GenerateOptions.m_Settings.m_Workspace = _Params["Workspace"].f_String();
 				if (auto pValue = _Params.f_GetMember("Action"))
@@ -111,7 +119,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 				if (ExitValue)
 					co_return ExitValue;
 
-				co_return bChanged ? 2 : 0;
+				co_return (bChanged && bSignalChanged) ? 2 : 0;
 			}
 		)
 	;
