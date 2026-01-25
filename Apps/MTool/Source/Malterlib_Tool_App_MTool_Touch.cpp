@@ -78,13 +78,30 @@ public:
 		try
 		{
 			auto SourceTime = NFile::CFile::fs_GetWriteTime(SourceFile);
+			CStr NewestSourceFile = SourceFile;
+
+			// Check additional source files (params 2, 3, 4, ...)
+			for (mint i = 2; ; ++i)
+			{
+				using namespace NMib::NStr;
+				CStr ExtraSource = _Params.f_GetValue("{}"_f << i, "");
+				if (ExtraSource.f_IsEmpty())
+					break;
+				ExtraSource = CFile::fs_GetExpandedPath(ExtraSource);
+				auto ExtraTime = NFile::CFile::fs_GetWriteTime(ExtraSource);
+				if (ExtraTime > SourceTime)
+				{
+					SourceTime = ExtraTime;
+					NewestSourceFile = ExtraSource;
+				}
+			}
 
 			if (NFile::CFile::fs_FileExists(DestFile))
 			{
 				auto DestTime = NFile::CFile::fs_GetWriteTime(DestFile);
 				if (DestTime != SourceTime)
 				{
-					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime << DestTime << SourceFile << DestFile);
+					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime << DestTime << NewestSourceFile << DestFile);
 					CFile::fs_SetWriteTime(DestFile, SourceTime);
 				}
 			}
@@ -92,13 +109,14 @@ public:
 			{
 				NFile::CFile TempDst;
 				TempDst.f_Open(DestFile, EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_Read | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs | EFileOpen_DontTruncate);
-				DConErrOut("Copy new write time: {} -> {}{\n}", SourceFile << DestFile);
+				DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile << DestFile);
 				TempDst.f_SetWriteTime(SourceTime);
 			}
 		}
 		catch (NFile::CExceptionFile const &_Error)
 		{
 			DConErrOut2("Copy new write failed: {}: {}{\n}", DestFile, _Error);
+			return 1;
 		}
 		return 0;
 	}
@@ -118,13 +136,30 @@ public:
 		try
 		{
 			auto SourceTime = NFile::CFile::fs_GetWriteTime(SourceFile);
+			CStr NewestSourceFile = SourceFile;
+
+			// Check additional source files (params 2, 3, 4, ...)
+			for (mint i = 2; ; ++i)
+			{
+				using namespace NMib::NStr;
+				CStr ExtraSource = _Params.f_GetValue("{}"_f << i, "");
+				if (ExtraSource.f_IsEmpty())
+					break;
+				ExtraSource = CFile::fs_GetExpandedPath(ExtraSource);
+				auto ExtraTime = NFile::CFile::fs_GetWriteTime(ExtraSource);
+				if (ExtraTime > SourceTime)
+				{
+					SourceTime = ExtraTime;
+					NewestSourceFile = ExtraSource;
+				}
+			}
 
 			if (NFile::CFile::fs_FileExists(DestFile))
 			{
 				auto DestTime = NFile::CFile::fs_GetWriteTime(DestFile);
 				if (DestTime < SourceTime)
 				{
-					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime << DestTime << SourceFile << DestFile);
+					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime << DestTime << NewestSourceFile << DestFile);
 					CFile::fs_SetWriteTime(DestFile, SourceTime);
 				}
 			}
@@ -132,13 +167,14 @@ public:
 			{
 				NFile::CFile TempDst;
 				TempDst.f_Open(DestFile, EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_Read | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs | EFileOpen_DontTruncate);
-				DConErrOut("Copy new write time: {} -> {}{\n}", SourceFile << DestFile);
+				DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile << DestFile);
 				TempDst.f_SetWriteTime(SourceTime);
 			}
 		}
 		catch (NFile::CExceptionFile const &_Error)
 		{
 			DConErrOut2("Copy new write failed: {}: {}{\n}", DestFile, _Error);
+			return 1;
 		}
 		return 0;
 	}
