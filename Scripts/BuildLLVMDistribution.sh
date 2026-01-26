@@ -13,6 +13,107 @@ popd
 source "$MalterlibRoot/Malterlib/Core/Scripts/Detect.sh"
 DistributionDir="$MalterlibRoot/Binaries/MalterlibLLVM/$MalterlibPlatform/$MalterlibArch"
 
+# Install dependencies for Linux
+InstallLinuxDependencies()
+{
+	echo "Installing Linux build dependencies..."
+
+	if command -v apt-get &> /dev/null; then
+		sudo apt-get update
+		sudo apt-get install -y \
+			build-essential \
+			cmake \
+			ninja-build \
+			python3 \
+			python3-dev \
+			libcurl4-openssl-dev \
+			libzstd-dev \
+			libedit-dev \
+			libncurses5-dev \
+			swig \
+			libxml2-dev \
+			zlib1g-dev \
+			binutils-dev \
+			libpfm4-dev
+
+		# Install dev packages for all installed Python3 versions
+		PYTHON_DEV_PACKAGES=""
+		for pyver in $(ls /usr/bin/python3.* 2>/dev/null | grep -oP 'python3\.\d+' | sort -u); do
+			PYTHON_DEV_PACKAGES="$PYTHON_DEV_PACKAGES ${pyver}-dev"
+		done
+		if [ -n "$PYTHON_DEV_PACKAGES" ]; then
+			echo "Installing Python dev packages: $PYTHON_DEV_PACKAGES"
+			sudo apt-get install -y $PYTHON_DEV_PACKAGES
+		fi
+
+		# Install the latest available Lua dev package (prefer 5.4, then 5.3)
+		if apt-cache show lua5.4-dev &> /dev/null; then
+			echo "Installing Lua 5.4"
+			sudo apt-get install -y lua5.4 lua5.4-dev
+		elif apt-cache show lua5.3-dev &> /dev/null; then
+			echo "Installing Lua 5.3"
+			sudo apt-get install -y lua5.3 lua5.3-dev
+		fi
+
+	elif command -v dnf &> /dev/null; then
+		sudo dnf install -y \
+			gcc \
+			gcc-c++ \
+			make \
+			cmake \
+			ninja-build \
+			python3 \
+			python3-devel \
+			libcurl-devel \
+			libzstd-devel \
+			libedit-devel \
+			ncurses-devel \
+			swig \
+			libxml2-devel \
+			zlib-devel \
+			binutils-devel \
+			libpfm-devel \
+			lua-devel
+
+		# Install dev packages for all installed Python3 versions
+		PYTHON_DEV_PACKAGES=""
+		for pyver in $(rpm -qa | grep -oP 'python3\.\d+' | sort -u); do
+			PYTHON_DEV_PACKAGES="$PYTHON_DEV_PACKAGES ${pyver}-devel"
+		done
+		if [ -n "$PYTHON_DEV_PACKAGES" ]; then
+			echo "Installing Python dev packages: $PYTHON_DEV_PACKAGES"
+			sudo dnf install -y $PYTHON_DEV_PACKAGES
+		fi
+
+	elif command -v pacman &> /dev/null; then
+		sudo pacman -Sy --noconfirm \
+			base-devel \
+			cmake \
+			ninja \
+			python \
+			curl \
+			zstd \
+			libedit \
+			ncurses \
+			swig \
+			libxml2 \
+			zlib \
+			libpfm \
+			lua
+	else
+		echo "Warning: Unknown package manager. Please install dependencies manually:"
+		echo "  build-essential, cmake, ninja-build, python3, python3-dev,"
+		echo "  libcurl4-openssl-dev, libzstd-dev, libedit-dev, libncurses5-dev,"
+		echo "  swig, libxml2-dev, zlib1g-dev, binutils-dev, libpfm4-dev, lua5.4-dev"
+	fi
+
+	echo "Dependencies installed."
+}
+
+if [[ "$MalterlibPlatform" == "Linux" ]] && [[ "$InstallDependencies" == "true" ]]; then
+	InstallLinuxDependencies
+fi
+
 RootDir="$ScriptDir"
 echo "RootDir: $RootDir"
 echo "DistributionDir: $DistributionDir"
@@ -49,9 +150,25 @@ ExtraCMake="$ExtraCMake -DLLVM_USE_STATIC_ZSTD=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_USE_STATIC_ZSTD=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLVM_USE_STATIC_ZSTD=ON"
 
+ExtraCMake="$ExtraCMake -DLLVM_ENABLE_ZSTD=ON"
+ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_ENABLE_ZSTD=ON"
+ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLVM_ENABLE_ZSTD=ON"
+
 ExtraCMake="$ExtraCMake -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_INSTALL_TOOLCHAIN_ONLY=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLVM_INSTALL_TOOLCHAIN_ONLY=ON"
+
+# Enable Python support for LLDB
+ExtraCMake="$ExtraCMake -DLLDB_ENABLE_PYTHON=ON"
+ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLDB_ENABLE_PYTHON=ON"
+ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLDB_ENABLE_PYTHON=ON"
+
+if [[ "$MalterlibPlatform" == "macOS" ]]; then
+	# Use system Python on macOS to avoid Homebrew dependency
+	ExtraCMake="$ExtraCMake -DPython3_EXECUTABLE=/usr/bin/python3"
+	ExtraCMake="$ExtraCMake -DBOOTSTRAP_Python3_EXECUTABLE=/usr/bin/python3"
+	ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_Python3_EXECUTABLE=/usr/bin/python3"
+fi
 
 ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_RUNTIMES=$LLVMRuntimes"
 ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_PROJECTS=$LLVMProjects"

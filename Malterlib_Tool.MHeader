@@ -105,7 +105,6 @@ Property
 		&
 		{
 			PlatformFamily "Linux"
-			!HostPlatformFamily "Linux"
 		}
 	}
 
