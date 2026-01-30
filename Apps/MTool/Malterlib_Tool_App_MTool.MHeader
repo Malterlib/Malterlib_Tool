@@ -27,14 +27,7 @@ Property
 	{
 		Type "ConsoleExecutable"
 		BaseName "MTool"
-		LinkWithLibraries += "Iphlpapi.lib"
-		{
-			!!PlatformFamily "Windows"
-		}
-		LinkWithLibraries =+ [["-framework", "SystemConfiguration"]]
-		{
-			!!PlatformIsDarwin true
-		}
+
 		Group "Apps"
 		ExtraGroups =+ "{Malterlib}/{CloudTarBinaries}"
 	}
@@ -111,6 +104,20 @@ Property
 	}
 	{
 		Dependency.Link false
+	}
+
+	%Dependency "Iphlpapi.lib"
+	{
+		!!PlatformFamily "Windows"
+
+		Dependency.Type "Library"
+	}
+
+	%Dependency "SystemConfiguration"
+	{
+		!!PlatformIsDarwin true
+
+		Dependency.Type "Framework"
 	}
 }
 

@@ -339,9 +339,11 @@ Property.MalterlibEnableCMakeProject: bool = false
 				, {Pattern: `@("../../External/CMake/Modules"->MakeAbsolute())/*`, Destination: "Modules", Recursive: true}
 			]
 		}
-		Target.LinkWithLibraries += ["Userenv.lib", "Iphlpapi.lib"]
+		%Dependency ["Userenv.lib", "Iphlpapi.lib"]
 		{
 			!!PlatformFamily "Windows"
+
+			Dependency.Type "Library"
 		}
 	}
 }
