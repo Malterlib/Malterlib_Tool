@@ -58,6 +58,16 @@ public:
 		TCVector<CDirectory> m_Directories;
 		TCVector<CDependencyFile> m_Files;
 
+		bool f_AlreadyDirty() const
+		{
+			for (auto & File : m_Outputs)
+			{
+				if (CFile::fs_FileExists(File))
+					return false;
+			}
+			return true;
+		}
+
 		void f_NeedsUpdating() const
 		{
 			for (auto & File : m_Outputs)
@@ -99,6 +109,10 @@ public:
 
 		CStr const *pRelative = _Params.f_FindEqual("Relative");
 		bool bRelative = pRelative? *pRelative == "true" : false;
+
+		CStr const *pOutputDirty = _Params.f_FindEqual("OutputDirty");
+
+		bool bOutputDirty = pOutputDirty ? *pOutputDirty == "true" : false;
 
 		CStr CurrentDir = CFile::fs_GetCurrentDirectory();
 
@@ -302,16 +316,20 @@ public:
 		;
 
 		bool bUsesDigest = UsesDigest.f_Load();
+		TCAtomic<bool> bAnyNeedsUpdating(false);
 
 		fg_ParallellForEach
 			(
 				Dependencies
-				, [this, bVerbose, bUsesDigest, &fConvertPath](CDependency const& _Dependency)
+				, [this, bVerbose, bUsesDigest, &fConvertPath, &bAnyNeedsUpdating](CDependency const& _Dependency)
 				{
 					CDependency const& Dependency = _Dependency;
 					TCAtomic<bool> bNeedsUpdating(false);
 					do
 					{
+						if (Dependency.f_AlreadyDirty())
+							break;
+
 //						fg_ParallellForEach // Thread pool implementation is too poor for now
 						fg_ForEach
 							(
@@ -414,7 +432,10 @@ public:
 						;
 
 					if (bNeedsUpdating)
+					{
+						bAnyNeedsUpdating.f_Exchange(true);
 						Dependency.f_NeedsUpdating();
+					}
 				}
 				, ThreadPool
 			)
@@ -422,6 +443,9 @@ public:
 
 		if (!pOneDir)
 			DConOut("Dependency check: Checked dependencies {fe1} ms\n", Clock.f_GetTime() * 1000.0);
+
+		if (bOutputDirty && bAnyNeedsUpdating.f_Load())
+			DConOut2("Dependency check: Some files were dirty\n");
 
 		return 0;
 	}
