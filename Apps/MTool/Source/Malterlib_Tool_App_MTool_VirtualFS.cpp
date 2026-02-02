@@ -273,15 +273,13 @@ public:
 			"      -cpp            - TargetFile will be written as a cpp file (the default).\n"
 			"    and optionally:\n"
 			"      -verbose        - Detailed information on all operations performed will be displayed.\n"
-			"      -odepend        - Output dependency in make format to file.\n"
 			"      -platform       - The target platform. Currently this only matters for -asm and 'macOS' and 'Linux' is supported\n"
-			"      -oidsdepend     - Output dependency in ids dependency format to file.\n"
+			"      -oidsdepend     - Output dependency in MalterlibDependency format to file.\n"
+			"      -odepfile       - Output dependency in gcc depfile format to file.\n"
 			"      -dest <Path>    - Path within VFS to prefix included files with\n"
 			"      -symbol <Name>  - The name of the exported symbol (decorated)\n"
-			"  <SourceFile> is the name of a registry file specifying the files to add\n";
-
-
-
+			"  <SourceFile> is the name of a registry file specifying the files to add\n"
+		;
 
 		bool bVerbose = false;
 		ETargetFormat TargetFormat = ETargetFormat_CPP;
@@ -289,9 +287,8 @@ public:
 		CStr TargetFilename;
 		CStr TargetFilenameCpp;
 		CStr DestPath;
-		CStr DependencyFile;
-		CStr DependencyContents;
 		CStr MalterlibDependencyFile;
+		CStr DepFile;
 		CStr Platform = "macOS";
 		NBuildSystem::CMalterlibDependencyTracker MalterlibDependencyTracker;
 
@@ -333,17 +330,6 @@ public:
 						return -1;
 					}
 				}
-				else if (CurArg.f_CmpNoCase("-odepend") == 0)
-				{
-					++iCurArg;
-					DependencyFile = _Params.f_GetValue(f_IntToStr(iCurArg), "");
-					if (DependencyFile.f_IsEmpty())
-					{
-						DConOutRaw("VirtualFS: No out file specified after -odepend flag\n");
-						DConOutRaw(sc_pHelpText);
-						return -1;
-					}
-				}
 				else if (CurArg.f_CmpNoCase("-oidsdepend") == 0)
 				{
 					++iCurArg;
@@ -351,6 +337,17 @@ public:
 					if (MalterlibDependencyFile.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No out file specified after -oidsdepend flag\n");
+						DConOutRaw(sc_pHelpText);
+						return -1;
+					}
+				}
+				else if (CurArg.f_CmpNoCase("-odepfile") == 0)
+				{
+					++iCurArg;
+					DepFile = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+					if (DepFile.f_IsEmpty())
+					{
+						DConOutRaw("VirtualFS: No out file specified after -odepfile flag\n");
 						DConOutRaw(sc_pHelpText);
 						return -1;
 					}
@@ -442,8 +439,6 @@ public:
 		MalterlibDependencyTracker.f_AddOutputFile(TargetFilename);
 		if (!TargetFilenameCpp.f_IsEmpty())
 			MalterlibDependencyTracker.f_AddOutputFile(TargetFilenameCpp);
-
-		DependencyContents += CStr::CFormat("dependencies: \\\n  {}") << SourceFilename;
 
 		CRegistryPreserveAllFull Source;
 		try
@@ -617,8 +612,6 @@ public:
 					VirtualFS.f_CreateDirectory(Dir);
 
 				MalterlibDependencyTracker.f_AddInputFile(SourceFile);
-
-				DependencyContents += CStr::CFormat(" \\\n  {}") << SourceFile;
 
 				VirtualFS.f_CopyFileToFS(SourceFile, AddPath);
 			}
@@ -889,30 +882,15 @@ public:
 			}
 		}
 
-		if (!DependencyFile.f_IsEmpty())
-		{
-			try
-			{
-				NFile::CFile::fs_CreateDirectory(CFile::fs_GetPath(DependencyFile));
-				DependencyContents += "\n";
-				NFile::CFile::fs_WriteStringToFile(CStr(DependencyFile), DependencyContents, false);
-			}
-			catch(NFile::CExceptionFile& _Ex)
-			{
-				DConOut("Failed to write dependency file file {}: {}\n", DependencyFile << _Ex.f_GetErrorStr());
-				return 1;
-			}
-		}
-
 		if (!MalterlibDependencyFile.f_IsEmpty())
 		{
 			try
 			{
-				MalterlibDependencyTracker.f_WriteDependencyFile(MalterlibDependencyFile);
+				MalterlibDependencyTracker.f_WriteDependencyFile(MalterlibDependencyFile, DepFile);
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write dependency file file {}: {}\n", DependencyFile << _Ex.f_GetErrorStr());
+				DConOut("Failed to write dependency file {}: {}\n", MalterlibDependencyFile << _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}

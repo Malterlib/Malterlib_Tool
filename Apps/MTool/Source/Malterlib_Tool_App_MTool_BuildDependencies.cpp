@@ -19,6 +19,8 @@ public:
 		if (!pOutputFile)
 			DError("No OutputFile specified");
 
+		CStr const *pDependencyFile = _Params.f_FindEqual("DependencyFile");
+
 		bool bUseHash = false;
 		bool bRelative = false;
 
@@ -111,7 +113,7 @@ public:
 			}
 		}
 
-		DependencyTracker.f_WriteDependencyFile(*pOutputFile);
+		DependencyTracker.f_WriteDependencyFile(*pOutputFile, pDependencyFile ? *pDependencyFile : CStr{});
 
 		return 0;
 	}
