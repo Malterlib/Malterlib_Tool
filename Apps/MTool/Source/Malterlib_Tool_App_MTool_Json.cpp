@@ -43,9 +43,12 @@ public:
 
 			HttpClientActor = fg_Construct(fg_Construct(), "HTTP Client Reader");
 
-			TCMap<CStr, CStr> Headers;
+			CHttpClientActor::CRequest Request;
+			Request.m_URL = SourcePath;
+			Request.m_Method = CHttpClientActor::EMethod_GET;
+			Request.m_Cookies = fg_Move(Cookies);
 
-			HttpClientActor(&CHttpClientActor::f_Request, CHttpClientActor::EMethod_GET, SourcePath, Headers, CByteVector{}, Cookies) > fg_Move(Contents.m_Promise) / [ContentsPromise = Contents.m_Promise]
+			HttpClientActor(&CHttpClientActor::f_SendRequest, fg_Move(Request)) > fg_Move(Contents.m_Promise) / [ContentsPromise = Contents.m_Promise]
 				(CHttpClientActor::CResult &&_Result)
 				{
 					if (_Result.m_StatusCode >= 300)
