@@ -5,7 +5,7 @@
 
 #include <Mib/Encoding/EJson>
 #include <Mib/Concurrency/ConcurrencyManager>
-#include <Mib/Web/Curl>
+#include <Mib/Web/HttpClient>
 
 class CTool_ReadJson : public CTool2
 {
@@ -24,7 +24,7 @@ public:
 		CCurrentActorScope ActorScope{fg_ConcurrencyThreadLocal(), WorkActor};
 
 		TCPromiseFuturePair<CStr> Contents;
-		TCActor<CCurlActor> CurlActor;
+		TCActor<CHttpClientActor> HttpClientActor;
 
 		if (SourcePath.f_StartsWith("https://") || SourcePath.f_StartsWith("http://"))
 		{
@@ -41,12 +41,12 @@ public:
 				}
 			}
 
-			CurlActor = fg_Construct(fg_Construct(), "Curl Reader");
+			HttpClientActor = fg_Construct(fg_Construct(), "HTTP Client Reader");
 
 			TCMap<CStr, CStr> Headers;
 
-			CurlActor(&CCurlActor::f_Request, CCurlActor::EMethod_GET, SourcePath, Headers, CByteVector{}, Cookies) > fg_Move(Contents.m_Promise) / [ContentsPromise = Contents.m_Promise]
-				(CCurlActor::CResult &&_Result)
+			HttpClientActor(&CHttpClientActor::f_Request, CHttpClientActor::EMethod_GET, SourcePath, Headers, CByteVector{}, Cookies) > fg_Move(Contents.m_Promise) / [ContentsPromise = Contents.m_Promise]
+				(CHttpClientActor::CResult &&_Result)
 				{
 					if (_Result.m_StatusCode >= 300)
 						ContentsPromise.f_SetException(DMibErrorInstance("Error status: {}: {}"_f << _Result.m_StatusCode << _Result.m_Body));
