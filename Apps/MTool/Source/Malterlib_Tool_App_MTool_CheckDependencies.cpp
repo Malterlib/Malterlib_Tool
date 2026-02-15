@@ -260,7 +260,7 @@ public:
 									uint64 Seconds;
 									uint64 Fraction;
 									CStr Digest;
-									aint nChars = (CStr::CParse("FileDigest {nfh} {nfh} {} ") >> Seconds >> Fraction >> Digest).f_Parse(Line, nParsed);
+									aint nChars = (CStrPtr::CParse("FileDigest {nfh} {nfh} {} ") >> Seconds >> Fraction >> Digest).f_Parse(Line, nParsed);
 
 									if (nParsed != 3)
 										DError("Invalid 'FileDigest' entry in dependency file");
@@ -283,7 +283,7 @@ public:
 									aint nParsed = 0;
 									uint64 Seconds;
 									uint64 Fraction;
-									aint nChars = (CStr::CParse("File {nfh} {nfh} ") >> Seconds >> Fraction).f_Parse(Line, nParsed);
+									aint nChars = (CStrPtr::CParse("File {nfh} {nfh} ") >> Seconds >> Fraction).f_Parse(Line, nParsed);
 
 									if (nParsed != 2)
 										DError("Invalid 'File' entry in dependency file");

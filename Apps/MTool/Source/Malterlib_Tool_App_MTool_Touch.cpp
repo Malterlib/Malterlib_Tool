@@ -244,7 +244,7 @@ public:
 	{
 		DScopeConOutTimer("DiffCopy");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
-        CStr SourceDir = fg_ForceStrUTF8(NFile::CFile::fs_GetPath(SourcePattern));
+        CStr SourceDir = NFile::CFile::fs_GetPath(SourcePattern);
 		CStr DestPath = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
 		CStr Touch = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("2", ""));
         bool bRecursive = _Params.f_GetValue("3", "1").f_ToInt() != 0;
@@ -352,7 +352,6 @@ DMibRuntimeClass(CTool, CTool_DiffCopy);
 class CTool_DiffReplace : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimer("DiffReplace");
@@ -364,15 +363,14 @@ public:
 		bool bRecursive = _Params.f_GetValue("5", "0").f_ToInt() != 0;
 		bool bAddBom = _Params.f_GetValue("6", "0").f_ToInt() != 0;
 		bool bQuiet = _Params.f_GetValue("7", "0").f_ToInt() != 0;
-		CStr SourceDir = fg_ForceStrUTF8(NFile::CFile::fs_GetPath(SourcePattern));
+		CStr SourceDir = NFile::CFile::fs_GetPath(SourcePattern);
 
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(SourcePattern, EFileAttrib_File, bRecursive);
 
 		mint nFiles = Files.f_GetLen();
 		bool bCopied = false;
-		for (mint i = 0; i < nFiles; ++i)
+		for (auto &FilePath : Files)
 		{
-			CStr FilePath = fg_ForceStrUTF8(Files[i]);
 			CStr RelativePath = FilePath.f_Extract(SourceDir.f_GetLen() + 1);
 			CStr FileDest = NFile::CFile::fs_AppendPath(DestPath, RelativePath);
 			int32 nTimes = 20 * 30; // 30 seconds

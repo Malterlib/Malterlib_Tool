@@ -37,7 +37,7 @@ public:
 			CAnsiStr ReplacementTextAnsi;
 			{
 				CStr ReplacementText = NFile::CFile::fs_ReadStringFromFile((CStr)ReplacementTextPath);
-				NSys::NStr::fg_SystemEncodeCodePageStr(ReplacementText, ReplacementTextAnsi, 10000, '?'); // Code page 10000 = Mac Roman
+				NStr::NPlatform::fg_SystemEncodeCodePageStr(ReplacementText, ReplacementTextAnsi, 10000, '?'); // Code page 10000 = Mac Roman
 			}
 
 			aint iSearchPos = SourceFileContents.f_Find(SearchString);
