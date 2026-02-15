@@ -270,7 +270,7 @@ public:
 			Mapping.m_From = iStream.f_GetKey() + "/...";
 			Mapping.m_To = *iStream + "/...";
 
-			DConOut("{} -> {}{\n}", Mapping.m_From << Mapping.m_To);
+			DConOut("{} -> {}{\n}", Mapping.m_From, Mapping.m_To);
 		}
 
 		CStr MappingName = fg_Format("Temp_{}", NCryptography::fg_GetRandomUuidString());

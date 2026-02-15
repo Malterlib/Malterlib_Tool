@@ -125,7 +125,7 @@ public:
 				auto DestTime = NFile::CFile::fs_GetWriteTime(DestFile);
 				if (DestTime != SourceTime)
 				{
-					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime << DestTime << NewestSourceFile << DestFile);
+					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime, DestTime, NewestSourceFile, DestFile);
 					CFile::fs_SetWriteTime(DestFile, SourceTime);
 				}
 			}
@@ -133,13 +133,13 @@ public:
 			{
 				NFile::CFile TempDst;
 				TempDst.f_Open(DestFile, EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_Read | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs | EFileOpen_DontTruncate);
-				DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile << DestFile);
+				DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile, DestFile);
 				TempDst.f_SetWriteTime(SourceTime);
 			}
 		}
 		catch (NFile::CExceptionFile const &_Error)
 		{
-			DConErrOut2("Copy new write failed: {}: {}{\n}", DestFile, _Error);
+			DConErrOut("Copy new write failed: {}: {}{\n}", DestFile, _Error);
 			return 1;
 		}
 		return 0;
@@ -183,7 +183,7 @@ public:
 				auto DestTime = NFile::CFile::fs_GetWriteTime(DestFile);
 				if (DestTime < SourceTime)
 				{
-					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime << DestTime << NewestSourceFile << DestFile);
+					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime, DestTime, NewestSourceFile, DestFile);
 					CFile::fs_SetWriteTime(DestFile, SourceTime);
 				}
 			}
@@ -191,13 +191,13 @@ public:
 			{
 				NFile::CFile TempDst;
 				TempDst.f_Open(DestFile, EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_Read | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs | EFileOpen_DontTruncate);
-				DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile << DestFile);
+				DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile, DestFile);
 				TempDst.f_SetWriteTime(SourceTime);
 			}
 		}
 		catch (NFile::CExceptionFile const &_Error)
 		{
-			DConErrOut2("Copy new write failed: {}: {}{\n}", DestFile, _Error);
+			DConErrOut("Copy new write failed: {}: {}{\n}", DestFile, _Error);
 			return 1;
 		}
 		return 0;
@@ -214,22 +214,22 @@ void fg_LogVerbose(CFile::EDiffCopyChange _Change, CStr const &_Source, CStr con
 		DConOut("Directory deleted: {}" DNewLine, _Destination);
 		break;
 	case CFile::EDiffCopyChange_DirectoryCreated:
-		DConOut("Directory created: {} -> {}" DNewLine, _Source << _Destination);
+		DConOut("Directory created: {} -> {}" DNewLine, _Source, _Destination);
 		break;
 	case CFile::EDiffCopyChange_FileDeleted:
 		DConOut("File deleted: {}" DNewLine, _Destination);
 		break;
 	case CFile::EDiffCopyChange_FileCreated:
-		DConOut("File created: {} -> {}" DNewLine, _Source << _Destination);
+		DConOut("File created: {} -> {}" DNewLine, _Source, _Destination);
 		break;
 	case CFile::EDiffCopyChange_FileChanged:
-		DConOut("File changed: {} -> {}" DNewLine, _Source << _Destination);
+		DConOut("File changed: {} -> {}" DNewLine, _Source, _Destination);
 		break;
 	case CFile::EDiffCopyChange_LinkDeleted:
 		DConOut("Link deleted: {}" DNewLine, _Destination);
 		break;
 	case CFile::EDiffCopyChange_LinkCreated:
-		DConOut("Link created: {} -> {} = {}" DNewLine, _Source << _Destination << _Link);
+		DConOut("Link created: {} -> {} = {}" DNewLine, _Source, _Destination, _Link);
 		break;
 	case CFile::EDiffCopyChange_NoChange:
 		break;
@@ -281,7 +281,7 @@ public:
 				)
 			{
 				if (!bQuiet)
-					DConOut("{} -> {}" DNewLine, SourcePattern << FullDestPath);
+					DConOut("{} -> {}" DNewLine, SourcePattern, FullDestPath);
 				bCopied = true;
 			}
 			return 0;
@@ -324,7 +324,7 @@ public:
 				)
 			{
 				if (!bQuiet)
-					DConOut("{} -> {}" DNewLine, FilePath << FileDest);
+					DConOut("{} -> {}" DNewLine, FilePath, FileDest);
 				bCopied = true;
 			}
 		}
@@ -399,7 +399,7 @@ public:
 			if (NFile::CFile::fs_CopyFileDiff(Data, FileDest, NTime::CTime::fs_NowUTC()))
 			{
 				if (!bQuiet)
-					DConOut("{} -> {}" DNewLine, FilePath << FileDest);
+					DConOut("{} -> {}" DNewLine, FilePath, FileDest);
 				bCopied = true;
 			}
 		}
@@ -488,7 +488,7 @@ public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Test = NMib::NCryptography::fg_GetRandomUuidString();
-		DConOut(str_utf16("*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯{\n}"), 0);
+		DConOut("*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯{\n}");
 		for (int i = 0; i < 16; ++i)
 		{
 			NMib::NSys::fg_Thread_Sleep(0.001f);

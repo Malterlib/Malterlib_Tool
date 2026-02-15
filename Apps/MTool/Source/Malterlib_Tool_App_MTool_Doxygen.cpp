@@ -182,7 +182,7 @@ public:
 				}
 				, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 				{
-					DMibConOut2("Apple Inc. version cctools-1010.6\n");
+					DMibConOut("Apple Inc. version cctools-1010.6\n");
 					return 0;
 				}
 			)
@@ -229,7 +229,7 @@ public:
 
 					if (Registry.f_GetChild("-V"))
 					{
-						DMibConOut2("Apple Inc. version cctools-1010.6\n");
+						DMibConOut("Apple Inc. version cctools-1010.6\n");
 						return 0;
 					}
 
@@ -509,7 +509,7 @@ public:
 						LaunchParams.f_Insert(DoxygenConfigFile);
 					}
 
-					//DConOut2("Launching Doxygen at '{}' with: \n{}\n", CFile::fs_GetPath(m_OutputDir), LaunchParams);
+					//DConOut("Launching Doxygen at '{}' with: \n{}\n", CFile::fs_GetPath(m_OutputDir), LaunchParams);
 
 					CProcessLaunchParams Params = CProcessLaunchParams::fs_LaunchExecutable
 						(

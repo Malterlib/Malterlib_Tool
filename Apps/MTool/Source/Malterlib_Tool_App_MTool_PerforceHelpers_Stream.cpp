@@ -229,7 +229,7 @@ public:
 				Mapping.m_From = _From;
 				Mapping.m_To = _To;
 
-				DConOut("{} -> {}{\n}", Mapping.m_From << Mapping.m_To);
+				DConOut("{} -> {}{\n}", Mapping.m_From, Mapping.m_To);
 			}
 		;
 
@@ -417,7 +417,7 @@ public:
 				if (pParents)
 				{
 					MappedStreams[Stream] = *pParents->f_FindSmallest();
-//					DConOut("{} -> {}\n", Stream << *pParents->f_FindSmallest());
+//					DConOut("{} -> {}\n", Stream, *pParents->f_FindSmallest());
 					bFound = true;
 					break;
 				}
@@ -705,7 +705,7 @@ public:
 				{
 					for (auto &Error : Errors)
 					{
-						DConErrOut("{}: {}\n", Error.m_Path << Error.m_Error);
+						DConErrOut("{}: {}\n", Error.m_Path, Error.m_Error);
 					}
 				}
 				if (!IntegrateResult.f_IsEmpty())

@@ -132,7 +132,7 @@ public:
 					if (Now > NextUpdate)
 					{
 						if (_TotalBytes > 0)
-							DConOut("{sj12} bytes synced ({fe1} %){\n}", _SyncedBytes << (fp64(_SyncedBytes) / fp64(_TotalBytes)) * 100.0);
+							DConOut("{sj12} bytes synced ({fe1} %){\n}", _SyncedBytes, (fp64(_SyncedBytes) / fp64(_TotalBytes)) * 100.0);
 						else
 							DConOut("{sj12} bytes synced{\n}", _SyncedBytes);
 
@@ -273,7 +273,7 @@ public:
 
 		CEvent FinishedEvent;
 
-//		DConOut("Executing: {} {}\n", ClientPath << Params);
+//		DConOut("Executing: {} {}\n", ClientPath, Params);
 
 		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
 			(

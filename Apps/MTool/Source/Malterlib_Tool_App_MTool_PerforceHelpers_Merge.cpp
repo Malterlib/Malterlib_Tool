@@ -225,7 +225,7 @@ public:
 				for (auto iStream = Streams.f_GetIterator(); iStream; ++iStream, ++Number)
 				{
 					CPerforceClient::CStream Stream = Functions.f_GetStreamCached(*iStream);
-					DConOut("\t{}) //{}/{}{\n}", Number << CPerforceFunctions::fs_GetDepot(*iStream) << Stream.m_Name);
+					DConOut("\t{}) //{}/{}{\n}", Number, CPerforceFunctions::fs_GetDepot(*iStream), Stream.m_Name);
 				}
 
 				DConOut("\ta) All{\n}", 0);
@@ -556,7 +556,7 @@ public:
 
 							for (auto &Error : Errors)
 							{
-								DConErrOut("{}: {}", Error.m_Path << Error.m_Error);
+								DConErrOut("{}: {}", Error.m_Path, Error.m_Error);
 							}
 
 							if (!MustSync.f_IsEmpty())
@@ -577,9 +577,9 @@ public:
 						NewIntegrationPairs.f_Insert(Pair);
 						DConOut("{}{\n}", (Pair.m_bCopy ? "Copy" : "Merge"));
 						//DConOut("\tFrom\t\t{}{\n}", Pair.m_From);
-						DConOut("\tFrom\t\t//{}/{}{\n}", CPerforceFunctions::fs_GetDepot(Pair.m_From) << FromStream.m_Name);
+						DConOut("\tFrom\t\t//{}/{}{\n}", CPerforceFunctions::fs_GetDepot(Pair.m_From), FromStream.m_Name);
 						//DConOut("\tTo\t\t\t{}{\n}", Pair.m_To);
-						DConOut("\tTo\t\t\t//{}/{}{\n}", CPerforceFunctions::fs_GetDepot(Pair.m_To) << ToStream.m_Name);
+						DConOut("\tTo\t\t\t//{}/{}{\n}", CPerforceFunctions::fs_GetDepot(Pair.m_To), ToStream.m_Name);
 
 						if (Actions.f_IsEmpty())
 						{
@@ -680,7 +680,7 @@ public:
 											//	DConOut("\t\t{} - EXCLUDED\n", IntegrateFrom);
 										}
 										//else
-										//	DConOut("\t\t{} - EXCLUDED - {}\n", IntegrateFrom << pClient->f_NoThrow().f_GetLastError().f_Replace(IntegrateFrom, ""));
+										//	DConOut("\t\t{} - EXCLUDED - {}\n", IntegrateFrom, pClient->f_NoThrow().f_GetLastError().f_Replace(IntegrateFrom, ""));
 
 										++nDoneIntegrations;
 										pfp32 LastDisplayValue = LastDisplay.f_Load();
@@ -879,9 +879,9 @@ public:
 							for (auto iAction = Actions.f_GetIterator(); iAction; ++iAction)
 							{
 								if (iAction.f_GetKey() == CPerforceClient::EAction_Add)
-									DConOut("\t{}\t\t\t{} files{\n}", CPerforceClient::fs_ActionToStr(iAction.f_GetKey()) << *iAction);
+									DConOut("\t{}\t\t\t{} files{\n}", CPerforceClient::fs_ActionToStr(iAction.f_GetKey()), *iAction);
 								else
-									DConOut("\t{}\t\t{} files{\n}", CPerforceClient::fs_ActionToStr(iAction.f_GetKey()) << *iAction);
+									DConOut("\t{}\t\t{} files{\n}", CPerforceClient::fs_ActionToStr(iAction.f_GetKey()), *iAction);
 							}
 
 							DConOut("{\n}{}", FullCommentListDisplay);

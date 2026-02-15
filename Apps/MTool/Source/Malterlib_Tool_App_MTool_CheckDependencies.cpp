@@ -348,14 +348,14 @@ public:
 										if (bChanged)
 										{
 											if (bVerbose)
-												DConOut("Dependency check: File Timestamp ({}): {} != {}\n", File.m_Path << File.m_Timestamp << WriteTime);
+												DConOut("Dependency check: File Timestamp ({}): {} != {}\n", File.m_Path, File.m_Timestamp, WriteTime);
 											bNeedsUpdating = true;
 										}
 									}
 									catch (CExceptionFile const& _Exception)
 									{
 										if (bVerbose)
-											DConOut("Dependency check: Exception reading file write time({}): {}\n", File.m_Path << _Exception.f_GetErrorStr());
+											DConOut("Dependency check: Exception reading file write time({}): {}\n", File.m_Path, _Exception.f_GetErrorStr());
 										bNeedsUpdating = true;
 									}
 								}
@@ -378,7 +378,7 @@ public:
 										if (Directory.m_Timestamp != WriteTime)
 										{
 											if (bVerbose)
-												DConOut("Dependency check: Directory Timestamp ({}): {} != {}\n", Directory.m_Path << Directory.m_Timestamp << WriteTime);
+												DConOut("Dependency check: Directory Timestamp ({}): {} != {}\n", Directory.m_Path, Directory.m_Timestamp, WriteTime);
 											bNeedsUpdating = true;
 											break;
 										}
@@ -386,7 +386,7 @@ public:
 									catch (CExceptionFile const& _Exception)
 									{
 										if (bVerbose)
-											DConOut("Dependency check: Exception reading directory write time({}): {}\n", Directory.m_Path << _Exception.f_GetErrorStr());
+											DConOut("Dependency check: Exception reading directory write time({}): {}\n", Directory.m_Path, _Exception.f_GetErrorStr());
 										bNeedsUpdating = true;
 										break;
 									}
@@ -419,7 +419,7 @@ public:
 							if (Files != Directory.m_FoundFiles)
 							{
 								if (bVerbose)
-									DConOut("Dependency check: Found files differ ({}): {} != {}\n", Directory.m_Path << Files.f_GetLen() << Directory.m_FoundFiles.f_GetLen());
+									DConOut("Dependency check: Found files differ ({}): {} != {}\n", Directory.m_Path, Files.f_GetLen(), Directory.m_FoundFiles.f_GetLen());
 								bNeedsUpdating = true;
 								break;
 							}
@@ -445,7 +445,7 @@ public:
 			DConOut("Dependency check: Checked dependencies {fe1} ms\n", Clock.f_GetTime() * 1000.0);
 
 		if (bOutputDirty && bAnyNeedsUpdating.f_Load())
-			DConOut2("Dependency check: Some files were dirty\n");
+			DConOut("Dependency check: Some files were dirty\n");
 
 		return 0;
 	}

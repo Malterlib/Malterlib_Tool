@@ -369,22 +369,22 @@ public:
 											DConOut("Directory deleted: {}" DNewLine, _Destination);
 											break;
 										case CFile::EDiffCopyChange_DirectoryCreated:
-											DConOut("Directory created: {} -> {}" DNewLine, _Source << _Destination);
+											DConOut("Directory created: {} -> {}" DNewLine, _Source, _Destination);
 											break;
 										case CFile::EDiffCopyChange_FileDeleted:
 											DConOut("File deleted: {}" DNewLine, _Destination);
 											break;
 										case CFile::EDiffCopyChange_FileCreated:
-											DConOut("File created: {} -> {}" DNewLine, _Source << _Destination);
+											DConOut("File created: {} -> {}" DNewLine, _Source, _Destination);
 											break;
 										case CFile::EDiffCopyChange_FileChanged:
-											DConOut("File changed: {} -> {}" DNewLine, _Source << _Destination);
+											DConOut("File changed: {} -> {}" DNewLine, _Source, _Destination);
 											break;
 										case CFile::EDiffCopyChange_LinkDeleted:
 											DConOut("Link deleted: {}" DNewLine, _Destination);
 											break;
 										case CFile::EDiffCopyChange_LinkCreated:
-											DConOut("Link created: {} -> {} = {}" DNewLine, _Source << _Destination << _Link);
+											DConOut("Link created: {} -> {} = {}" DNewLine, _Source, _Destination, _Link);
 											break;
 										case CFile::EDiffCopyChange_NoChange:
 											break;
@@ -396,7 +396,7 @@ public:
 							)
 						)
 					{
-						DConOut("{} -> {}" DNewLine, _SourceFile << FullDestination);
+						DConOut("{} -> {}" DNewLine, _SourceFile, FullDestination);
 					}
 					if (bHash)
 						HashCache.f_SaveToFile(Destination + "/Files.hashes");
@@ -430,7 +430,7 @@ public:
 			{
 				CStr SubPath = CFile::fs_GetPath(FoundFile.m_Path.f_Extract(BasePathLen));
 				if (bVerbose)
-					DConOut("Wildcard found : {} in {}" DNewLine, FoundFile.m_Path << SubPath);
+					DConOut("Wildcard found : {} in {}" DNewLine, FoundFile.m_Path, SubPath);
 
 				fCopySourceFile(FoundFile.m_Path, SubPath);
 			}

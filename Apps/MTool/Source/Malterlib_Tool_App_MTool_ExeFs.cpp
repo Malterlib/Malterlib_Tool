@@ -227,7 +227,7 @@ public:
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(DestPath, SourceName);
 
 				if (bVerbose)
-					DConOut("Adding '{}' as '{}'" DNewLine, lSourceFiles[i] << AddPath);
+					DConOut("Adding '{}' as '{}'" DNewLine, lSourceFiles[i], AddPath);
 
 				++nFileAdded;
 
@@ -287,7 +287,7 @@ public:
 
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(DestPath, SourceName);
 
-				DConOut("File '{}' Extracted as '{}'" DNewLine, Files[i] << AddPath);
+				DConOut("File '{}' Extracted as '{}'" DNewLine, Files[i], AddPath);
 
 				CStr Dir = NFile::CFile::fs_GetPath(AddPath);
 				if (!Dir.f_IsEmpty())

@@ -450,7 +450,7 @@ public:
 		}
 		catch(NFile::CExceptionFile& _Ex)
 		{
-			DConOut("Failed to read source file {}: {}\n", SourceFilename << _Ex.f_GetErrorStr());
+			DConOut("Failed to read source file {}: {}\n", SourceFilename, _Ex.f_GetErrorStr());
 			return 1;
 		}
 
@@ -479,7 +479,7 @@ public:
 
 				if (Inc.m_Pattern.f_IsEmpty())
 				{
-					DConOut(DMibPFileLineColumnFormat " error: No Pattern specified in include block{\n}", Inc.m_Location.m_File << Inc.m_Location.m_Line << Inc.m_Location.m_Column);
+					DConOut(DMibPFileLineColumnFormat " error: No Pattern specified in include block{\n}", Inc.m_Location.m_File, Inc.m_Location.m_Line, Inc.m_Location.m_Column);
 					return 1;
 				}
 
@@ -541,7 +541,7 @@ public:
 			;++CurInclude)
 		{
 			if (bVerbose)
-				DConOut("{}{}\n", CurInclude->m_Pattern << (CurInclude->m_bRecurse ? " (Recursive)" : ""));
+				DConOut("{}{}\n", CurInclude->m_Pattern, (CurInclude->m_bRecurse ? " (Recursive)" : ""));
 
 			TCVector<CStr> lSourceFiles = NFile::CFile::fs_FindFiles(CurInclude->m_Pattern, EFileAttrib_File | EFileAttrib_Link, CurInclude->m_bRecurse, false);
 
@@ -550,7 +550,10 @@ public:
 				DConOut
 					(
 						DMibPFileLineColumnFormat " error: No files found for pattern '{}'{\n}"
-						, CurInclude->m_Location.m_File << CurInclude->m_Location.m_Line << CurInclude->m_Location.m_Column << CurInclude->m_Pattern
+						, CurInclude->m_Location.m_File
+						, CurInclude->m_Location.m_Line
+						, CurInclude->m_Location.m_Column
+						, CurInclude->m_Pattern
 					)
 				;
 				return 1;
@@ -603,7 +606,7 @@ public:
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(CurInclude->m_Destination, SourceName);
 
 				if (bVerbose)
-					DConOut("Adding '{}' as '{}'\n", SourceFile << AddPath);
+					DConOut("Adding '{}' as '{}'\n", SourceFile, AddPath);
 
 				++nFilesAdded;
 
@@ -690,7 +693,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp, _Ex.f_GetErrorStr());
 				return 1;
 			}
 
@@ -704,7 +707,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target OBJ file {}: {}\n", TargetFilename << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target OBJ file {}: {}\n", TargetFilename, _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}
@@ -749,7 +752,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp, _Ex.f_GetErrorStr());
 				return 1;
 			}
 
@@ -763,7 +766,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target BIN file {}: {}\n", TargetFilename << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target BIN file {}: {}\n", TargetFilename, _Ex.f_GetErrorStr());
 				return 1;
 			}
 
@@ -803,7 +806,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target BIN file {}: {}\n", TargetFilename << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target BIN file {}: {}\n", TargetFilename, _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}
@@ -877,7 +880,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp << _Ex.f_GetErrorStr());
+				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp, _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}
@@ -890,7 +893,7 @@ public:
 			}
 			catch(NFile::CExceptionFile& _Ex)
 			{
-				DConOut("Failed to write dependency file {}: {}\n", MalterlibDependencyFile << _Ex.f_GetErrorStr());
+				DConOut("Failed to write dependency file {}: {}\n", MalterlibDependencyFile, _Ex.f_GetErrorStr());
 				return 1;
 			}
 		}

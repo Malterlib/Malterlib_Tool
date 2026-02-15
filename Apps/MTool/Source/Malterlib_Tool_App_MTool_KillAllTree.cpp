@@ -113,11 +113,11 @@ public:
 				if (bFound)
 				{
 					TerminateProcess(hProcess, 44);
-					DConOut("{sf ,sj*}Killed process id {}: {} Parent: {}" DNewLine, "" << _Depth*4 << m_Process << m_FileName << m_ParentID);
+					DConOut("{sf ,sj*}Killed process id {}: {} Parent: {}" DNewLine, "", _Depth*4, m_Process, m_FileName, m_ParentID);
 				}
 				else
 				{
-					DConOut("{sf ,sj*}Did NOT kill process id {}: {} Parent: {}" DNewLine, "" << _Depth*4 << m_Process << m_FileName << m_ParentID);
+					DConOut("{sf ,sj*}Did NOT kill process id {}: {} Parent: {}" DNewLine, "", _Depth*4, m_Process, m_FileName, m_ParentID);
 				}
 				CloseHandle(hProcess);
 			}
@@ -131,7 +131,7 @@ public:
 		}
 		void f_TraceTree(int32 _Depth = 0)
 		{
-			DConOut("{sf ,sj*}Process id {}: {} Parent: {}" DNewLine, "" << _Depth*4 << m_Process << m_FileName << m_ParentID);
+			DConOut("{sf ,sj*}Process id {}: {} Parent: {}" DNewLine, "", _Depth*4, m_Process, m_FileName, m_ParentID);
 			DLinkDS_Iter(CProcessEntry, m_Link) Iter = m_Children;
 			while (Iter)
 			{

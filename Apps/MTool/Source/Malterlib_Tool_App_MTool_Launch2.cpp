@@ -443,7 +443,7 @@ private:
 				DMibNeverGetHere(Iter->m_Unit);
 				break;
 			}
-			DConOut("{a-,sj*} = {fe2} {}{\n}", Name << _NameLen << Value << Unit);
+			DConOut("{a-,sj*} = {fe2} {}{\n}", Name, _NameLen, Value, Unit);
 		}
 
 	}
@@ -477,7 +477,7 @@ private:
 				if (Options.m_bEchoCommand && !pProc->m_bEchoedCommand)
 				{
 					pProc->m_bEchoedCommand = true;
-					DConOut("\n<-------------------\n{} {}\n\n", Options.m_Target << Params);
+					DConOut("\n<-------------------\n{} {}\n\n", Options.m_Target, Params);
 				}
 
 			}
@@ -495,7 +495,7 @@ private:
 					if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
 					{
 						DLock(m_ConOutLock);
-						DConOut("error: Failed to launch #{} {}: {}", Options.m_iLaunch << Options.m_Target << _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
+						DConOut("error: Failed to launch #{} {}: {}", Options.m_iLaunch, Options.m_Target, _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
 						pProc->m_ReturnValue = 255u;
 					}
 					else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
@@ -508,7 +508,7 @@ private:
 
 						if (Options.m_bTime)
 						{
-							DConOut("Launch #{} {} took {} seconds to run." DNewLine, Options.m_iLaunch << Options.m_Target << _TimeSinceLaunch);
+							DConOut("Launch #{} {} took {} seconds to run." DNewLine, Options.m_iLaunch, Options.m_Target, _TimeSinceLaunch);
 						}
 
 						if (Options.m_bStats)
@@ -529,7 +529,7 @@ private:
 						uint32 ThisValue = _StateChange.f_Get<EProcessLaunchState_Exited>();
 						if (ThisValue != 0)
 						{
-							DConOut("error: Launch #{} {} exited with {}" DNewLine,  Options.m_iLaunch << Options.m_Target << ThisValue);
+							DConOut("error: Launch #{} {} exited with {}" DNewLine,  Options.m_iLaunch, Options.m_Target, ThisValue);
 						}
 						pProc->m_ReturnValue = ThisValue;
 						if (Options.m_bEchoCommand)
@@ -718,7 +718,7 @@ private:
 						;PIter
 						;++PIter)
 					{
-						DConOut("\tParam {}: {}" DNewLine, iParam << *PIter);
+						DConOut("\tParam {}: {}" DNewLine, iParam, *PIter);
 						++iParam;
 					}
 
@@ -738,7 +738,7 @@ private:
 							;RIter
 							;++RIter)
 						{
-							DConOut("\t\tRoot {} = {}" DNewLine, RIter.f_GetKey() << *RIter);
+							DConOut("\t\tRoot {} = {}" DNewLine, RIter.f_GetKey(), *RIter);
 						}
 					}
 					DConOut("\tCPUUsage: {}" DNewLine, _CurLaunch.m_CPUUsage);

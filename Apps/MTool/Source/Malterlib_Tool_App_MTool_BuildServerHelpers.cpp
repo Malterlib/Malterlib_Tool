@@ -195,7 +195,7 @@ public:
 
 				RemoteFile.m_RemoteFiles.f_Insert(OutputDir);
 
-				DConOut("Put on build server store: {} -> {}" DNewLine, *iFile << OutputDir);
+				DConOut("Put on build server store: {} -> {}" DNewLine, *iFile, OutputDir);
 			}
 
 		}
@@ -244,7 +244,7 @@ public:
 
 		for (auto iFile = FilesCopied.f_GetIterator(); iFile; ++iFile)
 		{
-			DConOut("Get from build server store: {} -> {}" DNewLine, iFile.f_GetKey() << *iFile);
+			DConOut("Get from build server store: {} -> {}" DNewLine, iFile.f_GetKey(), *iFile);
 		}
 
 		return 0;
@@ -355,7 +355,7 @@ public:
 						RemoteFile.m_RemoteFiles.f_Insert(RemoteFileName);
 
 						if (!bQuiet)
-							DConOut("Put on build server store (Tool): {} -> {}" DNewLine, *iFile << RemoteFileName);
+							DConOut("Put on build server store (Tool): {} -> {}" DNewLine, *iFile, RemoteFileName);
 
 						{
 							auto pExtraUpload = ExtraUploads.f_FindEqual(*iFile);
@@ -367,7 +367,7 @@ public:
 								ExtraRemoteFile.m_RemoteFiles.f_Insert(ToUpload);
 								ExtraToUpload.f_Insert(ToUpload);
 								if (!bQuiet)
-									DConOut("Put on build server store (Tool): {} -> {}" DNewLine, *pExtraUpload << ToUpload);
+									DConOut("Put on build server store (Tool): {} -> {}" DNewLine, *pExtraUpload, ToUpload);
 							}
 						}
 					}
@@ -393,7 +393,7 @@ public:
 			{
 /*				for (auto iFile = RemoteFiles.f_GetIterator(); iFile; ++iFile)
 				{
-					DConOut("Copying file to build server: {} -> {}" DNewLine, iFile->m_LocalFile << iFile->m_RemoteFile);
+					DConOut("Copying file to build server: {} -> {}" DNewLine, iFile->m_LocalFile, iFile->m_RemoteFile);
 				}*/
 
 				BuildServer.f_PutFiles(RemoteFiles);
@@ -442,7 +442,7 @@ public:
 				if (!ChangedFiles.f_FindEqual(iFile.f_GetKey()))
 					continue;
 				CStr TempPath = CFile::fs_GetPath(FullPath);
-				DConOut("Getting changed files from build server: {} -> {}" DNewLine, iFile.f_GetKey() << TempPath);
+				DConOut("Getting changed files from build server: {} -> {}" DNewLine, iFile.f_GetKey(), TempPath);
 
 				TCMap<CStr, CStr> FilesCopied = BuildServer.f_GetFiles(iFile.f_GetKey(), TempPath, false);
 				Cleanups.f_Insert
@@ -459,7 +459,7 @@ public:
 
 				{
 					for (auto iFile = FilesCopied.f_GetIterator(); iFile; ++iFile)
-						DConOut("Get from build server store (Tool): {} -> {}" DNewLine, iFile.f_GetKey() << *iFile);
+						DConOut("Get from build server store (Tool): {} -> {}" DNewLine, iFile.f_GetKey(), *iFile);
 				}
 
 				if
@@ -479,7 +479,7 @@ public:
 					)
 				{
 					if (!bQuiet)
-						DConOut("Copied back: {} -> {}" DNewLine, FullPath << iFile->m_Path);
+						DConOut("Copied back: {} -> {}" DNewLine, FullPath, iFile->m_Path);
 				}
 			}
 		}
@@ -507,7 +507,7 @@ public:
 		CUniversallyUniqueIdentifier UniqueID(EUniversallyUniqueIdentifierGenerate_Random);
 		CStr FileName = UniqueID.f_GetAsString(EUniversallyUniqueIdentifierFormat_AlphaNum);
 
-		DConOut("Adding file '{}' to directory: {}" DNewLine, FileName << Directory);
+		DConOut("Adding file '{}' to directory: {}" DNewLine, FileName, Directory);
 
 		CFile::fs_CreateDirectory(Directory + "/" + FileName);
 		CFile File;

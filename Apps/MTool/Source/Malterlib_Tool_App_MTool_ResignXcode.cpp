@@ -239,7 +239,7 @@ public:
 								continue;
 							}
 
-							DMibConOut2("{}: {}\n", SourcePath, Entitlements);
+							DMibConOut("{}: {}\n", SourcePath, Entitlements);
 							CFile::fs_WriteStringToFile(TempEntitlementsFile, Entitlements, false);
 							Params = {"--entitlements", TempEntitlementsFile};
 						}
@@ -281,7 +281,7 @@ public:
 								continue;
 							}
 
-							DMibConOut2("{}: {}\n", SourcePath, Entitlements);
+							DMibConOut("{}: {}\n", SourcePath, Entitlements);
 							CFile::fs_WriteStringToFile(TempEntitlementsFile, Entitlements, false);
 							Params = {"--entitlements", TempEntitlementsFile};
 						}

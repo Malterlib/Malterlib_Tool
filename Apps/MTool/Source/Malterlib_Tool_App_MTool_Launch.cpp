@@ -279,7 +279,7 @@ public:
 								if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
 								{
 									CStr Params = Program.f_GetParams();
-									DConOut("error: {} failed to launch: {}", Params << _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
+									DConOut("error: {} failed to launch: {}", Params, _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
 									ReturnValue = fg_Max(ReturnValue, 255u);
 								}
 								else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
@@ -290,7 +290,7 @@ public:
 									{
 										CStr Params = Program.f_GetParams();
 										DLock(ConOutLock);
-										DConOut("error: {} exited with {}" DNewLine, Params << ThisValue);
+										DConOut("error: {} exited with {}" DNewLine, Params, ThisValue);
 										ReturnValue = fg_Max(ReturnValue, ThisValue);
 									}
 									fg_OutputWholeLines(*pStdOutBuffer, EProcessLaunchOutputType_StdOut, Program.m_bFilterP4, true);
@@ -440,7 +440,7 @@ public:
 				CStr Root = fg_GetStrSep(CurRootStr, "=");
 				LaunchParams.m_SandboxRoots[Root] = fg_GetStrSep(CurRootStr, "=");
 
-				DConOut("Mapping: {} : {}" DNewLine, Root << LaunchParams.m_SandboxRoots[Root]);
+				DConOut("Mapping: {} : {}" DNewLine, Root, LaunchParams.m_SandboxRoots[Root]);
 
 				++iRoot;
 			}

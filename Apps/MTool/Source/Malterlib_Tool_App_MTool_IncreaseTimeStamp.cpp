@@ -166,9 +166,9 @@ public:
 					(
 						"Old version: {}.{} ({}.{})" DNewLine
 						, pHeader->OptionalHeader.MajorOperatingSystemVersion
-						<< pHeader->OptionalHeader.MinorOperatingSystemVersion
-						<< pHeader->OptionalHeader.MajorSubsystemVersion
-						<< pHeader->OptionalHeader.MinorSubsystemVersion
+						, pHeader->OptionalHeader.MinorOperatingSystemVersion
+						, pHeader->OptionalHeader.MajorSubsystemVersion
+						, pHeader->OptionalHeader.MinorSubsystemVersion
 					)
 				;
 #endif
@@ -181,9 +181,9 @@ public:
 					(
 						"New version: {}.{} ({}.{})" DNewLine
 						, pHeader->OptionalHeader.MajorOperatingSystemVersion
-						<< pHeader->OptionalHeader.MinorOperatingSystemVersion
-						<< pHeader->OptionalHeader.MajorSubsystemVersion
-						<< pHeader->OptionalHeader.MinorSubsystemVersion
+						, pHeader->OptionalHeader.MinorOperatingSystemVersion
+						, pHeader->OptionalHeader.MajorSubsystemVersion
+						, pHeader->OptionalHeader.MinorSubsystemVersion
 					)
 				;
 #endif
@@ -204,9 +204,9 @@ public:
 					(
 						"Old version: {}.{} ({}.{})" DNewLine
 						, pHeader->OptionalHeader.MajorOperatingSystemVersion
-						<< pHeader->OptionalHeader.MinorOperatingSystemVersion
-						<< pHeader->OptionalHeader.MajorSubsystemVersion
-						<< pHeader->OptionalHeader.MinorSubsystemVersion
+						, pHeader->OptionalHeader.MinorOperatingSystemVersion
+						, pHeader->OptionalHeader.MajorSubsystemVersion
+						, pHeader->OptionalHeader.MinorSubsystemVersion
 					)
 				;
 #endif
@@ -219,9 +219,9 @@ public:
 					(
 						"New version: {}.{} ({}.{})" DNewLine
 						, pHeader->OptionalHeader.MajorOperatingSystemVersion
-						<< pHeader->OptionalHeader.MinorOperatingSystemVersion
-						<< pHeader->OptionalHeader.MajorSubsystemVersion
-						<< pHeader->OptionalHeader.MinorSubsystemVersion
+						, pHeader->OptionalHeader.MinorOperatingSystemVersion
+						, pHeader->OptionalHeader.MajorSubsystemVersion
+						, pHeader->OptionalHeader.MinorSubsystemVersion
 					)
 				;
 #endif

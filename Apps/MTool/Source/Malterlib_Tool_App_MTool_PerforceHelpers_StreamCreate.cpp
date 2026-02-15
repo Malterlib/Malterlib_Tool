@@ -104,7 +104,7 @@ public:
 		}
 
 		DConOut("Created:\t{}{\n}", CleanName);
-		DConOut("\t\t//{}/{}{\n}", CPerforceFunctions::fs_GetDepot(CleanName) << _StreamName);
+		DConOut("\t\t//{}/{}{\n}", CPerforceFunctions::fs_GetDepot(CleanName), _StreamName);
 
 		NewStream.m_Name = _StreamName;
 		NewStream.m_Parent = _StreamParent;
@@ -285,7 +285,7 @@ public:
 
 				CStr ImportDepot = CPerforceFunctions::fs_GetDepot(_Stream);
 
-				DConOut("Create new stream for import (from, to):{\n}\t//{}/{}{\n}\t//{}/{}{\n}", ImportDepot << ImportStream.m_Name << ImportDepot << NewName);
+				DConOut("Create new stream for import (from, to):{\n}\t//{}/{}{\n}\t//{}/{}{\n}", ImportDepot, ImportStream.m_Name, ImportDepot, NewName);
 
 				bool bOwnedParent = ParentOwnedStreams.m_StreamMap.f_FindEqual(_Stream);
 
@@ -486,7 +486,7 @@ public:
 			else if (_bJustUpdate)
 				NewStream.m_Paths.f_Insert(*iPath);
 			//else
-			//	DConOut("Type: {} Path: {} DepotPath: {}{\n}", Type << Path << DepotPath);
+			//	DConOut("Type: {} Path: {} DepotPath: {}{\n}", Type, Path, DepotPath);
 			//NewStream.m_Paths.f_Insert(*iPath);
 		}
 
@@ -619,7 +619,7 @@ public:
 		NewStream.m_Description = Registry.f_GenerateStr();
 
 #if 0
-		DConOut("//{}/{}:{\n}", CPerforceFunctions::fs_GetDepot(_StreamParent) << _StreamName);
+		DConOut("//{}/{}:{\n}", CPerforceFunctions::fs_GetDepot(_StreamParent), _StreamName);
 		DConOut("Desc:\n{}", NewStream.m_Description);
 
 		for (auto iPath = NewStream.m_Paths.f_GetIterator(); iPath; ++iPath)
@@ -684,7 +684,7 @@ public:
 
 		DConOut("Parent stream:{\n}", ParentStreamName);
 		DConOut("\t{}{\n}", ParentStreamName);
-		DConOut("\t//{}/{}{\n}", CPerforceFunctions::fs_GetDepot(ParentStreamName) << ParentStream.m_Name);
+		DConOut("\t//{}/{}{\n}", CPerforceFunctions::fs_GetDepot(ParentStreamName), ParentStream.m_Name);
 
 		CBlockingStdInReader StdInReader;
 
@@ -856,7 +856,7 @@ public:
 			if (StreamInfo.m_Parent.f_IsEmpty() || StreamInfo.m_Parent == "none")
 				continue;
 
-			DConOut("Checking stream: {}/{}{\n}", Functions.fs_GetDepot(Stream) << StreamInfo.m_Name);
+			DConOut("Checking stream: {}/{}{\n}", Functions.fs_GetDepot(Stream), StreamInfo.m_Name);
 
 			CStr DestinationWorkspace = _StreamSwitcher.f_GetClientForStream(StreamInfo.m_Parent, true);
 
@@ -881,7 +881,7 @@ public:
 					DConOut("{}\n", Error);
 
 				for (auto& Error : Errors)
-					DConOut("{}: {}\n", Error.m_Path << Error.m_Error);
+					DConOut("{}: {}\n", Error.m_Path, Error.m_Error);
 
 				if (i == 0)
 				{
@@ -921,7 +921,7 @@ public:
 			{
 				++Actions[iResult->m_Action];
 
-				DConOut("{}#{},{} -> {} \n", iResult->m_From << (iResult->m_StartFromRev + 1) << iResult->m_EndFromRev << iResult->m_To);
+				DConOut("{}#{},{} -> {} \n", iResult->m_From, (iResult->m_StartFromRev + 1), iResult->m_EndFromRev, iResult->m_To);
 
 				CStr RevRange = fg_Format("{}#{},{}", iResult->m_From, iResult->m_StartFromRev + 1, iResult->m_EndFromRev);
 				FileRevsToCheck[iResult->m_To].f_Insert(RevRange);
@@ -955,7 +955,7 @@ public:
 				for (auto &ChangeList : ChangeLists)
 				{
 					CPerforceClient::CChangeList ChangeListInfo = pClient->f_GetChangelist(ChangeList);
-					DConOut("{}: {}  {}{\n}{}{\n}", ChangeList << ChangeListInfo.m_PerforceDate << ChangeListInfo.m_User << ChangeListInfo.m_Description);
+					DConOut("{}: {}  {}{\n}{}{\n}", ChangeList, ChangeListInfo.m_PerforceDate, ChangeListInfo.m_User, ChangeListInfo.m_Description);
 				}
 			}
 

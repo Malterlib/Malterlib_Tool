@@ -310,7 +310,7 @@ public:
 		}
 
 		if (!bFoundTimeHeader)
-			DConErrOut2("WARNING {}: Did not find extended timestamp header\n", _Path);
+			DConErrOut("WARNING {}: Did not find extended timestamp header\n", _Path);
 
 		return Time;
 	}
@@ -500,7 +500,7 @@ public:
 
 			CStr Wildcard = Params.f_GetValue("Wildcard", "*");
 
-			DConErrOut2("Enumerating files\n");
+			DConErrOut("Enumerating files\n");
 			TCVector<CStr> Files = CFile::fs_FindFiles(fg_Format("{}/{}", SourceDirectory, Wildcard), EFileAttrib_File, true);
 
 			mint iFile = 0;
@@ -512,7 +512,7 @@ public:
 				if (Percent != LastPercent)
 				{
 					LastPercent = Percent;
-					DConErrOut2("{} %\n", Percent);
+					DConErrOut("{} %\n", Percent);
 				}
 				++iFile;
 				CStr Extension = CFile::fs_GetExtension(File).f_LowerCase();
@@ -578,7 +578,7 @@ public:
 				Database.m_OutstandingPDPFiles.f_Remove(Guid);
 
 			for (auto &Outstanding : Database.m_OutstandingPDPFiles)
-				DConErrOut2("Missing timestamp: {}/{}\n", Outstanding.m_BasePath, Outstanding.m_FileName);
+				DConErrOut("Missing timestamp: {}/{}\n", Outstanding.m_BasePath, Outstanding.m_FileName);
 
 			Database.f_Write(DatabaseFileName);
 		}
@@ -592,7 +592,7 @@ public:
 				CTime const &StartTime = iRange->f_Start();
 				CTime const &EndTime = iRange->f_End();
 
-				DConOut2("{} -> {}\n", StartTime.f_ToLocal(), EndTime.f_ToLocal());
+				DConOut("{} -> {}\n", StartTime.f_ToLocal(), EndTime.f_ToLocal());
 
 				TCMap<CStr, CTime> SourceFileNames;
 				for (auto iFiles = Database.m_SourceFilesByTime.f_GetIterator_SmallestGreaterThanEqual(StartTime); iFiles && iFiles.f_GetKey() <= EndTime; ++iFiles)
@@ -608,18 +608,18 @@ public:
 						SymbolFileNames[FileName] = iFiles.f_GetKey();
 				}
 
-				DConOut2("    Source Files\n");
+				DConOut("    Source Files\n");
 				for (auto &Time : SourceFileNames)
 				{
 					auto &FileName = SourceFileNames.fs_GetKey(Time);
-					DConOut2("        {} - {}\n", Time.f_ToLocal(), FileName);
+					DConOut("        {} - {}\n", Time.f_ToLocal(), FileName);
 				}
 
-				DConOut2("    Symbol Files\n");
+				DConOut("    Symbol Files\n");
 				for (auto &Time : SymbolFileNames)
 				{
 					auto &FileName = SymbolFileNames.fs_GetKey(Time);
-					DConOut2("        {} - {}/{}\n", Time.f_ToLocal(), FileName.m_BasePath, FileName.m_FileName);
+					DConOut("        {} - {}/{}\n", Time.f_ToLocal(), FileName.m_BasePath, FileName.m_FileName);
 				}
 			}
 		}
@@ -635,7 +635,7 @@ public:
 				CTime const &StartTime = iRange->f_Start();
 				CTime const &EndTime = iRange->f_End();
 
-				DConOut2("{} -> {}\n", StartTime.f_ToLocal(), EndTime.f_ToLocal());
+				DConOut("{} -> {}\n", StartTime.f_ToLocal(), EndTime.f_ToLocal());
 
 				TCSet<CDatabase::CSymbolFile> SymbolFileNames;
 				for (auto iFiles = Database.m_SymbolFilesByTime.f_GetIterator_SmallestGreaterThanEqual(StartTime); iFiles && iFiles.f_GetKey() <= EndTime; ++iFiles)
@@ -659,11 +659,11 @@ public:
 						CFile::fs_CopyFile(SourceFile, TempFileName);
 						CFile::fs_RenameFile(TempFileName, DestinationFile);
 
-						DConOut2("    {} -> {} = {}\n", FileName.m_BasePath, DestinationDirectory, FileName.m_FileName);
+						DConOut("    {} -> {} = {}\n", FileName.m_BasePath, DestinationDirectory, FileName.m_FileName);
 					}
 					catch (CException const &_Exception)
 					{
-						DConOut2("ERR {} -> {} = {}\n        {}\n", FileName.m_BasePath, DestinationDirectory, FileName.m_FileName, _Exception);
+						DConOut("ERR {} -> {} = {}\n        {}\n", FileName.m_BasePath, DestinationDirectory, FileName.m_FileName, _Exception);
 					}
 				}
 			}
@@ -685,7 +685,7 @@ public:
 				for (auto &File : Files)
 				{
 					if (File.m_FileName.f_Find(SearchTerm) >= 0)
-						DConOut2("{}/{}: {}\n", File.m_BasePath, File.m_FileName, Time);
+						DConOut("{}/{}: {}\n", File.m_BasePath, File.m_FileName, Time);
 				}
 			}
 		}
