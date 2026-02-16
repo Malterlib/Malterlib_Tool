@@ -4,6 +4,21 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include <Mib/Cryptography/UUID>
 
+class CTool_Sleep : public CTool
+{
+public:
+	aint f_Run(NContainer::CRegistry &_Params)
+	{
+		CStr SleepTime = _Params.f_GetValue("0", "NotExist");
+
+		NSys::fg_Thread_Sleep(SleepTime.f_ToFloat(fp32(0.0)));
+
+		return 0;
+	}
+};
+
+DMibRuntimeClass(CTool, CTool_Sleep);
+
 class CTool_Touch : public CTool
 {
 public:
