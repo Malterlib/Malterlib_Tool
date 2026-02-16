@@ -365,64 +365,60 @@ public:
 						if (bNeedsUpdating)
 							break;
 
-						for (auto & Directory : Dependency.m_Directories)
+						try
 						{
-							if (!bUsesDigest)
+							for (auto & Directory : Dependency.m_Directories)
 							{
-								if (Directory.m_Timestamp.f_IsValid())
+								if (!bUsesDigest)
 								{
-									try
+									if (Directory.m_Timestamp.f_IsValid())
 									{
-										CTime WriteTime = f_GetWriteTime(Directory.m_Path);
-
-										if (Directory.m_Timestamp != WriteTime)
+										if (!CFile::fs_FileExists(Directory.m_Path, EFileAttrib_Directory))
 										{
 											if (bVerbose)
-												DConOut("Dependency check: Directory Timestamp ({}): {} != {}\n", Directory.m_Path, Directory.m_Timestamp, WriteTime);
+												DConOut("Dependency check: Directory no longer exists ({})\n", Directory.m_Path);
 											bNeedsUpdating = true;
 											break;
 										}
 									}
-									catch (CExceptionFile const& _Exception)
+									else if (CFile::fs_FileExists(Directory.m_Path, EFileAttrib_Directory))
 									{
 										if (bVerbose)
-											DConOut("Dependency check: Exception reading directory write time({}): {}\n", Directory.m_Path, _Exception.f_GetErrorStr());
+											DConOut("Dependency check: Directory does exist ({})\n", Directory.m_Path);
 										bNeedsUpdating = true;
 										break;
 									}
-
 								}
-								else if (CFile::fs_FileExists(Directory.m_Path, EFileAttrib_Directory))
+
+								CFile::CFindFilesOptions Options(CFile::fs_AppendPath(Directory.m_Path, Directory.m_Pattern), Directory.m_bRecursive);
+
+								Options.m_AttribMask = Directory.m_Attributes;
+								Options.m_bFollowLinks = Directory.m_bFollowLinks;
+								Options.m_ExcludePatterns = Directory.m_Excluded;
+
+								auto FoundFiles = CFile::fs_FindFiles(Options);
+
+								TCVector<CStr> Files;
+
+								for (auto File : FoundFiles)
+									Files.f_Insert(fConvertPath(File.m_Path));
+
+								Files.f_Sort();
+
+								if (Files != Directory.m_FoundFiles)
 								{
 									if (bVerbose)
-										DConOut("Dependency check: Directory does exist ({})}\n", Directory.m_Path);
+										DConOut("Dependency check: Found files differ ({}): {} != {}\n", Directory.m_Path, Files.f_GetLen(), Directory.m_FoundFiles.f_GetLen());
 									bNeedsUpdating = true;
 									break;
 								}
 							}
-
-							CFile::CFindFilesOptions Options(CFile::fs_AppendPath(Directory.m_Path, Directory.m_Pattern), Directory.m_bRecursive);
-
-							Options.m_AttribMask = Directory.m_Attributes;
-							Options.m_bFollowLinks = Directory.m_bFollowLinks;
-							Options.m_ExcludePatterns = Directory.m_Excluded;
-
-							auto FoundFiles = CFile::fs_FindFiles(Options);
-
-							TCVector<CStr> Files;
-
-							for (auto File : FoundFiles)
-								Files.f_Insert(fConvertPath(File.m_Path));
-
-							Files.f_Sort();
-
-							if (Files != Directory.m_FoundFiles)
-							{
-								if (bVerbose)
-									DConOut("Dependency check: Found files differ ({}): {} != {}\n", Directory.m_Path, Files.f_GetLen(), Directory.m_FoundFiles.f_GetLen());
-								bNeedsUpdating = true;
-								break;
-							}
+						}
+						catch (CExceptionFile const& _Exception)
+						{
+							if (bVerbose)
+								DConOut("Dependency check: Exception checking file finds: {}\n", _Exception.f_GetErrorStr());
+							bNeedsUpdating = true;
 						}
 
 						if (bNeedsUpdating)
