@@ -101,7 +101,7 @@ public:
 							(
 								g_Dispatch(BlockingActorCheckout) / [Source, Destination, StateFile, SigningWhiteList, pCommandLine = _pCommandLine]
 								{
-									CClock Clock{true};
+									CStopwatch Stopwatch{true};
 									mint nFiles = 0;
 									TCSet<CStr> ToSignExecutables;
 									TCSet<CStr> ToSign;
@@ -155,12 +155,12 @@ public:
 													}
 												}
 
-												if (Clock.f_GetTime() > 1.0)
+												if (Stopwatch.f_GetTime() > 1.0)
 												{
 													CUStr ToOutput = CStr("  {} files done"_f << nFiles);
 
 													*pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
-													Clock.f_AddOffset(1.0);
+													Stopwatch.f_AddOffset(1.0);
 												}
 
 												++nFiles;

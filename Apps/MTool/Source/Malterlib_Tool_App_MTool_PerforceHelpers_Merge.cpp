@@ -606,9 +606,9 @@ public:
 
 							TCAtomic<mint> nDoneIntegrations;
 
-							CClock Clock;
-							Clock.f_Start();
-							TCAtomic<pfp32> LastDisplay(Clock.f_GetTime().f_Get());
+							CStopwatch Stopwatch;
+							Stopwatch.f_Start();
+							TCAtomic<pfp32> LastDisplay(Stopwatch.f_GetTime().f_Get());
 
 							struct CToProcess
 							{
@@ -632,7 +632,8 @@ public:
 							fg_ParallellForEach
 								(
 									ToProcess
-									, [&ClientCache, &nIntegrations, &nDoneIntegrations, &LastDisplay, &Clock, &Lock, &Actions, &ChangeLists, &ConnectionInfo](CToProcess const &_ToProcess)
+									, [&ClientCache, &nIntegrations, &nDoneIntegrations, &LastDisplay, &Stopwatch, &Lock, &Actions, &ChangeLists, &ConnectionInfo]
+									(CToProcess const &_ToProcess)
 									{
 										auto &IntegrateFrom = _ToProcess.m_From;
 										auto &IntegrateTo = _ToProcess.m_To;
@@ -684,7 +685,7 @@ public:
 
 										++nDoneIntegrations;
 										pfp32 LastDisplayValue = LastDisplay.f_Load();
-										pfp32 CurrentTime = Clock.f_GetTime().f_Get();
+										pfp32 CurrentTime = Stopwatch.f_GetTime().f_Get();
 										if (CurrentTime - LastDisplayValue > 2.0)
 										{
 											if (LastDisplay.f_CompareExchangeStrong(LastDisplayValue, CurrentTime))
@@ -931,11 +932,11 @@ public:
 		;
 
 		DConOut("Doing test merge{\n}{\n}", 0);
-		CClock Clock;
-		Clock.f_Start();
-		fp64 StartTime = Clock.f_GetTime();
+		CStopwatch Stopwatch;
+		Stopwatch.f_Start();
+		fp64 StartTime = Stopwatch.f_GetTime();
 		bool bNeedMerge = fl_Integrate(true, false);
-		fp64 EndTime = Clock.f_GetTime();
+		fp64 EndTime = Stopwatch.f_GetTime();
 		if (bNeedMerge)
 		{
 			DConOut("Test merge took {} seconds{\n}{\n}", (EndTime - StartTime));
@@ -944,9 +945,9 @@ public:
 			if (Result == "Y" || Result == "y" || Result == "" || Result == "NoSubmit")
 			{
 				DConOut("Doing real merge{\n}{\n}", 0);
-				StartTime = Clock.f_GetTime();
+				StartTime = Stopwatch.f_GetTime();
 				fl_Integrate(false, Result == "NoSubmit");
-				EndTime = Clock.f_GetTime();
+				EndTime = Stopwatch.f_GetTime();
 
 				DConOut("Real merge took {} seconds{\n}{\n}", (EndTime - StartTime));
 			}

@@ -142,7 +142,7 @@ public:
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		DScopeConOutTimer("LaunchParallell");
+		DScopeConOutTimeMeauser("LaunchParallell");
 		struct CProgram
 		{
 			CProgram()

@@ -257,7 +257,7 @@ public:
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		DScopeConOutTimer("DiffCopy");
+		DScopeConOutTimeMeauser("DiffCopy");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
         CStr SourceDir = NFile::CFile::fs_GetPath(SourcePattern);
 		CStr DestPath = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
@@ -369,7 +369,7 @@ class CTool_DiffReplace : public CTool
 public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		DScopeConOutTimer("DiffReplace");
+		DScopeConOutTimeMeauser("DiffReplace");
 		CStr Search = _Params.f_GetValue("0", "NotExist");
 		CStr Replace = _Params.f_GetValue("1", "NotExist");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("2", "NotExist"));
@@ -454,7 +454,7 @@ public:
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		DScopeConOutTimer("DeleteDirectoryRecursive");
+		DScopeConOutTimeMeauser("DeleteDirectoryRecursive");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
 		bool bRemoveWriteProtection = _Params.f_GetValue("1", "1").f_ToInt() != 0;
 
@@ -475,7 +475,7 @@ public:
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		DScopeConOutTimer("DeleteRecursive");
+		DScopeConOutTimeMeauser("DeleteRecursive");
 		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
 
 		CStr Pattern = CFile::fs_GetFile(SourcePattern);

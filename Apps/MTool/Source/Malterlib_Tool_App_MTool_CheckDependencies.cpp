@@ -98,8 +98,8 @@ public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr const *pOneDir = _Params.f_FindEqual("Directory");
-		CClock Clock;
-		Clock.f_Start();
+		CStopwatch Stopwatch;
+		Stopwatch.f_Start();
 		if (_Files.f_GetLen() != 1 && !pOneDir)
 			DError("You need to specify ONE file");
 
@@ -438,7 +438,7 @@ public:
 		;
 
 		if (!pOneDir)
-			DConOut("Dependency check: Checked dependencies {fe1} ms\n", Clock.f_GetTime() * 1000.0);
+			DConOut("Dependency check: Checked dependencies {fe1} ms\n", Stopwatch.f_GetTime() * 1000.0);
 
 		if (bOutputDirty && bAnyNeedsUpdating.f_Load())
 			DConOut("Dependency check: Some files were dirty\n");

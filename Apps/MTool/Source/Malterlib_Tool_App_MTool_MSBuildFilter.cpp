@@ -84,8 +84,8 @@ public:
 		bool m_bEndOfFileReceived = false;
 
 		CCommandCounts m_CommandCounts;
-		CClock m_LastProgressUpdate{true};
-		CClock m_BuildTimer{true};
+		CStopwatch m_LastProgressUpdate{true};
+		CStopwatch m_BuildStopClock{true};
 		bool m_bProgressShown = false;
 		mint m_LastOutputProgressRows = 0;
 
@@ -645,9 +645,9 @@ public:
 				}
 
 				if (bAnyFailed)
-					co_await m_Config.m_pCommandLine->f_StdOut("\nBuild failed after {}\n\n"_f << fg_SecondsDurationToHumanReadable(m_BuildTimer.f_GetTime()));
+					co_await m_Config.m_pCommandLine->f_StdOut("\nBuild failed after {}\n\n"_f << fg_SecondsDurationToHumanReadable(m_BuildStopClock.f_GetTime()));
 				else
-					co_await m_Config.m_pCommandLine->f_StdOut("Build completed in {}\n\n"_f << fg_SecondsDurationToHumanReadable(m_BuildTimer.f_GetTime()));
+					co_await m_Config.m_pCommandLine->f_StdOut("Build completed in {}\n\n"_f << fg_SecondsDurationToHumanReadable(m_BuildStopClock.f_GetTime()));
 			}
 
 			co_return {};

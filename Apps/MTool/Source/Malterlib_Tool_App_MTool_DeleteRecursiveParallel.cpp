@@ -250,36 +250,36 @@ public:
 					mint MaxConcurrency = _Params["MaxConcurrency"].f_Integer();
 					mint ItemChunkSize = _Params["ItemChunkSize"].f_Integer();
 
-					CClock TotalClock{true};
+					CStopwatch TotalStopwatch{true};
 
 					if (bShowSummary)
 						*_pCommandLine %= "Deleting with concurrency {}: {vs}\n"_f << MaxConcurrency << Destinations;
 
 					NAtomic::TCAtomic<mint> nItemsDeleted = 0;
-					NAtomic::TCAtomic<int64> ClockStartTime = TotalClock.m_StartTime;
+					NAtomic::TCAtomic<int64> ClockStartTime = TotalStopwatch.m_StartTime;
 					mint nTotalItems = 0;
 
 					auto fLogProgress = [&](bool _bForce = false)
 						{
 							if (!_bForce)
 							{
-								CClock Clock;
-								Clock.m_StartTime = ClockStartTime.f_Load();
+								CStopwatch Stopwatch;
+								Stopwatch.m_StartTime = ClockStartTime.f_Load();
 
-								auto StartTime = Clock.m_StartTime;
+								auto StartTime = Stopwatch.m_StartTime;
 
-								if (Clock.f_GetTime() <= 1.0)
+								if (Stopwatch.f_GetTime() <= 1.0)
 									return;
 
-								Clock.f_AddOffset(1.0);
+								Stopwatch.f_AddOffset(1.0);
 
-								if (!ClockStartTime.f_CompareExchangeStrong(StartTime, Clock.m_StartTime))
+								if (!ClockStartTime.f_CompareExchangeStrong(StartTime, Stopwatch.m_StartTime))
 									return;
 							}
 
 							auto CurrentItems = nItemsDeleted.f_Load();
 
-							auto EllapsedTime = fg_SecondsDurationToHumanReadable(TotalClock.f_GetTime());
+							auto EllapsedTime = fg_SecondsDurationToHumanReadable(TotalStopwatch.f_GetTime());
 							auto PercentDone = (fp64(CurrentItems) / fp64(nTotalItems)) * 100.0;
 
 							CUStr ToOutput = CStr("  {} items deleted. {fe0}% done in {}"_f << CurrentItems << PercentDone << EllapsedTime);
@@ -301,7 +301,7 @@ public:
 									, bShowProgress
 									, bShowSummary
 									, bVerbose
-									, TotalClock
+									, TotalStopwatch
 									, &nTotalItems
 									, &nItemsDeleted
 									, &fLogProgress
@@ -347,7 +347,7 @@ public:
 											Files += fg_Move(FoundFiles);
 									}
 
-									auto FindTime = TotalClock.f_GetTime();
+									auto FindTime = TotalStopwatch.f_GetTime();
 
 									nTotalItems = Files.m_FilesOrLinks.f_GetLen() + Files.m_Directories.f_GetLen();
 
@@ -487,7 +487,7 @@ public:
 					}
 
 					if (bShowSummary)
-						*_pCommandLine %= "Finished in {}\n"_f << fg_SecondsDurationToHumanReadable(TotalClock.f_GetTime());
+						*_pCommandLine %= "Finished in {}\n"_f << fg_SecondsDurationToHumanReadable(TotalStopwatch.f_GetTime());
 
 					co_return bSuccess ? 0 : 1;
 				}

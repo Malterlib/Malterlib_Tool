@@ -118,16 +118,16 @@ public:
 
 		CStr ToSync = f_GetOption(_Params, "ToSync");
 		CStr ClientName;
-		CClock Timer;
-		Timer.f_Start();
-		fp64 NextUpdate = Timer.f_GetTime() + 0.5;
+		CStopwatch Stopwatch;
+		Stopwatch.f_Start();
+		fp64 NextUpdate = Stopwatch.f_GetTime() + 0.5;
 		TCUniquePointer<CPerforceClientThrow> pClient = PerforceHelper.f_GetClient(_Params, ClientName);
 		pClient->f_Sync
 			(
 				ToSync
 				, [&](int64 _TotalBytes, int64 _SyncedBytes)
 				{
-					fp64 Now = Timer.f_GetTime();
+					fp64 Now = Stopwatch.f_GetTime();
 
 					if (Now > NextUpdate)
 					{
