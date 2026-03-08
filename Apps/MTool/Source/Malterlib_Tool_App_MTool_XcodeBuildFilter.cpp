@@ -11,7 +11,6 @@
 #include <Mib/Process/ProcessLaunchActor>
 #include <Mib/Process/StdInActor>
 #include <Mib/String/String>
-#include <Mib/Time/ClockTimer>
 
 struct CTool_XcodeBuildFilter : public CDistributedTool, public CAllowUnsafeThis
 {

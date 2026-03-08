@@ -11,7 +11,6 @@
 #include <Mib/String/String>
 #include <Mib/CommandLine/AnsiEncodingParse>
 #include <Mib/CommandLine/TableRenderer>
-#include <Mib/Time/ClockTimer>
 
 struct CTool_MSBuildFilter : public CDistributedTool, public CAllowUnsafeThis
 {

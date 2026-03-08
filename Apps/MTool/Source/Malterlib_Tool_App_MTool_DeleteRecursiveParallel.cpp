@@ -256,24 +256,23 @@ public:
 						*_pCommandLine %= "Deleting with concurrency {}: {vs}\n"_f << MaxConcurrency << Destinations;
 
 					NAtomic::TCAtomic<mint> nItemsDeleted = 0;
-					NAtomic::TCAtomic<int64> ClockStartTime = TotalStopwatch.m_StartTime;
+					NAtomic::TCAtomic<int64> ClockStartTime = TotalStopwatch.f_GetStartTicks();
 					mint nTotalItems = 0;
 
 					auto fLogProgress = [&](bool _bForce = false)
 						{
 							if (!_bForce)
 							{
-								CStopwatch Stopwatch;
-								Stopwatch.m_StartTime = ClockStartTime.f_Load();
+								CStopwatch Stopwatch = CStopwatch::fs_CreateFromStartTicks(ClockStartTime.f_Load());
 
-								auto StartTime = Stopwatch.m_StartTime;
+								auto StartTime = Stopwatch.f_GetStartTicks();
 
 								if (Stopwatch.f_GetTime() <= 1.0)
 									return;
 
 								Stopwatch.f_AddOffset(1.0);
 
-								if (!ClockStartTime.f_CompareExchangeStrong(StartTime, Stopwatch.m_StartTime))
+								if (!ClockStartTime.f_CompareExchangeStrong(StartTime, Stopwatch.f_GetStartTicks()))
 									return;
 							}
 

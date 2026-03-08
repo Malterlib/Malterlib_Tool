@@ -3,6 +3,7 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include <Mib/Process/VirtualProcessLaunch>
+#include <Mib/Time/TimeMeasure>
 
 class CTool_LaunchTimed : public CTool
 {
@@ -142,7 +143,7 @@ public:
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		DScopeConOutTimeMeauser("LaunchParallell");
+		DScopeConOutTimeMeasure("LaunchParallell");
 		struct CProgram
 		{
 			CProgram()
