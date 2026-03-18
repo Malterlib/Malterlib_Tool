@@ -17,7 +17,7 @@ struct CTool_MSBuildFilter : public CDistributedTool, public CAllowUnsafeThis
 public:
 	struct CAnsiProperties
 	{
-		auto operator <=> (CAnsiProperties const &_Right) const = default;
+		auto operator <=> (CAnsiProperties const &_Right) const noexcept = default;
 
 		TCOptional<CAnsiEncodingParse::CBackgroundColor> m_BackgroundColor;
 		TCOptional<CAnsiEncodingParse::CForegroundColor> m_ForegroundColor;

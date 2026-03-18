@@ -322,7 +322,7 @@ public:
 			CStr m_BasePath;
 			CStr m_FileName;
 
-			auto operator <=> (CSymbolFile const &_Right) const = default;
+			auto operator <=> (CSymbolFile const &_Right) const noexcept = default;
 		};
 
 		TCRegions<CTime> m_SourceTimes;

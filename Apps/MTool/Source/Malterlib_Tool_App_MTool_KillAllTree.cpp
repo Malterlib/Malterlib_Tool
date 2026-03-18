@@ -35,12 +35,12 @@ public:
 		DLinkDS_List(CProcessEntry, m_LinkAll) m_AllProcess;
 		using CAllIter = DLinkDS_Iter(CProcessEntry, m_LinkAll);
 
-		bool operator == (uint32 _Process) const
+		bool operator == (uint32 _Process) const noexcept
 		{
 			return m_Process == _Process;
 		}
 
-		bool operator == (const CStr &_Process) const
+		bool operator == (const CStr &_Process) const noexcept
 		{
 			return m_FileName == _Process;
 		}
