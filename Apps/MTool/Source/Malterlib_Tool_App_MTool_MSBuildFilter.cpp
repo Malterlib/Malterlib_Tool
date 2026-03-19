@@ -39,12 +39,12 @@ public:
 
 	struct CCommandCounts
 	{
-		mint m_nCompile = 0;
-		mint m_nLink = 0;
-		mint m_nOther = 0;
-		mint m_nProjectsCompleted = 0;
+		umint m_nCompile = 0;
+		umint m_nLink = 0;
+		umint m_nOther = 0;
+		umint m_nProjectsCompleted = 0;
 
-		mint f_GetTotal() const
+		umint f_GetTotal() const
 		{
 			return m_nCompile + m_nLink + m_nOther + m_nProjectsCompleted;
 		}
@@ -69,14 +69,14 @@ public:
 		}
 
 		CConfig m_Config;
-		NContainer::TCMap<mint, CProjectInfo> m_ProjectMap;
-		mint m_iLastOutput = 0;
-		mint m_iLastProject = 0;
+		NContainer::TCMap<umint, CProjectInfo> m_ProjectMap;
+		umint m_iLastOutput = 0;
+		umint m_iLastProject = 0;
 
 		TCFuture<void> f_OutputProject(CProjectInfo &&_Project);
 
 		CStr m_BufferedInput;
-		mint m_BufferedInputParsedChars = 0;
+		umint m_BufferedInputParsedChars = 0;
 
 		CAnsiProperties m_AnsiProperties;
 		CAnsiEncodingParse::CParseState m_AnsiParseState;
@@ -86,7 +86,7 @@ public:
 		CStopwatch m_LastProgressUpdate{true};
 		CStopwatch m_BuildStopClock{true};
 		bool m_bProgressShown = false;
-		mint m_LastOutputProgressRows = 0;
+		umint m_LastOutputProgressRows = 0;
 
 		CSequencer m_InputSequencer{"Input sequencer"};
 
@@ -118,7 +118,7 @@ public:
 					else
 						break;
 				}
-				mint nFinishedChars = pFinishedOutput - pStartParse;
+				umint nFinishedChars = pFinishedOutput - pStartParse;
 				if (!nFinishedChars)
 				{
 					m_BufferedInputParsedChars = pParse - pStartParse;
@@ -171,7 +171,7 @@ public:
 
 			CTableRenderHelper::CColumnHelper Columns(1);
 
-			mint nOutputRows = 5;
+			umint nOutputRows = 5;
 
 			Columns.f_AddHeading("Total", 0);
 			Columns.f_AddHeading("{}{}{ns }{}"_f << AnsiEncoding.f_StatusNormal() << AnsiEncoding.f_Bold() << m_CommandCounts.f_GetTotal() << AnsiEncoding.f_Default(), 0);
@@ -183,7 +183,7 @@ public:
 
 			auto UnimportantRGB = AnsiEncoding.f_ForegroundRGB(128, 128, 128);
 
-			auto fAddCategory = [&](ch8 const *_pName, mint _nCount, bool _bImportant)
+			auto fAddCategory = [&](ch8 const *_pName, umint _nCount, bool _bImportant)
 				{
 					++nOutputRows;
 					TableRenderer.f_AddRow
@@ -231,7 +231,7 @@ public:
 			co_return {};
 		}
 
-		TCFuture<void>  f_OutputProject(mint _iProject)
+		TCFuture<void>  f_OutputProject(umint _iProject)
 		{
 			auto *pProject = m_ProjectMap.f_FindEqual(_iProject);
 			if (!pProject)
@@ -259,7 +259,7 @@ public:
 
 			co_await m_Config.m_pCommandLine->f_StdOut("\n=== {} ({}) ==={}\n"_f << ProjectInfo.m_ProjectName << _iProject << (ProjectInfo.m_bFailed ? " FAILED" : ""));
 
-			mint nBufferedLines = 0;
+			umint nBufferedLines = 0;
 			CStr Output;
 
 			for (auto const &BufferedLine : ProjectInfo.m_BufferedLines)
@@ -366,7 +366,7 @@ public:
 						, [&](auto const &_String) -> bool
 						{
 							fApplyFormatting();
-							mint nSpaces = 0;
+							umint nSpaces = 0;
 							do
 							{
 								if (bDidOutput)
@@ -418,7 +418,7 @@ public:
 
 								CStrPtr ProjectIdStr(pNumberStart, pParse - pNumberStart);
 
-								m_iLastProject = ProjectIdStr.f_ToInt(mint(1));
+								m_iLastProject = ProjectIdStr.f_ToInt(umint(1));
 								bBelongsInProject = true;
 
 								++pParse;

@@ -151,7 +151,7 @@ public:
 				int32 nClustersToSearch = 1024;
 				CMibFilePos FileSize = fg_AlignDown(TargetFile.f_GetLength() -(sizeof(int64) + 8), ClusterSize);
 
-				const mint SigSize = 8;
+				const umint SigSize = 8;
 				ch8 Signature[SigSize+1];
 				Signature[SigSize] = 0;
 
@@ -182,7 +182,7 @@ public:
 			{
 				// No file system lets create one
 				TargetFile.f_SetPositionFromEnd(0);
-				mint ToWrite = MalterlibFsFilePos - TargetFile.f_GetPosition();
+				umint ToWrite = MalterlibFsFilePos - TargetFile.f_GetPosition();
 				while (ToWrite)
 				{
 					TargetFile << uint8(0);
@@ -215,10 +215,10 @@ public:
 					BasePath = BaseFiles[0];
 			}
 
-			mint Len = BasePath.f_GetLen();
+			umint Len = BasePath.f_GetLen();
 
-			mint nFileAdded = 0;
-			for (mint i = 0; i < lSourceFiles.f_GetLen(); ++i)
+			umint nFileAdded = 0;
+			for (umint i = 0; i < lSourceFiles.f_GetLen(); ++i)
 			{
 				CStr SourceName = lSourceFiles[i].f_Extract(Len+1);
 				if (SourceName[0] == '.')
@@ -246,7 +246,7 @@ public:
 
 			if (TargetType == ETarget_Exe)
 			{
-				const mint SigSize = 8;
+				const umint SigSize = 8;
 				TargetFile.f_SetPositionFromEnd(0);
 				TargetFile.f_FeedBytes(pSig, SigSize);
 				TargetFile << MalterlibFsFilePos;
@@ -256,9 +256,9 @@ public:
 		{
 			TCVector<CStr> Files = VirtualFS.f_FindFiles(SourcePattern, EFileAttrib_File, true);
 			CStr BasePath = NFile::CFile::fs_GetPath(SourcePattern);
-			mint Len = BasePath.f_GetLen();
+			umint Len = BasePath.f_GetLen();
 
-			for (mint i = 0; i < Files.f_GetLen(); ++i)
+			for (umint i = 0; i < Files.f_GetLen(); ++i)
 			{
 				CStr SourceName;
 				if (Len == 0)
@@ -275,9 +275,9 @@ public:
 		{
 			TCVector<CStr> Files = VirtualFS.f_FindFiles(SourcePattern, EFileAttrib_File, true);
 			CStr BasePath = NFile::CFile::fs_GetPath(SourcePattern);
-			mint Len = BasePath.f_GetLen();
+			umint Len = BasePath.f_GetLen();
 
-			for (mint i = 0; i < Files.f_GetLen(); ++i)
+			for (umint i = 0; i < Files.f_GetLen(); ++i)
 			{
 				CStr SourceName;
 				if (Len == 0)

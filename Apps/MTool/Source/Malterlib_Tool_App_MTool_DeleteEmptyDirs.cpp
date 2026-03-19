@@ -11,7 +11,7 @@ public:
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
 
-		for (mint i = 0; i < Files.f_GetLen(); ++i)
+		for (umint i = 0; i < Files.f_GetLen(); ++i)
 		{
 			fr_DeleteEmptyDirs(Files[i]);
 		}

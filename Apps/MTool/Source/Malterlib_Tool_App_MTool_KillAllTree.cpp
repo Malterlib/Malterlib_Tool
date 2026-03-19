@@ -99,9 +99,9 @@ public:
 			HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, false, m_Process);
 			if (hProcess)
 			{
-				mint nProcesses = _ProcessNames.f_GetLen();
+				umint nProcesses = _ProcessNames.f_GetLen();
 				bool bFound = false;
-				for (mint i = 0; i < nProcesses; ++i)
+				for (umint i = 0; i < nProcesses; ++i)
 				{
 					if (m_FileName.f_CmpNoCase(_ProcessNames[i]) == 0)
 					{
@@ -174,9 +174,9 @@ RestartSearch:
 				{
 					bool bFound = false;
 
-					mint nProces = _ProcessNames.f_GetLen();
+					umint nProces = _ProcessNames.f_GetLen();
 
-					for (mint i = 0; i < nProces; ++i)
+					for (umint i = 0; i < nProces; ++i)
 					{
 						if (Iter->m_FileName == _ProcessNames[i])
 						{

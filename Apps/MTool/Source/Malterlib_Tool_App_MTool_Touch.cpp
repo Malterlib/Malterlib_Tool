@@ -27,7 +27,7 @@ public:
 	void fr_Touch(CStr _Path, CStr _Pattern, const NTime::CTime &_Time, bool _bRecursive)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/" + _Pattern, EFileAttrib_File, _bRecursive);
-		for (mint i = 0; i < Files.f_GetLen(); ++i)
+		for (umint i = 0; i < Files.f_GetLen(); ++i)
 		{
 			try
 			{
@@ -121,7 +121,7 @@ public:
 			CStr NewestSourceFile = SourceFile;
 
 			// Check additional source files (params 2, 3, 4, ...)
-			for (mint i = 2; ; ++i)
+			for (umint i = 2; ; ++i)
 			{
 				using namespace NMib::NStr;
 				CStr ExtraSource = _Params.f_GetValue("{}"_f << i, "");
@@ -179,7 +179,7 @@ public:
 			CStr NewestSourceFile = SourceFile;
 
 			// Check additional source files (params 2, 3, 4, ...)
-			for (mint i = 2; ; ++i)
+			for (umint i = 2; ; ++i)
 			{
 				using namespace NMib::NStr;
 				CStr ExtraSource = _Params.f_GetValue("{}"_f << i, "");
@@ -313,7 +313,7 @@ public:
 
 		TCVector<CFile::CFoundFile> Files = NFile::CFile::fs_FindFiles(FindOptions);
 
-		mint nFiles = Files.f_GetLen();
+		umint nFiles = Files.f_GetLen();
 		for (auto &File : Files)
 		{
 			auto &FilePath = File.m_Path;
@@ -383,7 +383,7 @@ public:
 
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(SourcePattern, EFileAttrib_File, bRecursive);
 
-		mint nFiles = Files.f_GetLen();
+		umint nFiles = Files.f_GetLen();
 		bool bCopied = false;
 		for (auto &FilePath : Files)
 		{

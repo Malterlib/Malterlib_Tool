@@ -17,7 +17,7 @@ public:
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
 
-		for (mint i = 0; i < Files.f_GetLen(); ++i)
+		for (umint i = 0; i < Files.f_GetLen(); ++i)
 		{
 			fr_DeleteEmptyDirs(Files[i]);
 		}
@@ -56,7 +56,7 @@ public:
 		bool bDirectory = false;
 		bool bRecursive = false;
 
-		for (mint i = 0; true; ++i)
+		for (umint i = 0; true; ++i)
 		{
 			CStr Value = _Params.f_GetValue(CStr::fs_ToStr(i), "");
 			if (Value.f_IsEmpty())
@@ -409,7 +409,7 @@ public:
 		if (bRecursive || bDirectory || CFile::fs_GetFile(SourceFile).f_FindChars("*?") >= 0)
 		{
 			CStr BasePath = CFile::fs_GetPath(SourceFile);
-			mint BasePathLen = BasePath.f_GetLen() + 1;
+			umint BasePathLen = BasePath.f_GetLen() + 1;
 
 			SourceFile = CFile::fs_AppendPath(BasePath, SourceFileName);
 

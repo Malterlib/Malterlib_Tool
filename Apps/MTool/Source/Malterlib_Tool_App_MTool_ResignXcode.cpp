@@ -91,8 +91,8 @@ public:
 
 					TCSet<CStr> SigningWhiteList = {Destination, "/xcodebuild", "/llbuild.framework", "/XCBBuildService.framework", "/XCBBuildService.bundle"};
 
-					mint nFiles = 0;
-					mint nFilesSkipped = 0;
+					umint nFiles = 0;
+					umint nFilesSkipped = 0;
 
 					if (!bCopyDone)
 					{
@@ -102,7 +102,7 @@ public:
 								g_Dispatch(BlockingActorCheckout) / [Source, Destination, StateFile, SigningWhiteList, pCommandLine = _pCommandLine]
 								{
 									CStopwatch Stopwatch{true};
-									mint nFiles = 0;
+									umint nFiles = 0;
 									TCSet<CStr> ToSignExecutables;
 									TCSet<CStr> ToSign;
 
@@ -207,7 +207,7 @@ public:
 					CStr TempEntitlementsFile = CFile::fs_GetTemporaryDirectory() / "Temp.entitlements";
 #endif
 
-					mint nExecutableSign = 0;
+					umint nExecutableSign = 0;
 
 					for (auto &ToSign : ToSignExecutablesVector)
 					{
@@ -255,7 +255,7 @@ public:
 					}
 					*_pCommandLine %= "\n";
 
-					mint nSign = 0;
+					umint nSign = 0;
 
 					for (auto &ToSign : ToSignVector)
 					{

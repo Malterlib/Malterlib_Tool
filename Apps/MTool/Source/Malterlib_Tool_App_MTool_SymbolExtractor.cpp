@@ -503,12 +503,12 @@ public:
 			DConErrOut("Enumerating files\n");
 			TCVector<CStr> Files = CFile::fs_FindFiles(fg_Format("{}/{}", SourceDirectory, Wildcard), EFileAttrib_File, true);
 
-			mint iFile = 0;
-			mint LastPercent = 0;
+			umint iFile = 0;
+			umint LastPercent = 0;
 
 			for (auto &File : Files)
 			{
-				mint Percent = (iFile * 100) / Files.f_GetLen();
+				umint Percent = (iFile * 100) / Files.f_GetLen();
 				if (Percent != LastPercent)
 				{
 					LastPercent = Percent;

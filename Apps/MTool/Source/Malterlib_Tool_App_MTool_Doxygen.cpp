@@ -12,7 +12,7 @@ namespace
 
 		CStr LastOption;
 
-		for (mint i = 0; true; ++i)
+		for (umint i = 0; true; ++i)
 		{
 			auto pChild = _Params.f_GetChildNoPath(CStr::fs_ToStr(i));
 			if (!pChild)
@@ -215,7 +215,7 @@ public:
 
 					if (auto pParams = _Params.f_GetMember("Params"))
 					{
-						mint iParam = 0;
+						umint iParam = 0;
 						for (auto &Param : pParams->f_Array())
 						{
 							Params.f_SetValue(CStr::fs_ToStr(iParam), Param.f_String());

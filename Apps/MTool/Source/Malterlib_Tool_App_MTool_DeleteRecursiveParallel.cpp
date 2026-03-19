@@ -7,10 +7,10 @@
 
 namespace NDeleteRecursive
 {
-	constinit NAtomic::TCAtomic<mint> g_nBlockingActors{0};
+	constinit NAtomic::TCAtomic<umint> g_nBlockingActors{0};
 
 	template <typename tf_CResult, typename tf_CContainer, typename tf_CFunctor>
-	auto DMibWorkaroundUBSanSectionErrorsDisable fg_ParallelForEachBlocking(tf_CContainer &&_Container, tf_CFunctor &&_fFunctor, mint _MaxConcurrency)
+	auto DMibWorkaroundUBSanSectionErrorsDisable fg_ParallelForEachBlocking(tf_CContainer &&_Container, tf_CFunctor &&_fFunctor, umint _MaxConcurrency)
 		-> TCUnsafeFuture<TCConditional<NTraits::cIsVoid<tf_CResult>, tf_CResult, TCVector<tf_CResult>>>
 	{
 		co_await ECoroutineFlag_CaptureMalterlibExceptions;
@@ -18,8 +18,8 @@ namespace NDeleteRecursive
 		if (_Container.f_IsEmpty())
 			co_return {};
 
-		mint nSplit = 1;
-		mint nValues = _Container.f_GetLen();
+		umint nSplit = 1;
+		umint nValues = _Container.f_GetLen();
 		while (nSplit < nValues)
 		{
 			auto nActors = g_nBlockingActors.f_Load();
@@ -47,10 +47,10 @@ namespace NDeleteRecursive
 
 			TCVector<CBlockingActorCheckout> Checkouts;
 			Checkouts.f_Reserve(nSplit - 1);
-			for (mint i = 1; i < nSplit; ++i)
+			for (umint i = 1; i < nSplit; ++i)
 				Checkouts.f_Insert(fg_BlockingActor());
 
-			mint iSplit = 0;
+			umint iSplit = 0;
 
 			for (auto &Value : _Container)
 			{
@@ -121,7 +121,7 @@ namespace NDeleteRecursive
 		TCVector<CStr> m_Directories;
 	};
 
-	TCUnsafeFuture<CFoundFiles> fg_FindFilesRecursiveParallel(CStr const &_Path, mint _MaxConcurrency)
+	TCUnsafeFuture<CFoundFiles> fg_FindFilesRecursiveParallel(CStr const &_Path, umint _MaxConcurrency)
 	{
 		CFoundFiles Return;
 
@@ -247,17 +247,17 @@ public:
 					bool bVerbose = _Params["Verbose"].f_Boolean();
 					bool bShowProgress = _Params["ShowProgress"].f_Boolean();
 					bool bShowSummary = _Params["ShowSummary"].f_Boolean();
-					mint MaxConcurrency = _Params["MaxConcurrency"].f_Integer();
-					mint ItemChunkSize = _Params["ItemChunkSize"].f_Integer();
+					umint MaxConcurrency = _Params["MaxConcurrency"].f_Integer();
+					umint ItemChunkSize = _Params["ItemChunkSize"].f_Integer();
 
 					CStopwatch TotalStopwatch{true};
 
 					if (bShowSummary)
 						*_pCommandLine %= "Deleting with concurrency {}: {vs}\n"_f << MaxConcurrency << Destinations;
 
-					NAtomic::TCAtomic<mint> nItemsDeleted = 0;
+					NAtomic::TCAtomic<umint> nItemsDeleted = 0;
 					NAtomic::TCAtomic<int64> ClockStartTime = TotalStopwatch.f_GetStartTicks();
-					mint nTotalItems = 0;
+					umint nTotalItems = 0;
 
 					auto fLogProgress = [&](bool _bForce = false)
 						{
@@ -378,7 +378,7 @@ public:
 											; pFiles += ItemChunkSize
 										)
 									{
-										FilesChunks.f_Insert().f_InsertMove(pFiles, fg_Min(ItemChunkSize, mint(pFilesEnd - pFiles)));
+										FilesChunks.f_Insert().f_InsertMove(pFiles, fg_Min(ItemChunkSize, umint(pFilesEnd - pFiles)));
 									}
 
 									co_await fg_ParallelForEachBlocking<void>
@@ -410,12 +410,12 @@ public:
 										)
 									;
 
-									TCMap<mint, TCVector<TCVector<CStr>>> DirectoriesDepth;
+									TCMap<umint, TCVector<TCVector<CStr>>> DirectoriesDepth;
 
 									for (auto &Directory : Files.m_Directories)
 									{
 										auto pParse = Directory.f_GetStr();
-										mint Depth = 0;
+										umint Depth = 0;
 										while (*pParse)
 										{
 											if (*pParse == '/')
@@ -540,15 +540,15 @@ public:
 					co_await ECoroutineFlag_CaptureExceptions;
 
 					auto Destination = _Params["Destination"].f_String();
-					mint NumFiles = _Params["NumFiles"].f_Integer();
-					mint NumDirectories = _Params["NumDirectories"].f_Integer();
-					mint FanOut = _Params["FanOut"].f_Integer();
-					mint FileSize = _Params["FileSize"].f_Integer();
+					umint NumFiles = _Params["NumFiles"].f_Integer();
+					umint NumDirectories = _Params["NumDirectories"].f_Integer();
+					umint FanOut = _Params["FanOut"].f_Integer();
+					umint FileSize = _Params["FileSize"].f_Integer();
 
 					CStr FileContents;
 					CStr FileLine = gc_Str<"0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789\n">;
-					while (mint(FileContents.f_GetLen()) < FileSize)
-						FileContents += FileLine.f_Left(fg_Min(mint(FileLine.f_GetLen()), FileSize - FileContents.f_GetLen()));
+					while (umint(FileContents.f_GetLen()) < FileSize)
+						FileContents += FileLine.f_Left(fg_Min(umint(FileLine.f_GetLen()), FileSize - FileContents.f_GetLen()));
 
 					{
 						auto BlockingActorCheckout = fg_BlockingActor();
@@ -563,7 +563,7 @@ public:
 									auto fCreateDirectories = [&](CStr const &_Path)
 										{
 											TCVector<CStr> Directories;
-											for (mint iDirectory = 0; iDirectory < FanOut; ++iDirectory)
+											for (umint iDirectory = 0; iDirectory < FanOut; ++iDirectory)
 											{
 												if (nLeftToCreate == 0)
 													return Directories;
@@ -603,8 +603,8 @@ public:
 
 									TCVector<CStr> Directories = fCreateDirectoriesRecurse(Destination);
 
-									mint iDirectory = 0;
-									for (mint iFile = 0; iFile < NumFiles; ++iFile)
+									umint iDirectory = 0;
+									for (umint iFile = 0; iFile < NumFiles; ++iFile)
 									{
 										CStr Path = Directories[iDirectory] / ("File{}.txt"_f << iFile);
 										CFile::fs_WriteStringToFile(Path, FileContents, false);

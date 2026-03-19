@@ -64,7 +64,7 @@ private:
 		TCMap<CStr, CStr> m_SandboxRoots;
 
 		fp32 m_CPUUsage;
-		mint m_LimitConcurrency;
+		umint m_LimitConcurrency;
 
 		CStr m_RedirectStdOut;
 
@@ -133,7 +133,7 @@ private:
 
 		void f_SetTime(bool _bValue) { m_Fields |= EField_Time; m_bTime = _bValue; }
 		void f_SetStats(bool _bValue) { m_Fields |= EField_Stats; m_bStats = _bValue; }
-		void f_SetLimitConcurrency(mint _Value) { m_Fields |= EField_LimitConcurrency; m_LimitConcurrency = _Value; }
+		void f_SetLimitConcurrency(umint _Value) { m_Fields |= EField_LimitConcurrency; m_LimitConcurrency = _Value; }
 		void f_SetPerforceParsing(bool _bValue) { m_Fields |= EField_PerforceParsing; m_bPerforceParsing = _bValue; }
 		void f_SetSeparateStdErr(bool _bValue) { m_Fields |= EField_SeparateStdErr; m_bSeparateStdErr = _bValue; }
 		void f_SetEchoCommand(bool _bValue) { m_Fields |= EField_EchoCommand; m_bEchoCommand = _bValue; }
@@ -262,11 +262,11 @@ private:
 			pOptions->f_SetStats(fp_ParseBool(Value));
 		else if (Key.f_CmpNoCase("LimitConcurrency") == 0)
 		{
-			mint nLimit = 1;
+			umint nLimit = 1;
 			if (Value.f_IsEmpty() || Value == "Yes")
 				nLimit = NSys::fg_Thread_GetVirtualCores();
 			else
-				nLimit = Value.f_ToInt(mint(1));
+				nLimit = Value.f_ToInt(umint(1));
 			pOptions->f_SetLimitConcurrency(nLimit);
 		}
 		else if (Key.f_CmpNoCase("P4") == 0)
@@ -362,16 +362,16 @@ private:
 		}
 	}
 
-	mint fp_DisplayStatsGetMaxLen(NMib::NProcess::CProcessStatistics const &_Stats)
+	umint fp_DisplayStatsGetMaxLen(NMib::NProcess::CProcessStatistics const &_Stats)
 	{
-		mint Len = 0;
+		umint Len = 0;
 		for (auto Iter = _Stats.m_Statistics.f_GetIterator(); Iter; ++Iter)
-			Len = fg_Max(Len, mint(Iter.f_GetKey().f_GetLen()));
+			Len = fg_Max(Len, umint(Iter.f_GetKey().f_GetLen()));
 
 		return Len;
 	}
 
-	void fp_DisplayStats(NMib::NProcess::CProcessStatistics const &_Stats, mint _NameLen)
+	void fp_DisplayStats(NMib::NProcess::CProcessStatistics const &_Stats, umint _NameLen)
 	{
 		for (auto Iter = _Stats.m_Statistics.f_GetIterator(); Iter; ++Iter)
 		{
@@ -516,7 +516,7 @@ private:
 							NMib::NProcess::CProcessStatistics MemoryStats = pProc->m_pProcessLaunchInfo->f_GetProcessLaunch()->f_GetOverallMemoryStatistics();
 							NMib::NProcess::CProcessStatistics ExecutionStats = pProc->m_pProcessLaunchInfo->f_GetProcessLaunch()->f_GetOverallExecutionStatistics();
 
-							mint MaxLen = 0;
+							umint MaxLen = 0;
 							MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(MemoryStats), MaxLen);
 							MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(ExecutionStats), MaxLen);
 							MaxLen = fg_Max(fp_DisplayStatsGetMaxLen(pProc->m_SampledMemoryStats), MaxLen);
@@ -628,7 +628,7 @@ private:
 				{
 					CStr Value = *AIter;
 
-					mint nChars = Value.f_GetLen();
+					umint nChars = Value.f_GetLen();
 					if (Value.f_GetAt(nChars - 1) == ')')
 					{
 						Value = Value.f_Extract(0, nChars-1);
@@ -657,7 +657,7 @@ private:
 						CurLaunch.m_Target = Arg;	 // This may be empty here if there is a space after the (, but that is OK!
 						if (!CurLaunch.m_Target.f_IsEmpty())
 						{
-							mint nChars = CurLaunch.m_Target.f_GetLen();
+							umint nChars = CurLaunch.m_Target.f_GetLen();
 							if (CurLaunch.m_Target.f_GetAt(nChars - 1) == ')')
 							{
 								CurLaunch.m_Target = CurLaunch.m_Target.f_Extract(0, nChars-1);
@@ -782,8 +782,8 @@ private:
 
 			lProcessInfo.f_SetLen(lLaunchOptions.f_GetLen());
 
-			mint nLaunchProcesses = 0;
-			mint nMaxLaunchProcesses = TCLimitsInt<mint>::mc_Max;
+			umint nLaunchProcesses = 0;
+			umint nMaxLaunchProcesses = TCLimitsInt<umint>::mc_Max;
 			if (GlobalOptions.m_Defaults.m_LimitConcurrency)
 				nMaxLaunchProcesses = GlobalOptions.m_Defaults.m_LimitConcurrency;
 

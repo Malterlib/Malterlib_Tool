@@ -20,7 +20,7 @@ namespace NMib::NTool
 			File.f_Read(Mem.f_GetArray(), FLen);
 		}
 
-		auto fReadData = [&](CFilePos _Position, void *_pDest, mint _Length)
+		auto fReadData = [&](CFilePos _Position, void *_pDest, umint _Length)
 			{
 				File.f_SetPosition(_Position);
 				File.f_Read(_pDest, fg_Min(CFilePos(_Length), File.f_GetLength() - _Position));
@@ -30,7 +30,7 @@ namespace NMib::NTool
 		// Look for header information
 		CNTImageHeaders *pGeneralHeaders = nullptr;
 		uint32 *pData = (uint32 *)Mem.f_GetArray();
-		mint HeadersStart = 0;
+		umint HeadersStart = 0;
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
 		for (int i = 0; i < FLen; i += 4, pData += 1)
 		{
@@ -58,7 +58,7 @@ namespace NMib::NTool
 				CFilePos SectionsStart = CFilePos(HeadersStart) + sizeof(CNTImageHeaders) + _Header.m_FileHeader.m_SizeOfOptionalHeader;
 				fReadData(SectionsStart, SectionHeaders.f_GetArray(), SectionHeaders.f_GetLen() * sizeof(CImageSectionHeader));
 
-				mint DebugRva = _Header.m_Optional.m_DataDirectory[6].m_VirtualAddress;
+				umint DebugRva = _Header.m_Optional.m_DataDirectory[6].m_VirtualAddress;
 
 				CImageSectionHeader *pDebugSection = nullptr;
 
@@ -83,9 +83,9 @@ namespace NMib::NTool
 
 				// Look up the file offset using the section header
 
-				mint Diff = (mint)( pDebugSection->m_VirtualAddress - pDebugSection->m_PointerToRawData);
+				umint Diff = (umint)( pDebugSection->m_VirtualAddress - pDebugSection->m_PointerToRawData);
 
-				mint FileOffset = DebugRva - Diff;
+				umint FileOffset = DebugRva - Diff;
 
 				CImageDebugDirectory DebugInfo;
 				fReadData(FileOffset, &DebugInfo, sizeof(DebugInfo));

@@ -184,7 +184,7 @@ public:
 						bParentChildren = true;
 						Streams = pClient->f_FindStreams(fg_Format("Parent={} & ^(Type=task)", Stream.m_Parent));
 
-						for (mint i = 0; i < Streams.f_GetLen();)
+						for (umint i = 0; i < Streams.f_GetLen();)
 						{
 							if (Streams[i] == StreamName)
 								Streams.f_Remove(i);
@@ -200,7 +200,7 @@ public:
 				}
 			}
 
-			for (mint i = 0; i < Streams.f_GetLen();)
+			for (umint i = 0; i < Streams.f_GetLen();)
 			{
 				auto &StreamName = Streams[i];
 				CPerforceClient::CStream Stream = Functions.f_GetStreamCached(StreamName);
@@ -312,7 +312,7 @@ public:
 
 		TCMap<CStr, CIntegrationResult> PairResults;
 
-		mint nThreads = 16;
+		umint nThreads = 16;
 		g_ThreadPool.f_Construct(nThreads);
 
 		auto fl_Integrate
@@ -352,7 +352,7 @@ public:
 					pClient->f_Login(CStr());
 
 					TCThreadSafeQueue<TCUniquePointer<CPerforceClientThrow>> ClientCache;
-					for (mint i = 0; i < nThreads; ++i)
+					for (umint i = 0; i < nThreads; ++i)
 					{
 						TCUniquePointer<CPerforceClientThrow> pClient;
 						pClient = fg_Construct(ConnectionInfo);
@@ -598,13 +598,13 @@ public:
 							TCSet<int32> ChangeLists;
 							TCVector<CStr> FileRevsToCheck;
 							TCMap<CStr, CStr> IntegrateTo;
-							mint nIntegrations = 0;
+							umint nIntegrations = 0;
 							for (auto iResult = UniqueResults.f_GetIterator(); iResult; ++iResult)
 							{
 								nIntegrations += iResult->m_EndFromRev - iResult->m_StartFromRev;
 							}
 
-							TCAtomic<mint> nDoneIntegrations;
+							TCAtomic<umint> nDoneIntegrations;
 
 							CStopwatch Stopwatch;
 							Stopwatch.f_Start();
@@ -750,7 +750,7 @@ public:
 										smint iReview;
 										while ((iReview = Line.f_FindNoCase("#review")) >= 0)
 										{
-											mint Length = fg_StrLen("#review");
+											umint Length = fg_StrLen("#review");
 											if (Line.f_GetAt(iReview + Length) == ':')
 												++Length;
 											if (Line.f_GetAt(iReview + Length) == '-')
@@ -769,7 +769,7 @@ public:
 										smint iMention;
 										while ((iMention = Line.f_FindChar('@')) >= 0)
 										{
-											mint Length = 1;
+											umint Length = 1;
 											for
 												(
 													ch8 Char = Line.f_GetAt(iMention + Length)
@@ -842,7 +842,7 @@ public:
 
 							}
 
-							mint nComments = 0;
+							umint nComments = 0;
 							for (auto iComment = Comments.f_GetIterator(); iComment; ++iComment)
 								nComments += iComment->f_GetLen();
 

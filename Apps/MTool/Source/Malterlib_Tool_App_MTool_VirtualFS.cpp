@@ -134,13 +134,13 @@ struct CCOFFObject
 
 	struct CSection
 	{
-		TCVector<mint> m_Symbols;
+		TCVector<umint> m_Symbols;
 		IMAGE_SECTION_HEADER m_Header;
 	};
 
 	struct CSymbol
 	{
-		mint m_iDataMember;
+		umint m_iDataMember;
 		IMAGE_SYMBOL m_Header;
 	};
 
@@ -153,7 +153,7 @@ struct CCOFFObject
 		STRING_TABLE m_StringTable;
 		void f_AddSymbol(CStr const &_Name, CByteVector const &_Data, CSection *_pSection)
 		{
-			mint iSymbol = m_Symbols.f_GetLen();
+			umint iSymbol = m_Symbols.f_GetLen();
 			auto &Symbol = m_Symbols.f_Insert();
 
 			Symbol.m_Header.m_Name.m_Name.m_Short = 0;
@@ -535,7 +535,7 @@ public:
 
 		CFileSystemInterface_Disk DiskSystem;
 
-		mint nFilesAdded = 0;
+		umint nFilesAdded = 0;
 		for (auto CurInclude = lIncludes.f_GetIterator()
 			;CurInclude
 			;++CurInclude)
@@ -585,9 +585,9 @@ public:
 					BasePath = BaseFiles[0];
 			}
 
-			mint Len = BasePath.f_GetLen();
+			umint Len = BasePath.f_GetLen();
 
-			for (mint i = 0; i < lSourceFiles.f_GetLen(); ++i)
+			for (umint i = 0; i < lSourceFiles.f_GetLen(); ++i)
 			{
 				auto & SourceFile = lSourceFiles[i];
 				{
@@ -840,7 +840,7 @@ public:
 			ByteFormatter << Input[0];
 
 
-			mint nBytesLeft = lData.f_GetLen();
+			umint nBytesLeft = lData.f_GetLen();
 			auto DataIter = lData.f_GetIterator();
 
 			while(nBytesLeft >= 16)

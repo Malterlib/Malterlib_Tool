@@ -33,13 +33,13 @@ public:
 
 	struct CCommandCounts
 	{
-		mint m_nCompile = 0;
-		mint m_nLink = 0;
-		mint m_nPhaseScript = 0;
-		mint m_nProcessPCH = 0;
-		mint m_nOther = 0;
+		umint m_nCompile = 0;
+		umint m_nLink = 0;
+		umint m_nPhaseScript = 0;
+		umint m_nProcessPCH = 0;
+		umint m_nOther = 0;
 
-		mint f_GetTotal() const
+		umint f_GetTotal() const
 		{
 			return m_nCompile + m_nLink + m_nPhaseScript + m_nProcessPCH + m_nOther;
 		}
@@ -66,10 +66,10 @@ public:
 		CStopwatch m_LastProgressUpdate{true};
 		CStopwatch m_BuildStopClock{true};
 		bool m_bProgressShown = false;
-		mint m_LastOutputProgressRows = 0;
+		umint m_LastOutputProgressRows = 0;
 
 		CStr m_BufferedInput;
-		mint m_BufferedInputParsedChars = 0;
+		umint m_BufferedInputParsedChars = 0;
 		bool m_bEndOfFileReceived = false;
 
 		CStr *m_pPendingIncludeLineFix = nullptr;
@@ -134,7 +134,7 @@ public:
 			if (!_Trimmed.f_StartsWith(c_Prefix) && !c_Prefix.f_StartsWith(_Trimmed))
 				return false;
 
-			mint nColonCount = 0;
+			umint nColonCount = 0;
 			for (auto Char : _Trimmed)
 			{
 				if (Char == ':')
@@ -184,7 +184,7 @@ public:
 
 			CTableRenderHelper::CColumnHelper Columns(1);
 
-			mint nOutputRows = 5;
+			umint nOutputRows = 5;
 
 			Columns.f_AddHeading("Total", 0);
 			Columns.f_AddHeading("{}{}{ns }{}"_f << AnsiEncoding.f_StatusNormal() << AnsiEncoding.f_Bold() << m_CommandCounts.f_GetTotal() << AnsiEncoding.f_Default(), 0);
@@ -196,7 +196,7 @@ public:
 
 			auto UnimportantRGB = AnsiEncoding.f_ForegroundRGB(128, 128, 128);
 
-			auto fAddCategory = [&](ch8 const *_pName, mint _nCount, bool _bImportant)
+			auto fAddCategory = [&](ch8 const *_pName, umint _nCount, bool _bImportant)
 				{
 					++nOutputRows;
 					TableRenderer.f_AddRow
@@ -407,7 +407,7 @@ public:
 					else
 						break;
 				}
-				mint nFinishedChars = pFinishedOutput - pStartParse;
+				umint nFinishedChars = pFinishedOutput - pStartParse;
 				if (!nFinishedChars)
 				{
 					m_BufferedInputParsedChars = pParse - pStartParse;

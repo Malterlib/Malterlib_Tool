@@ -12,7 +12,7 @@ public:
 //		DConOut("Removing broken ojb files for dir: {}" DNewLine, _Path);
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*.obj", EFileAttrib_File, true);
 
-		for (mint i = 0; i < Files.f_GetLen(); ++i)
+		for (umint i = 0; i < Files.f_GetLen(); ++i)
 		{
 			CFilePos Len = NFile::CFile::fs_GetFileSize(Files[i]);
 			if (Len == 0)
@@ -27,14 +27,14 @@ public:
 					CByteVector Test;
 					CFile File;
 					File.f_Open(Files[i], EFileOpen_Read|EFileOpen_ShareAll);
-					mint ToRead = fg_Min(File.f_GetLength(), 16);
+					umint ToRead = fg_Min(File.f_GetLength(), 16);
 					Test.f_SetLen(ToRead);
 					File.f_Read(Test.f_GetArray(), Test.f_GetLen());
 
-					mint Len = Test.f_GetLen();
+					umint Len = Test.f_GetLen();
 					bool bOnly0 = true;
 					{
-						for (mint i = 0; i < Len; ++i)
+						for (umint i = 0; i < Len; ++i)
 						{
 							if (Test[i] != 0)
 								bOnly0 = false;

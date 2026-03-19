@@ -66,7 +66,7 @@ public:
 			while (1)
 			{
 				ch8 Temp[1024];
-				mint ThisTime = fg_Min(1024, File.f_GetLength() - File.f_GetPosition());
+				umint ThisTime = fg_Min(1024, File.f_GetLength() - File.f_GetPosition());
 				File.f_ConsumeBytes(Temp, ThisTime);
 
 				Buffer.f_AddStr(Temp, ThisTime);

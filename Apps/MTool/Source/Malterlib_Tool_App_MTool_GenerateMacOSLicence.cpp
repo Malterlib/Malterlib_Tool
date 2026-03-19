@@ -49,18 +49,18 @@ public:
 			CAnsiStr FormattedReplacementText;
 			{
 
-				mint nLength = ReplacementTextAnsi.f_GetLen();
+				umint nLength = ReplacementTextAnsi.f_GetLen();
 
-				for (mint iChar = 0; iChar < nLength; iChar += 16)
+				for (umint iChar = 0; iChar < nLength; iChar += 16)
 				{
-					mint nChars = (iChar + 16 <= nLength) ? 16 : nLength - iChar;
+					umint nChars = (iChar + 16 <= nLength) ? 16 : nLength - iChar;
 
 					if (FormattedReplacementText.f_IsEmpty())
 						FormattedReplacementText += "$\"";
 					else
 						FormattedReplacementText += "\t$\"";
 
-					for (mint j = 0; j < nChars; ++j)
+					for (umint j = 0; j < nChars; ++j)
 					{
 						if (j > 0 && (j & 1) == 0)
 							FormattedReplacementText += " ";

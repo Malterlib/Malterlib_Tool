@@ -59,7 +59,7 @@ void CTool::f_Register
 			, [this](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 			{
 				NContainer::CRegistry Params;
-				mint iOut = 0;
+				umint iOut = 0;
 
 				if (auto pParams = _Params.f_GetMember("Params"))
 				{
@@ -99,7 +99,7 @@ aint CTool2::f_Run(NContainer::CRegistry &_Params)
 
 	TCVector<CStr> Files;
 
-	for (mint i = 0; true; ++i)
+	for (umint i = 0; true; ++i)
 	{
 		CStr Value = _Params.f_GetValue(CStr::fs_ToStr(i), "");
 		if (Value.f_IsEmpty())

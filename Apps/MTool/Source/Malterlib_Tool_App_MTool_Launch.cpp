@@ -259,7 +259,7 @@ public:
 			for (auto Iter = Programs.f_GetIterator(); Iter; ++Iter)
 			{
 				CProgram const &Program = *Iter;
-				mint nParams = Program.m_Params.f_GetLen();
+				umint nParams = Program.m_Params.f_GetLen();
 				if (nParams > 0)
 				{
 					CStr FileName = Program.m_Params[0];
