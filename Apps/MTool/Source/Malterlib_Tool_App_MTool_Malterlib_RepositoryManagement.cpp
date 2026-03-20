@@ -128,6 +128,18 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		}
 	;
 
+	auto fFilter_IncludePull = [](bool _bDefault)
+		{
+			return "RepoIncludePull?"_o=
+				{
+					"Names"_o= _o["--repo-include-pull"]
+					, "Default"_o= _bDefault
+					, "Description"_o= "When filtering for changed repositories, also include repositories that need to be pulled.\n"
+				}
+			;
+		}
+	;
+
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
@@ -215,6 +227,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
@@ -288,6 +301,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, Filter_Tags
 						, Filter_Branch
 						, fFilter_OnlyChanged(false)
+						, fFilter_IncludePull(false)
 						, fs_CachedEnvironmentOption(true)
 					}
 					, "Parameters"_o=
@@ -349,6 +363,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, Filter_Tags
 						, Filter_Branch
 						, fFilter_OnlyChanged(false)
+						, fFilter_IncludePull(false)
 						, fs_CachedEnvironmentOption(true)
 						, "Shell?"_o=
 						{
@@ -465,6 +480,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, Option_Force
 						, fFilter_Type("")
 						, fFilter_OnlyChanged(true)
+						, fFilter_IncludePull(false)
 						, fs_CachedEnvironmentOption(true)
 					}
 					, "Parameters"_o=
@@ -521,6 +537,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, Option_Force
 						, fFilter_Type("")
 						, fFilter_OnlyChanged(true)
+						, fFilter_IncludePull(false)
 						, fs_CachedEnvironmentOption(true)
 					}
 				}
@@ -597,6 +614,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 				, "Parameters"_o=
@@ -690,6 +708,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 				, "Parameters"_o=
@@ -777,6 +796,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 				, "Parameters"_o=
@@ -887,6 +907,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 				, "Parameters"_o=
@@ -981,6 +1002,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
