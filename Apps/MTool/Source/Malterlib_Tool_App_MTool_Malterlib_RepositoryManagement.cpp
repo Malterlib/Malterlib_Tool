@@ -128,6 +128,18 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		}
 	;
 
+	auto fFilter_IncludePull = [](bool _bDefault)
+		{
+			return "RepoIncludePull?"_o=
+				{
+					"Names"_o= _o["--repo-include-pull"]
+					, "Default"_o= _bDefault
+					, "Description"_o= "When filtering for changed repositories, also include repositories that need to be pulled.\n"
+				}
+			;
+		}
+	;
+
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
@@ -215,6 +227,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
@@ -288,6 +301,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, Filter_Tags
 						, Filter_Branch
 						, fFilter_OnlyChanged(false)
+						, fFilter_IncludePull(false)
 						, fs_CachedEnvironmentOption(true)
 					}
 					, "Parameters"_o=
@@ -349,6 +363,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, Filter_Tags
 						, Filter_Branch
 						, fFilter_OnlyChanged(false)
+						, fFilter_IncludePull(false)
 						, fs_CachedEnvironmentOption(true)
 						, "Shell?"_o=
 						{
@@ -457,14 +472,21 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			(
 				{
 					"Names"_o= _o["branch"]
-					, "Description"_o= "Check out branch for matching repositories.\n"
+					, "Description"_o= "Check out branch for root repository and update all repositories.\n"
+					"Use --force to check out the branch for matching repositories using git checkout -B,"
+					" keeping the current HEAD and any untracked files.\n"
+					"Repository filters are only available with --force.\n"
 					, "Category"_o= "Repository management"
 					, "Options"_o=
 					{
 						Option_Pretend
 						, Option_Force
+						, Filter_Name
 						, fFilter_Type("")
-						, fFilter_OnlyChanged(true)
+						, Filter_Tags
+						, Filter_Branch
+						, fFilter_OnlyChanged(false)
+						, fFilter_IncludePull(false)
 						, fs_CachedEnvironmentOption(true)
 					}
 					, "Parameters"_o=
@@ -513,14 +535,21 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			(
 				{
 					"Names"_o= _o["unbranch"]
-					, "Description"_o= "Check out the default branch for matching repositories.\n"
+					, "Description"_o= "Check out the default branch for root repository and update all repositories.\n"
+					"Use --force to check out the default branch for matching repositories using git checkout -B,"
+					" keeping the current HEAD and any untracked files.\n"
+					"Repository filters are only available with --force.\n"
 					, "Category"_o= "Repository management"
 					, "Options"_o=
 					{
 						Option_Pretend
 						, Option_Force
+						, Filter_Name
 						, fFilter_Type("")
-						, fFilter_OnlyChanged(true)
+						, Filter_Tags
+						, Filter_Branch
+						, fFilter_OnlyChanged(false)
+						, fFilter_IncludePull(false)
 						, fs_CachedEnvironmentOption(true)
 					}
 				}
@@ -597,6 +626,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 				, "Parameters"_o=
@@ -690,6 +720,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 				, "Parameters"_o=
@@ -777,6 +808,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 				, "Parameters"_o=
@@ -887,6 +919,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 				, "Parameters"_o=
@@ -981,6 +1014,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					, Filter_Tags
 					, Filter_Branch
 					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
 					, fs_CachedEnvironmentOption(true)
 				}
 			}

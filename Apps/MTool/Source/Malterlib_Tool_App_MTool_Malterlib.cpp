@@ -89,6 +89,8 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJsonSorted 
 
 	GenerateOptions.m_bDetailedValues = _Params["DetailedValues"].f_Boolean();
 
+	GenerateOptions.m_bStash = _Params["Stash"].f_Boolean();
+
 	return GenerateOptions;
 }
 

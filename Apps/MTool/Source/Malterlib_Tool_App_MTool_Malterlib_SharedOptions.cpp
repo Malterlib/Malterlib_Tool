@@ -120,6 +120,13 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					, "Hidden"_o= true
 					, "Description"_o= "[INTERNAL] Used internally when relaunching to force reconcile options to be ignored.\n"
 				}
+				, "Stash?"_o=
+				{
+					"Names"_o= _o["--stash"]
+					, "Default"_o= true
+					, "Description"_o= "Stash local changes before switching branches during repository update.\n"
+					"Changes are stashed with a predetermined name and restored when switching back.\n"
+				}
 				, "DetailedPositions?"_o=
 				{
 					"Names"_o= _o["--detailed-positions"]
