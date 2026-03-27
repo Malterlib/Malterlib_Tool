@@ -86,19 +86,19 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 						"Type"_o= ""
 						, "Description"_o= "The workspace to build."
 					}
-					, "Platform"_o=
+					, "Platform?"_o=
 					{
 						"Type"_o= ""
 						, "Description"_o= "The platform to build.\n"
 						"For example: " DMibStringize(DPlatform)
 					}
-					, "Architecture"_o=
+					, "Architecture?"_o=
 					{
 						"Type"_o= ""
 						, "Description"_o= "The architecture to build.\n"
 						"For example: " DMibStringize(DArchitecture)
 					}
-					, "Configuration"_o=
+					, "Configuration?"_o=
 					{
 						"Type"_o= ""
 						, "Description"_o= "The configuration to build.\n"
@@ -128,19 +128,19 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 						"Type"_o= ""
 						, "Description"_o= "The target to build."
 					}
-					, "Platform"_o=
+					, "Platform?"_o=
 					{
 						"Type"_o= ""
 						, "Description"_o= "The platform to build.\n"
 						"For example: " DMibStringize(DPlatform)
 					}
-					, "Architecture"_o=
+					, "Architecture?"_o=
 					{
 						"Type"_o= ""
 						, "Description"_o= "The architecture to build.\n"
 						"For example: " DMibStringize(DArchitecture)
 					}
-					, "Configuration"_o=
+					, "Configuration?"_o=
 					{
 						"Type"_o= ""
 						, "Description"_o= "The configuration to build.\n"
