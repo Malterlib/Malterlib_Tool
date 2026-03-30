@@ -17,10 +17,30 @@ export MalterlibImportUpdateCache=false
 echo "DestinationDir: $DestinationDir"
 echo "Architecture: $Architecture"
 
-sudo apt install -y build-essential cmake ninja-build python3-distutils libacl1-dev \
+Packages="xcb build-essential cmake ninja-build libacl1-dev \
 	libext2fs-dev libudev-dev libssl-dev uuid-dev libdbus-1-dev libsecret-1-dev libxcb-xinerama0-dev \
 	libunity-dev libxkbcommon-x11-dev libxkbcommon-dev libxcb-cursor0 libxcb-cursor-dev libxcb-util-dev \
-	libxcb1-dev libx11-dev libc++-20-dev
+	libxcb1-dev libx11-dev libc++-20-dev"
+
+# python3-distutils was removed in Ubuntu 24.04 (merged into Python 3.12 stdlib)
+if apt-get install --simulate python3-distutils &>/dev/null; then
+	Packages="$Packages python3-distutils"
+fi
+
+sudo apt install -y $Packages
+
+# Ensure deb-src is enabled for build-dep
+if [ -f /etc/apt/sources.list.d/ubuntu.sources ]; then
+	if ! grep -q 'Types:.*deb-src' /etc/apt/sources.list.d/ubuntu.sources; then
+		sudo sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources
+		sudo apt-get update
+	fi
+elif [ -f /etc/apt/sources.list ]; then
+	if ! grep -q '^deb-src' /etc/apt/sources.list; then
+		sudo sed -i 's/^deb /deb-src /' /etc/apt/sources.list | sudo tee -a /etc/apt/sources.list > /dev/null
+		sudo apt-get update
+	fi
+fi
 
 sudo apt-get build-dep qtbase-opensource-src qtchooser -y
 
