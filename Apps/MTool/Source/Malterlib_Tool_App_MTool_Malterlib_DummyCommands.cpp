@@ -112,7 +112,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_o= _o["build_target"]
+				"Names"_o= _o["build-target", "build_target"]
 				, "Description"_o= "Build a targen in a workspace."
 				, "GlobalOptions"_o= HelpGlobalOptions
 				, "ShowParametersStart"_o= false
@@ -214,7 +214,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_o= _o["bootstrap_only"]
+				"Names"_o= _o["bootstrap-only", "bootstrap_only"]
 				, "Description"_o= "Only bootstrap malterlib."
 				, "GlobalOptions"_o= HelpGlobalOptions
 				, "ShowParametersStart"_o= false
@@ -225,7 +225,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
-				"Names"_o= _o["detect_system"]
+				"Names"_o= _o["detect-system", "detect_system"]
 				, "Description"_o= "Source this command to get build system info in environment.\n"
 				"@Indent=21\r"
 				"   MToolPath:        The path to the MTool executable. Is added to PATH as well when sourcing.\r"

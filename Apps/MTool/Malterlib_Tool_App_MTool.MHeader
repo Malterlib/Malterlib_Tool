@@ -165,7 +165,7 @@ Property
 		* Run profiles
 			LLVM_PROFILE_FILE="/opt/Temp/MTool/mtool-%p.profraw" ./Binaries/Malterlib/macOS/arm64/mib generate --action=ReBuild
 			LLVM_PROFILE_FILE="/opt/Temp/MTool/mtool-%p.profraw" ./Binaries/Malterlib/macOS/arm64/mib generate
-			LLVM_PROFILE_FILE="/opt/Temp/MTool/mtool-%p.profraw" ./Binaries/Malterlib/macOS/arm64/mib update_repos
+			LLVM_PROFILE_FILE="/opt/Temp/MTool/mtool-%p.profraw" ./Binaries/Malterlib/macOS/arm64/mib update-repos
 			LLVM_PROFILE_FILE="/opt/Temp/MTool/mtool-%p.profraw" ./Binaries/Malterlib/macOS/arm64/mib status
 
 		* Merge profiles
