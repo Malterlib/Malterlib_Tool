@@ -11,7 +11,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 	o_ToolsSection.f_RegisterCommand
 		(
 			{
-				"Names"_o= _o["update_repos"]
+				"Names"_o= _o["update-repos", "update_repos"]
 				, "Description"_o= "Update repositories.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
