@@ -171,6 +171,7 @@ void CTool_Malterlib::f_Register
 	f_Register_SharedOptions(o_ToolsSection);
 	f_Register_LfsReleaseStore(o_CommandLine);
 	f_Register_RepositoryManagement(o_ToolsSection);
+	f_Register_CheckLicense(o_ToolsSection);
 	f_Register_Core(o_ToolsSection);
 }
 
