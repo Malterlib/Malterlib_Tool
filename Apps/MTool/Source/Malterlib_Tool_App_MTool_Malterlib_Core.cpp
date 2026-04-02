@@ -168,6 +168,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 				CBuildSystem BuildSystem
 					(
 						_pCommandLine->f_AnsiEncoding().f_Flags()
+						, _pCommandLine->m_CommandLineWidth
 						, [_pCommandLine](NStr::CStr const &_Output, bool _bError)
 						{
 							if (_bError)
