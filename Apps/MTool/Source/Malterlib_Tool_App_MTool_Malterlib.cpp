@@ -74,6 +74,7 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJsonSorted 
 
 	GenerateOptions.m_bSkipUpdate = _Params["SkipUpdate"].f_Boolean();
 	GenerateOptions.m_bForceUpdateRemotes = _Params["ForceUpdateRemotes"].f_Boolean();
+	GenerateOptions.m_bForceUpdateHooks = _Params["ForceUpdateHooks"].f_Boolean();
 	GenerateOptions.f_ParseReconcileActions(_Params);
 
 	auto &DetailedPositions = _Params["DetailedPositions"];

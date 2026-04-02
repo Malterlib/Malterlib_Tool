@@ -78,6 +78,12 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					, "Default"_o= true
 					, "Description"_o= "Force update local tags when updating remotes.\n"
 				}
+				, "ForceUpdateHooks?"_o=
+				{
+					"Names"_o= _o["--force-update-hooks"]
+					, "Default"_o= false
+					, "Description"_o= "Force re-checking and updating of managed repository hooks.\n"
+				}
 				, "GitFetchTimeout?"_o=
 				{
 					"Names"_o= _o["--fetch-timeout"]
