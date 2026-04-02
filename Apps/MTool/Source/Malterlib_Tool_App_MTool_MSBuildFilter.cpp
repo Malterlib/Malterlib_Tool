@@ -1,5 +1,5 @@
-// Copyright © 2025 Favro Holding AB
-// Distributed under the MIT license, see license text in LICENSE.Malterlib
+// Copyright © Unbroken AB
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include "Malterlib/CommandLine/Source/Malterlib_CommandLine_AnsiEncoding.h"
 #include "Malterlib_Tool_App_MTool_Main.h"

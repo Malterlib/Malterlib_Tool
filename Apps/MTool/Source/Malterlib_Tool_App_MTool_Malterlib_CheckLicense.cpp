@@ -1,4 +1,4 @@
-// Copyright Unbroken AB
+// Copyright © Unbroken AB
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include "Malterlib_Tool_App_MTool_Main.h"

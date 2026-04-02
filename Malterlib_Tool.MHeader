@@ -1,5 +1,5 @@
-// Copyright © 2016 Hansoft AB
-// Distributed under the MIT license, see license text in LICENSE.Malterlib
+// Copyright © Unbroken AB
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 Import "../Core/Lib_Malterlib.MTarget"
 Import "Apps/*/*.MHeader"
@@ -346,6 +346,115 @@ Property.MalterlibEnableCMakeProject: bool = false
 			Dependency.Type "Library"
 		}
 	}
+}
+
+Repository
+{
+	&
+	{
+		Repository.Type "Malterlib"
+		MalterlibRepoName->StartsWith("MalterlibBinaries_") true
+	}
+
+	CheckLicense true
+
+	License {
+		Include: ["*"]
+		, Disallowed: ["LICENSE.Malterlib", "LICENSE.ThirdParty"]
+		, Exclude: [
+			"LICENSE"
+			, ".gitattributes"
+			, "Bootstrap.version"
+			, "MTool*"
+			, "MalterlibHelper"
+			, "bsdtar*"
+			, "ninja*"
+			, "*MalterlibOverrideMalloc.dylib"
+			, "LinuxLibTool/libtool"
+			, "NoLib/*/lib.exe"
+		]
+		, LicenseFiles: {
+			"LICENSE": [
+				{ Source: "../Core/LICENSE"->MakeAbsolute(), Name: "Malterlib (https://github.com/Malterlib/Malterlib)" }
+				, { Source: "../../External/boringssl/LICENSE"->MakeAbsolute(), Name: "BoringSSL (https://github.com/Malterlib/boringssl, https://github.com/google/boringssl)" }
+				, { Source: "../../External/CMake/LICENSE.rst"->MakeAbsolute(), Name: "CMake (https://github.com/Malterlib/CMake, https://github.com/Kitware/CMake)" }
+				, { Source: "../../External/curl/COPYING"->MakeAbsolute(), Name: "curl (https://github.com/Malterlib/curl, https://github.com/curl/curl)" }
+				, { Source: "../../External/hidapi/LICENSE-bsd.txt"->MakeAbsolute(), Name: "HIDAPI (https://github.com/Malterlib/hidapi, https://github.com/libusb/hidapi)" }
+				, { Source: "../../External/libarchive/COPYING"->MakeAbsolute(), Name: "libarchive (https://github.com/Malterlib/libarchive, https://github.com/libarchive/libarchive)" }
+				, { Source: "../../External/libjpeg-turbo/LICENSE.md"->MakeAbsolute(), Name: "libjpeg-turbo (https://github.com/Malterlib/libjpeg-turbo, https://github.com/libjpeg-turbo/libjpeg-turbo)" }
+				, { Source: "../../External/libpng/LICENSE"->MakeAbsolute(), Name: "libpng (https://github.com/Malterlib/libpng, https://github.com/glennrp/libpng)" }
+				, { Source: "../../External/llvm-project/LICENSE.TXT"->MakeAbsolute(), Name: "LLVM (https://github.com/Malterlib/llvm-project, https://github.com/llvm/llvm-project)" }
+				, { Source: "../../External/ninja/COPYING"->MakeAbsolute(), Name: "ninja (https://github.com/Malterlib/ninja, https://github.com/ninja-build/ninja)" }
+				, { Source: "../../External/p4source/LICENSE"->MakeAbsolute(), Name: "Perforce (https://github.com/Malterlib/p4source)" }
+				, { Source: "../../External/tinyxml2/LICENSE.txt"->MakeAbsolute(), Name: "TinyXML-2 (https://github.com/Malterlib/tinyxml2, https://github.com/leethomason/tinyxml2)" }
+				, { Source: "../../External/zlib/LICENSE"->MakeAbsolute(), Name: "zlib (https://github.com/Malterlib/zlib, https://github.com/madler/zlib)" }
+				, { Source: "../../External/zstd/LICENSE"->MakeAbsolute(), Name: "Zstandard (https://github.com/Malterlib/zstd, https://github.com/facebook/zstd)" }
+				, { Source: "../../External/CMake/Utilities/cmbzip2/LICENSE"->MakeAbsolute(), Name: "bzip2 (bundled in CMake, https://sourceware.org/bzip2/)" }
+				, { Source: "../../External/CMake/Utilities/cmcppdap/LICENSE"->MakeAbsolute(), Name: "cppdap (bundled in CMake, https://github.com/google/cppdap)" }
+				, { Source: "../../External/CMake/Utilities/cmcppdap/NOTICE"->MakeAbsolute(), Name: "cppdap NOTICE" }
+				, { Source: "../../External/CMake/Utilities/cmexpat/COPYING"->MakeAbsolute(), Name: "Expat (bundled in CMake, https://github.com/libexpat/libexpat)" }
+				, { Source: "../../External/CMake/Utilities/cmjsoncpp/LICENSE"->MakeAbsolute(), Name: "JsonCpp (bundled in CMake, https://github.com/open-source-parsers/jsoncpp)" }
+				, { Source: "../../External/CMake/Utilities/cmliblzma/COPYING"->MakeAbsolute(), Name: "XZ Utils (bundled in CMake, https://tukaani.org/xz/)" }
+				, { Source: "../../External/CMake/Utilities/cmlibrhash/COPYING"->MakeAbsolute(), Name: "LibRHash (bundled in CMake, https://github.com/rhash/RHash)" }
+				, { Source: "../../External/CMake/Utilities/cmlibuv/LICENSE"->MakeAbsolute(), Name: "libuv (bundled in CMake, https://github.com/libuv/libuv)" }
+				, { Source: "ThirdPartyLicenses/lmdb/LICENSE"->MakeAbsolute(), Name: "lmdb (https://github.com/LMDB/lmdb.git)" }
+			]
+		}
+	}
+
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/nasm/LICENSE"->MakeAbsolute(), Name: "nasm (https://github.com/netwide-assembler/nasm.git)" }
+	{
+		!!MalterlibRepoName->StartsWith("MalterlibBinaries_Windows_") true
+	}
+
+	License #<Exclude> =+ ["nasm.exe"]
+	{
+		!!MalterlibRepoName->StartsWith("MalterlibBinaries_Windows_") true
+	}
+}
+
+Repository
+{
+	&
+	{
+		Repository.Type "Malterlib"
+		MalterlibRepoName->StartsWith("MalterlibLLVMBinaries_") true
+	}
+
+	CheckLicense true
+
+	License {
+		Include: ["*"]
+		, Exclude: [
+			"LICENSE"
+			, ".gitignore"
+			, ".gitattributes"
+			, "include/*"
+			, "share/*"
+			, "lib/*"
+			, "libexec/*"
+			, "bin/*"
+		]
+		, Disallowed: ["LICENSE.Malterlib"]
+		, LicenseFiles: {
+			"LICENSE": [
+				{ Source: "../Core/LICENSE"->MakeAbsolute(), Name: "Malterlib (https://github.com/Malterlib/Malterlib)" }
+				, { Source: "../../External/llvm-project/LICENSE.TXT"->MakeAbsolute(), Name: "LLVM (https://github.com/Malterlib/llvm-project, https://github.com/llvm/llvm-project)" }
+			]
+		}
+	}
+}
+
+Repository
+{
+	&
+	{
+		Repository.Type "Malterlib"
+		MalterlibRepoName->StartsWith("MalterlibBinariesSDK_") true
+	}
+
+	// Licensing is handled separately inside the repo as part of the SDK build process
+	CheckLicense false
 }
 
 Property.Malterlib_Tool_App_Targets: [type(CEntity)] = []
