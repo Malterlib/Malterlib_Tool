@@ -341,6 +341,54 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		;
 	}
 
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["repo-commit"]
+				, "Description"_o= "Create 'Update repositories' commits for config files with descriptive messages generated from child-repo commits.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
+				{
+					"SkipCi?"_o=
+					{
+						"Names"_o= _o["--skip-ci"]
+						, "Default"_o= false
+						, "Description"_o= "Add [skip ci] to commit message.\n"
+					}
+					, "MaxCommitsPerSection?"_o=
+					{
+						"Names"_o= _o["--max-commits-per-section"]
+						, "Default"_o= 20
+						, "Description"_o= "Maximum number of commits to show per section in the commit message.\n"
+					}
+					, fs_CachedEnvironmentOption(true)
+				}
+			}
+			, [=, this](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				CBuildSystem::ERepoCommitFlag Flags = CBuildSystem::ERepoCommitFlag_None;
+				if (_Params["SkipCi"].f_Boolean())
+					Flags |= CBuildSystem::ERepoCommitFlag_SkipCi;
+
+				uint32 MaxCommitsPerSection = _Params["MaxCommitsPerSection"].f_Integer();
+
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				co_return co_await f_RunBuildSystem
+					(
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
+						{
+							co_return co_await _pBuildSystem->f_Action_Repository_CommitRepos(GenerateOptions, Flags, MaxCommitsPerSection);
+						}
+						, _pCommandLine
+						, &GenerateOptions
+					)
+				;
+			}
+		)
+	;
+
 	{
 		o_ToolsSection.f_RegisterCommand
 			(
