@@ -976,11 +976,13 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					{
 						"Default"_o= "origin/master"
 						, "Description"_o= "The commit to start showing commits from.\n"
+						"For Perforce roots, use @changelist (e.g. @12345). Default auto-detects previous changelist.\n"
 					}
 					, "ToReference?"_o=
 					{
 						"Default"_o= "HEAD"
 						, "Description"_o= "The commit to end showing commits to.\n"
+						"For Perforce roots, use @changelist (e.g. @12345). Default auto-detects latest changelist.\n"
 					}
 				}
 			}
