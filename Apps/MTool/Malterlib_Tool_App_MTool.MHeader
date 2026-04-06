@@ -96,7 +96,7 @@ Property
 			Dependency.Target: "Com_ninja_ninja"
 			, Dependency.TargetProperties: {
 				MalterlibPostCopyProject: MalterlibPostCopyProject
-				, MalterlibPostCopyDestination: `@(MalterlibPostCopyDestination)/`
+				, MalterlibPostCopyDestination: MalterlibPostCopyDestination
 				, Target.Name: "Com_ninja_ninja"
 				, Target.Group: "ExternalBinaries/ninja"
 			}
