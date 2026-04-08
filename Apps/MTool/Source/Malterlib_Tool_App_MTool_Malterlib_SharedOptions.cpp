@@ -20,6 +20,8 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 			DetailedPositionsDefault = DetailedPositionsEnv;
 	}
 
+	bool bShowProgressDefault = fg_GetSys()->f_GetEnvironmentVariable("RunningCI", "") != "true" && fg_GetSys()->f_GetEnvironmentVariable("BUILDSERVER", "").f_LowerCase() != "true";
+
 	o_ToolsSection.f_RegisterSectionOptions
 		(
 			{
@@ -148,6 +150,12 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					, "Default"_o= false
 					, "Description"_o= "Show values for contributing positions.\n"
 					"Enabling detailed values is going to significantly affect performance"
+				}
+				, "ShowRepoProgress?"_o=
+				{
+					"Names"_o= _o["--show-repo-progress"]
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_ShowRepoProgress", bShowProgressDefault ? "true" : "") == "true"
+					, "Description"_o= "Show progress while repository operations are ongoing."
 				}
 			}
 		)
