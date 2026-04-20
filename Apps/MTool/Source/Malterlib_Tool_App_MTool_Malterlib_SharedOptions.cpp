@@ -100,9 +100,13 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					"Format: Wildcard:Action[,Wildcard:Action]...\n"
 					"Valid actions\r"
 					"@Indent=12\r"
-					"   auto:    Accept recommended actions\r"
-					"   rebase:  Rebase repositories\r"
-					"   reset:   Reset repositories (WARNING changes can be lost)\r"
+					"   auto:         Accept recommended actions\r"
+					"   rebase:       Rebase repositories\r"
+					"   reset:        Reset repositories (WARNING changes can be lost)\r"
+					"   leave:        Leave repositories as is, no action taken\r"
+					"   fork-remote:  Fork from a configured remote on a supported hosting provider into the missing origin (when origin is missing)\r"
+					"   clone-remote: Clone from a configured non-origin remote into the missing origin (when origin is missing)\r"
+					"   init:         Initialize a missing repository locally with a placeholder commit (when no remote has it yet)\r"
 				}
 				, "ReconcileRemoved?"_o=
 				{
