@@ -184,7 +184,6 @@ Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		!!Compile.Type "C++"
 		SearchPath += []
 		PreprocessorDefines += [
-			"NINJA_HAVE_BROWSE",
 			"USE_PPOLL=1"
 		]
 	}
@@ -202,30 +201,6 @@ Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		%File `@('../../../../External/ninja'->MakeAbsolute())/src/ninja.cc`
 		{
 			Compile.Type "C++"
-		}
-		%File `@('../../../../External/ninja'->MakeAbsolute())/src/browse.cc`
-		{
-			Compile.Type "C++"
-			Compile.PreprocessorDefines += [
-				"NINJA_PYTHON=\"python3\""
-			]
-		}
-		%File `@('../../../../External/ninja'->MakeAbsolute())/src/browse.py`
-		{
-			Compile
-			{
-				Type "Custom"
-				Custom_CommandLine `MToolCMake -E make_directory @(`@('.'->MakeAbsolute())/build`->MakeAbsolute()->EscapeHost()) && src/inline.sh kBrowsePy < src/browse.py > @(`@(CMakeIntermediateDirectory)/External_ninja/build/browse_py.h`->MakeAbsolute()->EscapeHost())`
-				AllowNonExisting true
-				Custom_WorkingDirectory `@('../../../../External/ninja'->MakeAbsolute())`->MakeAbsolute()
-				Custom_Outputs [
-					`@(CMakeIntermediateDirectory)/External_ninja/build/browse_py.h`->MakeAbsolute()
-				]
-				Custom_Inputs [
-					`@('../../../../External/ninja'->MakeAbsolute())/src/browse.py`->MakeAbsolute(),
-					`@('../../../../External/ninja'->MakeAbsolute())/src/inline.sh`->MakeAbsolute()
-				]
-			}
 		}
 	}
 	%Dependency "Lib_ninja_libninja"

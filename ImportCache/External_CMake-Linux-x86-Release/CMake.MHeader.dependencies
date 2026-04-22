@@ -24,9 +24,6 @@
 ../../../../External/CMake/Source/Checks/cm_cxx_filesystem.cxx
 ../../../../External/CMake/Source/Checks/cm_cxx_make_unique.cxx
 ../../../../External/CMake/Source/Checks/cm_message_checks_compat.cmake
-../../../../External/CMake/Source/CursesDialog/CMakeLists.txt
-../../../../External/CMake/Source/CursesDialog/form/CMakeLists.txt
-../../../../External/CMake/Source/CursesDialog/form/cmFormConfigure.h.in
 ../../../../External/CMake/Source/Modules/CMakeBuildUtilities.cmake
 ../../../../External/CMake/Source/Modules/OverrideC.cmake
 ../../../../External/CMake/Source/Modules/OverrideCXX.cmake
@@ -116,7 +113,6 @@
 ../../../../External/CMake/Tests/CTestTestUpload/test.cmake.in
 ../../../../External/CMake/Tests/CTestTestVerboseOutput/test.cmake.in
 ../../../../External/CMake/Tests/CTestUpdateGIT.cmake.in
-../../../../External/CMake/Tests/CTestUpdateSVN.cmake.in
 ../../../../External/CMake/Tests/CheckFortran.cmake
 ../../../../External/CMake/Tests/CheckSourceTree/CMakeLists.txt
 ../../../../External/CMake/Tests/CheckSwift.cmake

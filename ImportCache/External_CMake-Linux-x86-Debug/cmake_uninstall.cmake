@@ -8,7 +8,7 @@ foreach(file ${files})
   message(STATUS "Uninstalling \"$ENV{DESTDIR}${file}\"")
   if(EXISTS "$ENV{DESTDIR}${file}")
     execute_process(
-      COMMAND "../../../../Binaries/Malterlib/macOS/arm64/MToolCMake" -E rm -f "$ENV{DESTDIR}${file}"
+      COMMAND "../../../../Binaries/Malterlib/Linux/arm64/MToolCMake" -E rm -f "$ENV{DESTDIR}${file}"
       OUTPUT_VARIABLE rm_out
       RESULT_VARIABLE rm_retval
       )
