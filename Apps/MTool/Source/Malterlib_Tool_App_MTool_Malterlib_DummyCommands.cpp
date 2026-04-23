@@ -75,6 +75,27 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 	Section.f_RegisterDirectCommand
 		(
 			{
+				"Names"_o= _o["init"]
+				, "Description"_o= "Initialize a new Malterlib project in the current directory."
+				, "GlobalOptions"_o= HelpGlobalOptions
+				, "ShowParametersStart"_o= false
+				, "Options"_o=
+				{
+					"RepoRoot?"_o=
+					{
+						"Names"_o= _o["--repo-root"]
+						, "Default"_o= ""
+						, "Description"_o= "The Malterlib repository root URL to bake into the generated build system file. When omitted, the generated file uses the default root (https://github.com/Malterlib)."
+					}
+				}
+				, "ShowOptionsInCommandEntry"_o= true
+			}
+			, fDummyCommand
+		)
+	;
+	Section.f_RegisterDirectCommand
+		(
+			{
 				"Names"_o= _o["build"]
 				, "Description"_o= "Build a workspace."
 				, "GlobalOptions"_o= HelpGlobalOptions
