@@ -10,6 +10,9 @@ Import "Apps/*/*.MHeader"
 	{
 		Type "External"
 		Remotes =+ {Name: "upstream", URL: "https://github.com/Kitware/CMake.git"}
+		{
+			!!MalterlibAddUpstreams true
+		}
 	}
 }
 
@@ -313,6 +316,9 @@ Property
 	{
 		Type "External"
 		Remotes =+ {Name: "upstream", URL: "https://github.com/ninja-build/ninja.git"}
+		{
+			!!MalterlibAddUpstreams true
+		}
 	}
 }
 
