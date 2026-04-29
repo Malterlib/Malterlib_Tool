@@ -851,6 +851,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_o= false
 						, "Description"_o= "Force push to remotes.\n"
 					}
+					, "PushPulls?"_o=
+					{
+						"Names"_o= _o["--push-pulls"]
+						, "Default"_o= false
+						, "Description"_o= "Also push branches whose same-named remote branch would show as needing pull in status, but only when the local branch tip is reachable from the remote default branch.\n"
+					}
 					, Filter_Name
 					, fFilter_Type("")
 					, Filter_Tags
@@ -885,6 +891,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					Flags |= CBuildSystem::ERepoPushFlag_NonDefaultToAll;
 				if (_Params["Force"].f_Boolean())
 					Flags |= CBuildSystem::ERepoPushFlag_Force;
+				if (_Params["PushPulls"].f_Boolean())
+					Flags |= CBuildSystem::ERepoPushFlag_PushPulls;
 
 				TCVector<CStr> Remotes;
 				for (auto &Param : _Params["Remotes"].f_Array())
