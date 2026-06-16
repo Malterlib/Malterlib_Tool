@@ -322,6 +322,72 @@ Property
 	}
 }
 
+Property.MalterlibEnableLLVMBuildRepositories: bool = true // User(Repository)=true: Sync optional external repositories needed to build Malterlib LLVM distributions.
+
+%Repository "libxml2"
+{
+	!!MalterlibEnableLLVMBuildRepositories true
+
+	Repository
+	{
+		Type "External"
+		Remotes =+ {Name: "upstream", URL: "https://gitlab.gnome.org/GNOME/libxml2.git"}
+		{
+			!!MalterlibAddUpstreams true
+		}
+		DefaultUpstreamBranch "master"
+		Tags ["llvm"]
+	}
+}
+
+%Repository "libedit"
+{
+	!!MalterlibEnableLLVMBuildRepositories true
+
+	Repository
+	{
+		Type "External"
+		Remotes =+ {Name: "upstream", URL: "https://salsa.debian.org/debian/libedit.git"}
+		{
+			!!MalterlibAddUpstreams true
+		}
+		DefaultUpstreamBranch "master"
+		Tags ["llvm"]
+	}
+}
+
+%Repository "lua"
+{
+	!!MalterlibEnableLLVMBuildRepositories true
+
+	Repository
+	{
+		Type "External"
+		Remotes =+ {Name: "upstream", URL: "https://github.com/lua/lua.git"}
+		{
+			!!MalterlibAddUpstreams true
+		}
+		DefaultUpstreamBranch "master"
+		Tags ["llvm"]
+	}
+}
+
+%Repository "PDCursesMod"
+{
+	!!MalterlibEnableLLVMBuildRepositories true
+
+	Repository
+	{
+		Type "External"
+		Remotes =+ {Name: "upstream", URL: "https://github.com/Bill-Gray/PDCursesMod.git"}
+		{
+			!!MalterlibAddUpstreams true
+		}
+		DefaultUpstreamBranch "master"
+		Tags ["llvm"]
+	}
+}
+
 Property.MalterlibEnableCMakeProject: bool = false
 
 %Workspace "CMake"
@@ -439,6 +505,7 @@ Repository
 			, "share/*"
 			, "lib/*"
 			, "libexec/*"
+			, "local/*"
 			, "bin/*"
 		]
 		, Disallowed: ["LICENSE.Malterlib"]
@@ -448,6 +515,102 @@ Repository
 				, { Source: "../../External/llvm-project/LICENSE.TXT"->MakeAbsolute(), Name: "LLVM (https://github.com/Malterlib/llvm-project, https://github.com/llvm/llvm-project)" }
 			]
 		}
+	}
+
+	// Windows ships a bundled Python runtime (for LLDB scripting) and statically
+	// links libxml2 into the toolchain.
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/Python/LICENSE"->MakeAbsolute(), Name: "Python and bundled runtime (https://www.python.org, https://github.com/python/cpython)" }
+	{
+		!!RepoPlatformFamily "Windows"
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/libxml2/Copyright"->MakeAbsolute(), Name: "libxml2 (https://gitlab.gnome.org/GNOME/libxml2)" }
+	{
+		!!RepoPlatformFamily "Windows"
+	}
+	// The bundled Python runtime ships OpenSSL (libssl/libcrypto, used by _ssl and
+	// _hashlib) which is not covered by Python's own license.
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/OpenSSL/LICENSE"->MakeAbsolute(), Name: "OpenSSL (bundled in the Python runtime, https://www.openssl.org, https://github.com/openssl/openssl)" }
+	{
+		!!RepoPlatformFamily "Windows"
+	}
+
+	// Linux and macOS build the LLVM distribution with vendored/static support libraries.
+	// Python is resolved dynamically at runtime through LLDB's stable-ABI shim on
+	// both platforms, so only Windows bundles a Python runtime.
+	License #<LicenseFiles.LICENSE> =+ { Source: "../../External/zstd/LICENSE"->MakeAbsolute(), Name: "Zstandard (https://github.com/Malterlib/zstd, https://github.com/facebook/zstd)" }
+	{
+		|
+		{
+			RepoPlatformFamily "Linux"
+			RepoPlatformFamily "macOS"
+		}
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "../../External/zlib/LICENSE"->MakeAbsolute(), Name: "zlib (https://github.com/Malterlib/zlib, https://github.com/madler/zlib)" }
+	{
+		|
+		{
+			RepoPlatformFamily "Linux"
+			RepoPlatformFamily "macOS"
+		}
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "../../External/PDCursesMod/README.md"->MakeAbsolute(), Name: "PDCursesMod (https://github.com/Bill-Gray/PDCursesMod)" }
+	{
+		|
+		{
+			RepoPlatformFamily "Linux"
+			RepoPlatformFamily "macOS"
+			RepoPlatformFamily "Windows"
+		}
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "../../External/curl/COPYING"->MakeAbsolute(), Name: "curl (https://github.com/Malterlib/curl, https://github.com/curl/curl)" }
+	{
+		|
+		{
+			RepoPlatformFamily "Linux"
+			RepoPlatformFamily "macOS"
+		}
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "../../External/boringssl/LICENSE"->MakeAbsolute(), Name: "BoringSSL (https://github.com/Malterlib/boringssl, https://github.com/google/boringssl)" }
+	{
+		|
+		{
+			RepoPlatformFamily "Linux"
+			RepoPlatformFamily "macOS"
+		}
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "../../External/libedit/COPYING"->MakeAbsolute(), Name: "libedit (https://github.com/cdesjardins/libedit, https://thrysoee.dk/editline/)" }
+	{
+		|
+		{
+			RepoPlatformFamily "Linux"
+			RepoPlatformFamily "macOS"
+		}
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "../../External/libxml2/Copyright"->MakeAbsolute(), Name: "libxml2 (https://gitlab.gnome.org/GNOME/libxml2)" }
+	{
+		|
+		{
+			RepoPlatformFamily "Linux"
+			RepoPlatformFamily "macOS"
+		}
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/Lua/LICENSE"->MakeAbsolute(), Name: "Lua (https://www.lua.org, https://github.com/lua/lua)" }
+	{
+		|
+		{
+			RepoPlatformFamily "Linux"
+			RepoPlatformFamily "macOS"
+		}
+	}
+
+	// Linux also links static support libraries supplied by the Ubuntu 22.04 build image.
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/LinuxLLVM/XZ/copyright"->MakeAbsolute(), Name: "XZ Utils/liblzma (Ubuntu liblzma, https://tukaani.org/xz/)" }
+	{
+		!!RepoPlatformFamily "Linux"
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/LinuxLLVM/libpfm/copyright"->MakeAbsolute(), Name: "libpfm4 (Ubuntu libpfm4, https://perfmon2.sourceforge.net/)" }
+	{
+		!!RepoPlatformFamily "Linux"
 	}
 }
 
@@ -461,6 +624,15 @@ Repository
 
 	// Licensing is handled separately inside the repo as part of the SDK build process
 	CheckLicense false
+}
+
+Repository
+{
+	!!MalterlibRepoName "Malterlib_Tool.git"
+
+	// ThirdPartyLicenses holds verbatim third-party license texts (used as
+	// LicenseFiles sources); they must not get Malterlib license headers.
+	License #<Exclude> =+ ["ThirdPartyLicenses/*"]
 }
 
 Property.Malterlib_Tool_App_Targets: [type(CEntity)] = []
