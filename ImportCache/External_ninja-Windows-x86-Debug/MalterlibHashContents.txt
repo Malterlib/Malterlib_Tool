@@ -1,5 +1,5 @@
-GeneratorVersion: 38
-Import.CMake_FullRebuildVersion: 4.1-4
+GeneratorVersion: 40
+Import.CMake_FullRebuildVersion: 5.1-9
 Import.CMake_CacheExcludePatterns: [
 	*/CMakeFiles/*,
 	*/cmake.tmp/*,
@@ -191,9 +191,7 @@ Import.CMake_CacheReplaceContents: [
 		"Replace": ""
 	}
 ]
-
 Import.CMake_Environment: {}
-
 Import.CMake_CacheIgnoreInputs: [
 ]
 
@@ -227,16 +225,28 @@ Import.CMake_Languages: [
 		"MalterlibLanguage": "WindowsResource"
 	}
 ]
-
 Import.CMake_Config: Debug
 Import.CMake_Variables: [
+	CMAKE_TRY_COMPILE_PLATFORM_VARIABLES=CMAKE_CXX_COMPILER_TARGET;CMAKE_C_COMPILER_TARGET;CMAKE_CXX_FLAGS;CMAKE_C_FLAGS;CMAKE_SYSTEM_NAME;CMAKE_SYSTEM_PROCESSOR,
 	CMAKE_OBJECT_PATH_MAX=4096,
+	CMAKE_C_FLAGS_INIT=--target=i386-windows-msvc,
+	CMAKE_CXX_FLAGS_INIT=--target=i386-windows-msvc,
 	,
 	OPENSSL_ROOT_DIR=/External/boringssl,
-	OPENSSL_LIBRARIES=/dev/null,
-	OPENSSL_CRYPTO_LIBRARY=/dev/null,
-	OPENSSL_SSL_LIBRARY=/dev/null,
-	RE2C=NO
+	OPENSSL_INCLUDE_DIR=/External/boringssl/include,
+	OPENSSL_LIBRARIES=/lib/x86/delayimp.lib,
+	OPENSSL_CRYPTO_LIBRARY=/lib/x86/delayimp.lib,
+	OPENSSL_CRYPTO_LIBRARIES=/lib/x86/delayimp.lib,
+	OPENSSL_SSL_LIBRARY=/lib/x86/delayimp.lib,
+	OPENSSL_SSL_LIBRARIES=/lib/x86/delayimp.lib,
+	OPENSSL_USE_STATIC_LIBS=TRUE,
+	OPENSSL_MSVC_STATIC_RT=TRUE,
+	OPENSSL_FOUND=TRUE,
+	OpenSSL_FOUND=TRUE,
+	DISABLE_OPENSSL_WINDOWS=TRUE,
+	RE2C=NO,
+	NINJA_PYTHON=python3,
+	BUILD_TESTING=OFF
 ]
 
 Import.CMake_IncludeInHash: [
