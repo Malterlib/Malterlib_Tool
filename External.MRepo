@@ -2,6 +2,18 @@
 	"../../External/CMake": {
 		"Hash": "59b0ccfd461dcb97fa0f3256dfae49fae4781682"
 	},
+	"../../External/PDCursesMod": {
+		"Hash": "4c8676bf89fe983ea9051017e780893cba3a5279"
+	},
+	"../../External/libedit": {
+		"Hash": "156e25a4379192551f57ee99a3cc5dbf62cc29d9"
+	},
+	"../../External/libxml2": {
+		"Hash": "13a3df99ffe2521a903f270abb33aa7092b34147"
+	},
+	"../../External/lua": {
+		"Hash": "a5522f06d2679b8f18534fd6a9968f7eb539dc31"
+	},
 	"../../External/ninja": {
 		"Hash": "d5b487e788bfdba9e15fb48ad01c1cb978ebd8fd"
 	}
