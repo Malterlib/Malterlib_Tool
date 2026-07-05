@@ -4,6 +4,10 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
 
+#if defined(DPlatformFamily_macOS) && !defined(DMibSanitizerEnabled)
+#	include <sys/signal.h>
+#endif
+
 void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
 {
 	o_ToolsSection.f_RegisterCommand
