@@ -21,7 +21,7 @@ public:
 
 		TCOptional<CAnsiEncodingParse::CBackgroundColor> m_BackgroundColor;
 		TCOptional<CAnsiEncodingParse::CForegroundColor> m_ForegroundColor;
-		TCOptional<CAnsiEncodingParse::CBold> m_Bold;
+		TCOptional<CAnsiEncodingParse::CWeight> m_Weight;
 		TCOptional<CAnsiEncodingParse::CItalic> m_Italic;
 	};
 
@@ -319,9 +319,9 @@ public:
 							bSetProperties = false;
 						}
 
-						if (m_AnsiProperties.m_Bold && m_AnsiProperties.m_Bold->m_bEnabled)
+						if (m_AnsiProperties.m_Weight && m_AnsiProperties.m_Weight->m_Weight != CAnsiEncoding::EWeight::mc_Normal)
 						{
-							OutputLine += AnsiEncoding.f_Bold();
+							OutputLine += AnsiEncoding.f_Weight(m_AnsiProperties.m_Weight->m_Weight);
 							bSetProperties = true;
 						}
 
@@ -449,11 +449,17 @@ public:
 							{
 								m_AnsiProperties.m_BackgroundColor.f_Clear();
 								m_AnsiProperties.m_ForegroundColor.f_Clear();
-								m_AnsiProperties.m_Bold.f_Clear();
+								m_AnsiProperties.m_Weight.f_Clear();
 								m_AnsiProperties.m_Italic.f_Clear();
 							}
-							else if (_Change.f_IsOfType<CAnsiEncodingParse::CBold>() && _Change.f_GetAsType<CAnsiEncodingParse::CBold>().m_bEnabled)
-								m_AnsiProperties.m_Bold = {true};
+							else if (_Change.f_IsOfType<CAnsiEncodingParse::CWeight>())
+							{
+								auto &Weight = _Change.f_GetAsType<CAnsiEncodingParse::CWeight>();
+								if (Weight.m_Weight != CAnsiEncoding::EWeight::mc_Normal)
+									m_AnsiProperties.m_Weight = Weight;
+								else
+									m_AnsiProperties.m_Weight.f_Clear();
+							}
 							else if (_Change.f_IsOfType<CAnsiEncodingParse::CItalic>() && _Change.f_GetAsType<CAnsiEncodingParse::CItalic>().m_bEnabled)
 								m_AnsiProperties.m_Italic = {true};
 							else if (_Change.f_IsOfType<CAnsiEncodingParse::CBackgroundColor>())
