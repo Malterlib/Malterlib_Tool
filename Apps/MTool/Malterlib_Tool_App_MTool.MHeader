@@ -192,7 +192,8 @@ Property
 			cp Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata Binaries/Malterlib/Linux/x86/ProfileData/
 			cp Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata Binaries/Malterlib/Linux/x64/ProfileData/
 			cp Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata Binaries/Malterlib/Linux/arm64/ProfileData/
-
+			cp Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata Binaries/Malterlib/Windows/x64/ProfileData/
+			cp Binaries/Malterlib/macOS/arm64/ProfileData/MTool.profdata Binaries/Malterlib/Windows/arm64/ProfileData/
 		*/
 
 		MToolProfDataPath: string = MToolDirectory / "ProfileData/MTool.profdata"
