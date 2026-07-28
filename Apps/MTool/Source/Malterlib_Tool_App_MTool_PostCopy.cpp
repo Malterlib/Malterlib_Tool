@@ -191,7 +191,12 @@ public:
 			DefaultRootDefault = "X:/Deploy";
 #else
 		if (!DefaultRootDefault)
-			DefaultRootDefault = "/opt/Deploy";
+		{
+			if (NFile::CFile::fs_FileExists(CStr("/Deploy"), EFileAttrib_Directory))
+				DefaultRootDefault = "/Deploy";
+			else
+				DefaultRootDefault = "/opt/Deploy";
+		}
 #endif
 		CBuildSystemSyntax::CRootValue DefaultRootDefaultRootValue{.m_Value = {DefaultRootDefault}};
 
