@@ -106,6 +106,22 @@ Property
 		Dependency.Link false
 	}
 
+	%Dependency {
+		Name: "Com_programs_zstd"
+		, Properties: {
+			Dependency.Target: "Com_programs_zstd"
+			, Dependency.TargetProperties: {
+				MalterlibPostCopyProject: MalterlibPostCopyProject
+				, MalterlibPostCopyDestination: MalterlibPostCopyDestination
+				, Target.Name: "Com_programs_zstd"
+				, Target.Group: "ExternalBinaries/zstd"
+			}
+		}
+	}
+	{
+		Dependency.Link false
+	}
+
 	%Dependency "Iphlpapi.lib"
 	{
 		!!PlatformFamily "Windows"

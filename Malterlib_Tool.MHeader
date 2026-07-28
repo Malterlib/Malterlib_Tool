@@ -441,6 +441,7 @@ Repository
 			, "MalterlibHelper"
 			, "bsdtar*"
 			, "ninja*"
+			, "zstd*"
 			, "*MalterlibOverrideMalloc.dylib"
 			, "LinuxLibTool/libtool"
 			, "NoLib/*/lib.exe"
