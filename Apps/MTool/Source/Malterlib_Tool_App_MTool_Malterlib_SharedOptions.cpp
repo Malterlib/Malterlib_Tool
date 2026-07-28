@@ -6,7 +6,7 @@
 
 void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
 {
-	CStr CurrentDirectory = CFile::fs_GetCurrentDirectory();
+	CStr CurrentDirectory = fs_GetLogicalCurrentDirectory();
 	auto BuildSystemFiles = CFile::fs_FindFiles(CurrentDirectory / "*.MBuildSystem");
 
 	CEJsonOrdered DetailedPositionsDefault;

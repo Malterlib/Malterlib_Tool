@@ -4,6 +4,32 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
 
+CStr CTool_Malterlib::fs_GetLogicalCurrentDirectory()
+{
+	CStr CurrentDirectory = CFile::fs_GetCurrentDirectory();
+
+	// The platform reports the physical directory, with every symbolic link traversed to reach it already
+	// resolved. Shells keep the path that was actually used in PWD, so prefer that when it still names the
+	// same directory - otherwise a symlinked source root ends up rewritten to its target in everything we generate.
+	CStr LogicalDirectory = fg_GetSys()->f_GetEnvironmentVariable("PWD");
+
+	if (LogicalDirectory.f_IsEmpty() || LogicalDirectory == CurrentDirectory)
+		return CurrentDirectory;
+
+	// Only symbolic links may differ between the two, so anything not already canonical is not trusted.
+	if (!CFile::fs_IsPathAbsolute(LogicalDirectory) || CFile::fs_GetExpandedPath(LogicalDirectory) != LogicalDirectory)
+		return CurrentDirectory;
+
+	if (!CFile::fs_FileExists(LogicalDirectory, EFileAttrib_Directory))
+		return CurrentDirectory;
+
+	// PWD is inherited and can be stale, so make sure it still names the directory we are actually in.
+	if (CFile::fs_GetUniqueIdentifier(LogicalDirectory) != CFile::fs_GetUniqueIdentifier(CurrentDirectory))
+		return CurrentDirectory;
+
+	return LogicalDirectory;
+}
+
 CStr CTool_Malterlib::fs_GetFileNameOrEmpty(NEncoding::CEJsonSorted const &_Param, CStr const &_CurrentDirectory)
 {
 	CStr FileName = _Param.f_String();
