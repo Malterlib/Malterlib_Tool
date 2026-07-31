@@ -373,8 +373,9 @@ public:
 									break;
 
 								auto *pParse = _String.f_GetStr();
+								auto *pEnd = pParse + _String.f_GetLen();
 								auto *pSpaceStart = pParse;
-								while (*pParse && *pParse == ' ')
+								while (pParse < pEnd && *pParse == ' ')
 									++pParse;
 
 								nSpaces = pParse - pSpaceStart;
@@ -384,7 +385,7 @@ public:
 								if (nSpaces >= 7)
 								{
 									bBelongsInProject = true;
-									CStrPtr ToOutput(_String.f_GetStr() + 7, fg_StrLen(_String.f_GetStr() + 7));
+									CStrPtr ToOutput(_String.f_GetStr() + 7, _String.f_GetLen() - 7);
 									OutputLine += ToOutput;
 									if (CleanLine.f_IsEmpty() && !ToOutput.f_IsEmpty())
 										Color = m_AnsiProperties.m_ForegroundColor;
@@ -397,23 +398,23 @@ public:
 
 								auto pNumberStart = pParse;
 
-								while (*pParse && fg_CharIsNumber(*pParse))
+								while (pParse < pEnd && fg_CharIsNumber(*pParse))
 									++pParse;
 
 								if (pNumberStart == pParse)
 									break;
 
 								// Check for colon-separated format (ProjectKey:EntryPointKey)
-								if (*pParse == ':')
+								if (pParse < pEnd && *pParse == ':')
 								{
 									++pParse;
 
 									// Parse second number (EntryPointKey)
-									while (*pParse && fg_CharIsNumber(*pParse))
+									while (pParse < pEnd && fg_CharIsNumber(*pParse))
 										++pParse;
 								}
 
-								if (*pParse != '>')
+								if (pParse >= pEnd || *pParse != '>')
 									break;
 
 								CStrPtr ProjectIdStr(pNumberStart, pParse - pNumberStart);
@@ -423,7 +424,7 @@ public:
 
 								++pParse;
 
-								CStrPtr ToAdd(pParse, fg_StrLen(pParse));
+								CStrPtr ToAdd(pParse, pEnd - pParse);
 								OutputLine += ToAdd;
 								if (CleanLine.f_IsEmpty() && !ToAdd.f_IsEmpty())
 									Color = m_AnsiProperties.m_ForegroundColor;
