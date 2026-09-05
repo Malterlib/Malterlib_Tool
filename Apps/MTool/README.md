@@ -177,9 +177,19 @@ The implementation separates file selection, configuration resolution, and line
 validation. Additional rules can use the same input selection and resolved
 properties in audit, staged, and base-comparison modes.
 
+## License checks
+
+`./mib check-license` normalizes CRLF and CR line endings to LF when comparing
+license files and generated `REUSE.toml` metadata. Line-ending differences alone
+do not require a fix. Real text and whitespace differences are still reported.
+
+`--fix` writes LF when creating or updating license files and generated metadata.
+Matching files keep their existing line endings, and upstream source files are
+not rewritten.
+
 ## Integration tests
 
-Validation tests use the Malterlib test framework in
+Validation and license-check tests use the Malterlib test framework in
 `Malterlib/Tool/Test`. The test target builds MTool as a runtime dependency and
 deploys it using the existing test-app layout at `Tests/TestApps/MTool`.
 The tests locate it relative to their executable. Git must be available on
