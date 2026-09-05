@@ -4,7 +4,7 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
 
-void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecification &o_CommandLine)
+void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecification::CSection &o_UtilitiesSection)
 {
 	auto fDummyCommand = [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 		{
@@ -14,8 +14,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 
 	auto HelpGlobalOptions = CDistributedAppCommandLineSpecification::fs_RelevantHelpGlobalOptions();
 
-	auto Section = o_CommandLine.f_AddSection("Utilities", "Various utilities.", "Default");
-	Section.f_RegisterDirectCommand
+	o_UtilitiesSection.f_RegisterDirectCommand
 		(
 			{
 				"Names"_o= _o["test"]
@@ -35,7 +34,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 		)
 	;
 #if DPlatformFamily_macOS
-	Section.f_RegisterDirectCommand
+	o_UtilitiesSection.f_RegisterDirectCommand
 		(
 			{
 				"Names"_o= _o["setup"]
@@ -72,7 +71,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 		)
 	;
 #endif
-	Section.f_RegisterDirectCommand
+	o_UtilitiesSection.f_RegisterDirectCommand
 		(
 			{
 				"Names"_o= _o["init"]
@@ -93,7 +92,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 			, fDummyCommand
 		)
 	;
-	Section.f_RegisterDirectCommand
+	o_UtilitiesSection.f_RegisterDirectCommand
 		(
 			{
 				"Names"_o= _o["build"]
@@ -130,7 +129,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 			, fDummyCommand
 		)
 	;
-	Section.f_RegisterDirectCommand
+	o_UtilitiesSection.f_RegisterDirectCommand
 		(
 			{
 				"Names"_o= _o["build-target", "build_target"]
@@ -172,7 +171,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 			, fDummyCommand
 		)
 	;
-	Section.f_RegisterDirectCommand
+	o_UtilitiesSection.f_RegisterDirectCommand
 		(
 			{
 				"Names"_o= _o["prebuild"]
@@ -212,7 +211,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 			, fDummyCommand
 		)
 	;
-	Section.f_RegisterDirectCommand
+	o_UtilitiesSection.f_RegisterDirectCommand
 		(
 			{
 				"Names"_o= _o["postbuild"]
@@ -232,7 +231,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 			, fDummyCommand
 		)
 	;
-	Section.f_RegisterDirectCommand
+	o_UtilitiesSection.f_RegisterDirectCommand
 		(
 			{
 				"Names"_o= _o["bootstrap-only", "bootstrap_only"]
@@ -243,7 +242,7 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 			, fDummyCommand
 		)
 	;
-	Section.f_RegisterDirectCommand
+	o_UtilitiesSection.f_RegisterDirectCommand
 		(
 			{
 				"Names"_o= _o["detect-system", "detect_system"]

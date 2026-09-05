@@ -195,7 +195,10 @@ void CTool_Malterlib::f_Register
 	if (!fg_IsMalterlib())
 		return;
 
-	f_Register_DummyCommands(o_CommandLine);
+	auto UtilitiesSection = o_CommandLine.f_AddSection("Utilities", "Various utilities.", "Default");
+	f_Register_DummyCommands(UtilitiesSection);
+	f_Register_UpdateAgents(UtilitiesSection);
+
 	f_Register_SharedOptions(o_ToolsSection);
 	f_Register_LfsReleaseStore(o_CommandLine);
 	f_Register_RepositoryManagement(o_ToolsSection);

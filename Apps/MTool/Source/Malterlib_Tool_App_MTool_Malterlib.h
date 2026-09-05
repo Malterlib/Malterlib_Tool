@@ -27,11 +27,12 @@ public:
 	;
 
 	void f_Register_SharedOptions(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
-	void f_Register_DummyCommands(CDistributedAppCommandLineSpecification &o_CommandLine);
+	void f_Register_DummyCommands(CDistributedAppCommandLineSpecification::CSection &o_UtilitiesSection);
 	void f_Register_Core(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
 	void f_Register_RepositoryManagement(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
 	void f_Register_LfsReleaseStore(CDistributedAppCommandLineSpecification &o_CommandLine);
 	void f_Register_CheckLicense(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
+	void f_Register_UpdateAgents(CDistributedAppCommandLineSpecification::CSection &o_UtilitiesSection);
 
 	void f_Register
 		(

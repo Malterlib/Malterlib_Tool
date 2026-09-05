@@ -189,7 +189,7 @@ not rewritten.
 
 ## Integration tests
 
-Validation and license-check tests use the Malterlib test framework in
+Validation, license-check, and agent-generation tests use the Malterlib test framework in
 `Malterlib/Tool/Test`. The test target builds MTool as a runtime dependency and
 deploys it using the existing test-app layout at `Tests/TestApps/MTool`.
 The tests locate it relative to their executable. Git must be available on
@@ -245,3 +245,27 @@ Projects
 	}
 }
 ```
+
+## Agent instructions
+
+`./mib update-agents` expands Markdown includes from `CLAUDE.md` into `AGENTS.md`
+in the current directory. It does not require a Git repository or load a build
+system. Project initialization runs it after fetching the repositories.
+
+```bash
+./mib update-agents
+./mib update-agents -C /path/to/project
+./mib update-agents --input docs/CLAUDE.md --output docs/AGENTS.md
+```
+
+Paths in `--input` and `--output` are relative to `--current-directory` (`-C`).
+Include paths are relative to the Markdown file containing them. Standalone
+`@path` lines may have up to three backticks around them; inline bare and
+single-backtick mentions are supported too.
+
+References remain in the text with a “see below” annotation. Included content
+follows the containing file, with standalone includes first, followed by inline
+includes. Within a line, code-form mentions are collected before bare mentions.
+Each file is expanded once; duplicates, cycles, and missing includes receive
+HTML comment markers. A missing input file fails without replacing the output.
+Generated files use UTF-8 without a BOM and LF line endings.
