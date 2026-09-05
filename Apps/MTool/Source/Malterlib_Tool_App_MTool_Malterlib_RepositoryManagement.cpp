@@ -394,7 +394,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			(
 				{
 					"Names"_o= _o["repo-run"]
-					, "Description"_o= "Run commands with git directory as current path.\n"
+					, "Description"_o= "Run commands with git directory as current path and mib's tool directory prepended to PATH.\n"
 					, "Category"_o= "Repository management"
 					, "ErrorOnCommandAsParameter"_o= false
 					, "ErrorOnOptionAsParameter"_o= false

@@ -636,6 +636,31 @@ Repository
 	License #<Exclude> =+ ["ThirdPartyLicenses/*"]
 }
 
+Property
+{
+	!!MalterlibEnableInternalTests true
+
+	MalterlibTests =+ "Malterlib_Tool"
+	MalterlibTestFiles_Malterlib_Tool: [type(CEntity)] = ["Test/*.cpp"->MakeAbsolute()]
+	MalterlibTestDependencies_Malterlib_Tool: [type(CEntity)] = [
+		{
+			Name: "Com_MTool"
+			, Properties: {
+				Dependency.Target: "Malterlib_Tool_MTool"
+				, Dependency.TargetProperties: {
+					MToolEmbedCMake: false
+					, MalterlibBuildSystemEmbedCMake: false
+					, MToolBuildHelperTools: false
+					, MalterlibTestApp: true
+					, MalterlibGenerateScheme: false
+				}
+				, Dependency.Link: false
+				, Dependency.Stage: "Runtime"
+			}
+		}
+	]
+}
+
 Property.Malterlib_Tool_App_Targets: [type(CEntity)] = []
 
 %Workspace "Apps_Malterlib_Tool"

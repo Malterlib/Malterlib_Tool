@@ -4,6 +4,7 @@
 Property
 {
 	MToolEmbedCMake: bool = true
+	MToolBuildHelperTools: bool = true // Build and deploy the Ninja, zstd, and bsdtar executables alongside MTool.
 }
 
 %Target "Malterlib_Tool_MTool"
@@ -11,6 +12,9 @@ Property
 	Property
 	{
 		MalterlibPostCopyProject "MTool"
+		{
+			!!MalterlibPostCopyProject undefined
+		}
 		MalterlibDoExeFS true
         ProductName "Malterlib Tool"
 		MalterlibTargetNameType "Normal"
@@ -30,6 +34,9 @@ Property
 
 		Group "Apps"
 		ExtraGroups =+ "{Malterlib}/{CloudTarBinaries}"
+		{
+			!!MToolBuildHelperTools true
+		}
 	}
 	Compile
 	{
@@ -88,6 +95,7 @@ Property
 	%Dependency "Lib_Malterlib_Perforce"
 	%Dependency "Lib_Malterlib_BuildSystem"
 	%Dependency "Lib_Malterlib_Git"
+	%Dependency "Lib_Malterlib_Develop"
 	%Dependency "Lib_Malterlib"
 
 	%Dependency {
@@ -103,6 +111,8 @@ Property
 		}
 	}
 	{
+		!!MToolBuildHelperTools true
+
 		Dependency.Link false
 	}
 
@@ -119,6 +129,8 @@ Property
 		}
 	}
 	{
+		!!MToolBuildHelperTools true
+
 		Dependency.Link false
 	}
 
