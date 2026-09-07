@@ -133,7 +133,9 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 		(
 			{
 				"Names"_o= _o["build-target", "build_target"]
-				, "Description"_o= "Build a targen in a workspace."
+				, "Description"_o= "Build one or more targets in a workspace.\n"
+				"The targets are built in one build invocation, so build them together rather than in parallel commands: "
+				"only one build may run in a configuration's build directory at a time, and a second one is refused."
 				, "GlobalOptions"_o= HelpGlobalOptions
 				, "ShowParametersStart"_o= false
 				, "Parameters"_o=
@@ -146,7 +148,8 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 					, "Target"_o=
 					{
 						"Type"_o= ""
-						, "Description"_o= "The target to build."
+						, "Description"_o= "The target to build, or several separated by commas.\n"
+						"For example: Com_Test_Malterlib_Core,Com_Test_Malterlib_Network"
 					}
 					, "Platform?"_o=
 					{
