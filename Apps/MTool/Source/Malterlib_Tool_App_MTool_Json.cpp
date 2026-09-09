@@ -41,7 +41,7 @@ public:
 				}
 			}
 
-			HttpClientActor = fg_Construct(fg_Construct(), "HTTP Client Reader");
+			HttpClientActor = fg_Construct();
 
 			CHttpClientActor::CRequest Request;
 			Request.m_URL = SourcePath;
