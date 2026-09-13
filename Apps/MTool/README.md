@@ -212,9 +212,11 @@ properties in audit, staged, and base-comparison modes.
 # Source formatting
 
 `MTool Format`, in the Validation command group, formats sources that opt in
-with `malterlib_format = malterlib` in `.editorconfig`. The rules, protected
-regions, and range contract are documented in
-[Malterlib/Develop](../../../Develop/Documentation/CodeFormatting.md).
+with `malterlib_format = malterlib` in `.editorconfig`. The rules, line
+structure, protected regions, and range contract are documented in
+[Malterlib/Develop](../../../Develop/Documentation/CodeFormatting.md). A split
+construct that fits is brought back to one line; splitting an overlong construct
+is not implemented yet, so an overlong line is reported and left alone.
 
 ```bash
 MTool Format --file Source/Example.cpp
