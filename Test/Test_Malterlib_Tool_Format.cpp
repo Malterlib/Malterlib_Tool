@@ -264,8 +264,7 @@ namespace NMib::NTool
 					Repo.f_Write("Example.cpp", Source);
 
 					// A partial selection expands to the line it touches by default.
-					auto Expanded = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Example.cpp", "--offset", "20", "--length", "2"})
-					;
+					auto Expanded = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Example.cpp", "--offset", "20", "--length", "2"});
 					DMibExpect(Expanded.m_ExitCode, ==, 0u);
 					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Example.cpp", true), ==, CStr("void fg_Test()\n{\n\t\tint a;\n        int b;\n}\n"));
 
