@@ -156,7 +156,9 @@ namespace
 		if (!fg_MeasureTextColumns(_Line, _Settings.m_nTabWidth, nColumns))
 		{
 			_CommandLine %= "{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f
-				<< _AbsolutePath << _LineNumber << _Settings.m_nMaxColumns
+				<< _AbsolutePath
+				<< _LineNumber
+				<< _Settings.m_nMaxColumns
 			;
 
 			return false;
@@ -191,15 +193,25 @@ namespace
 		if (!_Counts.m_nFormatFiles)
 		{
 			_CommandLine %= "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f
-				<< _Counts.m_nFiles << _Kind << _Counts.m_nLineErrors << _Counts.m_nExcluded << _Seconds
+				<< _Counts.m_nFiles
+				<< _Kind
+				<< _Counts.m_nLineErrors
+				<< _Counts.m_nExcluded
+				<< _Seconds
 			;
 
 			return;
 		}
 
 		_CommandLine %= "Validated {} {} file(s): {} line length violation(s), {} formatting violation(s) in {} formatted file(s), {} unanalyzable. Excluded {} file(s). Time: {fe2} s.\n"_f
-			<< _Counts.m_nFiles << _Kind << _Counts.m_nLineErrors << _Counts.m_nFormatErrors << _Counts.m_nFormatFiles
-			<< _Counts.m_nFormatFailed << _Counts.m_nExcluded << _Seconds
+			<< _Counts.m_nFiles
+			<< _Kind
+			<< _Counts.m_nLineErrors
+			<< _Counts.m_nFormatErrors
+			<< _Counts.m_nFormatFiles
+			<< _Counts.m_nFormatFailed
+			<< _Counts.m_nExcluded
+			<< _Seconds
 		;
 	}
 
@@ -319,7 +331,8 @@ namespace
 		CFile::fs_CreateDirectory(DiffDirectory);
 		CFile::fs_CreateDirectory(SnapshotGitDirectory / "objects");
 		CFile::fs_CreateDirectory(SnapshotGitDirectory / "refs");
-		CStr SnapshotHead = Head ? Head : bHasHead ? Info.f_GetLast() : CStr("ref: refs/heads/validation");
+		CStr SnapshotHead = Head ? Head : bHasHead ? Info.f_GetLast()
+			: CStr("ref: refs/heads/validation");
 		CFile::fs_WriteStringToFile(SnapshotGitDirectory / "HEAD", SnapshotHead + "\n", false);
 		CFile::fs_WriteStringToFile
 			(
@@ -598,12 +611,7 @@ namespace
 		CStopwatch Stopwatch{true};
 		_Directory = (co_await NGit::fg_LaunchGit({"rev-parse", "--show-toplevel"}, _Directory)).f_Trim();
 		// Enumerate names first so Git does not read excluded files to classify their content.
-		auto Index = co_await NGit::fg_LaunchGit
-			(
-				{"-c", "core.quotePath=true", "ls-files", "--cached", "--deduplicate"}
-				, _Directory
-			)
-		;
+		auto Index = co_await NGit::fg_LaunchGit({"-c", "core.quotePath=true", "ls-files", "--cached", "--deduplicate"}, _Directory);
 
 		TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct(_Directory);
 		auto DestroyConfigurations = co_await fg_AsyncDestroy(Configurations);
@@ -703,7 +711,8 @@ struct CTool_Validate : CDistributedTool
 			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
-		) override
+		)
+		override
 	{
 		if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
 			return;
