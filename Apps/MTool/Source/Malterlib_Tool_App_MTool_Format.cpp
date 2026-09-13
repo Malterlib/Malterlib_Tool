@@ -214,7 +214,11 @@ namespace NMib::NTool::NFormat
 			++o_Result.m_nReported;
 			o_Result.m_nUnresolved += !Diagnostic.m_bHasAutomaticFix;
 			o_Result.m_Report += "{}:{}:{}: {}: {}\n"_f
-				<< _Job.m_Path << Diagnostic.m_iLine << Diagnostic.m_iColumn << Diagnostic.m_Rule << Diagnostic.m_Explanation
+				<< _Job.m_Path
+				<< Diagnostic.m_iLine
+				<< Diagnostic.m_iColumn
+				<< Diagnostic.m_Rule
+				<< Diagnostic.m_Explanation
 			;
 		}
 	}
@@ -256,7 +260,10 @@ namespace NMib::NTool::NFormat
 			{
 				Result.m_Outcome = EFormatOutcome::mc_Failed;
 				Result.m_Report = "{}: --lines {}:{} is outside the file's {} line(s)\n"_f
-					<< _Job.m_Path << _Job.m_iFirstLine << _Job.m_iLastLine << nPrintable
+					<< _Job.m_Path
+					<< _Job.m_iFirstLine
+					<< _Job.m_iLastLine
+					<< nPrintable
 				;
 
 				co_return Result;
@@ -594,8 +601,14 @@ namespace NMib::NTool::NFormat
 
 		CStr Action = _Options.m_Mode == EFormatMode::mc_Write ? "changed" : "would change";
 		*_pCommandLine %= "Formatted {} file(s): {} unchanged, {} {}, {} unresolved violation(s), {} failed. Excluded {} file(s). Time: {fe2} s.\n"_f
-			<< Summary.m_nSelected << Summary.m_nUnchanged << Summary.m_nChanged << Action
-			<< Summary.m_nUnresolved << Summary.m_nFailed << Summary.m_nExcluded << Stopwatch.f_GetTime()
+			<< Summary.m_nSelected
+			<< Summary.m_nUnchanged
+			<< Summary.m_nChanged
+			<< Action
+			<< Summary.m_nUnresolved
+			<< Summary.m_nFailed
+			<< Summary.m_nExcluded
+			<< Stopwatch.f_GetTime()
 		;
 
 		if (Summary.m_nFailed)
@@ -694,7 +707,8 @@ struct CTool_Format : CDistributedTool
 			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
-		) override
+		)
+		override
 	{
 		if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
 			return;
