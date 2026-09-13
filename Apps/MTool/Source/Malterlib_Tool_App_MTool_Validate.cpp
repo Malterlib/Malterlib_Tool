@@ -1,12 +1,18 @@
 // Copyright © Unbroken AB
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "Malterlib_Tool_App_MTool_Main.h"
+#include "Malterlib_Tool_App_MTool_Format.h"
 
 #include <Mib/Git/Helpers/Launch>
 #include <Mib/Develop/EditorConfig>
 #include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Time/Stopwatch>
+
+namespace
+{
+	using namespace NMib::NDevelop;
+	using namespace NMib::NTool::NFormat;
+}
 
 namespace
 {
@@ -139,65 +145,21 @@ namespace
 	}
 
 
-	struct CLineValidationSettings
-	{
-		explicit CLineValidationSettings(TCMap<CStr, CStr> const &_Properties)
-		{
-			if (auto pValue = _Properties.f_FindEqual("max_line_length"))
-			{
-				auto Value = pValue->f_LowerCase();
-				if (Value != "off" && Value != "unset")
-					m_nMaxColumns = fg_ParsePositive(Value, "max_line_length");
-			}
-
-			auto pWidth = _Properties.f_FindEqual("tab_width");
-			if (!pWidth || *pWidth == "unset")
-				pWidth = _Properties.f_FindEqual("indent_size");
-
-			if (pWidth && *pWidth != "unset" && *pWidth != "tab")
-				m_nTabWidth = fg_ParsePositive(*pWidth, "tab_width");
-		}
-
-		umint m_nMaxColumns = 0;
-		umint m_nTabWidth = 4;
-	};
-
-	bool fg_ValidateLine(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CLineValidationSettings const &_Settings, CCommandLineControl &_CommandLine)
+	bool fg_ValidateLine(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CCodeFormattingSettings const &_Settings, CCommandLineControl &_CommandLine)
 	{
 		if (!_Settings.m_nMaxColumns)
 			return true;
 
-		// The iterator's character value may be NUL before the end of its input.
-		// File-leading BOM removal is handled by the caller.
+		// The engine owns the shared column model, including tab stops, Unicode accounting,
+		// and malformed-byte handling. File-leading BOM removal is handled by the caller.
 		umint nColumns = 0;
-		umint iPrevious = 0;
-		if (_Line.f_GetLen() > iPrevious)
+		if (!fg_MeasureTextColumns(_Line, _Settings.m_nTabWidth, nColumns))
 		{
-			CStrIteratorUTF8 End(_Line.f_GetStr() + _Line.f_GetLen(), 0);
-			for (CStrIteratorUTF8 Iterator(_Line); ; ++Iterator)
-			{
-				auto iEnd = _Line.f_GetLen() - umint(End - Iterator);
-				umint nAdvance = 1;
-				if (Iterator.f_IsBroken() || !Iterator.f_IsWholeCodePoint())
-					nAdvance = iEnd - iPrevious;
-				else if (*Iterator == '\t')
-					nAdvance = _Settings.m_nTabWidth - nColumns % _Settings.m_nTabWidth;
+			_CommandLine %= "{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f
+				<< _AbsolutePath << _LineNumber << _Settings.m_nMaxColumns
+			;
 
-				if (nColumns > TCLimitsInt<umint>::mc_Max - nAdvance)
-				{
-					_CommandLine %= "{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f
-						<< _AbsolutePath << _LineNumber << _Settings.m_nMaxColumns
-					;
-
-					return false;
-				}
-
-				nColumns += nAdvance;
-				iPrevious = iEnd;
-
-				if (Iterator - End >= 0)
-					break;
-			}
+			return false;
 		}
 
 		if (nColumns <= _Settings.m_nMaxColumns)
@@ -208,11 +170,56 @@ namespace
 		return false;
 	}
 
-	void fg_OutputValidationSummary(CCommandLineControl &_CommandLine, CStr const &_Kind, umint _nFiles, umint _nExcluded, umint _nErrors, fp64 _Seconds)
+	struct CValidationCounts
 	{
-		_CommandLine %= "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f
-			<< _nFiles << _Kind << _nErrors << _nExcluded << _Seconds
+		umint m_nFiles = 0;
+		umint m_nExcluded = 0;
+		umint m_nLineErrors = 0;
+		umint m_nFormatFiles = 0;
+		umint m_nFormatErrors = 0;
+		umint m_nFormatFailed = 0;
+
+		umint f_GetErrors() const
+		{
+			return m_nLineErrors + m_nFormatErrors;
+		}
+	};
+
+	// Line-length-only repositories keep the original summary so existing output stays compatible.
+	void fg_OutputValidationSummary(CCommandLineControl &_CommandLine, CStr const &_Kind, CValidationCounts const &_Counts, fp64 _Seconds)
+	{
+		if (!_Counts.m_nFormatFiles)
+		{
+			_CommandLine %= "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f
+				<< _Counts.m_nFiles << _Kind << _Counts.m_nLineErrors << _Counts.m_nExcluded << _Seconds
+			;
+
+			return;
+		}
+
+		_CommandLine %= "Validated {} {} file(s): {} line length violation(s), {} formatting violation(s) in {} formatted file(s), {} unanalyzable. Excluded {} file(s). Time: {fe2} s.\n"_f
+			<< _Counts.m_nFiles << _Kind << _Counts.m_nLineErrors << _Counts.m_nFormatErrors << _Counts.m_nFormatFiles
+			<< _Counts.m_nFormatFailed << _Counts.m_nExcluded << _Seconds
 		;
+	}
+
+	bool fg_HasNul(CStr const &_Text)
+	{
+		auto pStart = _Text.f_GetStr();
+		for (umint i = 0; i < umint(_Text.f_GetLen()); ++i)
+		{
+			if (!pStart[i])
+				return true;
+		}
+
+		return false;
+	}
+
+	// Validation never writes, so an opted-in file is analyzed as a whole snapshot and
+	// reported through the shared engine instead of a second set of layout checks.
+	bool fg_UsesFormattingEngine(CCodeFormattingSettings const &_Settings, CStr const &_Path)
+	{
+		return _Settings.f_IsFormattingEnabled() && fg_DetectCodeLanguage(_Path) == ECodeLanguage::mc_Cpp;
 	}
 
 	TCFuture<CStr> fg_ResolveValidationCommit(CStr _Reference, CStr _Directory)
@@ -416,7 +423,7 @@ namespace
 
 		if (Changes.f_IsEmpty())
 		{
-			fg_OutputValidationSummary(*_pCommandLine, Kind, 0, 0, 0, Stopwatch.f_GetTime());
+			fg_OutputValidationSummary(*_pCommandLine, Kind, {}, Stopwatch.f_GetTime());
 
 			co_return 0;
 		}
@@ -436,9 +443,8 @@ namespace
 		;
 		auto DestroyConfigurations = co_await fg_AsyncDestroy(Configurations);
 
-		umint nErrors = 0;
-		umint nFiles = 0;
-		umint nExcluded = 0;
+		CValidationCounts Counts;
+		TCVector<CFormatJob> FormatJobs;
 		for (umint i = 0; i < Changes.f_GetLen(); ++i)
 		{
 			auto Header = Changes[i];
@@ -457,15 +463,17 @@ namespace
 
 			auto Properties = co_await Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, _Directory / Path);
 
-			CLineValidationSettings Settings(Properties);
-			if (!Settings.m_nMaxColumns)
+			CCodeFormattingSettings Settings(Properties);
+			bool bFormat = fg_UsesFormattingEngine(Settings, Path);
+			if (!Settings.m_nMaxColumns && !bFormat)
 			{
-				++nExcluded;
+				++Counts.m_nExcluded;
 				continue;
 			}
 
-			++nFiles;
-			auto PatchPath = AttributeDirectory / "patch";
+			++Counts.m_nFiles;
+			// Every parallel job needs its own patch file, so the path carries the file index.
+			auto PatchPath = AttributeDirectory / ("patch-{}"_f << Counts.m_nFiles);
 			TCVector<CStr> DiffParams =
 				{
 					"-c", "core.attributesFile=" + (AttributeDirectory / "attributes"), "--literal-pathspecs", "diff"
@@ -488,43 +496,99 @@ namespace
 			// also preserves NULs that text process-output handling can discard.
 			co_await NGit::fg_LaunchGit(fg_Move(DiffParams), DiffDirectory, DiffEnvironment);
 			auto Diff = CFile::fs_ReadStringFromFile(PatchPath, true);
+			// Formatting analyses the exact snapshot bytes, so a file needing NUL normalization
+			// is reported as unanalyzable instead of being rewritten into something parseable.
+			bool bNormalizedNuls = fg_HasNul(Diff);
 			fg_NormalizeValidationNuls(Diff);
 
 			CStr AbsolutePath = _Directory / Path;
+			CStr Snapshot;
+			TCVector<umint> AddedLines;
+			bool bWholeFile = true;
 			umint iLine = 0;
 			// Git patch records are LF-delimited; a bare CR belongs to the file content.
 			for (auto const &Line : Diff.f_Split("\n"))
 			{
 				if (Line.f_StartsWith("diff --git "))
+				{
 					iLine = 0;
+					Snapshot.f_Clear();
+					AddedLines.f_Clear();
+				}
 				else if (Line.f_StartsWith("@@ "))
 				{
 					auto Range = Line.f_Extract(Line.f_Find(" +") + 2);
 					auto Number = fg_GetStrSeparators(Range, " ,");
 					iLine = Number == "0" ? 0 : fg_ParsePositive(Number, "diff line number");
+					// Maximal context produces one hunk covering the file; anything else
+					// would leave gaps that cannot be reassembled into a complete snapshot.
+					bWholeFile &= iLine == 1 && Snapshot.f_IsEmpty();
 				}
+				else if (Line.f_StartsWith("\\ "))
+					Snapshot = Snapshot.f_RemoveSuffix("\n");
 				else if (iLine && (Line.f_StartsWith("+") || Line.f_StartsWith(" ")))
 				{
-					auto SourceRecord = Line.f_Extract(1).f_RemoveSuffix("\r");
+					auto Record = Line.f_Extract(1);
+					Snapshot += Record;
+					Snapshot += "\n";
+					auto SourceRecord = Record.f_RemoveSuffix("\r");
 					if (iLine == 1)
 						SourceRecord = SourceRecord.f_RemovePrefix("\xEF\xBB\xBF");
 
 					for (auto const &SourceLine : SourceRecord.f_SplitLine())
 					{
 						if (Line.f_StartsWith("+"))
-							nErrors += !fg_ValidateLine(SourceLine, AbsolutePath, iLine, Settings, *_pCommandLine);
+						{
+							AddedLines.f_Insert(iLine);
+							if (!bFormat)
+								Counts.m_nLineErrors += !fg_ValidateLine(SourceLine, AbsolutePath, iLine, Settings, *_pCommandLine);
+						}
+
 						++iLine;
 					}
 				}
 			}
+
+			// A change with no added or modified lines has nothing to report, which also
+			// covers deletion-only hunks and a file emptied by the change.
+			if (!bFormat || AddedLines.f_IsEmpty())
+				continue;
+
+			++Counts.m_nFormatFiles;
+			if (!bWholeFile || bNormalizedNuls)
+			{
+				++Counts.m_nFormatFailed;
+				*_pCommandLine %= "{}: the changed snapshot could not be reassembled for formatting analysis\n"_f << AbsolutePath;
+
+				continue;
+			}
+
+			auto &Job = FormatJobs.f_Insert();
+			Job.m_Path = AbsolutePath;
+			Job.m_DisplayPath = Path;
+			Job.m_Settings = Settings;
+			Job.m_Source = fg_Move(Snapshot);
+			Job.m_bHasSource = true;
+			Job.m_ReportedLines = fg_Move(AddedLines);
+			Job.m_Mode = EFormatMode::mc_Report;
 		}
 
+		for (auto const &Result : co_await fg_RunFormatJobs(fg_Move(FormatJobs), fg_GetDefaultFormatJobs()))
+		{
+			if (Result.m_Report)
+				*_pCommandLine %= Result.m_Report;
+
+			Counts.m_nFormatErrors += Result.m_nReported;
+			Counts.m_nFormatFailed += Result.m_Outcome == EFormatOutcome::mc_Failed;
+		}
+
+		auto nErrors = Counts.f_GetErrors();
 		if (nErrors)
-			*_pCommandLine %= "Commit validation failed: {} changed line(s) exceed the configured limit.\n"_f << nErrors;
+			*_pCommandLine %= "Commit validation failed: {} changed line(s) violate the configured rules.\n"_f << nErrors;
 
-		fg_OutputValidationSummary(*_pCommandLine, Kind, nFiles, nExcluded, nErrors, Stopwatch.f_GetTime());
+		fg_OutputValidationSummary(*_pCommandLine, Kind, Counts, Stopwatch.f_GetTime());
 
-		co_return nErrors ? 1 : 0;
+		co_return nErrors || Counts.m_nFormatFailed ? 1 : 0;
 	}
 
 	TCFuture<uint32> fg_ValidateRepository(CStr _Directory, TCSharedPointer<CCommandLineControl> _pCommandLine)
@@ -543,18 +607,19 @@ namespace
 
 		TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct(_Directory);
 		auto DestroyConfigurations = co_await fg_AsyncDestroy(Configurations);
-		TCMap<CStr, CLineValidationSettings> SettingsByPath;
+		TCMap<CStr, CCodeFormattingSettings> SettingsByPath;
 		TCVector<CStr> CandidatePaths;
-		umint nExcluded = 0;
+		CValidationCounts Counts;
 		for (auto const &EncodedPath : Index.f_SplitLine<true>())
 		{
 			auto Path = fg_UnquoteGitPath(EncodedPath);
 			auto Properties = co_await Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, _Directory / Path);
 
-			CLineValidationSettings Settings(Properties);
-			if (!Settings.m_nMaxColumns)
+			// A file is a candidate when any validator applies to it, not only the line-length one.
+			CCodeFormattingSettings Settings(Properties);
+			if (!Settings.m_nMaxColumns && !fg_UsesFormattingEngine(Settings, Path))
 			{
-				++nExcluded;
+				++Counts.m_nExcluded;
 				continue;
 			}
 
@@ -562,8 +627,7 @@ namespace
 			SettingsByPath(Path, Settings);
 		}
 
-		umint nFiles = 0;
-		umint nErrors = 0;
+		TCVector<CFormatJob> FormatJobs;
 		umint iPath = 0;
 		while (iPath < CandidatePaths.f_GetLen())
 		{
@@ -595,19 +659,39 @@ namespace
 				auto Path = fg_UnquoteGitPath(EncodedPath);
 				auto const &Settings = *SettingsByPath.f_FindEqual(Path);
 				CStr AbsolutePath = _Directory / Path;
+				++Counts.m_nFiles;
+				if (fg_UsesFormattingEngine(Settings, Path))
+				{
+					++Counts.m_nFormatFiles;
+					auto &Job = FormatJobs.f_Insert();
+					Job.m_Path = AbsolutePath;
+					Job.m_DisplayPath = Path;
+					Job.m_Settings = Settings;
+					Job.m_Mode = EFormatMode::mc_Report;
+
+					continue;
+				}
+
 				auto Contents = CFile::fs_ReadStringFromFile(AbsolutePath, true);
 				fg_NormalizeValidationNuls(Contents);
 				umint iLine = 0;
 				for (auto const &Line : Contents.f_SplitLine())
-					nErrors += !fg_ValidateLine(Line, AbsolutePath, ++iLine, Settings, *_pCommandLine);
-
-				++nFiles;
+					Counts.m_nLineErrors += !fg_ValidateLine(Line, AbsolutePath, ++iLine, Settings, *_pCommandLine);
 			}
 		}
 
-		fg_OutputValidationSummary(*_pCommandLine, "tracked text", nFiles, nExcluded, nErrors, Stopwatch.f_GetTime());
+		for (auto const &Result : co_await fg_RunFormatJobs(fg_Move(FormatJobs), fg_GetDefaultFormatJobs()))
+		{
+			if (Result.m_Report)
+				*_pCommandLine %= Result.m_Report;
 
-		co_return nErrors ? 1 : 0;
+			Counts.m_nFormatErrors += Result.m_nReported;
+			Counts.m_nFormatFailed += Result.m_Outcome == EFormatOutcome::mc_Failed;
+		}
+
+		fg_OutputValidationSummary(*_pCommandLine, "tracked text", Counts, Stopwatch.f_GetTime());
+
+		co_return Counts.f_GetErrors() || Counts.m_nFormatFailed ? 1 : 0;
 	}
 }
 
