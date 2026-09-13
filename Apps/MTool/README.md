@@ -1,8 +1,12 @@
 # Source validation
 
 EditorConfig parsing, pattern matching, and property resolution are provided by
-`Malterlib/Develop` through `<Mib/Develop/EditorConfig>`. MTool supplies repository
-boundaries and Git snapshot contents, and implements validation and diagnostics.
+`Malterlib/Develop` through `<Mib/Develop/EditorConfig>`. The formatting engine
+is provided by the same module through `<Mib/Develop/CodeFormatting>`. MTool
+supplies repository boundaries and Git snapshot contents, schedules the work,
+and implements diagnostics, patches, and safe writes. `MTool Format` and
+`MTool Validate` share one engine, so an automatic fix and a reported violation
+cannot develop separate interpretations of the rules.
 
 `MTool Validate`, in the Validation command group, audits all tracked text files
 in the current Git repository,
@@ -39,7 +43,26 @@ References are resolved locally; this command does not fetch from a remote.
 An invalid reference, missing `HEAD`, or absent/ambiguous merge base reports an
 error. `--base` and `--staged` cannot be combined.
 
-The initial validator enforces `max_line_length`. Diagnostics include the absolute file path,
+`MTool Validate` enforces `max_line_length` for every selected file, and the
+Malterlib formatting rules for files that opt in with `malterlib_format`. A file
+is selected when any validator applies to it, so formatting can be checked in a
+scope that has no line-length limit. Validate never writes; it reports the edit
+plan the shared engine would apply.
+
+Formatting diagnostics are written as `path:line:column: rule: explanation`.
+Line-length-only files keep the existing `path:line: line length ...` message
+and the original summary line, so output for scopes that have not opted in is
+unchanged. Opted-in files report line length through the engine instead, which
+avoids describing the same overlong line twice.
+
+Changed-line modes reassemble each file's complete snapshot from its
+full-context patch, analyze the whole file, and then report only violations on
+added or modified lines. A file whose snapshot cannot be reassembled, including
+one containing NUL bytes, is reported as unanalyzable rather than analyzed from
+normalized content. Deletion-only hunks keep the existing no-added-lines
+behavior. Each file gets its own patch file so concurrent jobs cannot collide.
+
+The line-length validator enforces `max_line_length`. Diagnostics include the absolute file path,
 line number, measured columns, and limit. Tabs advance to the next `tab_width`
 tab stop (falling back to `indent_size`, then 4). Other Unicode code points count
 as one column, including embedded NULs in files explicitly marked as text.
@@ -67,8 +90,14 @@ Supported section patterns include `*`, `**`, `?`, character sets and ranges
 (including negation, such as `[!0-9]`), escaped characters, and brace alternatives
 such as `*.{cpp,h}`. Numeric brace ranges
 are currently rejected. Use `max_line_length = off` or `unset` for an exception;
-a missing limit disables this validator. Invalid limits fail validation.
-Other properties are retained for future validators but are not enforced.
+a missing limit disables the line-length validator, unless `malterlib_format`
+selects the Malterlib profile, whose default limit is 190. Invalid limits fail
+validation. Other properties are retained for future validators but are not
+enforced.
+
+No repository configuration enables `malterlib_format` yet, so the templates and
+module configurations above are unchanged and every existing scope keeps its
+current behavior.
 
 Patterns are compiled once per configuration section and matched as Unicode
 characters. Brace alternatives retain their token boundaries; repeated
@@ -133,6 +162,9 @@ Pre-commit hooks are ordered by configurable properties, like
 | `MalterlibSourcePreCommitHooks` | Core and source modules | Source validation |
 | `MalterlibBinaryPreCommitHooks` | Binary distributions, including SDK and Qt | LFS content check |
 
+Enabling `malterlib_format` also enables formatting checks in these hooks, so
+roll the property out only after the affected sources are already clean.
+
 Set a complete list in the project's root `.MBuildSystem` to control the order:
 
 ```text
@@ -177,6 +209,77 @@ The implementation separates file selection, configuration resolution, and line
 validation. Additional rules can use the same input selection and resolved
 properties in audit, staged, and base-comparison modes.
 
+# Source formatting
+
+`MTool Format`, in the Validation command group, formats sources that opt in
+with `malterlib_format = malterlib` in `.editorconfig`. The rules, protected
+regions, and range contract are documented in
+[Malterlib/Develop](../../../Develop/Documentation/CodeFormatting.md).
+
+```bash
+MTool Format --file Source/Example.cpp
+MTool Format --file Source/Example.cpp --lines 40:75
+MTool Format --file Source/Example.cpp --offset 120 --length 48
+MTool Format -C /path/to/project --pattern 'Malterlib/Concurrency/Source/*.cpp' --recursive
+MTool Format -C /path/to/project --pattern 'Malterlib/Concurrency/Source/*.cpp' --recursive --check
+MTool Format --file Source/Example.cpp --lines 40:75 --diff
+MTool Format --file Source/Example.cpp --lines 40:75 --strict-range
+```
+
+`--file` selects explicit files and `--pattern` enumerates regular files with
+the File module's wildcard search, where only the last path component may
+contain wildcards; `--recursive` enables descendant traversal. Both options take
+one value or a comma-separated list, following the shared command-line
+convention for list options; repeating an option replaces its earlier value.
+Quote patterns so MTool receives them unchanged. Relative paths resolve against
+`--working-directory` (`-C`), which defaults to the caller's current directory.
+These file-search globs are not EditorConfig section patterns and do not share
+their syntax.
+
+An input selector is required: an empty invocation never rewrites the current
+directory. No matches is an input error. Matching files that are all excluded
+are a successful no-op with an explicit summary. Symbolic links are skipped,
+directory symbolic links are not traversed, and overlapping selections are
+deduplicated by normalized path.
+
+Format writes in place by default. `--check` reports without writing and
+`--diff` prints the proposed unified patch to standard output without writing;
+combining them is rejected. `--jobs N` bounds how many files are formatted
+concurrently and defaults to a bounded host-capacity value; `--jobs 1` uses the
+same code path. Selected files are processed in sorted path order and results
+are reported in that order, so a parallel run and a single-job run produce
+identical output.
+
+Range options require exactly one selected file and cannot be combined with
+patterns or several files. `--lines` uses one-based inclusive source lines.
+`--offset` and `--length` use zero-based byte offsets in the original on-disk
+contents and must occur together. Combining line and byte ranges, reversed or
+out-of-bounds ranges, and boundaries inside an encoded code point or a CRLF pair
+are all rejected. A zero-length byte range formats the unit at the cursor, and
+at end of file the preceding unit. By default a selection expands to the whole
+lines it touches; `--strict-range` never modifies bytes outside the request and
+reports a `range-boundary` violation instead.
+
+Each file's configuration is resolved from its own containing repository, so a
+selection spanning nested repositories resolves every file independently. A file
+outside the resolved root is rejected with a message suggesting `-C`.
+
+Before replacing a file, Format verifies that it is still the regular file whose
+bytes were analyzed, writes the result beside the destination, restores the
+original attributes, and renames it into place. A file that changed on disk
+during analysis is never overwritten. Unchanged files are not rewritten. A batch
+is not a transaction: per-file outcomes are reported individually and partial
+completion is reported accurately.
+
+Exit status 0 means the files were formatted, or that check mode found no
+violations. Exit status 1 means check-mode violations, or violations that
+remain unresolved after a write, such as an indivisible overlong line. Exit
+status 2 is reserved for operational errors: input, configuration, parse, I/O,
+and worker failures. Validate's existing exit behavior is unchanged.
+
+Summaries distinguish selected, unchanged, changed or would-change, unresolved,
+and failed files, along with the number excluded by configuration.
+
 ## License checks
 
 `./mib check-license` normalizes CRLF and CR line endings to LF when comparing
@@ -189,7 +292,7 @@ not rewritten.
 
 ## Integration tests
 
-Validation, license-check, and agent-generation tests use the Malterlib test framework in
+Validation, formatting, license-check, and agent-generation tests use the Malterlib test framework in
 `Malterlib/Tool/Test`. The test target builds MTool as a runtime dependency and
 deploys it using the existing test-app layout at `Tests/TestApps/MTool`.
 The tests locate it relative to their executable. Git must be available on
