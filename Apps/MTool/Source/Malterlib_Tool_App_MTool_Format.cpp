@@ -374,8 +374,6 @@ namespace NMib::NTool::NFormat
 
 	TCFuture<CStr> fg_ResolveFormatRoot(CStr _Path, CFormatRootCache *_pCache)
 	{
-		auto CaptureScope = co_await (g_CaptureExceptions % ("Resolving the configuration boundary for '{}'"_f << _Path));
-
 		// The containing repository bounds configuration discovery, matching Validate.
 		auto Directory = CFile::fs_FileExists(_Path, EFileAttrib_Directory) ? _Path : CFile::fs_GetPath(_Path);
 		Directory = CFile::fs_CondensePath(Directory);
