@@ -5,6 +5,7 @@
 
 #include <Mib/Git/Helpers/Launch>
 #include <Mib/Concurrency/AsyncDestroy>
+#include <Mib/Container/Map>
 #include <Mib/Core/OnScopeExitCatch>
 #include <Mib/Time/Stopwatch>
 
@@ -357,17 +358,56 @@ namespace NMib::NTool::NFormat
 		return fg_Min(fg_Max(umint(NSys::fg_Thread_GetVirtualCores()), umint(1)), umint(16));
 	}
 
-	TCFuture<CStr> fg_ResolveFormatRoot(CStr _Path)
+	// Repository roots by directory. Launching git for every selected file made a run of a
+	// module spend nearly all its time waiting for git, so a directory asks git only when
+	// it holds a '.git' entry of its own; otherwise it takes the root of the nearest
+	// directory above it that is already known.
+	struct CFormatRootCache
+	{
+		TCMap<CStr, CStr> m_Roots;
+	};
+
+	TCFuture<CStr> fg_ResolveFormatRoot(CStr _Path, CFormatRootCache *_pCache)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % ("Resolving the configuration boundary for '{}'"_f << _Path));
 
 		// The containing repository bounds configuration discovery, matching Validate.
 		auto Directory = CFile::fs_FileExists(_Path, EFileAttrib_Directory) ? _Path : CFile::fs_GetPath(_Path);
-		auto Result = co_await NGit::fg_LaunchGitWithResult({"rev-parse", "--show-toplevel"}, Directory);
-		if (Result.m_ExitCode)
-			co_return CStr();
+		Directory = CFile::fs_CondensePath(Directory);
+		TCVector<CStr> Pending;
+		CStr Root;
+		bool bResolved = false;
+		for (auto Walk = Directory; !bResolved; )
+		{
+			if (auto pRoot = _pCache->m_Roots.f_FindEqual(Walk))
+			{
+				Root = *pRoot;
+				bResolved = true;
 
-		co_return Result.f_GetStdOut().f_Trim();
+				break;
+			}
+
+			Pending.f_Insert(Walk);
+			auto Parent = CFile::fs_CondensePath(CFile::fs_GetPath(Walk));
+			bool bRepository = CFile::fs_FileExists(Walk / ".git");
+			if (!bRepository && Parent && Parent != Walk)
+			{
+				Walk = Parent;
+
+				continue;
+			}
+
+			auto Result = co_await NGit::fg_LaunchGitWithResult({"rev-parse", "--show-toplevel"}, Walk);
+			if (!Result.m_ExitCode)
+				Root = Result.f_GetStdOut().f_Trim();
+
+			bResolved = true;
+		}
+
+		for (auto const &Known : Pending)
+			_pCache->m_Roots.f_Insert(Known) = Root;
+
+		co_return Root;
 	}
 
 	CStr fg_NormalizeFormatPath(CStr const &_Path, CStr const &_WorkingDirectory)
@@ -525,9 +565,10 @@ namespace NMib::NTool::NFormat
 		// spanning nested repositories resolves every file against its own root.
 		TCVector<CStr> Roots;
 		TCVector<TCVector<CStr>> Grouped;
+		CFormatRootCache RootCache;
 		for (auto const &Path : Candidates)
 		{
-			auto Root = co_await fg_ResolveFormatRoot(Path);
+			auto Root = co_await fg_ResolveFormatRoot(Path, &RootCache);
 			if (!Root)
 				Root = WorkingDirectory;
 
