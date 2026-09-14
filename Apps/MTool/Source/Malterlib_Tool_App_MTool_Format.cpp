@@ -232,14 +232,14 @@ namespace NMib::NTool::NFormat
 	}
 
 	// Every job is queued at once and a job that awaits lets the worker start the next, so a
-	// blocking actor checked out per job would mean a thread per file. The worker's own
-	// checkout bounds that to one thread per worker.
-	CFormatWorker::CFormatWorker(CStr _Root)
+	// blocking actor checked out per job would mean a thread per file. The run's shared set
+	// bounds that to its capacity, whatever the number of workers and resolvers.
+	CFormatWorker::CFormatWorker(CStr _Root, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors)
 		: mp_Root(fg_Move(_Root))
-		, mp_BlockingActor(fg_BlockingActor())
+		, mp_pBlockingActors(_pBlockingActors)
 	{
 		if (mp_Root)
-			mp_Configurations = fg_Construct(mp_Root);
+			mp_Configurations = fg_Construct(mp_Root, mp_pBlockingActors);
 	}
 
 	// The resolver is an actor of its own, and its destruction is awaited here so that the
@@ -273,13 +273,12 @@ namespace NMib::NTool::NFormat
 			_Job.m_DisplayPath = CFile::fs_MakePathRelative(_Job.m_Path, mp_Root);
 		}
 
-		auto &BlockingActor = mp_BlockingActor;
 		auto Snapshot = _Job.m_Source;
 		if (!_Job.m_bHasSource)
 		{
 			Snapshot = co_await
 				(
-					g_Dispatch(BlockingActor) / [Path = _Job.m_Path]() -> CStr
+					g_Dispatch(mp_pBlockingActors->f_Next()) / [Path = _Job.m_Path]() -> CStr
 					{
 						auto Data = CFile::fs_ReadFile(Path);
 
@@ -356,7 +355,7 @@ namespace NMib::NTool::NFormat
 		auto Formatted = fg_ApplyCodeFormattingEdits(Snapshot, Analysis.m_Edits);
 		auto Written = co_await
 			(
-				g_Dispatch(BlockingActor) / [Path = _Job.m_Path, Snapshot, Formatted]() -> CStr
+				g_Dispatch(mp_pBlockingActors->f_Next()) / [Path = _Job.m_Path, Snapshot, Formatted]() -> CStr
 				{
 					// Never overwrite an intervening edit: the file must still be the regular
 					// file whose bytes were analyzed.
@@ -533,8 +532,7 @@ namespace NMib::NTool::NFormat
 		CStr mp_Wildcard;								// Upper case, matched the way the platform matches a find pattern.
 		bool mp_bMatchAll = false;
 		bool mp_bRecursive = false;
-		TCVector<CBlockingActorCheckout> mp_Readers;
-		umint mp_iNextReader = 0;
+		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pReaders;	// Shared with the repositories' resolvers.
 		TCVector<CFormatWalkRepository> mp_Repositories;
 	};
 
@@ -544,9 +542,7 @@ namespace NMib::NTool::NFormat
 		, mp_bRecursive(_bRecursive)
 	{
 		mp_bMatchAll = mp_Wildcard == "*";
-		for (umint i = 0; i < fg_Max(_nJobs, umint(1)); ++i)
-			mp_Readers.f_Insert(fg_BlockingActor());
-
+		mp_pReaders = fg_Construct(_nJobs);
 		fp_AddRepository(_Root, _bGit);
 	}
 
@@ -555,7 +551,7 @@ namespace NMib::NTool::NFormat
 		auto &Repository = mp_Repositories.f_Insert();
 		Repository.m_Root = _Root;
 		Repository.m_bGit = _bGit;
-		Repository.m_Configurations = fg_Construct(_Root);
+		Repository.m_Configurations = fg_Construct(_Root, mp_pReaders);
 
 		return mp_Repositories.f_GetLen() - 1;
 	}
@@ -580,11 +576,9 @@ namespace NMib::NTool::NFormat
 
 	TCFuture<CFormatListing> CFormatWalk::fp_List(umint _iRepository, CStr _Directory)
 	{
-		auto &Reader = mp_Readers[mp_iNextReader++ % mp_Readers.f_GetLen()];
-
 		co_return co_await
 			(
-				g_Dispatch(Reader) / [iRepository = _iRepository, Directory = fg_Move(_Directory)]() -> CFormatListing
+				g_Dispatch(mp_pReaders->f_Next()) / [iRepository = _iRepository, Directory = fg_Move(_Directory)]() -> CFormatListing
 				{
 					CFormatListing Listing;
 					Listing.m_iRepository = iRepository;
@@ -743,9 +737,10 @@ namespace NMib::NTool::NFormat
 			co_return Results;
 
 		auto nWorkers = fg_Min(_nJobs, _Jobs.f_GetLen());
+		TCSharedPointer<CSharedRoundRobinBlockingActors> pBlockingActors = fg_Construct(nWorkers);
 		TCVector<TCActor<CFormatWorker>> Workers;
 		for (umint i = 0; i < nWorkers; ++i)
-			Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(_Root));
+			Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(_Root, pBlockingActors));
 
 		auto DestroyWorkers = co_await fg_AsyncDestroy
 			(

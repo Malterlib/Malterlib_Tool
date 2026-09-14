@@ -52,12 +52,12 @@ namespace NMib::NTool::NFormat
 		umint m_nUnresolved = 0;									// Reported diagnostics without an automatic fix.
 	};
 
-	// Workers share no state: the caller owns selection, ordering, and reporting. A worker
-	// given a root resolves its own jobs' settings there, so configuration runs on every
-	// core along with the formatting.
+	// Workers share no state but the blocking actors their file I/O runs on: the caller owns
+	// selection, ordering, and reporting. A worker given a root resolves its own jobs'
+	// settings there, so configuration runs on every core along with the formatting.
 	struct CFormatWorker : NConcurrency::CActor
 	{
-		explicit CFormatWorker(NStr::CStr _Root);
+		CFormatWorker(NStr::CStr _Root, NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> const &_pBlockingActors);
 
 		NConcurrency::TCFuture<CFormatJobResult> f_Process(CFormatJob _Job);
 
@@ -67,7 +67,7 @@ namespace NMib::NTool::NFormat
 	private:
 		NStr::CStr mp_Root;
 		NConcurrency::TCActor<NDevelop::CEditorConfigResolver> mp_Configurations;
-		NConcurrency::CBlockingActorCheckout mp_BlockingActor;	// One per worker: the worker's file I/O queues here instead of each job checking one out.
+		NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> mp_pBlockingActors;
 	};
 
 	// Resolves the repository root that bounds configuration discovery for a directory. A
