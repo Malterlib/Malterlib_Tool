@@ -56,8 +56,29 @@ namespace NMib::NTool::NFormat
 		NConcurrency::TCFuture<CFormatJobResult> f_Process(CFormatJob _Job);
 	};
 
-	// Runs the jobs across a bounded window of workers and returns their results in job order,
-	// so a parallel run reports exactly like a single-job run.
+	// Resolves the repository root that bounds configuration discovery for a directory. A
+	// directory asks git only when it holds a '.git' entry of its own or nothing above it is
+	// known; otherwise it takes the root of the nearest known directory above it. A directory
+	// whose root is being resolved is asked once, and later callers wait for that answer, so
+	// every file's resolve can be issued at once.
+	struct CFormatRootResolver : NConcurrency::CActor
+	{
+		NConcurrency::TCFuture<NStr::CStr> f_Resolve(NStr::CStr _Directory);
+
+	private:
+		struct CEntry
+		{
+			NConcurrency::TCAsyncResult<NStr::CStr> m_Result;
+			NContainer::TCVector<NConcurrency::TCPromise<NStr::CStr>> m_Waiters;
+		};
+
+		NConcurrency::TCFuture<NStr::CStr> fp_AskGit(NStr::CStr _Directory);
+
+		NContainer::TCMap<NStr::CStr, NStorage::TCSharedPointer<CEntry>> mp_Entries;
+	};
+
+	// Runs the jobs over the worker pool and returns their results in job order, so a
+	// parallel run reports exactly like a single-job run.
 	NConcurrency::TCFuture<NContainer::TCVector<CFormatJobResult>> fg_RunFormatJobs(NContainer::TCVector<CFormatJob> _Jobs, umint _nJobs);
 
 	// A bounded default for hosts that did not ask for a specific job count.
