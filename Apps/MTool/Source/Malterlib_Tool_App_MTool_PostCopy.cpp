@@ -55,6 +55,8 @@ public:
 		bool bHash = false;
 		bool bDirectory = false;
 		bool bRecursive = false;
+		bool bPrintDestination = false;
+		bool bPrintedDestination = false;
 
 		for (umint i = 0; true; ++i)
 		{
@@ -84,6 +86,8 @@ public:
 				bDirectory = Value.f_ToInt(0) != 0 || Value == "true";
 			else if (Key == "Recursive")
 				bRecursive = Value.f_ToInt(0) != 0 || Value == "true";
+			else if (Key == "PrintDestination")
+				bPrintDestination = Value.f_ToInt(0) != 0 || Value == "true";
 			else
 				DError(CStr(CStr::CFormat("Unknown setting: {}") << Key));
 		}
@@ -216,12 +220,13 @@ public:
 			pProject = pProjects->f_CreateChildNoPath(DestinationProjectKey);
 			auto pDestination = pProject->f_CreateChildNoPath(DestinationKey, true);
 			pDestination->f_SetThisValue(CBuildSystemSyntax::CRootValue{.m_Value = {CFile::fs_AppendPath(DefaultRoot, DestinationProject)}});
-			DConOut("Added {} post copy project to config file" DNewLine, DestinationProject);
+			if (!bPrintDestination)
+				DConOut("Added {} post copy project to config file" DNewLine, DestinationProject);
 		}
 
 		auto fCopySourceFile = [&](CStr const &_SourceFile, CStr const &_SubPath)
 			{
-				if (!CFile::fs_FileExists(_SourceFile))
+				if (!bPrintDestination && !CFile::fs_FileExists(_SourceFile))
 					DError(CStr(CStr::CFormat("Source file does not exist: {}") << _SourceFile));
 
 				CStr SourceFileName = CFile::fs_GetFile(_SourceFile);
@@ -287,6 +292,14 @@ public:
 						FullDestination = CFile::fs_AppendPath(Destination, NewFileName);
 					else
 						FullDestination = CFile::fs_AppendPath(CFile::fs_AppendPath(Destination, FullDestinationFolder), NewFileName);
+
+					if (bPrintDestination)
+					{
+						DConOut("{}" DNewLine, FullDestination);
+						bPrintedDestination = true;
+
+						return;
+					}
 
 					EFileAttrib SupportedAttributes = CFile::fs_GetSupportedAttributes();
 					EFileAttrib ValidAttributes = CFile::fs_GetValidAttributes();
@@ -443,6 +456,14 @@ public:
 		else
 			fCopySourceFile(SourceFile, "");
 
+		if (bPrintDestination)
+		{
+			if (!bPrintedDestination)
+				DError(fg_Format("No enabled destination for post copy project '{}'", DestinationProject));
+
+			return 0;
+		}
+
 		if (Registry != OriginalRegistry)
 		{
 			CStr NewRegistry = Registry.f_GenerateStr();
@@ -461,4 +482,3 @@ public:
 };
 
 DMibRuntimeClass(CTool, CTool_PostCopy);
-
