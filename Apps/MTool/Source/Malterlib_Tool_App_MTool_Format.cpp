@@ -438,8 +438,9 @@ namespace NMib::NTool::NFormat
 		ECodeRangePolicy m_RangePolicy = ECodeRangePolicy::mc_Expand;
 	};
 
-	// Runs the selected files across a bounded window of worker actors. The window keeps
-	// several files in flight without holding every snapshot in memory at once.
+	// Runs the selected files over a pool of worker actors sized by the host. Every file is
+	// queued at once, in turn over the workers, and the results come back in the jobs'
+	// order whatever order the files finished in.
 	TCFuture<TCVector<CFormatJobResult>> fg_RunFormatJobs(TCVector<CFormatJob> _Jobs, umint _nJobs)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % "Running formatting jobs");
@@ -466,32 +467,23 @@ namespace NMib::NTool::NFormat
 			)
 		;
 
-		TCVector<TCFuture<CFormatJobResult>> InFlight;
-		umint nDispatched = 0;
-		while (nDispatched < _Jobs.f_GetLen() && InFlight.f_GetLen() < nWorkers)
-		{
-			InFlight.f_InsertLast(Workers[InFlight.f_GetLen()](&CFormatWorker::f_Process, _Jobs[nDispatched]));
-			++nDispatched;
-		}
+		TCFutureVector<CFormatJobResult> Pending;
+		Pending.f_SetLen(_Jobs.f_GetLen());
+		for (umint iJob = 0; iJob < _Jobs.f_GetLen(); ++iJob)
+			Workers[iJob % nWorkers](&CFormatWorker::f_Process, _Jobs[iJob]) > Pending;
 
+		auto Outcomes = co_await fg_AllDoneWrapped(Pending);
 		Results.f_SetLen(_Jobs.f_GetLen());
 		for (umint iJob = 0; iJob < _Jobs.f_GetLen(); ++iJob)
 		{
-			auto iSlot = iJob % InFlight.f_GetLen();
-			auto Result = co_await fg_Move(InFlight[iSlot]).f_Wrap();
-			if (Result)
-				Results[iJob] = *Result;
+			auto &Outcome = Outcomes[iJob];
+			if (Outcome)
+				Results[iJob] = fg_Move(*Outcome);
 			else
 			{
 				Results[iJob].m_Path = _Jobs[iJob].m_Path;
 				Results[iJob].m_Outcome = EFormatOutcome::mc_Failed;
-				Results[iJob].m_Report = "{}\n"_f << Result.f_GetExceptionStr();
-			}
-
-			if (nDispatched < _Jobs.f_GetLen())
-			{
-				InFlight[iSlot] = Workers[iSlot](&CFormatWorker::f_Process, _Jobs[nDispatched]);
-				++nDispatched;
+				Results[iJob].m_Report = "{}\n"_f << Outcome.f_GetExceptionStr();
 			}
 		}
 
