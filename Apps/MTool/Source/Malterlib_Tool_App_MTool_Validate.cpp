@@ -229,9 +229,9 @@ namespace
 
 	// Validation never writes, so an opted-in file is analyzed as a whole snapshot and
 	// reported through the shared engine instead of a second set of layout checks.
-	bool fg_UsesFormattingEngine(CCodeFormattingSettings const &_Settings, CStr const &_Path)
+	bool fg_UsesFormattingEngine(CCodeFormattingSettings const &_Settings)
 	{
-		return _Settings.f_IsFormattingEnabled() && fg_DetectCodeLanguage(_Path) == ECodeLanguage::mc_Cpp;
+		return _Settings.f_IsFormattingEnabled();
 	}
 
 	TCFuture<CStr> fg_ResolveValidationCommit(CStr _Reference, CStr _Directory)
@@ -477,7 +477,7 @@ namespace
 			auto Properties = co_await Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, _Directory / Path);
 
 			CCodeFormattingSettings Settings(Properties);
-			bool bFormat = fg_UsesFormattingEngine(Settings, Path);
+			bool bFormat = fg_UsesFormattingEngine(Settings);
 			if (!Settings.m_nMaxColumns && !bFormat)
 			{
 				++Counts.m_nExcluded;
@@ -625,7 +625,7 @@ namespace
 
 			// A file is a candidate when any validator applies to it, not only the line-length one.
 			CCodeFormattingSettings Settings(Properties);
-			if (!Settings.m_nMaxColumns && !fg_UsesFormattingEngine(Settings, Path))
+			if (!Settings.m_nMaxColumns && !fg_UsesFormattingEngine(Settings))
 			{
 				++Counts.m_nExcluded;
 				continue;
@@ -668,7 +668,7 @@ namespace
 				auto const &Settings = *SettingsByPath.f_FindEqual(Path);
 				CStr AbsolutePath = _Directory / Path;
 				++Counts.m_nFiles;
-				if (fg_UsesFormattingEngine(Settings, Path))
+				if (fg_UsesFormattingEngine(Settings))
 				{
 					++Counts.m_nFormatFiles;
 					auto &Job = FormatJobs.f_Insert();

@@ -6,6 +6,7 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 
 #include <Mib/Develop/CodeFormatting>
+#include <Mib/Develop/EditorConfig>
 
 namespace NMib::NTool::NFormat
 {
@@ -30,6 +31,7 @@ namespace NMib::NTool::NFormat
 		NStr::CStr m_Path;											// Absolute path, used for reading, writing, and diagnostics.
 		NStr::CStr m_DisplayPath;									// Repository-relative path used in patch headers.
 		NDevelop::CCodeFormattingSettings m_Settings;
+		bool m_bResolveSettings = false;							// The worker resolves the settings and display path from its root.
 		NStr::CStr m_Source;										// Snapshot contents; empty means read m_Path.
 		bool m_bHasSource = false;
 		NContainer::TCVector<umint> m_ReportedLines;				// Sorted one-based lines to report; empty reports every line.
@@ -50,10 +52,22 @@ namespace NMib::NTool::NFormat
 		umint m_nUnresolved = 0;									// Reported diagnostics without an automatic fix.
 	};
 
-	// Workers hold no shared state: the caller owns selection, ordering, and reporting.
+	// Workers share no state: the caller owns selection, ordering, and reporting. A worker
+	// given a root resolves its own jobs' settings there, so configuration runs on every
+	// core along with the formatting.
 	struct CFormatWorker : NConcurrency::CActor
 	{
+		explicit CFormatWorker(NStr::CStr _Root);
+
 		NConcurrency::TCFuture<CFormatJobResult> f_Process(CFormatJob _Job);
+
+	protected:
+		NConcurrency::TCFuture<void> fp_Destroy() override;
+
+	private:
+		NStr::CStr mp_Root;
+		NConcurrency::TCActor<NDevelop::CEditorConfigResolver> mp_Configurations;
+		NConcurrency::CBlockingActorCheckout mp_BlockingActor;	// One per worker: the worker's file I/O queues here instead of each job checking one out.
 	};
 
 	// Resolves the repository root that bounds configuration discovery for a directory. A
@@ -79,7 +93,7 @@ namespace NMib::NTool::NFormat
 
 	// Runs the jobs over the worker pool and returns their results in job order, so a
 	// parallel run reports exactly like a single-job run.
-	NConcurrency::TCFuture<NContainer::TCVector<CFormatJobResult>> fg_RunFormatJobs(NContainer::TCVector<CFormatJob> _Jobs, umint _nJobs);
+	NConcurrency::TCFuture<NContainer::TCVector<CFormatJobResult>> fg_RunFormatJobs(NContainer::TCVector<CFormatJob> _Jobs, umint _nJobs, NStr::CStr _Root = {});
 
 	// A bounded default for hosts that did not ask for a specific job count.
 	umint fg_GetDefaultFormatJobs();

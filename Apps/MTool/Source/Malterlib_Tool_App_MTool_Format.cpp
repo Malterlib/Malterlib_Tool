@@ -230,13 +230,49 @@ namespace NMib::NTool::NFormat
 		}
 	}
 
+	// Every job is queued at once and a job that awaits lets the worker start the next, so a
+	// blocking actor checked out per job would mean a thread per file. The worker's own
+	// checkout bounds that to one thread per worker.
+	CFormatWorker::CFormatWorker(CStr _Root)
+		: mp_Root(fg_Move(_Root))
+		, mp_BlockingActor(fg_BlockingActor())
+	{
+		if (mp_Root)
+			mp_Configurations = fg_Construct(mp_Root);
+	}
+
+	// The resolver is an actor of its own, and its destruction is awaited here so that the
+	// worker's own destruction, and the run, do not end before it.
+	TCFuture<void> CFormatWorker::fp_Destroy()
+	{
+		if (mp_Configurations)
+			co_await fg_Move(mp_Configurations).f_Destroy();
+
+		co_return {};
+	}
+
 	TCFuture<CFormatJobResult> CFormatWorker::f_Process(CFormatJob _Job)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % ("Formatting '{}'"_f << _Job.m_Path));
 
 		CFormatJobResult Result;
 		Result.m_Path = _Job.m_Path;
-		auto BlockingActor = fg_BlockingActor();
+		if (_Job.m_bResolveSettings)
+		{
+			// The opt-in property decides what is formatted, and what it opts in is C++.
+			auto Properties = co_await mp_Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, _Job.m_Path);
+			_Job.m_Settings = CCodeFormattingSettings(Properties);
+			if (!_Job.m_Settings.f_IsFormattingEnabled())
+			{
+				Result.m_Outcome = EFormatOutcome::mc_Excluded;
+
+				co_return Result;
+			}
+
+			_Job.m_DisplayPath = CFile::fs_MakePathRelative(_Job.m_Path, mp_Root);
+		}
+
+		auto &BlockingActor = mp_BlockingActor;
 		auto Snapshot = _Job.m_Source;
 		if (!_Job.m_bHasSource)
 		{
@@ -260,7 +296,7 @@ namespace NMib::NTool::NFormat
 		CCodeFormattingRequest Request;
 		Request.m_Source = Snapshot;
 		Request.m_Path = _Job.m_Path;
-		Request.m_Language = fg_DetectCodeLanguage(_Job.m_Path);
+		Request.m_Language = ECodeLanguage::mc_Cpp;
 		Request.m_Settings = _Job.m_Settings;
 		Request.m_Ranges = _Job.m_ByteRanges;
 		Request.m_RangePolicy = _Job.m_RangePolicy;
@@ -458,7 +494,7 @@ namespace NMib::NTool::NFormat
 	// Runs the selected files over a pool of worker actors sized by the host. Every file is
 	// queued at once, in turn over the workers, and the results come back in the jobs'
 	// order whatever order the files finished in.
-	TCFuture<TCVector<CFormatJobResult>> fg_RunFormatJobs(TCVector<CFormatJob> _Jobs, umint _nJobs)
+	TCFuture<TCVector<CFormatJobResult>> fg_RunFormatJobs(TCVector<CFormatJob> _Jobs, umint _nJobs, CStr _Root)
 	{
 		TCVector<CFormatJobResult> Results;
 		if (_Jobs.f_IsEmpty())
@@ -467,7 +503,7 @@ namespace NMib::NTool::NFormat
 		auto nWorkers = fg_Min(_nJobs, _Jobs.f_GetLen());
 		TCVector<TCActor<CFormatWorker>> Workers;
 		for (umint i = 0; i < nWorkers; ++i)
-			Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>());
+			Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(_Root));
 
 		auto DestroyWorkers = co_await fg_AsyncDestroy
 			(
@@ -519,18 +555,6 @@ namespace NMib::NTool::NFormat
 		CStopwatch Stopwatch{true};
 		auto WorkingDirectory = fg_NormalizeFormatPath(_WorkingDirectory, CFile::fs_GetCurrentDirectory());
 		TCVector<CStr> Candidates;
-		TCSet<CStr> Seen;
-		auto fSelect = [&](CStr const &_Path)
-			{
-				auto Path = fg_NormalizeFormatPath(_Path, WorkingDirectory);
-				if (Seen.f_FindEqual(Path))
-					return;
-
-				Seen.f_Insert(Path);
-				Candidates.f_Insert(Path);
-			}
-		;
-
 		for (auto const &File : _Files)
 		{
 			auto Path = fg_NormalizeFormatPath(File, WorkingDirectory);
@@ -540,19 +564,21 @@ namespace NMib::NTool::NFormat
 			if (!CFile::fs_FileExists(Path, EFileAttrib_File))
 				co_return DMibErrorInstance("'{}' is not an existing regular file"_f << Path);
 
-			fSelect(Path);
+			Candidates.f_Insert(Path);
 		}
 
 		for (auto const &Pattern : _Patterns)
 		{
 			auto Search = fg_NormalizeFormatPath(Pattern, WorkingDirectory);
 			// Directory symbolic links are not traversed, so a pattern cannot escape its tree.
-			for (auto const &Found : CFile::fs_FindFilesEx(Search, EFileAttrib_File, _bRecursive, false))
+			// A found path is the normalized search path with names appended, so it is
+			// already in normal form.
+			for (auto &Found : CFile::fs_FindFilesEx(Search, EFileAttrib_File, _bRecursive, false))
 			{
 				if (Found.m_Attribs & (EFileAttrib_Link | EFileAttrib_Directory))
 					continue;
 
-				fSelect(Found.m_Path);
+				Candidates.f_Insert(fg_Move(Found.m_Path));
 			}
 		}
 
@@ -560,8 +586,22 @@ namespace NMib::NTool::NFormat
 			co_return DMibErrorInstance("No files matched the requested selection");
 
 		// Directory enumeration order is not stable, so selection order is, keeping
-		// diagnostics identical between runs and between job counts.
+		// diagnostics identical between runs and between job counts. A file named by
+		// more than one selector is formatted once.
 		Candidates.f_Sort();
+		umint nUnique = 0;
+		for (umint i = 0; i < Candidates.f_GetLen(); ++i)
+		{
+			if (nUnique && Candidates[nUnique - 1] == Candidates[i])
+				continue;
+
+			if (nUnique != i)
+				Candidates[nUnique] = fg_Move(Candidates[i]);
+
+			++nUnique;
+		}
+
+		Candidates.f_SetLen(nUnique);
 
 		bool bHasRange = _Options.m_iFirstLine || !_Options.m_ByteRanges.f_IsEmpty();
 		if (bHasRange && Candidates.f_GetLen() != 1)
@@ -570,26 +610,40 @@ namespace NMib::NTool::NFormat
 		// Configuration discovery is bounded by each file's own repository, so a selection
 		// spanning nested repositories resolves every file against its own root. Every
 		// resolve is issued at once; the resolver launches git once per repository.
+		// Sorted candidates keep the files of one directory together, so a root is asked
+		// for once per such run of files.
 		TCActor<CFormatRootResolver> RootResolver = fg_ConstructActor<CFormatRootResolver>();
 		auto DestroyRootResolver = co_await fg_AsyncDestroy(RootResolver);
 		TCFutureVector<CStr> RootRequests;
-		RootRequests.f_SetLen(Candidates.f_GetLen());
+		TCVector<umint> RequestOfCandidate;
+		TCVector<CStr> RequestDirectories;
 		for (auto const &Path : Candidates)
-			RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Path)) > RootRequests;
+		{
+			auto Directory = CFile::fs_GetPath(Path);
+			if (RequestDirectories.f_IsEmpty() || RequestDirectories.f_GetLast() != Directory)
+			{
+				RootResolver(&CFormatRootResolver::f_Resolve, Directory) > RootRequests;
+				RequestDirectories.f_Insert(fg_Move(Directory));
+			}
+
+			RequestOfCandidate.f_Insert(RequestDirectories.f_GetLen() - 1);
+		}
 
 		auto ResolvedRoots = co_await fg_AllDone(RootRequests);
 		TCVector<CStr> Roots;
 		TCVector<TCVector<CStr>> Grouped;
-		for (umint iCandidate = 0; iCandidate < Candidates.f_GetLen(); ++iCandidate)
+		TCVector<umint> RootOfRequest;
+		for (umint iRequest = 0; iRequest < RequestDirectories.f_GetLen(); ++iRequest)
 		{
-			auto const &Path = Candidates[iCandidate];
-			auto Root = ResolvedRoots[iCandidate];
+			auto Root = ResolvedRoots[iRequest];
 			if (!Root)
 				Root = WorkingDirectory;
 
-			auto Relative = CFile::fs_MakePathRelative(Path, Root);
-			if (!Relative || Relative.f_StartsWith(".."))
-				co_return DMibErrorInstance("'{}' is outside the configuration root '{}'; use --working-directory to supply a suitable root"_f << Path << Root);
+			// The directory may be the root itself, which relates to it as nothing at all.
+			auto const &Directory = RequestDirectories[iRequest];
+			auto Relative = CFile::fs_MakePathRelative(Directory, Root);
+			if (Relative.f_StartsWith("..") || CFile::fs_IsPathAbsolute(Relative))
+				co_return DMibErrorInstance("'{}' is outside the configuration root '{}'; use --working-directory to supply a suitable root"_f << Directory << Root);
 
 			umint iRoot = 0;
 			while (iRoot < Roots.f_GetLen() && Roots[iRoot] != Root)
@@ -601,31 +655,24 @@ namespace NMib::NTool::NFormat
 				Grouped.f_Insert();
 			}
 
-			Grouped[iRoot].f_Insert(Path);
+			RootOfRequest.f_Insert(iRoot);
 		}
+
+		for (umint iCandidate = 0; iCandidate < Candidates.f_GetLen(); ++iCandidate)
+			Grouped[RootOfRequest[RequestOfCandidate[iCandidate]]].f_Insert(Candidates[iCandidate]);
 
 		CFormatSummary Summary;
 		Summary.m_nSelected = Candidates.f_GetLen();
 		for (umint iRoot = 0; iRoot < Roots.f_GetLen(); ++iRoot)
 		{
-			TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct(Roots[iRoot]);
-			auto DestroyConfigurations = co_await fg_AsyncDestroy(Configurations);
-
+			// Every candidate is a job; the workers resolve its configuration and report a
+			// file the configuration does not opt in as excluded.
 			TCVector<CFormatJob> Jobs;
 			for (auto const &Path : Grouped[iRoot])
 			{
-				auto Properties = co_await Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, Path);
-				CCodeFormattingSettings Settings(Properties);
-				if (!Settings.f_IsFormattingEnabled() || fg_DetectCodeLanguage(Path) != ECodeLanguage::mc_Cpp)
-				{
-					++Summary.m_nExcluded;
-					continue;
-				}
-
 				auto &Job = Jobs.f_Insert();
 				Job.m_Path = Path;
-				Job.m_DisplayPath = CFile::fs_MakePathRelative(Path, Roots[iRoot]);
-				Job.m_Settings = Settings;
+				Job.m_bResolveSettings = true;
 				Job.m_ByteRanges = _Options.m_ByteRanges;
 				Job.m_iFirstLine = _Options.m_iFirstLine;
 				Job.m_iLastLine = _Options.m_iLastLine;
@@ -634,7 +681,7 @@ namespace NMib::NTool::NFormat
 			}
 
 			// The coordinator owns ordering, so parallel runs report exactly like --jobs 1.
-			for (auto const &Result : co_await fg_RunFormatJobs(fg_Move(Jobs), _Options.m_nJobs))
+			for (auto const &Result : co_await fg_RunFormatJobs(fg_Move(Jobs), _Options.m_nJobs, Roots[iRoot]))
 			{
 				if (Result.m_Report)
 					*_pCommandLine %= Result.m_Report;
@@ -645,6 +692,10 @@ namespace NMib::NTool::NFormat
 				Summary.m_nUnresolved += Result.m_nUnresolved;
 				switch (Result.m_Outcome)
 				{
+					case EFormatOutcome::mc_Excluded:
+						++Summary.m_nExcluded;
+
+						break;
 					case EFormatOutcome::mc_Changed:
 						++Summary.m_nChanged;
 
