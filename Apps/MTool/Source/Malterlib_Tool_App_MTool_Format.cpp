@@ -4,6 +4,7 @@
 #include "Malterlib_Tool_App_MTool_Format.h"
 
 #include <Mib/Git/Helpers/Launch>
+#include <Mib/Git/Ignore>
 #include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Container/Map>
 #include <Mib/Core/OnScopeExitCatch>
@@ -467,6 +468,247 @@ namespace NMib::NTool::NFormat
 	{
 		return CFile::fs_CondensePath(CFile::fs_GetFullPath(_Path, _WorkingDirectory));
 	}
+
+	struct CFormatCandidate
+	{
+		CStr m_Path;
+		umint m_iRoot = 0;
+	};
+
+	// A directory's contents, read on a blocking actor along with the ignore files in it.
+	struct CFormatListing
+	{
+		umint m_iRepository = 0;
+		CStr m_Directory;
+		TCVector<CFile::CFoundFile> m_Entries;
+		bool m_bRepository = false;						// The directory holds a '.git' entry.
+		TCOptional<CStr> m_Rules;						// The directory's own .gitignore.
+		TCOptional<CStr> m_Excludes;					// The repository's .git/info/exclude, at its root.
+	};
+
+	// One repository the walk has met: the ignore rules gathered on the way down, and a
+	// configuration resolver bounded by its root.
+	struct CFormatWalkRepository
+	{
+		CStr m_Root;
+		bool m_bGit = false;							// False for the working directory standing in for no repository.
+		NGit::CGitIgnore m_Ignore;
+		TCActor<NDevelop::CEditorConfigResolver> m_Configurations;
+	};
+
+	struct CFormatWalkFound
+	{
+		CStr m_Path;
+		umint m_iRoot = 0;								// Index into the result's roots.
+	};
+
+	struct CFormatWalkResult
+	{
+		TCVector<CFormatWalkFound> m_Found;
+		TCVector<CStr> m_Roots;
+	};
+
+	// Walks the tree a pattern names, listing directories in parallel on a bounded set of
+	// blocking actors. A directory is not entered when git ignores it, or when a document
+	// above it disables formatting for everything below it; a document deeper down that
+	// opts files back in is not seen then, which is the price of never reading those
+	// trees. The listing order is not the selection order, which the caller settles by
+	// sorting.
+	struct CFormatWalk : CActor
+	{
+		CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, umint _nJobs);
+
+		TCFuture<CFormatWalkResult> f_Run();
+
+	protected:
+		TCFuture<void> fp_Destroy() override;
+
+	private:
+		TCFuture<CFormatListing> fp_List(umint _iRepository, CStr _Directory);
+		TCFuture<void> fp_LoadRulesAbove(umint _iRepository, CStr _Directory);
+		umint fp_AddRepository(CStr const &_Root, bool _bGit);
+		bool fp_MatchesName(CStr const &_Name) const;
+
+		CStr mp_Directory;
+		CStr mp_Wildcard;								// Upper case, matched the way the platform matches a find pattern.
+		bool mp_bMatchAll = false;
+		bool mp_bRecursive = false;
+		TCVector<CBlockingActorCheckout> mp_Readers;
+		umint mp_iNextReader = 0;
+		TCVector<CFormatWalkRepository> mp_Repositories;
+	};
+
+	CFormatWalk::CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, umint _nJobs)
+		: mp_Directory(CFile::fs_GetPath(_Search))
+		, mp_Wildcard(CFile::fs_GetFile(_Search).f_UpperCase())
+		, mp_bRecursive(_bRecursive)
+	{
+		mp_bMatchAll = mp_Wildcard == "*";
+		for (umint i = 0; i < fg_Max(_nJobs, umint(1)); ++i)
+			mp_Readers.f_Insert(fg_BlockingActor());
+
+		fp_AddRepository(_Root, _bGit);
+	}
+
+	umint CFormatWalk::fp_AddRepository(CStr const &_Root, bool _bGit)
+	{
+		auto &Repository = mp_Repositories.f_Insert();
+		Repository.m_Root = _Root;
+		Repository.m_bGit = _bGit;
+		Repository.m_Configurations = fg_Construct(_Root);
+
+		return mp_Repositories.f_GetLen() - 1;
+	}
+
+	TCFuture<void> CFormatWalk::fp_Destroy()
+	{
+		for (auto &Repository : mp_Repositories)
+			co_await fg_Move(Repository.m_Configurations).f_Destroy();
+
+		co_return {};
+	}
+
+	bool CFormatWalk::fp_MatchesName(CStr const &_Name) const
+	{
+		if (mp_bMatchAll)
+			return true;
+
+		auto Name = _Name.f_UpperCase();
+
+		return fg_StrMatchWildcard(Name.f_GetStr(), mp_Wildcard.f_GetStr()) == EMatchWildcardResult_WholeStringMatchedAndPatternExhausted;
+	}
+
+	TCFuture<CFormatListing> CFormatWalk::fp_List(umint _iRepository, CStr _Directory)
+	{
+		auto &Reader = mp_Readers[mp_iNextReader++ % mp_Readers.f_GetLen()];
+
+		co_return co_await
+			(
+				g_Dispatch(Reader) / [iRepository = _iRepository, Directory = fg_Move(_Directory)]() -> CFormatListing
+				{
+					CFormatListing Listing;
+					Listing.m_iRepository = iRepository;
+					Listing.m_Directory = Directory;
+					Listing.m_Entries = CFile::fs_FindFilesEx(Directory / "*", EFileAttrib_File | EFileAttrib_Directory, false, false);
+					for (auto const &Entry : Listing.m_Entries)
+					{
+						auto Name = CFile::fs_GetFile(Entry.m_Path);
+						if (Name == ".git")
+						{
+							Listing.m_bRepository = true;
+							auto Excludes = Entry.m_Path / "info/exclude";
+							if ((Entry.m_Attribs & EFileAttrib_Directory) && CFile::fs_FileExists(Excludes, EFileAttrib_File))
+								Listing.m_Excludes = CFile::fs_ReadStringFromFile(Excludes, true);
+						}
+						else if (Name == ".gitignore" && (Entry.m_Attribs & EFileAttrib_File))
+							Listing.m_Rules = CFile::fs_ReadStringFromFile(Entry.m_Path, true);
+					}
+
+					return Listing;
+				}
+			)
+		;
+	}
+
+	// The rules of the ignore files between a repository's root and the directory the walk
+	// starts in apply to that directory, so they are gathered before the first listing.
+	TCFuture<void> CFormatWalk::fp_LoadRulesAbove(umint _iRepository, CStr _Directory)
+	{
+		auto const &Root = mp_Repositories[_iRepository].m_Root;
+		TCVector<CStr> Directories;
+		for (auto Walk = CFile::fs_GetPath(_Directory); Walk && Walk.f_GetLen() >= Root.f_GetLen(); Walk = CFile::fs_GetPath(Walk))
+		{
+			Directories.f_Insert(Walk);
+			if (Walk == Root)
+				break;
+		}
+
+		for (umint i = Directories.f_GetLen(); i; --i)
+		{
+			auto Listing = co_await fp_List(_iRepository, Directories[i - 1]);
+			auto &Repository = mp_Repositories[_iRepository];
+			if (Listing.m_Excludes)
+				Repository.m_Ignore.f_AddRules({}, *Listing.m_Excludes);
+
+			if (Listing.m_Rules)
+				Repository.m_Ignore.f_AddRules(CFile::fs_MakePathRelative(Listing.m_Directory, Repository.m_Root), *Listing.m_Rules);
+		}
+
+		co_return {};
+	}
+
+	TCFuture<CFormatWalkResult> CFormatWalk::f_Run()
+	{
+		CFormatWalkResult Result;
+		if (mp_Repositories[0].m_bGit)
+			co_await fp_LoadRulesAbove(0, mp_Directory);
+
+		// Listings are awaited in the order they were issued, while the readers keep as many
+		// of the later ones in flight as there are readers.
+		TCVector<TCFuture<CFormatListing>> Pending;
+		Pending.f_Insert(fp_List(0, mp_Directory));
+		for (umint iPending = 0; iPending < Pending.f_GetLen(); ++iPending)
+		{
+			auto Listing = co_await fg_Move(Pending[iPending]);
+			auto iRepository = Listing.m_iRepository;
+			if (Listing.m_bRepository && Listing.m_Directory != mp_Repositories[iRepository].m_Root)
+			{
+				iRepository = fp_AddRepository(Listing.m_Directory, true);
+				if (Listing.m_Excludes)
+					mp_Repositories[iRepository].m_Ignore.f_AddRules({}, *Listing.m_Excludes);
+			}
+
+			if (Listing.m_Rules && mp_Repositories[iRepository].m_bGit)
+			{
+				auto &Repository = mp_Repositories[iRepository];
+				auto Relative = CFile::fs_MakePathRelative(Listing.m_Directory, Repository.m_Root);
+				Repository.m_Ignore.f_AddRules(Relative == "." ? CStr() : Relative, *Listing.m_Rules);
+			}
+
+			for (auto &Entry : Listing.m_Entries)
+			{
+				if (Entry.m_Attribs & EFileAttrib_Link)
+					continue;
+
+				auto Name = CFile::fs_GetFile(Entry.m_Path);
+				if (Name == ".git")
+					continue;
+
+				bool bDirectory = (Entry.m_Attribs & EFileAttrib_Directory) != 0;
+				if (bDirectory && !mp_bRecursive)
+					continue;
+
+				if (!bDirectory && !fp_MatchesName(Name))
+					continue;
+
+				auto const &Repository = mp_Repositories[iRepository];
+				if (Repository.m_bGit && Repository.m_Ignore.f_IsIgnored(CFile::fs_MakePathRelative(Entry.m_Path, Repository.m_Root), bDirectory))
+					continue;
+
+				if (!bDirectory)
+				{
+					Result.m_Found.f_Insert({fg_Move(Entry.m_Path), iRepository});
+
+					continue;
+				}
+
+				// Only a document above that speaks for everything below can close a directory:
+				// a directory no document mentions may hold a document of its own that opts
+				// its files in, as a module's does.
+				auto Below = co_await mp_Repositories[iRepository].m_Configurations(&NDevelop::CEditorConfigResolver::f_ResolveBelow, Entry.m_Path);
+				bool bSettled = Below.m_Settled.f_FindEqual("malterlib_format") && !Below.m_Uncertain.f_FindEqual("malterlib_format");
+				if (bSettled && !CCodeFormattingSettings(Below.m_Properties).f_IsFormattingEnabled())
+					continue;
+
+				Pending.f_Insert(fp_List(iRepository, fg_Move(Entry.m_Path)));
+			}
+		}
+
+		for (auto const &Repository : mp_Repositories)
+			Result.m_Roots.f_Insert(Repository.m_Root);
+
+		co_return fg_Move(Result);
+	}
 }
 
 namespace NMib::NTool::NFormat
@@ -554,7 +796,25 @@ namespace NMib::NTool::NFormat
 
 		CStopwatch Stopwatch{true};
 		auto WorkingDirectory = fg_NormalizeFormatPath(_WorkingDirectory, CFile::fs_GetCurrentDirectory());
-		TCVector<CStr> Candidates;
+		bool bHasRange = _Options.m_iFirstLine || !_Options.m_ByteRanges.f_IsEmpty();
+		TCVector<CFormatCandidate> Candidates;
+		TCVector<CStr> Roots;
+		auto fRootIndex = [&](CStr const &_Root)
+			{
+				umint iRoot = 0;
+				while (iRoot < Roots.f_GetLen() && Roots[iRoot] != _Root)
+					++iRoot;
+
+				if (iRoot == Roots.f_GetLen())
+					Roots.f_Insert(_Root);
+
+				return iRoot;
+			}
+		;
+
+		// A file named outright is taken as it is; its repository bounds its configuration.
+		TCActor<CFormatRootResolver> RootResolver = fg_ConstructActor<CFormatRootResolver>();
+		auto DestroyRootResolver = co_await fg_AsyncDestroy(RootResolver);
 		for (auto const &File : _Files)
 		{
 			auto Path = fg_NormalizeFormatPath(File, WorkingDirectory);
@@ -564,22 +824,25 @@ namespace NMib::NTool::NFormat
 			if (!CFile::fs_FileExists(Path, EFileAttrib_File))
 				co_return DMibErrorInstance("'{}' is not an existing regular file"_f << Path);
 
-			Candidates.f_Insert(Path);
+			auto Root = co_await RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Path));
+			if (!Root)
+				Root = WorkingDirectory;
+
+			Candidates.f_Insert({Path, fRootIndex(Root)});
 		}
 
+		// A pattern walks its tree, and a directory is entered only when git does not ignore
+		// it and the configuration can still opt in a file below it. That is what keeps a
+		// dependency's build output or a tracked import cache from being listed file by file.
 		for (auto const &Pattern : _Patterns)
 		{
 			auto Search = fg_NormalizeFormatPath(Pattern, WorkingDirectory);
-			// Directory symbolic links are not traversed, so a pattern cannot escape its tree.
-			// A found path is the normalized search path with names appended, so it is
-			// already in normal form.
-			for (auto &Found : CFile::fs_FindFilesEx(Search, EFileAttrib_File, _bRecursive, false))
-			{
-				if (Found.m_Attribs & (EFileAttrib_Link | EFileAttrib_Directory))
-					continue;
-
-				Candidates.f_Insert(fg_Move(Found.m_Path));
-			}
+			auto Root = co_await RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Search));
+			TCActor<CFormatWalk> Walk = fg_ConstructActor<CFormatWalk>(Search, Root ? Root : WorkingDirectory, bool(Root), _bRecursive, _Options.m_nJobs);
+			auto DestroyWalk = co_await fg_AsyncDestroy(Walk);
+			auto Walked = co_await Walk(&CFormatWalk::f_Run);
+			for (auto &Found : Walked.m_Found)
+				Candidates.f_Insert({fg_Move(Found.m_Path), fRootIndex(Walked.m_Roots[Found.m_iRoot])});
 		}
 
 		if (Candidates.f_IsEmpty())
@@ -588,11 +851,18 @@ namespace NMib::NTool::NFormat
 		// Directory enumeration order is not stable, so selection order is, keeping
 		// diagnostics identical between runs and between job counts. A file named by
 		// more than one selector is formatted once.
-		Candidates.f_Sort();
+		Candidates.f_Sort
+			(
+				[](CFormatCandidate const &_Left, CFormatCandidate const &_Right)
+				{
+					return _Left.m_Path <=> _Right.m_Path;
+				}
+			)
+		;
 		umint nUnique = 0;
 		for (umint i = 0; i < Candidates.f_GetLen(); ++i)
 		{
-			if (nUnique && Candidates[nUnique - 1] == Candidates[i])
+			if (nUnique && Candidates[nUnique - 1].m_Path == Candidates[i].m_Path)
 				continue;
 
 			if (nUnique != i)
@@ -602,64 +872,13 @@ namespace NMib::NTool::NFormat
 		}
 
 		Candidates.f_SetLen(nUnique);
-
-		bool bHasRange = _Options.m_iFirstLine || !_Options.m_ByteRanges.f_IsEmpty();
 		if (bHasRange && Candidates.f_GetLen() != 1)
 			co_return DMibErrorInstance("Range options require exactly one selected file; {} were selected"_f << Candidates.f_GetLen());
 
-		// Configuration discovery is bounded by each file's own repository, so a selection
-		// spanning nested repositories resolves every file against its own root. Every
-		// resolve is issued at once; the resolver launches git once per repository.
-		// Sorted candidates keep the files of one directory together, so a root is asked
-		// for once per such run of files.
-		TCActor<CFormatRootResolver> RootResolver = fg_ConstructActor<CFormatRootResolver>();
-		auto DestroyRootResolver = co_await fg_AsyncDestroy(RootResolver);
-		TCFutureVector<CStr> RootRequests;
-		TCVector<umint> RequestOfCandidate;
-		TCVector<CStr> RequestDirectories;
-		for (auto const &Path : Candidates)
-		{
-			auto Directory = CFile::fs_GetPath(Path);
-			if (RequestDirectories.f_IsEmpty() || RequestDirectories.f_GetLast() != Directory)
-			{
-				RootResolver(&CFormatRootResolver::f_Resolve, Directory) > RootRequests;
-				RequestDirectories.f_Insert(fg_Move(Directory));
-			}
-
-			RequestOfCandidate.f_Insert(RequestDirectories.f_GetLen() - 1);
-		}
-
-		auto ResolvedRoots = co_await fg_AllDone(RootRequests);
-		TCVector<CStr> Roots;
 		TCVector<TCVector<CStr>> Grouped;
-		TCVector<umint> RootOfRequest;
-		for (umint iRequest = 0; iRequest < RequestDirectories.f_GetLen(); ++iRequest)
-		{
-			auto Root = ResolvedRoots[iRequest];
-			if (!Root)
-				Root = WorkingDirectory;
-
-			// The directory may be the root itself, which relates to it as nothing at all.
-			auto const &Directory = RequestDirectories[iRequest];
-			auto Relative = CFile::fs_MakePathRelative(Directory, Root);
-			if (Relative.f_StartsWith("..") || CFile::fs_IsPathAbsolute(Relative))
-				co_return DMibErrorInstance("'{}' is outside the configuration root '{}'; use --working-directory to supply a suitable root"_f << Directory << Root);
-
-			umint iRoot = 0;
-			while (iRoot < Roots.f_GetLen() && Roots[iRoot] != Root)
-				++iRoot;
-
-			if (iRoot == Roots.f_GetLen())
-			{
-				Roots.f_Insert(Root);
-				Grouped.f_Insert();
-			}
-
-			RootOfRequest.f_Insert(iRoot);
-		}
-
-		for (umint iCandidate = 0; iCandidate < Candidates.f_GetLen(); ++iCandidate)
-			Grouped[RootOfRequest[RequestOfCandidate[iCandidate]]].f_Insert(Candidates[iCandidate]);
+		Grouped.f_SetLen(Roots.f_GetLen());
+		for (auto &Candidate : Candidates)
+			Grouped[Candidate.m_iRoot].f_Insert(fg_Move(Candidate.m_Path));
 
 		CFormatSummary Summary;
 		Summary.m_nSelected = Candidates.f_GetLen();
@@ -858,7 +1077,8 @@ struct CTool_Format : CDistributedTool
 						{
 							"Names"_o= _o["--recursive", "-r"]
 							, "Default"_o= false
-							, "Description"_o= "Also match patterns in descendant directories.\n"
+							, "Description"_o=
+								"Also match patterns in descendant directories. A directory git ignores, or one a configuration document disables formatting under, is not entered.\n"
 						}
 						, "Check?"_o=
 						{
