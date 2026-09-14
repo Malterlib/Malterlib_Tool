@@ -252,6 +252,11 @@ namespace NMib::NTool::NFormat
 			;
 		}
 
+		// The read hands the worker back to the queue it was dispatched from, where every
+		// worker would then analyze one after the other. Yielding places the analysis on an
+		// idle core instead, and the worker stays there for the files that follow.
+		co_await g_Yield;
+
 		CCodeFormattingRequest Request;
 		Request.m_Source = Snapshot;
 		Request.m_Path = _Job.m_Path;
@@ -443,8 +448,6 @@ namespace NMib::NTool::NFormat
 	// order whatever order the files finished in.
 	TCFuture<TCVector<CFormatJobResult>> fg_RunFormatJobs(TCVector<CFormatJob> _Jobs, umint _nJobs)
 	{
-		auto CaptureScope = co_await (g_CaptureExceptions % "Running formatting jobs");
-
 		TCVector<CFormatJobResult> Results;
 		if (_Jobs.f_IsEmpty())
 			co_return Results;
@@ -458,7 +461,6 @@ namespace NMib::NTool::NFormat
 			(
 				[&Workers]() -> TCFuture<void>
 				{
-					auto Capture = co_await (g_CaptureExceptions % "Destroying formatting workers");
 					for (auto &Worker : Workers)
 						co_await fg_Move(Worker).f_Destroy();
 
