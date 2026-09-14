@@ -204,11 +204,17 @@ namespace NMib::NTool::NFormat
 
 	// Changed-line reporting masks diagnostics by their original affected span, so unchanged
 	// surrounding violations stay suppressed while the analysis still sees the whole file.
+	// Writing the file or printing its patch is the report of what was fixed, so only what
+	// stays unresolved is listed then.
 	void fg_DescribeDiagnostics(CFormatJob const &_Job, TCVector<CCodeFormattingDiagnostic> const &_Diagnostics, CFormatJobResult &o_Result)
 	{
+		bool bFixing = _Job.m_Mode == EFormatMode::mc_Write || _Job.m_Mode == EFormatMode::mc_Diff;
 		for (auto const &Diagnostic : _Diagnostics)
 		{
 			if (!fg_IsReportedLine(_Job.m_ReportedLines, Diagnostic.m_iLine))
+				continue;
+
+			if (bFixing && Diagnostic.m_bHasAutomaticFix)
 				continue;
 
 			++o_Result.m_nReported;
