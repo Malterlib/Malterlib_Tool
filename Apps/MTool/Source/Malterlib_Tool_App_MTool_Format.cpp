@@ -363,54 +363,68 @@ namespace NMib::NTool::NFormat
 		return fg_Min(fg_Max(umint(NSys::fg_Thread_GetVirtualCores()), umint(1)), umint(16));
 	}
 
-	// Repository roots by directory. Launching git for every selected file made a run of a
-	// module spend nearly all its time waiting for git, so a directory asks git only when
-	// it holds a '.git' entry of its own; otherwise it takes the root of the nearest
-	// directory above it that is already known.
-	struct CFormatRootCache
+	TCFuture<CStr> CFormatRootResolver::fp_AskGit(CStr _Directory)
 	{
-		TCMap<CStr, CStr> m_Roots;
-	};
+		auto Result = co_await NGit::fg_LaunchGitWithResult({"rev-parse", "--show-toplevel"}, _Directory);
+		if (Result.m_ExitCode)
+			co_return CStr();
 
-	TCFuture<CStr> fg_ResolveFormatRoot(CStr _Path, CFormatRootCache *_pCache)
+		co_return Result.f_GetStdOut().f_Trim();
+	}
+
+	TCFuture<CStr> CFormatRootResolver::f_Resolve(CStr _Directory)
 	{
-		// The containing repository bounds configuration discovery, matching Validate.
-		auto Directory = CFile::fs_FileExists(_Path, EFileAttrib_Directory) ? _Path : CFile::fs_GetPath(_Path);
-		Directory = CFile::fs_CondensePath(Directory);
+		// Walk up to a directory that is known or being resolved, or that holds a repository
+		// of its own. Every directory passed on the way shares that directory's answer.
 		TCVector<CStr> Pending;
-		CStr Root;
-		bool bResolved = false;
-		for (auto Walk = Directory; !bResolved; )
+		auto Walk = CFile::fs_CondensePath(_Directory);
+		TCSharedPointer<CEntry> pEntry;
+		while (true)
 		{
-			if (auto pRoot = _pCache->m_Roots.f_FindEqual(Walk))
+			if (auto pKnown = mp_Entries.f_FindEqual(Walk))
 			{
-				Root = *pRoot;
-				bResolved = true;
+				pEntry = *pKnown;
 
 				break;
 			}
 
 			Pending.f_Insert(Walk);
 			auto Parent = CFile::fs_CondensePath(CFile::fs_GetPath(Walk));
-			bool bRepository = CFile::fs_FileExists(Walk / ".git");
-			if (!bRepository && Parent && Parent != Walk)
-			{
-				Walk = Parent;
+			if (CFile::fs_FileExists(Walk / ".git") || !Parent || Parent == Walk)
+				break;
 
-				continue;
-			}
-
-			auto Result = co_await NGit::fg_LaunchGitWithResult({"rev-parse", "--show-toplevel"}, Walk);
-			if (!Result.m_ExitCode)
-				Root = Result.f_GetStdOut().f_Trim();
-
-			bResolved = true;
+			Walk = Parent;
 		}
 
-		for (auto const &Known : Pending)
-			_pCache->m_Roots.f_Insert(Known) = Root;
+		// Publish the pending resolve before awaiting so reentrant resolves can join it.
+		bool bAsk = !pEntry;
+		if (bAsk)
+			pEntry = fg_Construct();
 
-		co_return Root;
+		for (auto const &Known : Pending)
+			mp_Entries(Known, pEntry);
+
+		if (!bAsk)
+		{
+			if (pEntry->m_Result.f_IsSet())
+				co_return fg_TempCopy(pEntry->m_Result);
+
+			co_return co_await pEntry->m_Waiters.f_Insert().f_Future();
+		}
+
+		auto Result = co_await fp_AskGit(fg_TempCopy(Walk)).f_Wrap();
+		pEntry->m_Result = Result;
+		if (!Result)
+		{
+			for (auto const &Known : Pending)
+				mp_Entries.f_Remove(Known);
+		}
+
+		auto Waiters = fg_Move(pEntry->m_Waiters);
+		for (auto &Promise : Waiters)
+			Promise.f_SetResult(Result);
+
+		co_return fg_Move(Result);
 	}
 
 	CStr fg_NormalizeFormatPath(CStr const &_Path, CStr const &_WorkingDirectory)
@@ -554,13 +568,22 @@ namespace NMib::NTool::NFormat
 			co_return DMibErrorInstance("Range options require exactly one selected file; {} were selected"_f << Candidates.f_GetLen());
 
 		// Configuration discovery is bounded by each file's own repository, so a selection
-		// spanning nested repositories resolves every file against its own root.
+		// spanning nested repositories resolves every file against its own root. Every
+		// resolve is issued at once; the resolver launches git once per repository.
+		TCActor<CFormatRootResolver> RootResolver = fg_ConstructActor<CFormatRootResolver>();
+		auto DestroyRootResolver = co_await fg_AsyncDestroy(RootResolver);
+		TCFutureVector<CStr> RootRequests;
+		RootRequests.f_SetLen(Candidates.f_GetLen());
+		for (auto const &Path : Candidates)
+			RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Path)) > RootRequests;
+
+		auto ResolvedRoots = co_await fg_AllDone(RootRequests);
 		TCVector<CStr> Roots;
 		TCVector<TCVector<CStr>> Grouped;
-		CFormatRootCache RootCache;
-		for (auto const &Path : Candidates)
+		for (umint iCandidate = 0; iCandidate < Candidates.f_GetLen(); ++iCandidate)
 		{
-			auto Root = co_await fg_ResolveFormatRoot(Path, &RootCache);
+			auto const &Path = Candidates[iCandidate];
+			auto Root = ResolvedRoots[iCandidate];
 			if (!Root)
 				Root = WorkingDirectory;
 
