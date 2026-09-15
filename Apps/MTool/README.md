@@ -244,6 +244,18 @@ are a successful no-op with an explicit summary. Symbolic links are skipped,
 directory symbolic links are not traversed, and overlapping selections are
 deduplicated by normalized path.
 
+A recursive pattern does not enter a directory git ignores, nor one below which
+an EditorConfig section that covers every file sets `malterlib_format` to a
+disabling value or `unset`, so a dependency's build output or an import cache is
+never listed. The ignore rules are the repository's `.gitignore` files, its
+`info/exclude`, and the file `core.excludesFile` names in the git configuration,
+read from the system, global, repository, and worktree files with the precedence
+git gives them and honoring `GIT_CONFIG_GLOBAL`, `GIT_CONFIG_SYSTEM`,
+`GIT_CONFIG_NOSYSTEM`, and `XDG_CONFIG_HOME`; without a value the default
+`~/.config/git/ignore` applies. Configuration `include` directives are not
+followed. A directory the rules above it ignore is not entered even when it is
+a repository of its own.
+
 Format writes in place by default. `--check` reports without writing and
 `--diff` prints the proposed unified patch to standard output without writing;
 combining them is rejected. `--jobs N` bounds how many files are formatted

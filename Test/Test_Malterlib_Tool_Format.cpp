@@ -77,6 +77,37 @@ namespace NMib::NTool
 					co_return {};
 				};
 
+				DMibTestCategory("RepositoryExcludesPruneDirectories") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "RepositoryExcludesPruneDirectories");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write("Source.cpp", gc_Formatted);
+					Repo.f_Write("Generated/Bad.cpp", gc_Unformatted);
+					Repo.f_Write("Local/Bad.cpp", gc_Unformatted);
+					Repo.f_Write("Ignored/Bad.cpp", gc_Unformatted);
+					Repo.f_Write(".gitignore", "/Ignored/\n");
+					CFile::fs_WriteStringToFile(Repo.m_Path / ".git/info/exclude", "Local/\n", false);
+					CFile::fs_WriteStringToFile(Repo.m_Root / "excludes", "Generated/\n", false);
+					CFile::fs_WriteStringToFile
+						(
+							Repo.m_Root / "gitconfig"
+							, CFile::fs_ReadStringFromFile(Repo.m_Root / "gitconfig", true) + "\texcludesFile = " + Repo.m_Root / "excludes" + "\n"
+							, false
+						)
+					;
+
+					// The three ignored trees are never listed, so their violations go unseen; the
+					// listing holds the source and the two configuration files.
+					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "*", "--recursive", "--check"});
+					DMibExpect(Result.m_ExitCode, ==, 0u);
+					DMibExpect(Result.f_GetCombinedOut().f_Find("Formatted 3 file(s): 1 unchanged, 0 would change"), >=, 0);
+
+					co_return {};
+				};
+
 				DMibTestCategory("PatternsAndFilesDeduplicate") -> TCFuture<void>
 				{
 					auto Capture = co_await (g_CaptureExceptions % "PatternsAndFilesDeduplicate");
