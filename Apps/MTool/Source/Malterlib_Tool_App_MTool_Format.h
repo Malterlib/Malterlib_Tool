@@ -71,6 +71,25 @@ namespace NMib::NTool::NFormat
 		NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> mp_pBlockingActors;
 	};
 
+	// The workers of a run, taking jobs in turn, and the blocking actors their file I/O
+	// runs on. Several validations share one pool so that their jobs share both.
+	struct CFormatWorkerPool : NConcurrency::CActor
+	{
+		CFormatWorkerPool(umint _nWorkers, NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> const &_pBlockingActors);
+
+		NConcurrency::TCFuture<CFormatJobResult> f_Process(CFormatJob _Job);
+
+	protected:
+		NConcurrency::TCFuture<void> fp_Destroy() override;
+
+	private:
+		NContainer::TCVector<NConcurrency::TCActor<CFormatWorker>> mp_Workers;
+		umint mp_iNextWorker = 0;
+	};
+
+	// A pool with its own blocking actors, for a caller that runs no walk of its own.
+	NConcurrency::TCActor<CFormatWorkerPool> fg_ConstructFormatWorkerPool(umint _nWorkers);
+
 	// Resolves the repository root that bounds configuration discovery for a directory. A
 	// directory asks git only when it holds a '.git' entry of its own or nothing above it is
 	// known; otherwise it takes the root of the nearest known directory above it. A directory
@@ -92,9 +111,9 @@ namespace NMib::NTool::NFormat
 		NContainer::TCMap<NStr::CStr, NStorage::TCSharedPointer<CEntry>> mp_Entries;
 	};
 
-	// Runs the jobs over the worker pool and returns their results in job order, so a
-	// parallel run reports exactly like a single-job run.
-	NConcurrency::TCFuture<NContainer::TCVector<CFormatJobResult>> fg_RunFormatJobs(NContainer::TCVector<CFormatJob> _Jobs, umint _nJobs);
+	// Runs the jobs over the pool and returns their results in job order, so a parallel
+	// run reports exactly like a single-job run; a job that failed is a failed result.
+	NConcurrency::TCFuture<NContainer::TCVector<CFormatJobResult>> fg_RunFormatJobs(NConcurrency::TCActor<CFormatWorkerPool> _Workers, NContainer::TCVector<CFormatJob> _Jobs);
 
 	// A bounded default for hosts that did not ask for a specific job count.
 	umint fg_GetDefaultFormatJobs();
