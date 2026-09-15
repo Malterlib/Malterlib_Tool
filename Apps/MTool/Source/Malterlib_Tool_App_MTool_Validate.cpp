@@ -160,6 +160,11 @@ namespace NMib::NTool::NValidate
 		return *this;
 	}
 
+	bool fg_IsRunningUnderGitHook()
+	{
+		return bool(fg_GetSys()->f_GetEnvironmentVariable("MalterlibHookRepository"));
+	}
+
 	CStr fg_DescribeValidationFailure(CStr const &_Kind, CValidationCounts const &_Counts)
 	{
 		auto nErrors = _Counts.f_GetErrors();
@@ -648,6 +653,12 @@ struct CTool_Validate : CDistributedTool
 							, "Type"_o= ""
 							, "Description"_o= "Validate committed changes from the merge base with this reference to HEAD, using HEAD's .editorconfig files.\n"
 						}
+						, "Summary?"_o=
+						{
+							"Names"_o= _o["--summary"]
+							, "Default"_o= !fg_IsRunningUnderGitHook()
+							, "Description"_o= "End with the summary line. Defaults to off when run by a git hook, so a clean commit stays silent.\n"
+						}
 					}
 				}
 				, [](CEJsonSorted const _Params, TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
@@ -683,7 +694,8 @@ struct CTool_Validate : CDistributedTool
 					else
 						Result = co_await fg_ValidateRepositories({Directory}, fg_Move(Sink));
 					*_pCommandLine %= fg_DescribeValidationFailure(Result.m_Kind, Result.m_Counts);
-					*_pCommandLine %= fg_DescribeValidationSummary(Result.m_Kind, Result.m_Counts, Stopwatch.f_GetTime());
+					if (_Params["Summary"].f_Boolean())
+						*_pCommandLine %= fg_DescribeValidationSummary(Result.m_Kind, Result.m_Counts, Stopwatch.f_GetTime());
 
 					co_return Result.m_Counts.f_GetErrors() || Result.m_Counts.m_nFormatFailed ? 1 : 0;
 				}

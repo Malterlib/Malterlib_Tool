@@ -553,6 +553,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Type"_o= ""
 						, "Description"_o= "Validate committed changes from the merge base with this reference to HEAD, using HEAD's .editorconfig files.\n"
 					}
+					, "Summary?"_o=
+					{
+						"Names"_o= _o["--summary"]
+						, "Default"_o= !NMib::NTool::NValidate::fg_IsRunningUnderGitHook()
+						, "Description"_o= "End with the summary line. Defaults to off when run by a git hook.\n"
+					}
 					, Filter_Name
 					, fFilter_Type("")
 					, Filter_Tags
@@ -566,6 +572,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 
 				CStopwatch Stopwatch{true};
 				bool bStaged = _Params["Staged"].f_Boolean();
+				bool bSummary = _Params["Summary"].f_Boolean();
 				CStr Base;
 				if (auto pBase = _Params.f_GetMember("Base"))
 				{
@@ -651,7 +658,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							}
 
 							*_pCommandLine %= NMib::NTool::NValidate::fg_DescribeValidationFailure(Kind, Counts);
-							*_pCommandLine %= NMib::NTool::NValidate::fg_DescribeValidationSummary(Kind, Counts, Stopwatch.f_GetTime());
+							if (bSummary)
+								*_pCommandLine %= NMib::NTool::NValidate::fg_DescribeValidationSummary(Kind, Counts, Stopwatch.f_GetTime());
 							if (nFailed)
 								co_return DMibErrorInstance("{} {} could not be validated"_f << nFailed << (nFailed == 1 ? "repository" : "repositories"));
 

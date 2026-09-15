@@ -44,6 +44,11 @@ namespace NMib::NTool::NValidate
 	// are analyzed by the engine. Diagnostics come in path order.
 	NConcurrency::TCFuture<CValidationResult> fg_ValidateRepositories(NContainer::TCVector<NStr::CStr> _Directories, NFormat::CFormatSink _Sink);
 
+	// Whether this process was started by a managed git hook, whose dispatcher names the
+	// repository it serves. Git's own variables are not a sign: GIT_INDEX_FILE is also how
+	// a caller points the tool at an alternate index.
+	bool fg_IsRunningUnderGitHook();
+
 	// The lines a validation ends with: the failure notice of a changed-line validation
 	// with errors, and the summary.
 	NStr::CStr fg_DescribeValidationFailure(NStr::CStr const &_Kind, CValidationCounts const &_Counts);

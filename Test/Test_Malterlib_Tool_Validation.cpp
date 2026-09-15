@@ -647,6 +647,46 @@ namespace NMib::NTool
 					co_return {};
 				};
 
+				DMibTestCategory("SummaryUnderGitHook") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "SummaryUnderGitHook");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write("file.cpp", fg_Repeat("x", 191) + "\n");
+					co_await Repo.f_Stage();
+					auto fRun = [&](TCVector<CStr> _Extra)
+						{
+							TCVector<CStr> Params = {"Validate", "--no-color", "-C", Repo.m_Path, "--staged"};
+							Params.f_Insert(_Extra);
+
+							return Repo.f_Tool(fg_Move(Params));
+						}
+					;
+
+					// The dispatcher's variable marks a hook; the diagnostics and the failure
+					// notice still come, the summary does not unless asked for.
+					auto Plain = co_await fRun({});
+					DMibExpect(Plain.m_ExitCode, ==, 1u);
+					DMibExpect(Plain.f_GetCombinedOut().f_Find("staged file(s): 1 line length violation(s)"), >=, 0);
+
+					Repo.m_Environment["MalterlibHookRepository"] = Repo.m_Path;
+					auto Hooked = co_await fRun({});
+					DMibExpect(Hooked.m_ExitCode, ==, 1u);
+					DMibExpect(Hooked.f_GetCombinedOut().f_Find("file.cpp:1: line length 191"), >=, 0);
+					DMibExpect(Hooked.f_GetCombinedOut().f_Find("Commit validation failed"), >=, 0);
+					DMibExpect(Hooked.f_GetCombinedOut().f_Find("Validated"), <, 0);
+
+					auto Asked = co_await fRun({"--summary"});
+					DMibExpect(Asked.f_GetCombinedOut().f_Find("staged file(s): 1 line length violation(s)"), >=, 0);
+
+					Repo.m_Environment.f_Remove("MalterlibHookRepository");
+					auto Silenced = co_await fRun({"--no-summary"});
+					DMibExpect(Silenced.f_GetCombinedOut().f_Find("Validated"), <, 0);
+
+					co_return {};
+				};
+
 				DMibTestCategory("UntrackedConfiguration") -> TCFuture<void>
 				{
 					auto Capture = co_await (g_CaptureExceptions % "UntrackedConfiguration");
