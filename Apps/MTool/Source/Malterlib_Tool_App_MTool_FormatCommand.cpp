@@ -103,12 +103,12 @@ namespace NMib::NTool::NFormat
 				*_pCommandLine += _Text;
 			}
 		;
-		auto Run = co_await fg_RunFormat
-			(
-				_Params["WorkingDirectory"].f_String(), fg_Move(Files), fg_Move(Patterns), _Params["Recursive"].f_Boolean()
-				, fg_Move(Options), fg_Move(Sink)
-			)
-		;
+		CFormatSelection Selection;
+		Selection.m_WorkingDirectory = _Params["WorkingDirectory"].f_String();
+		Selection.m_Files = fg_Move(Files);
+		Selection.m_Patterns = fg_Move(Patterns);
+		Selection.m_bRecursive = _Params["Recursive"].f_Boolean();
+		auto Run = co_await fg_RunFormat({fg_Move(Selection)}, fg_Move(Options), fg_Move(Sink));
 
 		co_return Run.m_ExitCode;
 	}

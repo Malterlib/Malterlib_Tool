@@ -9,28 +9,10 @@
 
 namespace NMib::NTool
 {
-	// Diagnostics make the repository's row; patches go to standard output as they come,
-	// since a patch is not read in a table.
-	TCFuture<CBuildSystem::CRepoInProcessResult> fg_FormatRepository(CStr _Location, NFormat::CFormatOptions _Options, TCSharedPointer<CCommandLineControl> _pCommandLine)
+	struct CFormatOutcome
 	{
-		co_await ECoroutineFlag_CaptureExceptions;
-
-		CStr Report;
-		NFormat::CFormatSink Sink;
-		Sink.m_fReport = [&Report](CStr const &_Text)
-			{
-				Report += _Text;
-			}
-		;
-		Sink.m_fPatch = [_pCommandLine](CStr const &_Text)
-			{
-				*_pCommandLine += _Text;
-			}
-		;
-		auto Run = co_await NFormat::fg_RunFormat(fg_Move(_Location), {}, {"*"}, true, fg_Move(_Options), fg_Move(Sink));
-
-		co_return CBuildSystem::CRepoInProcessResult{fg_Move(Report), Run.m_ExitCode != 0};
-	}
+		uint32 m_ExitCode = 0;
+	};
 }
 
 void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
@@ -485,29 +467,57 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 				RepoFilter.m_bFormat = true;
 
-				CBuildSystem::CForEachRepoInProcessOptions ForEach;
-				ForEach.m_InvocationCommand = "format";
-				ForEach.m_ProgressDescription = "Formatting repos";
-				ForEach.m_FailureDescription = Options.m_Mode == NMib::NTool::NFormat::EFormatMode::mc_Write ? "Unresolved formatting violations" : "Formatting violations";
-				ForEach.m_fRun = [Options, _pCommandLine](CStr _Location)
-					{
-						return NMib::NTool::fg_FormatRepository(fg_Move(_Location), Options, _pCommandLine);
-					}
-				;
-
-				// The build system may run the command again after regenerating, so the
-				// options are kept for every run.
+				// One run formats every repository at once, so the walks and the formatting
+				// spread over the cores together; a violation is not an error of the build
+				// system, so the exit code comes back beside its result.
+				NStorage::TCSharedPointer<NMib::NTool::CFormatOutcome> pOutcome = fg_Construct();
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
-				co_return co_await f_RunBuildSystem
+				auto Code = co_await f_RunBuildSystem
 					(
-						[=, ForEach = fg_Move(ForEach)](NBuildSystem::CBuildSystem *_pBuildSystem) mutable -> TCUnsafeFuture<CBuildSystem::ERetry>
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_return co_await _pBuildSystem->f_Action_Repository_ForEachRepoInProcess(GenerateOptions, RepoFilter, ForEach);
+							TCVector<CStr> Locations;
+							if (auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations(GenerateOptions, RepoFilter, Locations); Retry != CBuildSystem::ERetry_None)
+								co_return Retry;
+
+							if (Locations.f_IsEmpty())
+							{
+								*_pCommandLine %= "No repository sets Repository.Format\n";
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							TCVector<NMib::NTool::NFormat::CFormatSelection> Selections;
+							for (auto &Location : Locations)
+							{
+								auto &Selection = Selections.f_Insert();
+								Selection.m_WorkingDirectory = fg_Move(Location);
+								Selection.m_Patterns = {"*"};
+								Selection.m_bRecursive = true;
+							}
+
+							NMib::NTool::NFormat::CFormatSink Sink;
+							Sink.m_fReport = [_pCommandLine](CStr const &_Text)
+								{
+									*_pCommandLine %= _Text;
+								}
+							;
+							Sink.m_fPatch = [_pCommandLine](CStr const &_Text)
+								{
+									*_pCommandLine += _Text;
+								}
+							;
+							auto Run = co_await NMib::NTool::NFormat::fg_RunFormat(fg_Move(Selections), Options, fg_Move(Sink));
+							pOutcome->m_ExitCode = Run.m_ExitCode;
+
+							co_return CBuildSystem::ERetry_None;
 						}
 						, _pCommandLine
 						, &GenerateOptions
 					)
 				;
+
+				co_return Code ? Code : pOutcome->m_ExitCode;
 			}
 		)
 	;
