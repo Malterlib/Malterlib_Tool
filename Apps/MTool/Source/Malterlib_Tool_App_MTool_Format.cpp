@@ -482,7 +482,8 @@ namespace NMib::NTool::NFormat
 		TCVector<CFile::CFoundFile> m_Entries;
 		bool m_bRepository = false;						// The directory holds a '.git' entry.
 		TCOptional<CStr> m_Rules;						// The directory's own .gitignore.
-		TCOptional<CStr> m_Excludes;					// The repository's .git/info/exclude, at its root.
+		TCOptional<CStr> m_GlobalExcludes;				// The file core.excludesFile names, at a repository's root.
+		TCOptional<CStr> m_Excludes;					// The repository's info/exclude, at its root.
 	};
 
 	// One repository the walk has met: the ignore rules gathered on the way down, and a
@@ -508,11 +509,12 @@ namespace NMib::NTool::NFormat
 	};
 
 	// Walks the tree a pattern names, listing directories in parallel on a bounded set of
-	// blocking actors. A directory is not entered when git ignores it, or when a document
-	// above it disables formatting for everything below it; a document deeper down that
-	// opts files back in is not seen then, which is the price of never reading those
-	// trees. The listing order is not the selection order, which the caller settles by
-	// sorting.
+	// blocking actors. A directory is not entered when git ignores it, by its .gitignore
+	// files, its info/exclude, or the excludes file its configuration names, or when a
+	// document above it disables formatting for everything below it; a document deeper
+	// down that opts files back in is not seen then, which is the price of never reading
+	// those trees. The listing order is not the selection order, which the caller settles
+	// by sorting.
 	struct CFormatWalk : CActor
 	{
 		CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, umint _nJobs);
@@ -526,6 +528,7 @@ namespace NMib::NTool::NFormat
 		TCFuture<CFormatListing> fp_List(umint _iRepository, CStr _Directory);
 		TCFuture<void> fp_LoadRulesAbove(umint _iRepository, CStr _Directory);
 		umint fp_AddRepository(CStr const &_Root, bool _bGit);
+		void fp_AddRepositoryExcludes(umint _iRepository, CFormatListing const &_Listing);
 		bool fp_MatchesName(CStr const &_Name) const;
 
 		CStr mp_Directory;
@@ -534,6 +537,7 @@ namespace NMib::NTool::NFormat
 		bool mp_bRecursive = false;
 		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pReaders;	// Shared with the repositories' resolvers.
 		TCVector<CFormatWalkRepository> mp_Repositories;
+		NGit::CGitEnvironment mp_GitEnvironment;
 	};
 
 	CFormatWalk::CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, umint _nJobs)
@@ -543,6 +547,7 @@ namespace NMib::NTool::NFormat
 	{
 		mp_bMatchAll = mp_Wildcard == "*";
 		mp_pReaders = fg_Construct(_nJobs);
+		mp_GitEnvironment = NGit::CGitEnvironment::fs_FromProcess();
 		fp_AddRepository(_Root, _bGit);
 	}
 
@@ -554,6 +559,18 @@ namespace NMib::NTool::NFormat
 		Repository.m_Configurations = fg_Construct(_Root, mp_pReaders);
 
 		return mp_Repositories.f_GetLen() - 1;
+	}
+
+	// git ranks the excludes file below info/exclude and both below every .gitignore, and
+	// rules added later win, so the root's own .gitignore is added after these.
+	void CFormatWalk::fp_AddRepositoryExcludes(umint _iRepository, CFormatListing const &_Listing)
+	{
+		auto &Repository = mp_Repositories[_iRepository];
+		if (_Listing.m_GlobalExcludes)
+			Repository.m_Ignore.f_AddRules({}, *_Listing.m_GlobalExcludes);
+
+		if (_Listing.m_Excludes)
+			Repository.m_Ignore.f_AddRules({}, *_Listing.m_Excludes);
 	}
 
 	TCFuture<void> CFormatWalk::fp_Destroy()
@@ -578,7 +595,7 @@ namespace NMib::NTool::NFormat
 	{
 		co_return co_await
 			(
-				g_Dispatch(mp_pReaders->f_Next()) / [iRepository = _iRepository, Directory = fg_Move(_Directory)]() -> CFormatListing
+				g_Dispatch(mp_pReaders->f_Next()) / [iRepository = _iRepository, Directory = fg_Move(_Directory), Environment = mp_GitEnvironment]() -> CFormatListing
 				{
 					CFormatListing Listing;
 					Listing.m_iRepository = iRepository;
@@ -590,9 +607,12 @@ namespace NMib::NTool::NFormat
 						if (Name == ".git")
 						{
 							Listing.m_bRepository = true;
-							auto Excludes = Entry.m_Path / "info/exclude";
-							if ((Entry.m_Attribs & EFileAttrib_Directory) && CFile::fs_FileExists(Excludes, EFileAttrib_File))
-								Listing.m_Excludes = CFile::fs_ReadStringFromFile(Excludes, true);
+							auto Excludes = NGit::fg_GetGitRepositoryExcludes(Directory, NGit::fg_GetGitDirectories(Directory), Environment);
+							if (Excludes.m_ExcludesFile)
+								Listing.m_GlobalExcludes = CFile::fs_ReadStringFromFile(Excludes.m_ExcludesFile, true);
+
+							if (Excludes.m_InfoExclude)
+								Listing.m_Excludes = CFile::fs_ReadStringFromFile(Excludes.m_InfoExclude, true);
 						}
 						else if (Name == ".gitignore" && (Entry.m_Attribs & EFileAttrib_File))
 							Listing.m_Rules = CFile::fs_ReadStringFromFile(Entry.m_Path, true);
@@ -621,8 +641,7 @@ namespace NMib::NTool::NFormat
 		{
 			auto Listing = co_await fp_List(_iRepository, Directories[i - 1]);
 			auto &Repository = mp_Repositories[_iRepository];
-			if (Listing.m_Excludes)
-				Repository.m_Ignore.f_AddRules({}, *Listing.m_Excludes);
+			fp_AddRepositoryExcludes(_iRepository, Listing);
 
 			if (Listing.m_Rules)
 				Repository.m_Ignore.f_AddRules(CFile::fs_MakePathRelative(Listing.m_Directory, Repository.m_Root), *Listing.m_Rules);
@@ -645,11 +664,14 @@ namespace NMib::NTool::NFormat
 		{
 			auto Listing = co_await fg_Move(Pending[iPending]);
 			auto iRepository = Listing.m_iRepository;
-			if (Listing.m_bRepository && Listing.m_Directory != mp_Repositories[iRepository].m_Root)
+			// The walk's own root is listed here too when it is the start directory, in
+			// which case nothing above loaded its excludes.
+			if (Listing.m_bRepository)
 			{
-				iRepository = fp_AddRepository(Listing.m_Directory, true);
-				if (Listing.m_Excludes)
-					mp_Repositories[iRepository].m_Ignore.f_AddRules({}, *Listing.m_Excludes);
+				if (Listing.m_Directory != mp_Repositories[iRepository].m_Root)
+					iRepository = fp_AddRepository(Listing.m_Directory, true);
+
+				fp_AddRepositoryExcludes(iRepository, Listing);
 			}
 
 			if (Listing.m_Rules && mp_Repositories[iRepository].m_bGit)
