@@ -7,6 +7,7 @@
 
 #include <Mib/Develop/CodeFormatting>
 #include <Mib/Develop/EditorConfig>
+#include <Mib/Function/Function>
 
 namespace NMib::NTool::NFormat
 {
@@ -97,4 +98,52 @@ namespace NMib::NTool::NFormat
 
 	// A bounded default for hosts that did not ask for a specific job count.
 	umint fg_GetDefaultFormatJobs();
+
+	struct CFormatOptions
+	{
+		EFormatMode m_Mode = EFormatMode::mc_Write;
+		umint m_nJobs = 1;
+		umint m_iFirstLine = 0;
+		umint m_iLastLine = 0;
+		NContainer::TCVector<NDevelop::CCodeFormattingRange> m_ByteRanges;
+		NDevelop::ECodeRangePolicy m_RangePolicy = NDevelop::ECodeRangePolicy::mc_Expand;
+	};
+
+	struct CFormatSummary
+	{
+		umint m_nSelected = 0;
+		umint m_nExcluded = 0;
+		umint m_nUnchanged = 0;
+		umint m_nChanged = 0;
+		umint m_nUnresolved = 0;
+		umint m_nFailed = 0;
+	};
+
+	// Where a run writes as it goes: diagnostics and the summary line, and the patches of
+	// a diff run. The tool binds these to its command line; a run made on behalf of another
+	// command collects them.
+	struct CFormatSink
+	{
+		NFunction::TCFunctionMovable<void (NStr::CStr const &_Text)> m_fReport;
+		NFunction::TCFunctionMovable<void (NStr::CStr const &_Text)> m_fPatch;
+	};
+
+	struct CFormatRunResult
+	{
+		CFormatSummary m_Summary;
+		uint32 m_ExitCode = 0;										// One when violations remain or a check would change a file.
+	};
+
+	// Selects the files, formats them, and reports; a failure to read, write, or format a
+	// file is an error, distinct from a violation.
+	NConcurrency::TCFuture<CFormatRunResult> fg_RunFormat
+		(
+			NStr::CStr _WorkingDirectory
+			, NContainer::TCVector<NStr::CStr> _Files
+			, NContainer::TCVector<NStr::CStr> _Patterns
+			, bool _bRecursive
+			, CFormatOptions _Options
+			, CFormatSink _Sink
+		)
+	;
 }

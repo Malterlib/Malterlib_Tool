@@ -3,8 +3,35 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
+#include "Malterlib_Tool_App_MTool_Format.h"
 
 #include <Mib/Process/ProcessLaunch>
+
+namespace NMib::NTool
+{
+	// Diagnostics make the repository's row; patches go to standard output as they come,
+	// since a patch is not read in a table.
+	TCFuture<CBuildSystem::CRepoInProcessResult> fg_FormatRepository(CStr _Location, NFormat::CFormatOptions _Options, TCSharedPointer<CCommandLineControl> _pCommandLine)
+	{
+		co_await ECoroutineFlag_CaptureExceptions;
+
+		CStr Report;
+		NFormat::CFormatSink Sink;
+		Sink.m_fReport = [&Report](CStr const &_Text)
+			{
+				Report += _Text;
+			}
+		;
+		Sink.m_fPatch = [_pCommandLine](CStr const &_Text)
+			{
+				*_pCommandLine += _Text;
+			}
+		;
+		auto Run = co_await NFormat::fg_RunFormat(fg_Move(_Location), {}, {"*"}, true, fg_Move(_Options), fg_Move(Sink));
+
+		co_return CBuildSystem::CRepoInProcessResult{fg_Move(Report), Run.m_ExitCode != 0};
+	}
+}
 
 void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
 {
@@ -388,6 +415,94 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
 							co_return co_await _pBuildSystem->f_Action_Repository_CommitRepos(GenerateOptions, Flags, MaxCommitsPerSection);
+						}
+						, _pCommandLine
+						, &GenerateOptions
+					)
+				;
+			}
+		)
+	;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["format"]
+				, "Description"_o=
+					"Format the sources of every repository that sets Repository.Format, as MTool Format does for one: "
+					"the files that opt in with malterlib_format = malterlib in .editorconfig, found under the repository root.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
+				{
+					"Check?"_o=
+					{
+						"Names"_o= _o["--check"]
+						, "Default"_o= false
+						, "Description"_o= "Report formatting violations without writing any file.\n"
+					}
+					, "Diff?"_o=
+					{
+						"Names"_o= _o["--diff"]
+						, "Default"_o= false
+						, "Description"_o= "Print the proposed patches without writing any file.\n"
+					}
+					, "Jobs?"_o=
+					{
+						"Names"_o= _o["--jobs", "-j"]
+						, "Default"_o= 0
+						, "Description"_o= "Maximum number of files formatted concurrently in a repository. Zero selects a bounded host-capacity default.\n"
+					}
+					, Filter_Name
+					, fFilter_Type("")
+					, Filter_Tags
+					, Filter_Branch
+					, fs_CachedEnvironmentOption(true)
+				}
+			}
+			, [=, this](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				bool bCheck = _Params["Check"].f_Boolean();
+				bool bDiff = _Params["Diff"].f_Boolean();
+				if (bCheck && bDiff)
+				{
+					*_pCommandLine %= "--check and --diff cannot be combined\n";
+
+					co_return 1;
+				}
+
+				NMib::NTool::NFormat::CFormatOptions Options;
+				if (bCheck)
+					Options.m_Mode = NMib::NTool::NFormat::EFormatMode::mc_Check;
+				else if (bDiff)
+					Options.m_Mode = NMib::NTool::NFormat::EFormatMode::mc_Diff;
+
+				Options.m_nJobs = umint(_Params["Jobs"].f_Integer());
+				if (!Options.m_nJobs)
+					Options.m_nJobs = NMib::NTool::NFormat::fg_GetDefaultFormatJobs();
+
+				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+				RepoFilter.m_bFormat = true;
+
+				CBuildSystem::CForEachRepoInProcessOptions ForEach;
+				ForEach.m_InvocationCommand = "format";
+				ForEach.m_ProgressDescription = "Formatting repos";
+				ForEach.m_FailureDescription = Options.m_Mode == NMib::NTool::NFormat::EFormatMode::mc_Write ? "Unresolved formatting violations" : "Formatting violations";
+				ForEach.m_fRun = [Options, _pCommandLine](CStr _Location)
+					{
+						return NMib::NTool::fg_FormatRepository(fg_Move(_Location), Options, _pCommandLine);
+					}
+				;
+
+				// The build system may run the command again after regenerating, so the
+				// options are kept for every run.
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				co_return co_await f_RunBuildSystem
+					(
+						[=, ForEach = fg_Move(ForEach)](NBuildSystem::CBuildSystem *_pBuildSystem) mutable -> TCUnsafeFuture<CBuildSystem::ERetry>
+						{
+							co_return co_await _pBuildSystem->f_Action_Repository_ForEachRepoInProcess(GenerateOptions, RepoFilter, ForEach);
 						}
 						, _pCommandLine
 						, &GenerateOptions
