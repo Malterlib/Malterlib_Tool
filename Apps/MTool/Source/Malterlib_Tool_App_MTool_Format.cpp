@@ -218,6 +218,51 @@ namespace NMib::NTool::NFormat
 		}
 	}
 
+	void fg_NormalizeValidationNuls(CStr &_Text)
+	{
+		auto pStart = _Text.f_GetStrUniqueWritable();
+		auto pEnd = pStart + _Text.f_GetLen();
+		for (auto pParse = pStart; pParse != pEnd; ++pParse)
+		{
+			if (*pParse == 0)
+				*pParse = ' ';
+		}
+	}
+
+	bool fg_ValidateLineLength(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CCodeFormattingSettings const &_Settings, CStr &o_Report)
+	{
+		if (!_Settings.m_nMaxColumns)
+			return true;
+
+		// The engine owns the shared column model, including tab stops, Unicode accounting,
+		// and malformed-byte handling. File-leading BOM removal is handled by the caller.
+		umint nColumns = 0;
+		if (!fg_MeasureTextColumns(_Line, _Settings.m_nTabWidth, nColumns))
+		{
+			o_Report += "{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f
+				<< _AbsolutePath
+				<< _LineNumber
+				<< _Settings.m_nMaxColumns
+			;
+
+			return false;
+		}
+
+		if (nColumns <= _Settings.m_nMaxColumns)
+			return true;
+
+		o_Report += "{}:{}: line length {} exceeds max_line_length = {}\n"_f << _AbsolutePath << _LineNumber << nColumns << _Settings.m_nMaxColumns;
+
+		return false;
+	}
+
+	struct CFormatRead
+	{
+		CStr m_Contents;
+		bool m_bEmpty = true;
+		bool m_bNul = false;							// A NUL among the first 8000 bytes.
+	};
+
 	// Every job is queued at once and a job that awaits lets the worker start the next, so a
 	// blocking actor checked out per job would mean a thread per file. The run's shared set
 	// bounds that to its capacity, whatever the number of workers and resolvers.
@@ -254,7 +299,8 @@ namespace NMib::NTool::NFormat
 
 			auto Properties = co_await (*pConfigurations)(&NDevelop::CEditorConfigResolver::f_Resolve, _Job.m_Path);
 			_Job.m_Settings = CCodeFormattingSettings(Properties);
-			if (!_Job.m_Settings.f_IsFormattingEnabled())
+			bool bLineLength = _Job.m_bValidateLineLength && _Job.m_Settings.m_nMaxColumns;
+			if (!_Job.m_Settings.f_IsFormattingEnabled() && !bLineLength)
 			{
 				Result.m_Outcome = EFormatOutcome::mc_Excluded;
 
@@ -265,18 +311,42 @@ namespace NMib::NTool::NFormat
 		}
 
 		auto Snapshot = _Job.m_Source;
+		bool bEmpty = !_Job.m_bHasSource;
+		bool bNul = false;
 		if (!_Job.m_bHasSource)
 		{
-			Snapshot = co_await
+			// A string treats a leading NUL as its end, so an audit, which may meet a text
+			// file with NULs, judges binariness on the bytes and reads them with NULs as
+			// spaces, which occupy one column just as they do.
+			auto Read = co_await
 				(
-					g_Dispatch(mp_pBlockingActors->f_Next()) / [Path = _Job.m_Path]() -> CStr
+					g_Dispatch(mp_pBlockingActors->f_Next()) / [Path = _Job.m_Path, bValidate = _Job.m_bValidateLineLength]() -> CFormatRead
 					{
 						auto Data = CFile::fs_ReadFile(Path);
+						CFormatRead Read;
+						Read.m_bEmpty = Data.f_IsEmpty();
+						auto nCheck = fg_Min(umint(Data.f_GetLen()), umint(8000));
+						for (umint i = 0; i < nCheck && !Read.m_bNul; ++i)
+							Read.m_bNul = !Data[i];
 
-						return CStr((ch8 const *)Data.f_GetArray(), Data.f_GetLen());
+						if (bValidate)
+						{
+							for (auto &Byte : Data)
+							{
+								if (!Byte)
+									Byte = ' ';
+							}
+						}
+
+						Read.m_Contents = CStr((ch8 const *)Data.f_GetArray(), Data.f_GetLen());
+
+						return Read;
 					}
 				)
 			;
+			Snapshot = fg_Move(Read.m_Contents);
+			bEmpty = Read.m_bEmpty;
+			bNul = Read.m_bNul;
 		}
 
 		// The read hands the worker back to the queue it was dispatched from, where every
@@ -284,6 +354,32 @@ namespace NMib::NTool::NFormat
 		// idle core instead, and the worker stays there for the files that follow.
 		co_await g_Yield;
 
+		if (_Job.m_bValidateLineLength)
+		{
+			// The attribute decides text or binary where it speaks and git's rule, a NUL
+			// among the first 8000 bytes, where it does not; an empty file has no line to
+			// check either way.
+			bool bBinary = _Job.m_TextAttribute == NGit::EGitTextAttribute::mc_Binary
+				|| (_Job.m_TextAttribute == NGit::EGitTextAttribute::mc_Unspecified && bNul)
+			;
+			if (bBinary || bEmpty)
+			{
+				Result.m_Outcome = EFormatOutcome::mc_Excluded;
+
+				co_return Result;
+			}
+
+			if (!_Job.m_Settings.f_IsFormattingEnabled())
+			{
+				umint iLine = 0;
+				for (auto const &Line : Snapshot.f_SplitLine())
+					Result.m_nLineErrors += !fg_ValidateLineLength(Line, _Job.m_Path, ++iLine, _Job.m_Settings, Result.m_Report);
+
+				co_return Result;
+			}
+		}
+
+		Result.m_bFormatted = true;
 		CCodeFormattingRequest Request;
 		Request.m_Source = Snapshot;
 		Request.m_Path = _Job.m_Path;
@@ -469,6 +565,8 @@ namespace NMib::NTool::NFormat
 		TCOptional<CStr> m_Rules;						// The directory's own .gitignore.
 		TCOptional<CStr> m_GlobalExcludes;				// The file core.excludesFile names, at a repository's root.
 		TCOptional<CStr> m_Excludes;					// The repository's info/exclude, at its root.
+		TCOptional<CStr> m_Attributes;					// The directory's own .gitattributes.
+		TCOptional<CStr> m_InfoAttributes;				// The repository's info/attributes, at its root.
 	};
 
 	// One repository the walk has met: the ignore rules gathered on the way down, and a
@@ -478,6 +576,7 @@ namespace NMib::NTool::NFormat
 		CStr m_Root;
 		bool m_bGit = false;							// False for the working directory standing in for no repository.
 		NGit::CGitIgnore m_Ignore;
+		NGit::CGitAttributes m_Attributes;
 		TCActor<NDevelop::CEditorConfigResolver> m_Configurations;
 	};
 
@@ -485,6 +584,7 @@ namespace NMib::NTool::NFormat
 	{
 		CStr m_Path;
 		umint m_iRoot = 0;								// Index into the result's roots.
+		NGit::EGitTextAttribute m_TextAttribute = NGit::EGitTextAttribute::mc_Unspecified;
 	};
 
 	struct CFormatWalkResult
@@ -502,7 +602,16 @@ namespace NMib::NTool::NFormat
 	// by sorting.
 	struct CFormatWalk : CActor
 	{
-		CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors);
+		CFormatWalk
+			(
+				CStr _Search
+				, CStr _Root
+				, bool _bGit
+				, bool _bRecursive
+				, bool _bLineLength
+				, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors
+			)
+		;
 
 		TCFuture<CFormatWalkResult> f_Run();
 
@@ -514,21 +623,32 @@ namespace NMib::NTool::NFormat
 		TCFuture<void> fp_LoadRulesAbove(umint _iRepository, CStr _Directory);
 		umint fp_AddRepository(CStr const &_Root, bool _bGit);
 		void fp_AddRepositoryExcludes(umint _iRepository, CFormatListing const &_Listing);
+		void fp_AddDirectoryRules(umint _iRepository, CFormatListing const &_Listing);
 		bool fp_MatchesName(CStr const &_Name) const;
 
 		CStr mp_Directory;
 		CStr mp_Wildcard;								// Upper case, matched the way the platform matches a find pattern.
 		bool mp_bMatchAll = false;
 		bool mp_bRecursive = false;
+		bool mp_bLineLength = false;					// A max_line_length below keeps a directory open too.
 		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pReaders;	// The run's, shared with the other walks and the resolvers.
 		TCVector<CFormatWalkRepository> mp_Repositories;
 		NGit::CGitEnvironment mp_GitEnvironment;
 	};
 
-	CFormatWalk::CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors)
+	CFormatWalk::CFormatWalk
+		(
+			CStr _Search
+			, CStr _Root
+			, bool _bGit
+			, bool _bRecursive
+			, bool _bLineLength
+			, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors
+		)
 		: mp_Directory(CFile::fs_GetPath(_Search))
 		, mp_Wildcard(CFile::fs_GetFile(_Search).f_UpperCase())
 		, mp_bRecursive(_bRecursive)
+		, mp_bLineLength(_bLineLength)
 		, mp_pReaders(_pBlockingActors)
 	{
 		mp_bMatchAll = mp_Wildcard == "*";
@@ -556,6 +676,27 @@ namespace NMib::NTool::NFormat
 
 		if (_Listing.m_Excludes)
 			Repository.m_Ignore.f_AddRules({}, *_Listing.m_Excludes);
+
+		if (_Listing.m_InfoAttributes)
+			Repository.m_Attributes.f_AddRules({}, *_Listing.m_InfoAttributes);
+	}
+
+	// A directory's own .gitignore and .gitattributes, relative to the repository root.
+	void CFormatWalk::fp_AddDirectoryRules(umint _iRepository, CFormatListing const &_Listing)
+	{
+		auto &Repository = mp_Repositories[_iRepository];
+		if (!Repository.m_bGit)
+			return;
+
+		auto Relative = CFile::fs_MakePathRelative(_Listing.m_Directory, Repository.m_Root);
+		if (Relative == ".")
+			Relative = {};
+
+		if (_Listing.m_Rules)
+			Repository.m_Ignore.f_AddRules(Relative, *_Listing.m_Rules);
+
+		if (_Listing.m_Attributes)
+			Repository.m_Attributes.f_AddRules(Relative, *_Listing.m_Attributes);
 	}
 
 	TCFuture<void> CFormatWalk::fp_Destroy()
@@ -598,9 +739,14 @@ namespace NMib::NTool::NFormat
 
 							if (Excludes.m_InfoExclude)
 								Listing.m_Excludes = CFile::fs_ReadStringFromFile(Excludes.m_InfoExclude, true);
+
+							if (Excludes.m_InfoAttributes)
+								Listing.m_InfoAttributes = CFile::fs_ReadStringFromFile(Excludes.m_InfoAttributes, true);
 						}
 						else if (Name == ".gitignore" && (Entry.m_Attribs & EFileAttrib_File))
 							Listing.m_Rules = CFile::fs_ReadStringFromFile(Entry.m_Path, true);
+						else if (Name == ".gitattributes" && (Entry.m_Attribs & EFileAttrib_File))
+							Listing.m_Attributes = CFile::fs_ReadStringFromFile(Entry.m_Path, true);
 					}
 
 					return Listing;
@@ -625,11 +771,8 @@ namespace NMib::NTool::NFormat
 		for (umint i = Directories.f_GetLen(); i; --i)
 		{
 			auto Listing = co_await fp_List(_iRepository, Directories[i - 1]);
-			auto &Repository = mp_Repositories[_iRepository];
 			fp_AddRepositoryExcludes(_iRepository, Listing);
-
-			if (Listing.m_Rules)
-				Repository.m_Ignore.f_AddRules(CFile::fs_MakePathRelative(Listing.m_Directory, Repository.m_Root), *Listing.m_Rules);
+			fp_AddDirectoryRules(_iRepository, Listing);
 		}
 
 		co_return {};
@@ -659,12 +802,7 @@ namespace NMib::NTool::NFormat
 				fp_AddRepositoryExcludes(iRepository, Listing);
 			}
 
-			if (Listing.m_Rules && mp_Repositories[iRepository].m_bGit)
-			{
-				auto &Repository = mp_Repositories[iRepository];
-				auto Relative = CFile::fs_MakePathRelative(Listing.m_Directory, Repository.m_Root);
-				Repository.m_Ignore.f_AddRules(Relative == "." ? CStr() : Relative, *Listing.m_Rules);
-			}
+			fp_AddDirectoryRules(iRepository, Listing);
 
 			for (auto &Entry : Listing.m_Entries)
 			{
@@ -688,17 +826,32 @@ namespace NMib::NTool::NFormat
 
 				if (!bDirectory)
 				{
-					Result.m_Found.f_Insert({fg_Move(Entry.m_Path), iRepository});
+					auto &Found = Result.m_Found.f_Insert();
+					Found.m_iRoot = iRepository;
+					if (Repository.m_bGit)
+						Found.m_TextAttribute = Repository.m_Attributes.f_GetTextAttribute(CFile::fs_MakePathRelative(Entry.m_Path, Repository.m_Root));
+
+					Found.m_Path = fg_Move(Entry.m_Path);
 
 					continue;
 				}
 
 				// Only a document above that speaks for everything below can close a directory:
 				// a directory no document mentions may hold a document of its own that opts
-				// its files in, as a module's does.
+				// its files in, as a module's does. An audit also keeps it open while a
+				// max_line_length may apply below.
 				auto Below = co_await mp_Repositories[iRepository].m_Configurations(&NDevelop::CEditorConfigResolver::f_ResolveBelow, Entry.m_Path);
-				bool bSettled = Below.m_Settled.f_FindEqual("malterlib_format") && !Below.m_Uncertain.f_FindEqual("malterlib_format");
-				if (bSettled && !CCodeFormattingSettings(Below.m_Properties).f_IsFormattingEnabled())
+				auto fSettledOff = [&](CStr const &_Key, bool _bOff)
+					{
+						return Below.m_Settled.f_FindEqual(_Key) && !Below.m_Uncertain.f_FindEqual(_Key) && _bOff;
+					}
+				;
+				CCodeFormattingSettings Settings(Below.m_Properties);
+				bool bClosed = fSettledOff("malterlib_format", !Settings.f_IsFormattingEnabled());
+				if (mp_bLineLength)
+					bClosed = bClosed && fSettledOff("max_line_length", !Settings.m_nMaxColumns);
+
+				if (bClosed)
 					continue;
 
 				Pending.f_Insert(fp_List(iRepository, fg_Move(Entry.m_Path)));
@@ -782,7 +935,7 @@ namespace NMib::NTool::NFormat
 
 	private:
 		TCFuture<void> fp_Select(CFormatSelection _Selection);
-		void fp_Schedule(CStr const &_Path, CStr const &_Root);
+		void fp_Schedule(CStr const &_Path, CStr const &_Root, NGit::EGitTextAttribute _TextAttribute);
 
 		CFormatOptions mp_Options;
 		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pBlockingActors;
@@ -810,7 +963,7 @@ namespace NMib::NTool::NFormat
 
 	// Every candidate is a job; the workers resolve its configuration and report a file
 	// the configuration does not opt in as excluded.
-	void CFormatRun::fp_Schedule(CStr const &_Path, CStr const &_Root)
+	void CFormatRun::fp_Schedule(CStr const &_Path, CStr const &_Root, NGit::EGitTextAttribute _TextAttribute)
 	{
 		if (mp_Scheduled.f_FindEqual(_Path))
 			return;
@@ -821,6 +974,8 @@ namespace NMib::NTool::NFormat
 		Job.m_Path = _Path;
 		Job.m_Root = _Root;
 		Job.m_bResolveSettings = true;
+		Job.m_bValidateLineLength = mp_Options.m_bValidateLineLength;
+		Job.m_TextAttribute = _TextAttribute;
 		Job.m_ByteRanges = mp_Options.m_ByteRanges;
 		Job.m_iFirstLine = mp_Options.m_iFirstLine;
 		Job.m_iLastLine = mp_Options.m_iLastLine;
@@ -846,18 +1001,22 @@ namespace NMib::NTool::NFormat
 				co_return DMibErrorInstance("'{}' is not an existing regular file"_f << Path);
 
 			auto Root = co_await mp_RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Path));
-			fp_Schedule(Path, Root ? Root : WorkingDirectory);
+			fp_Schedule(Path, Root ? Root : WorkingDirectory, NGit::EGitTextAttribute::mc_Unspecified);
 		}
 
 		for (auto const &Pattern : _Selection.m_Patterns)
 		{
 			auto Search = fg_NormalizeFormatPath(Pattern, WorkingDirectory);
 			auto Root = co_await mp_RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Search));
-			TCActor<CFormatWalk> Walk = fg_ConstructActor<CFormatWalk>(Search, Root ? Root : WorkingDirectory, bool(Root), _Selection.m_bRecursive, mp_pBlockingActors);
+			TCActor<CFormatWalk> Walk = fg_ConstructActor<CFormatWalk>
+				(
+					Search, Root ? Root : WorkingDirectory, bool(Root), _Selection.m_bRecursive, mp_Options.m_bValidateLineLength, mp_pBlockingActors
+				)
+			;
 			auto DestroyWalk = co_await fg_AsyncDestroy(Walk);
 			auto Walked = co_await Walk(&CFormatWalk::f_Run);
 			for (auto &Found : Walked.m_Found)
-				fp_Schedule(Found.m_Path, Walked.m_Roots[Found.m_iRoot]);
+				fp_Schedule(Found.m_Path, Walked.m_Roots[Found.m_iRoot], Found.m_TextAttribute);
 		}
 
 		co_return {};
@@ -873,7 +1032,7 @@ namespace NMib::NTool::NFormat
 
 		co_await fg_AllDone(Selections);
 
-		if (mp_Scheduled.f_IsEmpty())
+		if (mp_Scheduled.f_IsEmpty() && mp_Options.m_bRequireFiles)
 			co_return DMibErrorInstance("No files matched the requested selection");
 
 		bool bHasRange = mp_Options.m_iFirstLine || !mp_Options.m_ByteRanges.f_IsEmpty();
@@ -916,6 +1075,13 @@ namespace NMib::NTool::NFormat
 				_Sink.m_fPatch(Result.m_Patch);
 
 			Summary.m_nUnresolved += Result.m_nUnresolved;
+			Summary.m_nLineErrors += Result.m_nLineErrors;
+			if (Result.m_bFormatted)
+			{
+				++Summary.m_nFormatFiles;
+				Summary.m_nReported += Result.m_nReported;
+			}
+
 			switch (Result.m_Outcome)
 			{
 				case EFormatOutcome::mc_Excluded:
