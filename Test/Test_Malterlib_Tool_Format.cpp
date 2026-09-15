@@ -13,8 +13,8 @@ namespace NMib::NTool
 			"root = true\n\n[*]\nindent_style = tab\nindent_size = 4\ntab_width = 4\nmax_line_length = 190\n\n"
 			"[*.{c,cpp,h,hpp}]\nmalterlib_format = malterlib\n"
 		;
-		CStr const gc_Unformatted = "void fg_Test()\n{\n\n        int a;   \n\tif(a==2)\n\t\tfg_Other(a,1);\n}\n";
-		CStr const gc_Formatted = "void fg_Test()\n{\n\t\tint a;\n\tif (a == 2)\n\t\tfg_Other(a, 1);\n}\n";
+		CStr const gc_Unformatted = "void fg_Test()\n{\n\n    int a;   \n\tif(a==2)\n\t\tfg_Other(a,1);\n}\n";
+		CStr const gc_Formatted = "void fg_Test()\n{\n\tint a;\n\tif (a == 2)\n\t\tfg_Other(a, 1);\n}\n";
 
 		struct CRejectedCase
 		{
@@ -275,11 +275,11 @@ namespace NMib::NTool
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
 					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n        int a;\n        int b;\n}\n");
+					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n    int b;\n}\n");
 
 					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Example.cpp", "--lines", "3:3"});
 					DMibExpect(Result.m_ExitCode, ==, 0u);
-					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Example.cpp", true), ==, "void fg_Test()\n{\n\t\tint a;\n        int b;\n}\n");
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Example.cpp", true), ==, "void fg_Test()\n{\n\tint a;\n    int b;\n}\n");
 
 					co_return {};
 				};
@@ -291,13 +291,13 @@ namespace NMib::NTool
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
 					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					CStr Source = "void fg_Test()\n{\n        int a;\n        int b;\n}\n";
+					CStr Source = "void fg_Test()\n{\n    int a;\n    int b;\n}\n";
 					Repo.f_Write("Example.cpp", Source);
 
 					// A partial selection expands to the line it touches by default.
 					auto Expanded = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Example.cpp", "--offset", "20", "--length", "2"});
 					DMibExpect(Expanded.m_ExitCode, ==, 0u);
-					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Example.cpp", true), ==, CStr("void fg_Test()\n{\n\t\tint a;\n        int b;\n}\n"));
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Example.cpp", true), ==, CStr("void fg_Test()\n{\n\tint a;\n    int b;\n}\n"));
 
 					Repo.f_Write("Example.cpp", Source);
 					auto Strict = co_await Repo.f_Tool
@@ -362,11 +362,11 @@ namespace NMib::NTool
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
 					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n        int a;\n}\n");
+					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n}\n");
 					co_await Repo.f_Commit();
 
 					// The committed indentation violation is unchanged, so only the new line is reported.
-					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n        int a;\n        int b;\n}\n");
+					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n    int b;\n}\n");
 					co_await Repo.f_Stage();
 
 					auto Output = co_await Repo.f_Validate("Staged", 1);
@@ -384,7 +384,7 @@ namespace NMib::NTool
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
 					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n        int a;\n        int b;\n}\n");
+					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n    int b;\n}\n");
 					co_await Repo.f_Commit();
 
 					auto Output = co_await Repo.f_Validate("Audit", 1, false);
@@ -401,11 +401,11 @@ namespace NMib::NTool
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
 					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n        int a;\n        int b;\n}\n");
+					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n    int b;\n}\n");
 					co_await Repo.f_Commit();
 
 					// Removing a line adds none, so the remaining violations stay suppressed.
-					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n        int a;\n}\n");
+					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n}\n");
 					co_await Repo.f_Stage();
 
 					auto Output = co_await Repo.f_Validate("Staged");
