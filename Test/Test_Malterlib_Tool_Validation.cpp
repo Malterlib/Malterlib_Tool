@@ -943,6 +943,66 @@ namespace NMib::NTool
 
 				co_return {};
 			};
+
+			DMibTestSuite("Workspace") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Testing mib validate over a workspace");
+
+				DMibTestCategory("ValidatesRepositoriesThatOptIn") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "ValidatesRepositoriesThatOptIn");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 20\n");
+					Repo.f_Write("Long.txt", "This line is well past the twenty column limit.\n");
+					co_await Repo.f_Stage();
+					auto fConfigure = [&](bool _bFormat)
+						{
+							CStr Configuration = "%Repository \".\"\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n\t\tDefaultBranch \"main\"\n"
+								"\t\tURL \"https://example.invalid/validate-fixture.git\"\n"
+							;
+							Configuration += "\t\tLocation " + CEJsonSorted(Repo.m_Path).f_ToString() + "\n";
+							Configuration += _bFormat ? "\t\tFormat true\n\t}\n}\n" : "\t}\n}\n";
+							Repo.f_Write("Test.MBuildSystem", Configuration);
+						}
+					;
+					auto fRun = [&](TCVector<CStr> _Extra)
+						{
+							TCVector<CStr> Params =
+								{
+									"validate", "--skip-update", "--no-color", "--build-system", Repo.m_Path / "Test.MBuildSystem"
+									, "--output-directory", Repo.m_Path / "output", "--no-use-user-settings", "--no-use-cached-environment"
+								}
+							;
+							Params.f_Insert(_Extra);
+
+							return Repo.f_Tool(fg_Move(Params), true);
+						}
+					;
+
+					fConfigure(true);
+					auto Audited = co_await fRun({});
+					DMibExpect(Audited.m_ExitCode, ==, 1u);
+					DMibExpect(Audited.f_GetCombinedOut().f_Find("Long.txt:1: line length 47 exceeds max_line_length = 20"), >=, 0);
+					DMibExpect(Audited.f_GetCombinedOut().f_Find("tracked text file(s): 1 line length violation(s)"), >=, 0);
+
+					auto Staged = co_await fRun({"--staged"});
+					DMibExpect(Staged.m_ExitCode, ==, 1u);
+					DMibExpect(Staged.f_GetCombinedOut().f_Find("Commit validation failed: 1 changed line(s)"), >=, 0);
+					DMibExpect(Staged.f_GetCombinedOut().f_Find("staged file(s): 1 line length violation(s)"), >=, 0);
+
+					// A repository that does not opt in is not visited, and none is no error.
+					fConfigure(false);
+					auto Skipped = co_await fRun({});
+					DMibExpect(Skipped.m_ExitCode, ==, 0u);
+					DMibExpect(Skipped.f_GetCombinedOut().f_Find("Validated"), <, 0);
+
+					co_return {};
+				};
+
+				co_return {};
+			};
 		}
 	};
 

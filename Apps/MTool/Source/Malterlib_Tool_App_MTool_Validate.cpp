@@ -1,7 +1,7 @@
 // Copyright © Unbroken AB
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "Malterlib_Tool_App_MTool_Format.h"
+#include "Malterlib_Tool_App_MTool_Validate.h"
 
 #include <Mib/Git/Helpers/Launch>
 #include <Mib/Develop/EditorConfig>
@@ -12,9 +12,10 @@ namespace
 {
 	using namespace NMib::NDevelop;
 	using namespace NMib::NTool::NFormat;
+	using namespace NMib::NTool::NValidate;
 }
 
-namespace
+namespace NMib::NTool::NValidate
 {
 	void fg_NormalizeValidationNuls(CStr &_Text)
 	{
@@ -145,7 +146,7 @@ namespace
 	}
 
 
-	bool fg_ValidateLine(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CCodeFormattingSettings const &_Settings, CCommandLineControl &_CommandLine)
+	bool fg_ValidateLine(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CCodeFormattingSettings const &_Settings, CFormatSink &_Sink)
 	{
 		if (!_Settings.m_nMaxColumns)
 			return true;
@@ -155,10 +156,13 @@ namespace
 		umint nColumns = 0;
 		if (!fg_MeasureTextColumns(_Line, _Settings.m_nTabWidth, nColumns))
 		{
-			_CommandLine %= "{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f
-				<< _AbsolutePath
-				<< _LineNumber
-				<< _Settings.m_nMaxColumns
+			_Sink.m_fReport
+				(
+					"{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f
+						<< _AbsolutePath
+						<< _LineNumber
+						<< _Settings.m_nMaxColumns
+				)
 			;
 
 			return false;
@@ -167,43 +171,52 @@ namespace
 		if (nColumns <= _Settings.m_nMaxColumns)
 			return true;
 
-		_CommandLine %= "{}:{}: line length {} exceeds max_line_length = {}\n"_f << _AbsolutePath << _LineNumber << nColumns << _Settings.m_nMaxColumns;
+		_Sink.m_fReport("{}:{}: line length {} exceeds max_line_length = {}\n"_f << _AbsolutePath << _LineNumber << nColumns << _Settings.m_nMaxColumns);
 
 		return false;
 	}
 
-	struct CValidationCounts
+	umint CValidationCounts::f_GetErrors() const
 	{
-		umint m_nFiles = 0;
-		umint m_nExcluded = 0;
-		umint m_nLineErrors = 0;
-		umint m_nFormatFiles = 0;
-		umint m_nFormatErrors = 0;
-		umint m_nFormatFailed = 0;
+		return m_nLineErrors + m_nFormatErrors;
+	}
 
-		umint f_GetErrors() const
-		{
-			return m_nLineErrors + m_nFormatErrors;
-		}
-	};
+	CValidationCounts &CValidationCounts::operator += (CValidationCounts const &_Other)
+	{
+		m_nFiles += _Other.m_nFiles;
+		m_nExcluded += _Other.m_nExcluded;
+		m_nLineErrors += _Other.m_nLineErrors;
+		m_nFormatFiles += _Other.m_nFormatFiles;
+		m_nFormatErrors += _Other.m_nFormatErrors;
+		m_nFormatFailed += _Other.m_nFormatFailed;
+
+		return *this;
+	}
+
+	CStr fg_DescribeValidationFailure(CStr const &_Kind, CValidationCounts const &_Counts)
+	{
+		auto nErrors = _Counts.f_GetErrors();
+		if (!nErrors || _Kind == "tracked text")
+			return {};
+
+		return "Commit validation failed: {} changed line(s) violate the configured rules.\n"_f << nErrors;
+	}
 
 	// Line-length-only repositories keep the original summary so existing output stays compatible.
-	void fg_OutputValidationSummary(CCommandLineControl &_CommandLine, CStr const &_Kind, CValidationCounts const &_Counts, fp64 _Seconds)
+	CStr fg_DescribeValidationSummary(CStr const &_Kind, CValidationCounts const &_Counts, fp64 _Seconds)
 	{
 		if (!_Counts.m_nFormatFiles)
 		{
-			_CommandLine %= "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f
+			return "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f
 				<< _Counts.m_nFiles
 				<< _Kind
 				<< _Counts.m_nLineErrors
 				<< _Counts.m_nExcluded
 				<< _Seconds
 			;
-
-			return;
 		}
 
-		_CommandLine %= "Validated {} {} file(s): {} line length violation(s), {} formatting violation(s) in {} formatted file(s), {} unanalyzable. Excluded {} file(s). Time: {fe2} s.\n"_f
+		return "Validated {} {} file(s): {} line length violation(s), {} formatting violation(s) in {} formatted file(s), {} unanalyzable. Excluded {} file(s). Time: {fe2} s.\n"_f
 			<< _Counts.m_nFiles
 			<< _Kind
 			<< _Counts.m_nLineErrors
@@ -245,11 +258,10 @@ namespace
 		co_return Result.f_GetStdOut().f_Trim();
 	}
 
-	TCFuture<uint32> fg_ValidateChanges(CStr _Directory, CStr _Base, TCSharedPointer<CCommandLineControl> _pCommandLine)
+	TCFuture<CValidationResult> fg_ValidateChanges(CStr _Directory, CStr _Base, TCActor<CFormatWorkerPool> _Workers, CFormatSink _Sink)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % ("Validating changes in '{}'"_f << _Directory));
 
-		CStopwatch Stopwatch{true};
 		auto RepositoryInfo = co_await NGit::fg_LaunchGitWithResult
 			(
 				{
@@ -435,11 +447,7 @@ namespace
 		auto Changes = fg_ParseRawDiff(co_await NGit::fg_LaunchGit(fg_Move(RawParams), DiffDirectory, DiffEnvironment));
 
 		if (Changes.f_IsEmpty())
-		{
-			fg_OutputValidationSummary(*_pCommandLine, Kind, {}, Stopwatch.f_GetTime());
-
-			co_return 0;
-		}
+			co_return CValidationResult{Kind, {}};
 
 		TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct
 			(
@@ -554,7 +562,7 @@ namespace
 						{
 							AddedLines.f_Insert(iLine);
 							if (!bFormat)
-								Counts.m_nLineErrors += !fg_ValidateLine(SourceLine, AbsolutePath, iLine, Settings, *_pCommandLine);
+								Counts.m_nLineErrors += !fg_ValidateLine(SourceLine, AbsolutePath, iLine, Settings, _Sink);
 						}
 
 						++iLine;
@@ -571,7 +579,7 @@ namespace
 			if (!bWholeFile || bNormalizedNuls)
 			{
 				++Counts.m_nFormatFailed;
-				*_pCommandLine %= "{}: the changed snapshot could not be reassembled for formatting analysis\n"_f << AbsolutePath;
+				_Sink.m_fReport("{}: the changed snapshot could not be reassembled for formatting analysis\n"_f << AbsolutePath);
 
 				continue;
 			}
@@ -586,29 +594,22 @@ namespace
 			Job.m_Mode = EFormatMode::mc_Report;
 		}
 
-		for (auto const &Result : co_await fg_RunFormatJobs(fg_Move(FormatJobs), fg_GetDefaultFormatJobs()))
+		for (auto const &Result : co_await fg_RunFormatJobs(_Workers, fg_Move(FormatJobs)))
 		{
 			if (Result.m_Report)
-				*_pCommandLine %= Result.m_Report;
+				_Sink.m_fReport(Result.m_Report);
 
 			Counts.m_nFormatErrors += Result.m_nReported;
 			Counts.m_nFormatFailed += Result.m_Outcome == EFormatOutcome::mc_Failed;
 		}
 
-		auto nErrors = Counts.f_GetErrors();
-		if (nErrors)
-			*_pCommandLine %= "Commit validation failed: {} changed line(s) violate the configured rules.\n"_f << nErrors;
-
-		fg_OutputValidationSummary(*_pCommandLine, Kind, Counts, Stopwatch.f_GetTime());
-
-		co_return nErrors || Counts.m_nFormatFailed ? 1 : 0;
+		co_return CValidationResult{Kind, Counts};
 	}
 
-	TCFuture<uint32> fg_ValidateRepository(CStr _Directory, TCSharedPointer<CCommandLineControl> _pCommandLine)
+	TCFuture<CValidationResult> fg_ValidateRepository(CStr _Directory, TCActor<CFormatWorkerPool> _Workers, CFormatSink _Sink)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % ("Auditing repository '{}'"_f << _Directory));
 
-		CStopwatch Stopwatch{true};
 		_Directory = (co_await NGit::fg_LaunchGit({"rev-parse", "--show-toplevel"}, _Directory)).f_Trim();
 		// Enumerate names first so Git does not read excluded files to classify their content.
 		auto Index = co_await NGit::fg_LaunchGit({"-c", "core.quotePath=true", "ls-files", "--cached", "--deduplicate"}, _Directory);
@@ -684,22 +685,20 @@ namespace
 				fg_NormalizeValidationNuls(Contents);
 				umint iLine = 0;
 				for (auto const &Line : Contents.f_SplitLine())
-					Counts.m_nLineErrors += !fg_ValidateLine(Line, AbsolutePath, ++iLine, Settings, *_pCommandLine);
+					Counts.m_nLineErrors += !fg_ValidateLine(Line, AbsolutePath, ++iLine, Settings, _Sink);
 			}
 		}
 
-		for (auto const &Result : co_await fg_RunFormatJobs(fg_Move(FormatJobs), fg_GetDefaultFormatJobs()))
+		for (auto const &Result : co_await fg_RunFormatJobs(_Workers, fg_Move(FormatJobs)))
 		{
 			if (Result.m_Report)
-				*_pCommandLine %= Result.m_Report;
+				_Sink.m_fReport(Result.m_Report);
 
 			Counts.m_nFormatErrors += Result.m_nReported;
 			Counts.m_nFormatFailed += Result.m_Outcome == EFormatOutcome::mc_Failed;
 		}
 
-		fg_OutputValidationSummary(*_pCommandLine, "tracked text", Counts, Stopwatch.f_GetTime());
-
-		co_return Counts.f_GetErrors() || Counts.m_nFormatFailed ? 1 : 0;
+		co_return CValidationResult{"tracked text", Counts};
 	}
 }
 
@@ -749,6 +748,8 @@ struct CTool_Validate : CDistributedTool
 				{
 					auto CaptureScope = co_await (g_CaptureExceptions % "Running Validate");
 
+					CStopwatch Stopwatch{true};
+					CStr Base;
 					if (auto pBase = _Params.f_GetMember("Base"))
 					{
 						if (_Params["Staged"].f_Boolean())
@@ -756,13 +757,26 @@ struct CTool_Validate : CDistributedTool
 						if (pBase->f_String().f_IsEmpty())
 							co_return DMibErrorInstance("--base requires a nonempty commit reference");
 
-						co_return co_await fg_ValidateChanges(_Params["WorkingDirectory"].f_String(), pBase->f_String(), fg_Move(_pCommandLine));
+						Base = pBase->f_String();
 					}
 
-					if (_Params["Staged"].f_Boolean())
-						co_return co_await fg_ValidateChanges(_Params["WorkingDirectory"].f_String(), {}, fg_Move(_pCommandLine));
+					auto Workers = fg_ConstructFormatWorkerPool(fg_GetDefaultFormatJobs());
+					auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
+					CFormatSink Sink;
+					Sink.m_fReport = [_pCommandLine](CStr const &_Text)
+						{
+							*_pCommandLine %= _Text;
+						}
+					;
+					auto Directory = _Params["WorkingDirectory"].f_String();
+					auto Result = Base || _Params["Staged"].f_Boolean()
+						? co_await fg_ValidateChanges(Directory, Base, Workers, fg_Move(Sink))
+						: co_await fg_ValidateRepository(Directory, Workers, fg_Move(Sink))
+					;
+					*_pCommandLine %= fg_DescribeValidationFailure(Result.m_Kind, Result.m_Counts);
+					*_pCommandLine %= fg_DescribeValidationSummary(Result.m_Kind, Result.m_Counts, Stopwatch.f_GetTime());
 
-					co_return co_await fg_ValidateRepository(_Params["WorkingDirectory"].f_String(), fg_Move(_pCommandLine));
+					co_return Result.m_Counts.f_GetErrors() || Result.m_Counts.m_nFormatFailed ? 1 : 0;
 				}
 			)
 		;
