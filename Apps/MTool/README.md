@@ -183,13 +183,24 @@ An explicit empty list disables that category's pre-commit helpers. Defaults
 apply only when the property is undefined. `MalterlibInstallGitHookHelpers`
 continues to control installation of all managed helpers.
 
-To audit configured source repositories from the workspace root, `repo-run`
-makes the current mib's tool binaries available to the commands it launches:
+From the workspace root, `./mib validate` validates every repository whose
+build-system entry sets `Repository.Format` in one run: the repositories are
+validated at once on one pool of formatting workers, each repository's
+diagnostics are written in repository order, and one summary covers them all.
+It takes `--staged`, `--base`, and the repository filters, and exits like
+`MTool Validate` does.
+
+```bash
+./mib validate
+./mib validate --staged
+./mib validate --base origin/master -n "Malterlib/S*"
+```
+
+`repo-run` still launches the single-repository tool per repository, with the
+current mib's tool binaries on the path:
 
 ```bash
 ./mib repo-run -n "Malterlib/*" -- MTool Validate
-./mib repo-run -n "Malterlib/S*" -- MTool Validate --staged
-./mib repo-run -n "Malterlib/*" -- MTool Validate --base origin/master
 ```
 
 To include local source checkouts that are not currently configured in mib:

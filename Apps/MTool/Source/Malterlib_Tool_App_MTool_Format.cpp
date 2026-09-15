@@ -714,39 +714,42 @@ namespace NMib::NTool::NFormat
 
 namespace NMib::NTool::NFormat
 {
-	// Runs the selected files over a pool of worker actors sized by the host. Every file is
-	// queued at once, in turn over the workers, and the results come back in the jobs'
-	// order whatever order the files finished in.
-	TCFuture<TCVector<CFormatJobResult>> fg_RunFormatJobs(TCVector<CFormatJob> _Jobs, umint _nJobs)
+	CFormatWorkerPool::CFormatWorkerPool(umint _nWorkers, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors)
 	{
-		TCVector<CFormatJobResult> Results;
-		if (_Jobs.f_IsEmpty())
-			co_return Results;
+		for (umint i = 0; i < fg_Max(_nWorkers, umint(1)); ++i)
+			mp_Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(_pBlockingActors));
+	}
 
-		auto nWorkers = fg_Min(_nJobs, _Jobs.f_GetLen());
+	TCFuture<void> CFormatWorkerPool::fp_Destroy()
+	{
+		for (auto &Worker : mp_Workers)
+			co_await fg_Move(Worker).f_Destroy();
+
+		co_return {};
+	}
+
+	// Every job is queued at once and a job that awaits lets its worker start the next, so
+	// the turn-taking spreads the files over the workers whatever order they finish in.
+	TCFuture<CFormatJobResult> CFormatWorkerPool::f_Process(CFormatJob _Job)
+	{
+		co_return co_await mp_Workers[mp_iNextWorker++ % mp_Workers.f_GetLen()](&CFormatWorker::f_Process, fg_Move(_Job));
+	}
+
+	TCActor<CFormatWorkerPool> fg_ConstructFormatWorkerPool(umint _nWorkers)
+	{
 		TCSharedPointer<CSharedRoundRobinBlockingActors> pBlockingActors = fg_Construct(gc_nFormatBlockingActors);
-		TCVector<TCActor<CFormatWorker>> Workers;
-		for (umint i = 0; i < nWorkers; ++i)
-			Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(pBlockingActors));
 
-		auto DestroyWorkers = co_await fg_AsyncDestroy
-			(
-				[&Workers]() -> TCFuture<void>
-				{
-					for (auto &Worker : Workers)
-						co_await fg_Move(Worker).f_Destroy();
+		return fg_ConstructActor<CFormatWorkerPool>(_nWorkers, pBlockingActors);
+	}
 
-					co_return {};
-				}
-			)
-		;
-
+	TCFuture<TCVector<CFormatJobResult>> fg_RunFormatJobs(TCActor<CFormatWorkerPool> _Workers, TCVector<CFormatJob> _Jobs)
+	{
 		TCFutureVector<CFormatJobResult> Pending;
-		Pending.f_SetLen(_Jobs.f_GetLen());
-		for (umint iJob = 0; iJob < _Jobs.f_GetLen(); ++iJob)
-			Workers[iJob % nWorkers](&CFormatWorker::f_Process, _Jobs[iJob]) > Pending;
+		for (auto &Job : _Jobs)
+			_Workers(&CFormatWorkerPool::f_Process, Job) > Pending;
 
 		auto Outcomes = co_await fg_AllDoneWrapped(Pending);
+		TCVector<CFormatJobResult> Results;
 		Results.f_SetLen(_Jobs.f_GetLen());
 		for (umint iJob = 0; iJob < _Jobs.f_GetLen(); ++iJob)
 		{
@@ -783,8 +786,7 @@ namespace NMib::NTool::NFormat
 
 		CFormatOptions mp_Options;
 		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pBlockingActors;
-		TCVector<TCActor<CFormatWorker>> mp_Workers;
-		umint mp_iNextWorker = 0;
+		TCActor<CFormatWorkerPool> mp_Workers;
 		TCActor<CFormatRootResolver> mp_RootResolver;
 		TCSet<CStr> mp_Scheduled;						// A file named by more than one selection is formatted once.
 		TCFutureVector<CFormatJobResult> mp_Pending;
@@ -793,17 +795,14 @@ namespace NMib::NTool::NFormat
 	CFormatRun::CFormatRun(CFormatOptions _Options)
 		: mp_Options(fg_Move(_Options))
 		, mp_pBlockingActors(fg_Construct(gc_nFormatBlockingActors))
+		, mp_Workers(fg_ConstructActor<CFormatWorkerPool>(mp_Options.m_nJobs, mp_pBlockingActors))
 		, mp_RootResolver(fg_ConstructActor<CFormatRootResolver>())
 	{
-		for (umint i = 0; i < fg_Max(mp_Options.m_nJobs, umint(1)); ++i)
-			mp_Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(mp_pBlockingActors));
 	}
 
 	TCFuture<void> CFormatRun::fp_Destroy()
 	{
-		for (auto &Worker : mp_Workers)
-			co_await fg_Move(Worker).f_Destroy();
-
+		co_await fg_Move(mp_Workers).f_Destroy();
 		co_await fg_Move(mp_RootResolver).f_Destroy();
 
 		co_return {};
@@ -827,7 +826,7 @@ namespace NMib::NTool::NFormat
 		Job.m_iLastLine = mp_Options.m_iLastLine;
 		Job.m_RangePolicy = mp_Options.m_RangePolicy;
 		Job.m_Mode = mp_Options.m_Mode;
-		mp_Workers[mp_iNextWorker++ % mp_Workers.f_GetLen()](&CFormatWorker::f_Process, fg_Move(Job)) > mp_Pending;
+		mp_Workers(&CFormatWorkerPool::f_Process, fg_Move(Job)) > mp_Pending;
 	}
 
 	// A file named outright is taken as it is; its repository bounds its configuration. A

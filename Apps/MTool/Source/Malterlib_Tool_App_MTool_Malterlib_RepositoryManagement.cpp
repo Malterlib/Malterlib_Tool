@@ -4,7 +4,9 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
 #include "Malterlib_Tool_App_MTool_Format.h"
+#include "Malterlib_Tool_App_MTool_Validate.h"
 
+#include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Process/ProcessLaunch>
 #include <Mib/Time/Stopwatch>
 
@@ -516,6 +518,131 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return DMibErrorInstance("{} file(s) could not be formatted"_f << Run.m_Summary.m_nFailed);
 
 							pOutcome->m_ExitCode = Run.m_ExitCode;
+
+							co_return CBuildSystem::ERetry_None;
+						}
+						, _pCommandLine
+						, &GenerateOptions
+					)
+				;
+
+				co_return Code ? Code : pOutcome->m_ExitCode;
+			}
+		)
+	;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["validate"]
+				, "Description"_o=
+					"Validate the tracked text files of every repository that sets Repository.Format, as MTool Validate does for one, "
+					"in one run with one summary.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
+				{
+					"Staged?"_o=
+					{
+						"Names"_o= _o["--staged"]
+						, "Default"_o= false
+						, "Description"_o= "Only validate added or modified lines in each index, using staged .editorconfig files.\n"
+					}
+					, "Base?"_o=
+					{
+						"Names"_o= _o["--base"]
+						, "Type"_o= ""
+						, "Description"_o= "Validate committed changes from the merge base with this reference to HEAD, using HEAD's .editorconfig files.\n"
+					}
+					, Filter_Name
+					, fFilter_Type("")
+					, Filter_Tags
+					, Filter_Branch
+					, fs_CachedEnvironmentOption(true)
+				}
+			}
+			, [=, this](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				CStopwatch Stopwatch{true};
+				bool bStaged = _Params["Staged"].f_Boolean();
+				CStr Base;
+				if (auto pBase = _Params.f_GetMember("Base"))
+				{
+					if (bStaged || pBase->f_String().f_IsEmpty())
+					{
+						*_pCommandLine %= bStaged ? "--base and --staged cannot be combined\n" : "--base requires a nonempty commit reference\n";
+
+						co_return 1;
+					}
+
+					Base = pBase->f_String();
+				}
+
+				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+				RepoFilter.m_bFormat = true;
+
+				// The repositories are validated at once on one pool of workers. Each one's
+				// diagnostics are kept apart and written in repository order once all are
+				// done, so a parallel run reads the same from one run to the next.
+				NStorage::TCSharedPointer<NMib::NTool::CFormatOutcome> pOutcome = fg_Construct();
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				auto Code = co_await f_RunBuildSystem
+					(
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
+						{
+							TCVector<CStr> Locations;
+							if (auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations(GenerateOptions, RepoFilter, Locations); Retry != CBuildSystem::ERetry_None)
+								co_return Retry;
+
+							if (Locations.f_IsEmpty())
+							{
+								*_pCommandLine %= "No repository sets Repository.Format\n";
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							auto Workers = NMib::NTool::NFormat::fg_ConstructFormatWorkerPool(NMib::NTool::NFormat::fg_GetDefaultFormatJobs());
+							auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
+							TCVector<CStr> Reports;
+							Reports.f_SetLen(Locations.f_GetLen());
+							TCFutureVector<NMib::NTool::NValidate::CValidationResult> Pending;
+							for (umint i = 0; i < Locations.f_GetLen(); ++i)
+							{
+								NMib::NTool::NFormat::CFormatSink Sink;
+								Sink.m_fReport = [pReport = &Reports[i]](CStr const &_Text)
+									{
+										*pReport += _Text;
+									}
+								;
+								if (bStaged || Base)
+									NMib::NTool::NValidate::fg_ValidateChanges(Locations[i], Base, Workers, fg_Move(Sink)) > Pending;
+								else
+									NMib::NTool::NValidate::fg_ValidateRepository(Locations[i], Workers, fg_Move(Sink)) > Pending;
+							}
+
+							auto Outcomes = co_await fg_AllDoneWrapped(Pending);
+							CStr Kind = Base ? "committed" : bStaged ? "staged" : "tracked text";
+							NMib::NTool::NValidate::CValidationCounts Counts;
+							umint nFailed = 0;
+							for (umint i = 0; i < Locations.f_GetLen(); ++i)
+							{
+								*_pCommandLine %= Reports[i];
+								if (Outcomes[i])
+									Counts += Outcomes[i]->m_Counts;
+								else
+								{
+									*_pCommandLine %= "{}: {}\n"_f << Locations[i] << Outcomes[i].f_GetExceptionStr();
+									++nFailed;
+								}
+							}
+
+							*_pCommandLine %= NMib::NTool::NValidate::fg_DescribeValidationFailure(Kind, Counts);
+							*_pCommandLine %= NMib::NTool::NValidate::fg_DescribeValidationSummary(Kind, Counts, Stopwatch.f_GetTime());
+							if (nFailed)
+								co_return DMibErrorInstance("{} {} could not be validated"_f << nFailed << (nFailed == 1 ? "repository" : "repositories"));
+
+							pOutcome->m_ExitCode = Counts.f_GetErrors() || Counts.m_nFormatFailed ? 1 : 0;
 
 							co_return CBuildSystem::ERetry_None;
 						}
