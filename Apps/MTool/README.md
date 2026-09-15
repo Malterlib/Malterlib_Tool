@@ -233,7 +233,8 @@ repository whose build-system entry sets `Repository.Format`: the repositories
 are walked in parallel, a repository's files are queued for formatting as soon
 as its walk is done, and the diagnostics and one summary cover them all, in
 path order. It takes `--check`, `--diff`, `--jobs`, and the repository filters,
-and exits like `MTool Format` does. The Malterlib root and module repositories
+and exits like `MTool Format` does; its reported time includes finding the
+repositories. The Malterlib root and module repositories
 set the property; binary and external repositories do not.
 
 ```bash
