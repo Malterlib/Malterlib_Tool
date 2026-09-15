@@ -26,7 +26,8 @@ namespace NMib::NTool
 					auto Audit = co_await Repo.f_Validate("Audit", 0, false);
 
 					DMibExpect(Staged.f_Find("Validated 0 staged file(s)"), >=, 0);
-					DMibExpect(Audit.f_Find("Validated 0 tracked text file(s)"), >=, 0);
+					// The audit walks the working tree, so the fixture's untracked configuration counts.
+					DMibExpect(Audit.f_Find("Validated 1 text file(s)"), >=, 0);
 					DMibExpect(CFile::fs_FileExists(Repo.m_Root / "mtool/TrustDatabase.MTool", EFileAttrib_Directory), ==, true);
 
 					co_return {};
@@ -142,7 +143,7 @@ namespace NMib::NTool
 					auto Audit = co_await Repo.f_Validate("Audit", 0, false);
 
 					DMibExpect(Staged.f_Find("Excluded 1 file(s)"), >=, 0);
-					DMibExpect(Audit.f_Find("Validated 2 tracked text file(s)"), >=, 0);
+					DMibExpect(Audit.f_Find("Validated 2 text file(s)"), >=, 0);
 
 					co_return {};
 				};
@@ -964,15 +965,16 @@ namespace NMib::NTool
 							;
 							Configuration += "\t\tLocation " + CEJsonSorted(Repo.m_Path).f_ToString() + "\n";
 							Configuration += _bFormat ? "\t\tFormat true\n\t}\n}\n" : "\t}\n}\n";
-							Repo.f_Write("Test.MBuildSystem", Configuration);
+							// Outside the repository, where the audit would otherwise read it.
+							CFile::fs_WriteStringToFile(Repo.m_Root / "Test.MBuildSystem", Configuration, false);
 						}
 					;
 					auto fRun = [&](TCVector<CStr> _Extra)
 						{
 							TCVector<CStr> Params =
 								{
-									"validate", "--skip-update", "--no-color", "--build-system", Repo.m_Path / "Test.MBuildSystem"
-									, "--output-directory", Repo.m_Path / "output", "--no-use-user-settings", "--no-use-cached-environment"
+									"validate", "--skip-update", "--no-color", "--build-system", Repo.m_Root / "Test.MBuildSystem"
+									, "--output-directory", Repo.m_Root / "output", "--no-use-user-settings", "--no-use-cached-environment"
 								}
 							;
 							Params.f_Insert(_Extra);
@@ -985,7 +987,7 @@ namespace NMib::NTool
 					auto Audited = co_await fRun({});
 					DMibExpect(Audited.m_ExitCode, ==, 1u);
 					DMibExpect(Audited.f_GetCombinedOut().f_Find("Long.txt:1: line length 47 exceeds max_line_length = 20"), >=, 0);
-					DMibExpect(Audited.f_GetCombinedOut().f_Find("tracked text file(s): 1 line length violation(s)"), >=, 0);
+					DMibExpect(Audited.f_GetCombinedOut().f_Find("text file(s): 1 line length violation(s)"), >=, 0);
 
 					auto Staged = co_await fRun({"--staged"});
 					DMibExpect(Staged.m_ExitCode, ==, 1u);

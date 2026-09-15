@@ -536,7 +536,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			{
 				"Names"_o= _o["validate"]
 				, "Description"_o=
-					"Validate the tracked text files of every repository that sets Repository.Format, as MTool Validate does for one, "
+					"Validate the text files of every repository that sets Repository.Format, as MTool Validate does for one, "
 					"in one run with one summary.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
@@ -602,38 +602,51 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return CBuildSystem::ERetry_None;
 							}
 
-							auto Workers = NMib::NTool::NFormat::fg_ConstructFormatWorkerPool(NMib::NTool::NFormat::fg_GetDefaultFormatJobs());
-							auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
-							TCVector<CStr> Reports;
-							Reports.f_SetLen(Locations.f_GetLen());
-							TCFutureVector<NMib::NTool::NValidate::CValidationResult> Pending;
-							for (umint i = 0; i < Locations.f_GetLen(); ++i)
-							{
-								NMib::NTool::NFormat::CFormatSink Sink;
-								Sink.m_fReport = [pReport = &Reports[i]](CStr const &_Text)
-									{
-										*pReport += _Text;
-									}
-								;
-								if (bStaged || Base)
-									NMib::NTool::NValidate::fg_ValidateChanges(Locations[i], Base, Workers, fg_Move(Sink)) > Pending;
-								else
-									NMib::NTool::NValidate::fg_ValidateRepository(Locations[i], Workers, fg_Move(Sink)) > Pending;
-							}
-
-							auto Outcomes = co_await fg_AllDoneWrapped(Pending);
-							CStr Kind = Base ? "committed" : bStaged ? "staged" : "tracked text";
+							// An audit needs no git and is one Format run over every repository; the
+							// changed-line modes ask git per repository, at once on one pool, and their
+							// diagnostics are written in repository order once all are done.
+							CStr Kind = Base ? "committed" : bStaged ? "staged" : "text";
 							NMib::NTool::NValidate::CValidationCounts Counts;
 							umint nFailed = 0;
-							for (umint i = 0; i < Locations.f_GetLen(); ++i)
+							if (!bStaged && !Base)
 							{
-								*_pCommandLine %= Reports[i];
-								if (Outcomes[i])
-									Counts += Outcomes[i]->m_Counts;
-								else
+								NMib::NTool::NFormat::CFormatSink Sink;
+								Sink.m_fReport = [_pCommandLine](CStr const &_Text)
+									{
+										*_pCommandLine %= _Text;
+									}
+								;
+								Counts = (co_await NMib::NTool::NValidate::fg_ValidateRepositories(Locations, fg_Move(Sink))).m_Counts;
+							}
+							else
+							{
+								auto Workers = NMib::NTool::NFormat::fg_ConstructFormatWorkerPool(NMib::NTool::NFormat::fg_GetDefaultFormatJobs());
+								auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
+								TCVector<CStr> Reports;
+								Reports.f_SetLen(Locations.f_GetLen());
+								TCFutureVector<NMib::NTool::NValidate::CValidationResult> Pending;
+								for (umint i = 0; i < Locations.f_GetLen(); ++i)
 								{
-									*_pCommandLine %= "{}: {}\n"_f << Locations[i] << Outcomes[i].f_GetExceptionStr();
-									++nFailed;
+									NMib::NTool::NFormat::CFormatSink Sink;
+									Sink.m_fReport = [pReport = &Reports[i]](CStr const &_Text)
+										{
+											*pReport += _Text;
+										}
+									;
+									NMib::NTool::NValidate::fg_ValidateChanges(Locations[i], Base, Workers, fg_Move(Sink)) > Pending;
+								}
+
+								auto Outcomes = co_await fg_AllDoneWrapped(Pending);
+								for (umint i = 0; i < Locations.f_GetLen(); ++i)
+								{
+									*_pCommandLine %= Reports[i];
+									if (Outcomes[i])
+										Counts += Outcomes[i]->m_Counts;
+									else
+									{
+										*_pCommandLine %= "{}: {}\n"_f << Locations[i] << Outcomes[i].f_GetExceptionStr();
+										++nFailed;
+									}
 								}
 							}
 

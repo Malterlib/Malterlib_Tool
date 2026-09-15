@@ -462,7 +462,7 @@ namespace NMib::NTool
 							TCVector<CStr> Params =
 								{
 									"format", "--skip-update", "--no-color", "--build-system", Repo.m_Path / "Test.MBuildSystem"
-									, "--output-directory", Repo.m_Path / "output", "--no-use-user-settings", "--no-use-cached-environment"
+									, "--output-directory", Repo.m_Root / "output", "--no-use-user-settings", "--no-use-cached-environment"
 								}
 							;
 							Params.f_Insert(_Extra);

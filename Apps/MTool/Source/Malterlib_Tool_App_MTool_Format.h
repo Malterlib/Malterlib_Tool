@@ -8,6 +8,7 @@
 #include <Mib/Develop/CodeFormatting>
 #include <Mib/Develop/EditorConfig>
 #include <Mib/Function/Function>
+#include <Mib/Git/Ignore>
 
 namespace NMib::NTool::NFormat
 {
@@ -34,6 +35,8 @@ namespace NMib::NTool::NFormat
 		NStr::CStr m_Root;											// Bounds configuration discovery when the worker resolves the settings.
 		NDevelop::CCodeFormattingSettings m_Settings;
 		bool m_bResolveSettings = false;							// The worker resolves the settings and display path within m_Root.
+		bool m_bValidateLineLength = false;							// Also check max_line_length, on a file the engine does not format too.
+		NGit::EGitTextAttribute m_TextAttribute = NGit::EGitTextAttribute::mc_Unspecified;	// Decides text or binary before git's heuristic.
 		NStr::CStr m_Source;										// Snapshot contents; empty means read m_Path.
 		bool m_bHasSource = false;
 		NContainer::TCVector<umint> m_ReportedLines;				// Sorted one-based lines to report; empty reports every line.
@@ -52,6 +55,8 @@ namespace NMib::NTool::NFormat
 		NStr::CStr m_Patch;											// Unified diff for stdout.
 		umint m_nReported = 0;										// Diagnostics that survived the reporting mask.
 		umint m_nUnresolved = 0;									// Reported diagnostics without an automatic fix.
+		umint m_nLineErrors = 0;									// Lines over max_line_length, in a file the engine did not format.
+		bool m_bFormatted = false;									// The engine analyzed the file.
 	};
 
 	// Workers share no state but the blocking actors their file I/O runs on: the caller owns
@@ -122,6 +127,8 @@ namespace NMib::NTool::NFormat
 	{
 		EFormatMode m_Mode = EFormatMode::mc_Write;
 		umint m_nJobs = 1;
+		bool m_bValidateLineLength = false;							// Audit: also check max_line_length, and exclude binary files.
+		bool m_bRequireFiles = true;								// No file selected is an error.
 		umint m_iFirstLine = 0;
 		umint m_iLastLine = 0;
 		NContainer::TCVector<NDevelop::CCodeFormattingRange> m_ByteRanges;
@@ -136,6 +143,9 @@ namespace NMib::NTool::NFormat
 		umint m_nChanged = 0;
 		umint m_nUnresolved = 0;
 		umint m_nFailed = 0;
+		umint m_nLineErrors = 0;
+		umint m_nFormatFiles = 0;									// Files the engine analyzed.
+		umint m_nReported = 0;										// Diagnostics the engine reported for them.
 	};
 
 	// Where a run writes as it goes: diagnostics and the summary line, and the patches of
@@ -168,4 +178,10 @@ namespace NMib::NTool::NFormat
 	// to read, write, or format a file is an error, distinct from a violation.
 	NConcurrency::TCFuture<CFormatRunResult> fg_RunFormat(NContainer::TCVector<CFormatSelection> _Selections, CFormatOptions _Options, CFormatSink _Sink);
 	NStr::CStr fg_DescribeFormatSummary(CFormatSummary const &_Summary, EFormatMode _Mode, fp64 _Seconds);
+
+	// The max_line_length check of one line, appending its diagnostic to the report; false
+	// when the line is over the limit. NUL occupies one column, like space, and is
+	// normalized before splitting, whose substring constructors treat a leading NUL as empty.
+	bool fg_ValidateLineLength(NStr::CStr const &_Line, NStr::CStr const &_AbsolutePath, umint _LineNumber, NDevelop::CCodeFormattingSettings const &_Settings, NStr::CStr &o_Report);
+	void fg_NormalizeValidationNuls(NStr::CStr &_Text);
 }

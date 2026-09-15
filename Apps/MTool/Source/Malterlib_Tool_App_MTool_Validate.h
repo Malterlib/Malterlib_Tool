@@ -26,11 +26,10 @@ namespace NMib::NTool::NValidate
 		CValidationCounts m_Counts;
 	};
 
-	// Validates one repository, writing diagnostics through the sink; the caller reports
-	// the summary. The changes are the index against HEAD, or the merge base of _Base
-	// with HEAD against HEAD when _Base is given; the repository audit covers every
-	// tracked text file. Formatting jobs run on the pool given, which repositories
-	// validated together share.
+	// Validates the changes of one repository, writing diagnostics through the sink; the
+	// caller reports the summary. The changes are the index against HEAD, or the merge
+	// base of _Base with HEAD against HEAD when _Base is given. Formatting jobs run on the
+	// pool given, which repositories validated together share.
 	NConcurrency::TCFuture<CValidationResult> fg_ValidateChanges
 		(
 			NStr::CStr _Directory
@@ -39,13 +38,11 @@ namespace NMib::NTool::NValidate
 			, NFormat::CFormatSink _Sink
 		)
 	;
-	NConcurrency::TCFuture<CValidationResult> fg_ValidateRepository
-		(
-			NStr::CStr _Directory
-			, NConcurrency::TCActor<NFormat::CFormatWorkerPool> _Workers
-			, NFormat::CFormatSink _Sink
-		)
-	;
+
+	// Audits the working trees holding the directories in one Format run: every text file
+	// git does not ignore is checked against max_line_length, and the files that opt in
+	// are analyzed by the engine. Diagnostics come in path order.
+	NConcurrency::TCFuture<CValidationResult> fg_ValidateRepositories(NContainer::TCVector<NStr::CStr> _Directories, NFormat::CFormatSink _Sink);
 
 	// The lines a validation ends with: the failure notice of a changed-line validation
 	// with errors, and the summary.

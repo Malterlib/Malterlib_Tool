@@ -17,19 +17,6 @@ namespace
 
 namespace NMib::NTool::NValidate
 {
-	void fg_NormalizeValidationNuls(CStr &_Text)
-	{
-		// NUL occupies one column, just like space. Normalize it before string
-		// splitting, whose substring constructors treat a leading NUL as empty.
-		auto pStart = _Text.f_GetStrUniqueWritable();
-		auto pEnd = pStart + _Text.f_GetLen();
-		for (auto pParse = pStart; pParse != pEnd; ++pParse)
-		{
-			if (*pParse == 0)
-				*pParse = ' ';
-		}
-	}
-
 	CStr fg_UnquoteGitPath(CStr const &_Path)
 	{
 		if (!_Path.f_StartsWith("\""))
@@ -148,32 +135,12 @@ namespace NMib::NTool::NValidate
 
 	bool fg_ValidateLine(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CCodeFormattingSettings const &_Settings, CFormatSink &_Sink)
 	{
-		if (!_Settings.m_nMaxColumns)
-			return true;
+		CStr Report;
+		bool bValid = fg_ValidateLineLength(_Line, _AbsolutePath, _LineNumber, _Settings, Report);
+		if (Report)
+			_Sink.m_fReport(Report);
 
-		// The engine owns the shared column model, including tab stops, Unicode accounting,
-		// and malformed-byte handling. File-leading BOM removal is handled by the caller.
-		umint nColumns = 0;
-		if (!fg_MeasureTextColumns(_Line, _Settings.m_nTabWidth, nColumns))
-		{
-			_Sink.m_fReport
-				(
-					"{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f
-						<< _AbsolutePath
-						<< _LineNumber
-						<< _Settings.m_nMaxColumns
-				)
-			;
-
-			return false;
-		}
-
-		if (nColumns <= _Settings.m_nMaxColumns)
-			return true;
-
-		_Sink.m_fReport("{}:{}: line length {} exceeds max_line_length = {}\n"_f << _AbsolutePath << _LineNumber << nColumns << _Settings.m_nMaxColumns);
-
-		return false;
+		return bValid;
 	}
 
 	umint CValidationCounts::f_GetErrors() const
@@ -196,7 +163,7 @@ namespace NMib::NTool::NValidate
 	CStr fg_DescribeValidationFailure(CStr const &_Kind, CValidationCounts const &_Counts)
 	{
 		auto nErrors = _Counts.f_GetErrors();
-		if (!nErrors || _Kind == "tracked text")
+		if (!nErrors || _Kind == "text")
 			return {};
 
 		return "Commit validation failed: {} changed line(s) violate the configured rules.\n"_f << nErrors;
@@ -606,99 +573,38 @@ namespace NMib::NTool::NValidate
 		co_return CValidationResult{Kind, Counts};
 	}
 
-	TCFuture<CValidationResult> fg_ValidateRepository(CStr _Directory, TCActor<CFormatWorkerPool> _Workers, CFormatSink _Sink)
+	TCFuture<CValidationResult> fg_ValidateRepositories(TCVector<CStr> _Directories, CFormatSink _Sink)
 	{
-		auto CaptureScope = co_await (g_CaptureExceptions % ("Auditing repository '{}'"_f << _Directory));
+		auto CaptureScope = co_await (g_CaptureExceptions % "Auditing repositories");
 
-		_Directory = (co_await NGit::fg_LaunchGit({"rev-parse", "--show-toplevel"}, _Directory)).f_Trim();
-		// Enumerate names first so Git does not read excluded files to classify their content.
-		auto Index = co_await NGit::fg_LaunchGit({"-c", "core.quotePath=true", "ls-files", "--cached", "--deduplicate"}, _Directory);
+		TCVector<CFormatSelection> Selections;
+		for (auto const &Directory : _Directories)
+		{
+			auto Full = CFile::fs_GetFullPath(Directory, CFile::fs_GetCurrentDirectory());
+			auto Root = NGit::fg_FindGitWorkingTreeRoot(Full);
+			auto &Selection = Selections.f_Insert();
+			Selection.m_WorkingDirectory = Root ? Root : Full;
+			Selection.m_Patterns = {"*"};
+			Selection.m_bRecursive = true;
+		}
 
-		TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct(_Directory);
-		auto DestroyConfigurations = co_await fg_AsyncDestroy(Configurations);
-		TCMap<CStr, CCodeFormattingSettings> SettingsByPath;
-		TCVector<CStr> CandidatePaths;
+		CFormatOptions Options;
+		Options.m_Mode = EFormatMode::mc_Report;
+		Options.m_nJobs = fg_GetDefaultFormatJobs();
+		Options.m_bValidateLineLength = true;
+		Options.m_bRequireFiles = false;
+		auto Run = co_await fg_RunFormat(fg_Move(Selections), fg_Move(Options), fg_Move(_Sink));
+
+		auto const &Summary = Run.m_Summary;
 		CValidationCounts Counts;
-		for (auto const &EncodedPath : Index.f_SplitLine<true>())
-		{
-			auto Path = fg_UnquoteGitPath(EncodedPath);
-			auto Properties = co_await Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, _Directory / Path);
+		Counts.m_nFiles = Summary.m_nSelected - Summary.m_nExcluded;
+		Counts.m_nExcluded = Summary.m_nExcluded;
+		Counts.m_nLineErrors = Summary.m_nLineErrors;
+		Counts.m_nFormatFiles = Summary.m_nFormatFiles;
+		Counts.m_nFormatErrors = Summary.m_nReported;
+		Counts.m_nFormatFailed = Summary.m_nFailed;
 
-			// A file is a candidate when any validator applies to it, not only the line-length one.
-			CCodeFormattingSettings Settings(Properties);
-			if (!Settings.m_nMaxColumns && !fg_UsesFormattingEngine(Settings))
-			{
-				++Counts.m_nExcluded;
-				continue;
-			}
-
-			CandidatePaths.f_Insert(Path);
-			SettingsByPath(Path, Settings);
-		}
-
-		TCVector<CFormatJob> FormatJobs;
-		umint iPath = 0;
-		while (iPath < CandidatePaths.f_GetLen())
-		{
-			TCVector<CStr> Params =
-				{
-					"--literal-pathspecs", "-c", "core.quotePath=true", "grep", "--no-color", "--no-textconv"
-					, "-I", "--full-name", "-l", "-e", "", "--"
-				}
-			;
-			// Bound the escaped argument size, including quotes, for Windows command lines.
-			umint nArgumentChars = 0;
-			do
-			{
-				auto const &Path = CandidatePaths[iPath++];
-				Params.f_Insert(Path);
-				nArgumentChars += Path.f_GetLen() * 2 + 3;
-			}
-			while (iPath < CandidatePaths.f_GetLen() && nArgumentChars + CandidatePaths[iPath].f_GetLen() * 2 + 3 < 12000)
-			;
-
-			// Git selects nonempty, non-binary working-tree files from this filtered set.
-			// Exit 1 means no matching files, rather than a launch failure.
-			auto Result = co_await NGit::fg_LaunchGitWithResult(fg_Move(Params), _Directory);
-			if (Result.m_ExitCode > 1)
-				co_return DMibErrorInstance("Cannot select text files for validation: {}"_f << Result.f_GetStdErr());
-
-			for (auto const &EncodedPath : Result.f_GetStdOut().f_SplitLine<true>())
-			{
-				auto Path = fg_UnquoteGitPath(EncodedPath);
-				auto const &Settings = *SettingsByPath.f_FindEqual(Path);
-				CStr AbsolutePath = _Directory / Path;
-				++Counts.m_nFiles;
-				if (fg_UsesFormattingEngine(Settings))
-				{
-					++Counts.m_nFormatFiles;
-					auto &Job = FormatJobs.f_Insert();
-					Job.m_Path = AbsolutePath;
-					Job.m_DisplayPath = Path;
-					Job.m_Settings = Settings;
-					Job.m_Mode = EFormatMode::mc_Report;
-
-					continue;
-				}
-
-				auto Contents = CFile::fs_ReadStringFromFile(AbsolutePath, true);
-				fg_NormalizeValidationNuls(Contents);
-				umint iLine = 0;
-				for (auto const &Line : Contents.f_SplitLine())
-					Counts.m_nLineErrors += !fg_ValidateLine(Line, AbsolutePath, ++iLine, Settings, _Sink);
-			}
-		}
-
-		for (auto const &Result : co_await fg_RunFormatJobs(_Workers, fg_Move(FormatJobs)))
-		{
-			if (Result.m_Report)
-				_Sink.m_fReport(Result.m_Report);
-
-			Counts.m_nFormatErrors += Result.m_nReported;
-			Counts.m_nFormatFailed += Result.m_Outcome == EFormatOutcome::mc_Failed;
-		}
-
-		co_return CValidationResult{"tracked text", Counts};
+		co_return CValidationResult{"text", Counts};
 	}
 }
 
@@ -720,7 +626,7 @@ struct CTool_Validate : CDistributedTool
 			(
 				{
 					"Names"_o= _o["Validate"]
-					, "Description"_o= "Validate tracked text files using .editorconfig. Currently checks max_line_length.\n"
+					, "Description"_o= "Validate the text files of a repository using .editorconfig: max_line_length, and the formatting rules of files that opt in.\n"
 					, "Category"_o= "Validation"
 					, "Options"_o=
 					{
@@ -760,8 +666,6 @@ struct CTool_Validate : CDistributedTool
 						Base = pBase->f_String();
 					}
 
-					auto Workers = fg_ConstructFormatWorkerPool(fg_GetDefaultFormatJobs());
-					auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
 					CFormatSink Sink;
 					Sink.m_fReport = [_pCommandLine](CStr const &_Text)
 						{
@@ -769,10 +673,15 @@ struct CTool_Validate : CDistributedTool
 						}
 					;
 					auto Directory = _Params["WorkingDirectory"].f_String();
-					auto Result = Base || _Params["Staged"].f_Boolean()
-						? co_await fg_ValidateChanges(Directory, Base, Workers, fg_Move(Sink))
-						: co_await fg_ValidateRepository(Directory, Workers, fg_Move(Sink))
-					;
+					CValidationResult Result;
+					if (Base || _Params["Staged"].f_Boolean())
+					{
+						auto Workers = fg_ConstructFormatWorkerPool(fg_GetDefaultFormatJobs());
+						auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
+						Result = co_await fg_ValidateChanges(Directory, Base, Workers, fg_Move(Sink));
+					}
+					else
+						Result = co_await fg_ValidateRepositories({Directory}, fg_Move(Sink));
 					*_pCommandLine %= fg_DescribeValidationFailure(Result.m_Kind, Result.m_Counts);
 					*_pCommandLine %= fg_DescribeValidationSummary(Result.m_Kind, Result.m_Counts, Stopwatch.f_GetTime());
 
