@@ -228,13 +228,13 @@ MTool Format --file Source/Example.cpp --lines 40:75 --diff
 MTool Format --file Source/Example.cpp --lines 40:75 --strict-range
 ```
 
-From a workspace root, `./mib format` runs the same engine over every
-repository whose build-system entry sets `Repository.Format`, one after the
-other, and reports each repository's diagnostics and summary in the table the
-other repository commands use. It takes `--check`, `--diff`, `--jobs`, and the
-repository filters; `--check` exits with an error naming the number of
-repositories with violations. The Malterlib root and module repositories set
-the property; binary and external repositories do not.
+From a workspace root, `./mib format` runs the same engine once over every
+repository whose build-system entry sets `Repository.Format`: the repositories
+are walked in parallel, a repository's files are queued for formatting as soon
+as its walk is done, and the diagnostics and one summary cover them all, in
+path order. It takes `--check`, `--diff`, `--jobs`, and the repository filters,
+and exits like `MTool Format` does. The Malterlib root and module repositories
+set the property; binary and external repositories do not.
 
 ```bash
 ./mib format --check

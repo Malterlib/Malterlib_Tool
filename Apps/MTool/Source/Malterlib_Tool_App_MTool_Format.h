@@ -31,8 +31,9 @@ namespace NMib::NTool::NFormat
 	{
 		NStr::CStr m_Path;											// Absolute path, used for reading, writing, and diagnostics.
 		NStr::CStr m_DisplayPath;									// Repository-relative path used in patch headers.
+		NStr::CStr m_Root;											// Bounds configuration discovery when the worker resolves the settings.
 		NDevelop::CCodeFormattingSettings m_Settings;
-		bool m_bResolveSettings = false;							// The worker resolves the settings and display path from its root.
+		bool m_bResolveSettings = false;							// The worker resolves the settings and display path within m_Root.
 		NStr::CStr m_Source;										// Snapshot contents; empty means read m_Path.
 		bool m_bHasSource = false;
 		NContainer::TCVector<umint> m_ReportedLines;				// Sorted one-based lines to report; empty reports every line.
@@ -54,11 +55,11 @@ namespace NMib::NTool::NFormat
 	};
 
 	// Workers share no state but the blocking actors their file I/O runs on: the caller owns
-	// selection, ordering, and reporting. A worker given a root resolves its own jobs'
-	// settings there, so configuration runs on every core along with the formatting.
+	// selection, ordering, and reporting. A worker resolves its jobs' settings within their
+	// roots, so configuration runs on every core along with the formatting.
 	struct CFormatWorker : NConcurrency::CActor
 	{
-		CFormatWorker(NStr::CStr _Root, NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> const &_pBlockingActors);
+		explicit CFormatWorker(NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> const &_pBlockingActors);
 
 		NConcurrency::TCFuture<CFormatJobResult> f_Process(CFormatJob _Job);
 
@@ -66,8 +67,7 @@ namespace NMib::NTool::NFormat
 		NConcurrency::TCFuture<void> fp_Destroy() override;
 
 	private:
-		NStr::CStr mp_Root;
-		NConcurrency::TCActor<NDevelop::CEditorConfigResolver> mp_Configurations;
+		NContainer::TCMap<NStr::CStr, NConcurrency::TCActor<NDevelop::CEditorConfigResolver>> mp_Configurations;	// One resolver per root.
 		NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> mp_pBlockingActors;
 	};
 
@@ -94,7 +94,7 @@ namespace NMib::NTool::NFormat
 
 	// Runs the jobs over the worker pool and returns their results in job order, so a
 	// parallel run reports exactly like a single-job run.
-	NConcurrency::TCFuture<NContainer::TCVector<CFormatJobResult>> fg_RunFormatJobs(NContainer::TCVector<CFormatJob> _Jobs, umint _nJobs, NStr::CStr _Root = {});
+	NConcurrency::TCFuture<NContainer::TCVector<CFormatJobResult>> fg_RunFormatJobs(NContainer::TCVector<CFormatJob> _Jobs, umint _nJobs);
 
 	// A bounded default for hosts that did not ask for a specific job count.
 	umint fg_GetDefaultFormatJobs();
@@ -134,16 +134,17 @@ namespace NMib::NTool::NFormat
 		uint32 m_ExitCode = 0;										// One when violations remain or a check would change a file.
 	};
 
-	// Selects the files, formats them, and reports; a failure to read, write, or format a
-	// file is an error, distinct from a violation.
-	NConcurrency::TCFuture<CFormatRunResult> fg_RunFormat
-		(
-			NStr::CStr _WorkingDirectory
-			, NContainer::TCVector<NStr::CStr> _Files
-			, NContainer::TCVector<NStr::CStr> _Patterns
-			, bool _bRecursive
-			, CFormatOptions _Options
-			, CFormatSink _Sink
-		)
-	;
+	// The files and patterns named against one working directory.
+	struct CFormatSelection
+	{
+		NStr::CStr m_WorkingDirectory;
+		NContainer::TCVector<NStr::CStr> m_Files;
+		NContainer::TCVector<NStr::CStr> m_Patterns;
+		bool m_bRecursive = false;
+	};
+
+	// One run over every selection: the trees are walked in parallel, a selection's files
+	// are formatted as soon as it is walked, and the report covers them all in path order.
+	// A failure to read, write, or format a file is an error, distinct from a violation.
+	NConcurrency::TCFuture<CFormatRunResult> fg_RunFormat(NContainer::TCVector<CFormatSelection> _Selections, CFormatOptions _Options, CFormatSink _Sink);
 }

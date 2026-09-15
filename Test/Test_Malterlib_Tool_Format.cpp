@@ -474,8 +474,7 @@ namespace NMib::NTool
 					fConfigure(true);
 					auto Checked = co_await fRun({"--check"});
 					DMibExpect(Checked.m_ExitCode, ==, 1u);
-					DMibExpect(Checked.f_GetCombinedOut().f_Find("1 would change"), >=, 0);
-					DMibExpect(Checked.f_GetCombinedOut().f_Find("Formatting violations in 1 repository"), >=, 0);
+					DMibExpect(Checked.f_GetCombinedOut().f_Find("Formatted 3 file(s): 0 unchanged, 1 would change"), >=, 0);
 					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, gc_Unformatted);
 
 					auto Written = co_await fRun({});
@@ -483,7 +482,7 @@ namespace NMib::NTool
 					DMibExpect(Written.f_GetCombinedOut().f_Find("1 changed"), >=, 0);
 					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, gc_Formatted);
 
-					// A repository that does not opt in is not visited.
+					// A repository that does not opt in is not visited, and none is no error.
 					Repo.f_Write("Source.cpp", gc_Unformatted);
 					fConfigure(false);
 					auto Skipped = co_await fRun({"--check"});

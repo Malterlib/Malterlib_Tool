@@ -7,6 +7,7 @@
 #include <Mib/Git/Ignore>
 #include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Container/Map>
+#include <Mib/Container/Set>
 #include <Mib/Core/OnScopeExitCatch>
 #include <Mib/Time/Stopwatch>
 
@@ -15,6 +16,10 @@
 namespace NMib::NTool::NFormat
 {
 	using namespace NMib::NDevelop;
+
+	// File I/O of a run: directory listings, configuration loads, reads, and writes take
+	// turns on this many blocking actors, however many workers and walks are in flight.
+	umint const gc_nFormatBlockingActors = 8;
 
 	// Counts the lines a reader sees: the synthetic empty line after a final terminator
 	// is a position, not content.
@@ -216,20 +221,17 @@ namespace NMib::NTool::NFormat
 	// Every job is queued at once and a job that awaits lets the worker start the next, so a
 	// blocking actor checked out per job would mean a thread per file. The run's shared set
 	// bounds that to its capacity, whatever the number of workers and resolvers.
-	CFormatWorker::CFormatWorker(CStr _Root, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors)
-		: mp_Root(fg_Move(_Root))
-		, mp_pBlockingActors(_pBlockingActors)
+	CFormatWorker::CFormatWorker(TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors)
+		: mp_pBlockingActors(_pBlockingActors)
 	{
-		if (mp_Root)
-			mp_Configurations = fg_Construct(mp_Root, mp_pBlockingActors);
 	}
 
-	// The resolver is an actor of its own, and its destruction is awaited here so that the
-	// worker's own destruction, and the run, do not end before it.
+	// The resolvers are actors of their own, and their destruction is awaited here so that
+	// the worker's own destruction, and the run, do not end before them.
 	TCFuture<void> CFormatWorker::fp_Destroy()
 	{
-		if (mp_Configurations)
-			co_await fg_Move(mp_Configurations).f_Destroy();
+		for (auto &Configurations : mp_Configurations)
+			co_await fg_Move(Configurations).f_Destroy();
 
 		co_return {};
 	}
@@ -243,7 +245,14 @@ namespace NMib::NTool::NFormat
 		if (_Job.m_bResolveSettings)
 		{
 			// The opt-in property decides what is formatted, and what it opts in is C++.
-			auto Properties = co_await mp_Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, _Job.m_Path);
+			auto pConfigurations = mp_Configurations.f_FindEqual(_Job.m_Root);
+			if (!pConfigurations)
+			{
+				pConfigurations = &mp_Configurations[_Job.m_Root];
+				*pConfigurations = fg_Construct(_Job.m_Root, mp_pBlockingActors);
+			}
+
+			auto Properties = co_await (*pConfigurations)(&NDevelop::CEditorConfigResolver::f_Resolve, _Job.m_Path);
 			_Job.m_Settings = CCodeFormattingSettings(Properties);
 			if (!_Job.m_Settings.f_IsFormattingEnabled())
 			{
@@ -252,7 +261,7 @@ namespace NMib::NTool::NFormat
 				co_return Result;
 			}
 
-			_Job.m_DisplayPath = CFile::fs_MakePathRelative(_Job.m_Path, mp_Root);
+			_Job.m_DisplayPath = CFile::fs_MakePathRelative(_Job.m_Path, _Job.m_Root);
 		}
 
 		auto Snapshot = _Job.m_Source;
@@ -450,12 +459,6 @@ namespace NMib::NTool::NFormat
 		return CFile::fs_CondensePath(CFile::fs_GetFullPath(_Path, _WorkingDirectory));
 	}
 
-	struct CFormatCandidate
-	{
-		CStr m_Path;
-		umint m_iRoot = 0;
-	};
-
 	// A directory's contents, read on a blocking actor along with the ignore files in it.
 	struct CFormatListing
 	{
@@ -499,7 +502,7 @@ namespace NMib::NTool::NFormat
 	// by sorting.
 	struct CFormatWalk : CActor
 	{
-		CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, umint _nJobs);
+		CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors);
 
 		TCFuture<CFormatWalkResult> f_Run();
 
@@ -517,18 +520,18 @@ namespace NMib::NTool::NFormat
 		CStr mp_Wildcard;								// Upper case, matched the way the platform matches a find pattern.
 		bool mp_bMatchAll = false;
 		bool mp_bRecursive = false;
-		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pReaders;	// Shared with the repositories' resolvers.
+		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pReaders;	// The run's, shared with the other walks and the resolvers.
 		TCVector<CFormatWalkRepository> mp_Repositories;
 		NGit::CGitEnvironment mp_GitEnvironment;
 	};
 
-	CFormatWalk::CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, umint _nJobs)
+	CFormatWalk::CFormatWalk(CStr _Search, CStr _Root, bool _bGit, bool _bRecursive, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors)
 		: mp_Directory(CFile::fs_GetPath(_Search))
 		, mp_Wildcard(CFile::fs_GetFile(_Search).f_UpperCase())
 		, mp_bRecursive(_bRecursive)
+		, mp_pReaders(_pBlockingActors)
 	{
 		mp_bMatchAll = mp_Wildcard == "*";
-		mp_pReaders = fg_Construct(_nJobs);
 		mp_GitEnvironment = NGit::CGitEnvironment::fs_FromProcess();
 		fp_AddRepository(_Root, _bGit);
 	}
@@ -714,17 +717,17 @@ namespace NMib::NTool::NFormat
 	// Runs the selected files over a pool of worker actors sized by the host. Every file is
 	// queued at once, in turn over the workers, and the results come back in the jobs'
 	// order whatever order the files finished in.
-	TCFuture<TCVector<CFormatJobResult>> fg_RunFormatJobs(TCVector<CFormatJob> _Jobs, umint _nJobs, CStr _Root)
+	TCFuture<TCVector<CFormatJobResult>> fg_RunFormatJobs(TCVector<CFormatJob> _Jobs, umint _nJobs)
 	{
 		TCVector<CFormatJobResult> Results;
 		if (_Jobs.f_IsEmpty())
 			co_return Results;
 
 		auto nWorkers = fg_Min(_nJobs, _Jobs.f_GetLen());
-		TCSharedPointer<CSharedRoundRobinBlockingActors> pBlockingActors = fg_Construct(nWorkers);
+		TCSharedPointer<CSharedRoundRobinBlockingActors> pBlockingActors = fg_Construct(gc_nFormatBlockingActors);
 		TCVector<TCActor<CFormatWorker>> Workers;
 		for (umint i = 0; i < nWorkers; ++i)
-			Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(_Root, pBlockingActors));
+			Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(pBlockingActors));
 
 		auto DestroyWorkers = co_await fg_AsyncDestroy
 			(
@@ -761,40 +764,80 @@ namespace NMib::NTool::NFormat
 		co_return Results;
 	}
 
-	TCFuture<CFormatRunResult> fg_RunFormat
-		(
-			CStr _WorkingDirectory
-			, TCVector<CStr> _Files
-			, TCVector<CStr> _Patterns
-			, bool _bRecursive
-			, CFormatOptions _Options
-			, CFormatSink _Sink
-		)
+	// One run over every selection: the walks list their trees in parallel on the shared
+	// blocking actors, and a root's files are queued on the workers the moment its walk is
+	// done, while the other walks go on. The report is written once everything is done,
+	// in path order, so that it reads the same whatever order the walks finished in.
+	struct CFormatRun : CActor
 	{
-		auto CaptureScope = co_await (g_CaptureExceptions % "Running Format");
+		explicit CFormatRun(CFormatOptions _Options);
 
-		CStopwatch Stopwatch{true};
-		auto WorkingDirectory = fg_NormalizeFormatPath(_WorkingDirectory, CFile::fs_GetCurrentDirectory());
-		bool bHasRange = _Options.m_iFirstLine || !_Options.m_ByteRanges.f_IsEmpty();
-		TCVector<CFormatCandidate> Candidates;
-		TCVector<CStr> Roots;
-		auto fRootIndex = [&](CStr const &_Root)
-			{
-				umint iRoot = 0;
-				while (iRoot < Roots.f_GetLen() && Roots[iRoot] != _Root)
-					++iRoot;
+		TCFuture<CFormatRunResult> f_Run(TCVector<CFormatSelection> _Selections, CFormatSink _Sink);
 
-				if (iRoot == Roots.f_GetLen())
-					Roots.f_Insert(_Root);
+	protected:
+		TCFuture<void> fp_Destroy() override;
 
-				return iRoot;
-			}
-		;
+	private:
+		TCFuture<void> fp_Select(CFormatSelection _Selection);
+		void fp_Schedule(CStr const &_Path, CStr const &_Root);
 
-		// A file named outright is taken as it is; its repository bounds its configuration.
-		TCActor<CFormatRootResolver> RootResolver = fg_ConstructActor<CFormatRootResolver>();
-		auto DestroyRootResolver = co_await fg_AsyncDestroy(RootResolver);
-		for (auto const &File : _Files)
+		CFormatOptions mp_Options;
+		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pBlockingActors;
+		TCVector<TCActor<CFormatWorker>> mp_Workers;
+		umint mp_iNextWorker = 0;
+		TCActor<CFormatRootResolver> mp_RootResolver;
+		TCSet<CStr> mp_Scheduled;						// A file named by more than one selection is formatted once.
+		TCFutureVector<CFormatJobResult> mp_Pending;
+	};
+
+	CFormatRun::CFormatRun(CFormatOptions _Options)
+		: mp_Options(fg_Move(_Options))
+		, mp_pBlockingActors(fg_Construct(gc_nFormatBlockingActors))
+		, mp_RootResolver(fg_ConstructActor<CFormatRootResolver>())
+	{
+		for (umint i = 0; i < fg_Max(mp_Options.m_nJobs, umint(1)); ++i)
+			mp_Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(mp_pBlockingActors));
+	}
+
+	TCFuture<void> CFormatRun::fp_Destroy()
+	{
+		for (auto &Worker : mp_Workers)
+			co_await fg_Move(Worker).f_Destroy();
+
+		co_await fg_Move(mp_RootResolver).f_Destroy();
+
+		co_return {};
+	}
+
+	// Every candidate is a job; the workers resolve its configuration and report a file
+	// the configuration does not opt in as excluded.
+	void CFormatRun::fp_Schedule(CStr const &_Path, CStr const &_Root)
+	{
+		if (mp_Scheduled.f_FindEqual(_Path))
+			return;
+
+		mp_Scheduled.f_Insert(_Path);
+
+		CFormatJob Job;
+		Job.m_Path = _Path;
+		Job.m_Root = _Root;
+		Job.m_bResolveSettings = true;
+		Job.m_ByteRanges = mp_Options.m_ByteRanges;
+		Job.m_iFirstLine = mp_Options.m_iFirstLine;
+		Job.m_iLastLine = mp_Options.m_iLastLine;
+		Job.m_RangePolicy = mp_Options.m_RangePolicy;
+		Job.m_Mode = mp_Options.m_Mode;
+		mp_Workers[mp_iNextWorker++ % mp_Workers.f_GetLen()](&CFormatWorker::f_Process, fg_Move(Job)) > mp_Pending;
+	}
+
+	// A file named outright is taken as it is; its repository bounds its configuration. A
+	// pattern walks its tree, and a directory is entered only when git does not ignore it
+	// and the configuration can still opt in a file below it. That is what keeps a
+	// dependency's build output or a tracked import cache from being listed file by file.
+	TCFuture<void> CFormatRun::fp_Select(CFormatSelection _Selection)
+	{
+		auto WorkingDirectory = fg_NormalizeFormatPath(_Selection.m_WorkingDirectory, CFile::fs_GetCurrentDirectory());
+		for (auto const &File : _Selection.m_Files)
 		{
 			auto Path = fg_NormalizeFormatPath(File, WorkingDirectory);
 			if (CFile::fs_GetAttributesOnLink(Path) & EFileAttrib_Link)
@@ -803,114 +846,100 @@ namespace NMib::NTool::NFormat
 			if (!CFile::fs_FileExists(Path, EFileAttrib_File))
 				co_return DMibErrorInstance("'{}' is not an existing regular file"_f << Path);
 
-			auto Root = co_await RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Path));
-			if (!Root)
-				Root = WorkingDirectory;
-
-			Candidates.f_Insert({Path, fRootIndex(Root)});
+			auto Root = co_await mp_RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Path));
+			fp_Schedule(Path, Root ? Root : WorkingDirectory);
 		}
 
-		// A pattern walks its tree, and a directory is entered only when git does not ignore
-		// it and the configuration can still opt in a file below it. That is what keeps a
-		// dependency's build output or a tracked import cache from being listed file by file.
-		for (auto const &Pattern : _Patterns)
+		for (auto const &Pattern : _Selection.m_Patterns)
 		{
 			auto Search = fg_NormalizeFormatPath(Pattern, WorkingDirectory);
-			auto Root = co_await RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Search));
-			TCActor<CFormatWalk> Walk = fg_ConstructActor<CFormatWalk>(Search, Root ? Root : WorkingDirectory, bool(Root), _bRecursive, _Options.m_nJobs);
+			auto Root = co_await mp_RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Search));
+			TCActor<CFormatWalk> Walk = fg_ConstructActor<CFormatWalk>(Search, Root ? Root : WorkingDirectory, bool(Root), _Selection.m_bRecursive, mp_pBlockingActors);
 			auto DestroyWalk = co_await fg_AsyncDestroy(Walk);
 			auto Walked = co_await Walk(&CFormatWalk::f_Run);
 			for (auto &Found : Walked.m_Found)
-				Candidates.f_Insert({fg_Move(Found.m_Path), fRootIndex(Walked.m_Roots[Found.m_iRoot])});
+				fp_Schedule(Found.m_Path, Walked.m_Roots[Found.m_iRoot]);
 		}
 
-		if (Candidates.f_IsEmpty())
+		co_return {};
+	}
+
+	TCFuture<CFormatRunResult> CFormatRun::f_Run(TCVector<CFormatSelection> _Selections, CFormatSink _Sink)
+	{
+		auto CaptureScope = co_await (g_CaptureExceptions % "Running Format");
+
+		CStopwatch Stopwatch{true};
+		TCFutureVector<void> Selections;
+		for (auto &Selection : _Selections)
+			fp_Select(fg_Move(Selection)) > Selections;
+
+		co_await fg_AllDone(Selections);
+
+		if (mp_Scheduled.f_IsEmpty())
 			co_return DMibErrorInstance("No files matched the requested selection");
 
-		// Directory enumeration order is not stable, so selection order is, keeping
-		// diagnostics identical between runs and between job counts. A file named by
-		// more than one selector is formatted once.
-		Candidates.f_Sort
+		bool bHasRange = mp_Options.m_iFirstLine || !mp_Options.m_ByteRanges.f_IsEmpty();
+		if (bHasRange && mp_Scheduled.f_GetLen() != 1)
+			co_return DMibErrorInstance("Range options require exactly one selected file; {} were selected"_f << mp_Scheduled.f_GetLen());
+
+		// The results are reported in path order, so a parallel run reports exactly like
+		// --jobs 1, and a file that failed is reported where it would have been.
+		auto Outcomes = co_await fg_AllDoneWrapped(mp_Pending);
+		TCVector<CFormatJobResult> Results;
+		for (auto &Outcome : Outcomes)
+		{
+			if (Outcome)
+				Results.f_Insert(fg_Move(*Outcome));
+			else
+			{
+				auto &Result = Results.f_Insert();
+				Result.m_Outcome = EFormatOutcome::mc_Failed;
+				Result.m_Report = "{}\n"_f << Outcome.f_GetExceptionStr();
+			}
+		}
+
+		Results.f_Sort
 			(
-				[](CFormatCandidate const &_Left, CFormatCandidate const &_Right)
+				[](CFormatJobResult const &_Left, CFormatJobResult const &_Right)
 				{
 					return _Left.m_Path <=> _Right.m_Path;
 				}
 			)
 		;
-		umint nUnique = 0;
-		for (umint i = 0; i < Candidates.f_GetLen(); ++i)
-		{
-			if (nUnique && Candidates[nUnique - 1].m_Path == Candidates[i].m_Path)
-				continue;
-
-			if (nUnique != i)
-				Candidates[nUnique] = fg_Move(Candidates[i]);
-
-			++nUnique;
-		}
-
-		Candidates.f_SetLen(nUnique);
-		if (bHasRange && Candidates.f_GetLen() != 1)
-			co_return DMibErrorInstance("Range options require exactly one selected file; {} were selected"_f << Candidates.f_GetLen());
-
-		TCVector<TCVector<CStr>> Grouped;
-		Grouped.f_SetLen(Roots.f_GetLen());
-		for (auto &Candidate : Candidates)
-			Grouped[Candidate.m_iRoot].f_Insert(fg_Move(Candidate.m_Path));
 
 		CFormatSummary Summary;
-		Summary.m_nSelected = Candidates.f_GetLen();
-		for (umint iRoot = 0; iRoot < Roots.f_GetLen(); ++iRoot)
+		Summary.m_nSelected = Results.f_GetLen();
+		for (auto const &Result : Results)
 		{
-			// Every candidate is a job; the workers resolve its configuration and report a
-			// file the configuration does not opt in as excluded.
-			TCVector<CFormatJob> Jobs;
-			for (auto const &Path : Grouped[iRoot])
+			if (Result.m_Report)
+				_Sink.m_fReport(Result.m_Report);
+
+			if (Result.m_Patch)
+				_Sink.m_fPatch(Result.m_Patch);
+
+			Summary.m_nUnresolved += Result.m_nUnresolved;
+			switch (Result.m_Outcome)
 			{
-				auto &Job = Jobs.f_Insert();
-				Job.m_Path = Path;
-				Job.m_bResolveSettings = true;
-				Job.m_ByteRanges = _Options.m_ByteRanges;
-				Job.m_iFirstLine = _Options.m_iFirstLine;
-				Job.m_iLastLine = _Options.m_iLastLine;
-				Job.m_RangePolicy = _Options.m_RangePolicy;
-				Job.m_Mode = _Options.m_Mode;
-			}
+				case EFormatOutcome::mc_Excluded:
+					++Summary.m_nExcluded;
 
-			// The coordinator owns ordering, so parallel runs report exactly like --jobs 1.
-			for (auto const &Result : co_await fg_RunFormatJobs(fg_Move(Jobs), _Options.m_nJobs, Roots[iRoot]))
-			{
-				if (Result.m_Report)
-					_Sink.m_fReport(Result.m_Report);
+					break;
+				case EFormatOutcome::mc_Changed:
+					++Summary.m_nChanged;
 
-				if (Result.m_Patch)
-					_Sink.m_fPatch(Result.m_Patch);
+					break;
+				case EFormatOutcome::mc_Failed:
+					++Summary.m_nFailed;
 
-				Summary.m_nUnresolved += Result.m_nUnresolved;
-				switch (Result.m_Outcome)
-				{
-					case EFormatOutcome::mc_Excluded:
-						++Summary.m_nExcluded;
+					break;
+				default:
+					++Summary.m_nUnchanged;
 
-						break;
-					case EFormatOutcome::mc_Changed:
-						++Summary.m_nChanged;
-
-						break;
-					case EFormatOutcome::mc_Failed:
-						++Summary.m_nFailed;
-
-						break;
-					default:
-						++Summary.m_nUnchanged;
-
-						break;
-				}
+					break;
 			}
 		}
 
-		CStr Action = _Options.m_Mode == EFormatMode::mc_Write ? "changed" : "would change";
+		CStr Action = mp_Options.m_Mode == EFormatMode::mc_Write ? "changed" : "would change";
 		CStr Line = "Formatted {} file(s): {} unchanged, {} {}, {} unresolved violation(s), {} failed. Excluded {} file(s). Time: {fe2} s.\n"_f
 			<< Summary.m_nSelected
 			<< Summary.m_nUnchanged
@@ -928,9 +957,17 @@ namespace NMib::NTool::NFormat
 
 		CFormatRunResult Run;
 		Run.m_Summary = Summary;
-		if (Summary.m_nUnresolved || (_Options.m_Mode != EFormatMode::mc_Write && Summary.m_nChanged))
+		if (Summary.m_nUnresolved || (mp_Options.m_Mode != EFormatMode::mc_Write && Summary.m_nChanged))
 			Run.m_ExitCode = 1;
 
 		co_return Run;
+	}
+
+	TCFuture<CFormatRunResult> fg_RunFormat(TCVector<CFormatSelection> _Selections, CFormatOptions _Options, CFormatSink _Sink)
+	{
+		TCActor<CFormatRun> Run = fg_ConstructActor<CFormatRun>(fg_Move(_Options));
+		auto DestroyRun = co_await fg_AsyncDestroy(Run);
+
+		co_return co_await Run(&CFormatRun::f_Run, fg_Move(_Selections), fg_Move(_Sink));
 	}
 }
