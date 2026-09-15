@@ -6,6 +6,7 @@
 #include "Malterlib_Tool_App_MTool_Format.h"
 
 #include <Mib/Process/ProcessLaunch>
+#include <Mib/Time/Stopwatch>
 
 namespace NMib::NTool
 {
@@ -445,6 +446,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			{
 				co_await ECoroutineFlag_CaptureExceptions;
 
+				// The time reported covers finding the repositories as well as formatting them.
+				CStopwatch Stopwatch{true};
 				bool bCheck = _Params["Check"].f_Boolean();
 				bool bDiff = _Params["Diff"].f_Boolean();
 				if (bCheck && bDiff)
@@ -508,6 +511,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								}
 							;
 							auto Run = co_await NMib::NTool::NFormat::fg_RunFormat(fg_Move(Selections), Options, fg_Move(Sink));
+							*_pCommandLine %= NMib::NTool::NFormat::fg_DescribeFormatSummary(Run.m_Summary, Options.m_Mode, Stopwatch.f_GetTime());
+							if (Run.m_Summary.m_nFailed)
+								co_return DMibErrorInstance("{} file(s) could not be formatted"_f << Run.m_Summary.m_nFailed);
+
 							pOutcome->m_ExitCode = Run.m_ExitCode;
 
 							co_return CBuildSystem::ERetry_None;

@@ -868,7 +868,6 @@ namespace NMib::NTool::NFormat
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % "Running Format");
 
-		CStopwatch Stopwatch{true};
 		TCFutureVector<void> Selections;
 		for (auto &Selection : _Selections)
 			fp_Select(fg_Move(Selection)) > Selections;
@@ -939,28 +938,28 @@ namespace NMib::NTool::NFormat
 			}
 		}
 
-		CStr Action = mp_Options.m_Mode == EFormatMode::mc_Write ? "changed" : "would change";
-		CStr Line = "Formatted {} file(s): {} unchanged, {} {}, {} unresolved violation(s), {} failed. Excluded {} file(s). Time: {fe2} s.\n"_f
-			<< Summary.m_nSelected
-			<< Summary.m_nUnchanged
-			<< Summary.m_nChanged
-			<< Action
-			<< Summary.m_nUnresolved
-			<< Summary.m_nFailed
-			<< Summary.m_nExcluded
-			<< Stopwatch.f_GetTime()
-		;
-		_Sink.m_fReport(Line);
-
-		if (Summary.m_nFailed)
-			co_return DMibErrorInstance("{} file(s) could not be formatted"_f << Summary.m_nFailed);
-
 		CFormatRunResult Run;
 		Run.m_Summary = Summary;
 		if (Summary.m_nUnresolved || (mp_Options.m_Mode != EFormatMode::mc_Write && Summary.m_nChanged))
 			Run.m_ExitCode = 1;
 
 		co_return Run;
+	}
+
+	CStr fg_DescribeFormatSummary(CFormatSummary const &_Summary, EFormatMode _Mode, fp64 _Seconds)
+	{
+		CStr Action = _Mode == EFormatMode::mc_Write ? "changed" : "would change";
+
+		return "Formatted {} file(s): {} unchanged, {} {}, {} unresolved violation(s), {} failed. Excluded {} file(s). Time: {fe2} s.\n"_f
+			<< _Summary.m_nSelected
+			<< _Summary.m_nUnchanged
+			<< _Summary.m_nChanged
+			<< Action
+			<< _Summary.m_nUnresolved
+			<< _Summary.m_nFailed
+			<< _Summary.m_nExcluded
+			<< _Seconds
+		;
 	}
 
 	TCFuture<CFormatRunResult> fg_RunFormat(TCVector<CFormatSelection> _Selections, CFormatOptions _Options, CFormatSink _Sink)

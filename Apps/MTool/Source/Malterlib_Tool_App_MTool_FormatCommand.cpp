@@ -3,6 +3,8 @@
 
 #include "Malterlib_Tool_App_MTool_Format.h"
 
+#include <Mib/Time/Stopwatch>
+
 namespace NMib::NTool::NFormat
 {
 	using namespace NMib::NDevelop;
@@ -29,6 +31,7 @@ namespace NMib::NTool::NFormat
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % "Preparing Format");
 
+		CStopwatch Stopwatch{true};
 		CFormatOptions Options;
 		bool bCheck = _Params["Check"].f_Boolean();
 		bool bDiff = _Params["Diff"].f_Boolean();
@@ -108,7 +111,11 @@ namespace NMib::NTool::NFormat
 		Selection.m_Files = fg_Move(Files);
 		Selection.m_Patterns = fg_Move(Patterns);
 		Selection.m_bRecursive = _Params["Recursive"].f_Boolean();
+		auto Mode = Options.m_Mode;
 		auto Run = co_await fg_RunFormat({fg_Move(Selection)}, fg_Move(Options), fg_Move(Sink));
+		*_pCommandLine %= fg_DescribeFormatSummary(Run.m_Summary, Mode, Stopwatch.f_GetTime());
+		if (Run.m_Summary.m_nFailed)
+			co_return DMibErrorInstance("{} file(s) could not be formatted"_f << Run.m_Summary.m_nFailed);
 
 		co_return Run.m_ExitCode;
 	}

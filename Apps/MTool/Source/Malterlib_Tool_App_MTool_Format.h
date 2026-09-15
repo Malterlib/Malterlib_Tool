@@ -144,7 +144,9 @@ namespace NMib::NTool::NFormat
 	};
 
 	// One run over every selection: the trees are walked in parallel, a selection's files
-	// are formatted as soon as it is walked, and the report covers them all in path order.
-	// A failure to read, write, or format a file is an error, distinct from a violation.
+	// are formatted as soon as it is walked, and the diagnostics cover them all in path
+	// order. The caller reports the summary, timed from wherever its work began. A failure
+	// to read, write, or format a file is an error, distinct from a violation.
 	NConcurrency::TCFuture<CFormatRunResult> fg_RunFormat(NContainer::TCVector<CFormatSelection> _Selections, CFormatOptions _Options, CFormatSink _Sink);
+	NStr::CStr fg_DescribeFormatSummary(CFormatSummary const &_Summary, EFormatMode _Mode, fp64 _Seconds);
 }
