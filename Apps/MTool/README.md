@@ -8,11 +8,12 @@ and implements diagnostics, patches, and safe writes. `MTool Format` and
 `MTool Validate` share one engine, so an automatic fix and a reported violation
 cannot develop separate interpretations of the rules.
 
-`MTool Validate`, in the Validation command group, audits all tracked text files
-in the current Git repository,
-using working-tree `.editorconfig` files. Use `-C <repository>` to select a
-different repository. Untracked files are excluded, but untracked configuration
-files are applied, so rules can be audited before staging them.
+`MTool Validate`, in the Validation command group, audits the text files of the
+current Git repository using working-tree `.editorconfig` files. Use
+`-C <repository>` to select a different repository. The audit walks the working
+tree the way `MTool Format` does, without asking Git: a file or directory the
+repository's ignore rules exclude is never read, and any other file is audited,
+tracked or not, so rules and files can be audited before staging them.
 
 ```bash
 MTool Validate
@@ -72,12 +73,16 @@ Changed-line checks use full patch context to map Git's LF-based hunks back to
 source lines; unchanged context is never validated. Patches stay in the existing
 temporary validation directory so process text buffering cannot discard NULs.
 Binary files, symlinks,
-submodules, and deleted files are excluded.
+submodules, and deleted files are excluded. The audit takes a file for binary
+when the `diff` attribute in its `.gitattributes` files says so, and, where no
+attribute speaks, when a NUL byte lies among its first 8000 bytes, as Git does;
+a file the attribute marks as text is audited with its NULs counted as columns.
 
 Audit, staged, and base-comparison summaries include elapsed seconds, the number of files
-checked, and the number excluded by configuration. Audit mode resolves rules
-before reading file contents, then asks Git to select text files only from the
-enabled paths. Changed-line modes also avoid generating patches for excluded files.
+checked, and the number excluded by configuration. The audit resolves rules
+per directory and does not enter a directory below which neither a
+`max_line_length` nor the formatting opt-in can apply. Changed-line modes ask
+Git for the changes and avoid generating patches for excluded files.
 
 Settings are resolved from the repository root down to each file. Later matching
 sections override earlier sections; nested configurations override parents;
