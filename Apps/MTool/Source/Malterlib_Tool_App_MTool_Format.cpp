@@ -16,24 +16,6 @@ namespace NMib::NTool::NFormat
 {
 	using namespace NMib::NDevelop;
 
-	umint fg_ParseFormatCount(CStr const &_Value, CStr const &_Name)
-	{
-		umint Value = 0;
-		if (_Value.f_IsEmpty())
-			DMibError("Invalid {}: expected a number"_f << _Name);
-
-		for (auto pParse = _Value.f_GetStr(); *pParse; ++pParse)
-		{
-			auto Char = *pParse;
-			if (Char < '0' || Char > '9' || Value > (TCLimitsInt<umint>::mc_Max - umint(Char - '0')) / 10)
-				DMibError("Invalid {}: '{}'"_f << _Name << _Value);
-
-			Value = Value * 10 + umint(Char - '0');
-		}
-
-		return Value;
-	}
-
 	// Counts the lines a reader sees: the synthetic empty line after a final terminator
 	// is a position, not content.
 	umint fg_GetPrintableLineCount(CTextLineMap const &_Lines, CStr const &_Text)
@@ -729,26 +711,6 @@ namespace NMib::NTool::NFormat
 
 namespace NMib::NTool::NFormat
 {
-	struct CFormatSummary
-	{
-		umint m_nSelected = 0;
-		umint m_nExcluded = 0;
-		umint m_nUnchanged = 0;
-		umint m_nChanged = 0;
-		umint m_nUnresolved = 0;
-		umint m_nFailed = 0;
-	};
-
-	struct CFormatOptions
-	{
-		EFormatMode m_Mode = EFormatMode::mc_Write;
-		umint m_nJobs = 1;
-		umint m_iFirstLine = 0;
-		umint m_iLastLine = 0;
-		TCVector<CCodeFormattingRange> m_ByteRanges;
-		ECodeRangePolicy m_RangePolicy = ECodeRangePolicy::mc_Expand;
-	};
-
 	// Runs the selected files over a pool of worker actors sized by the host. Every file is
 	// queued at once, in turn over the workers, and the results come back in the jobs'
 	// order whatever order the files finished in.
@@ -799,14 +761,14 @@ namespace NMib::NTool::NFormat
 		co_return Results;
 	}
 
-	TCFuture<uint32> fg_RunFormat
+	TCFuture<CFormatRunResult> fg_RunFormat
 		(
 			CStr _WorkingDirectory
 			, TCVector<CStr> _Files
 			, TCVector<CStr> _Patterns
 			, bool _bRecursive
 			, CFormatOptions _Options
-			, TCSharedPointer<CCommandLineControl> _pCommandLine
+			, CFormatSink _Sink
 		)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % "Running Format");
@@ -920,10 +882,10 @@ namespace NMib::NTool::NFormat
 			for (auto const &Result : co_await fg_RunFormatJobs(fg_Move(Jobs), _Options.m_nJobs, Roots[iRoot]))
 			{
 				if (Result.m_Report)
-					*_pCommandLine %= Result.m_Report;
+					_Sink.m_fReport(Result.m_Report);
 
 				if (Result.m_Patch)
-					*_pCommandLine += Result.m_Patch;
+					_Sink.m_fPatch(Result.m_Patch);
 
 				Summary.m_nUnresolved += Result.m_nUnresolved;
 				switch (Result.m_Outcome)
@@ -949,7 +911,7 @@ namespace NMib::NTool::NFormat
 		}
 
 		CStr Action = _Options.m_Mode == EFormatMode::mc_Write ? "changed" : "would change";
-		*_pCommandLine %= "Formatted {} file(s): {} unchanged, {} {}, {} unresolved violation(s), {} failed. Excluded {} file(s). Time: {fe2} s.\n"_f
+		CStr Line = "Formatted {} file(s): {} unchanged, {} {}, {} unresolved violation(s), {} failed. Excluded {} file(s). Time: {fe2} s.\n"_f
 			<< Summary.m_nSelected
 			<< Summary.m_nUnchanged
 			<< Summary.m_nChanged
@@ -959,205 +921,16 @@ namespace NMib::NTool::NFormat
 			<< Summary.m_nExcluded
 			<< Stopwatch.f_GetTime()
 		;
+		_Sink.m_fReport(Line);
 
 		if (Summary.m_nFailed)
 			co_return DMibErrorInstance("{} file(s) could not be formatted"_f << Summary.m_nFailed);
 
-		if (Summary.m_nUnresolved)
-			co_return 1;
+		CFormatRunResult Run;
+		Run.m_Summary = Summary;
+		if (Summary.m_nUnresolved || (_Options.m_Mode != EFormatMode::mc_Write && Summary.m_nChanged))
+			Run.m_ExitCode = 1;
 
-		if (_Options.m_Mode != EFormatMode::mc_Write && Summary.m_nChanged)
-			co_return 1;
-
-		co_return 0;
-	}
-
-	TCFuture<uint32> fg_PrepareAndRunFormat(CEJsonSorted _Params, TCSharedPointer<CCommandLineControl> _pCommandLine)
-	{
-		auto CaptureScope = co_await (g_CaptureExceptions % "Preparing Format");
-
-		CFormatOptions Options;
-		bool bCheck = _Params["Check"].f_Boolean();
-		bool bDiff = _Params["Diff"].f_Boolean();
-		if (bCheck && bDiff)
-			co_return DMibErrorInstance("--check and --diff cannot be combined");
-
-		if (bCheck)
-			Options.m_Mode = EFormatMode::mc_Check;
-		else if (bDiff)
-			Options.m_Mode = EFormatMode::mc_Diff;
-
-		auto nJobs = umint(_Params["Jobs"].f_Integer());
-		if (!nJobs)
-			nJobs = fg_GetDefaultFormatJobs();
-
-		Options.m_nJobs = nJobs;
-		Options.m_RangePolicy = _Params["StrictRange"].f_Boolean() ? ECodeRangePolicy::mc_Strict : ECodeRangePolicy::mc_Expand;
-
-		auto pLines = _Params.f_GetMember("Lines");
-		auto pOffset = _Params.f_GetMember("Offset");
-		auto pLength = _Params.f_GetMember("Length");
-		if (pLines && (pOffset || pLength))
-			co_return DMibErrorInstance("--lines cannot be combined with --offset or --length");
-
-		if (bool(pOffset) != bool(pLength))
-			co_return DMibErrorInstance("--offset and --length must be given together");
-
-		if (pLines)
-		{
-			auto Value = pLines->f_String();
-			auto iSeparator = Value.f_Find(":");
-			if (iSeparator < 0)
-				co_return DMibErrorInstance("Invalid --lines '{}': expected FIRST:LAST"_f << Value);
-
-			Options.m_iFirstLine = fg_ParseFormatCount(Value.f_Left(iSeparator), "--lines");
-			Options.m_iLastLine = fg_ParseFormatCount(Value.f_Extract(iSeparator + 1), "--lines");
-			if (!Options.m_iFirstLine || Options.m_iLastLine < Options.m_iFirstLine)
-				co_return DMibErrorInstance("Invalid --lines '{}': expected one-based, non-decreasing line numbers"_f << Value);
-		}
-
-		if (pOffset)
-		{
-			auto &Range = Options.m_ByteRanges.f_Insert();
-			Range.m_iOffset = fg_ParseFormatCount(pOffset->f_String(), "--offset");
-			Range.m_nLength = fg_ParseFormatCount(pLength->f_String(), "--length");
-			if (Range.m_iOffset > TCLimitsInt<umint>::mc_Max - Range.m_nLength)
-				co_return DMibErrorInstance("--offset and --length overflow the addressable range");
-		}
-
-		TCVector<CStr> Files;
-		for (auto const &File : _Params["File"].f_Array())
-			Files.f_Insert(File.f_String());
-
-		TCVector<CStr> Patterns;
-		for (auto const &Pattern : _Params["Pattern"].f_Array())
-			Patterns.f_Insert(Pattern.f_String());
-
-		if (Files.f_IsEmpty() && Patterns.f_IsEmpty())
-			co_return DMibErrorInstance("Format requires at least one --file or --pattern selector");
-
-		if ((Options.m_iFirstLine || !Options.m_ByteRanges.f_IsEmpty()) && (Files.f_GetLen() != 1 || !Patterns.f_IsEmpty()))
-			co_return DMibErrorInstance("Range options require exactly one --file and no --pattern");
-
-		co_return co_await fg_RunFormat
-			(
-				_Params["WorkingDirectory"].f_String(), fg_Move(Files), fg_Move(Patterns), _Params["Recursive"].f_Boolean()
-				, fg_Move(Options), fg_Move(_pCommandLine)
-			)
-		;
+		co_return Run;
 	}
 }
-
-struct CTool_Format : CDistributedTool
-{
-	void f_Register
-		(
-			TCActor<CDistributedToolAppActor> const &_ToolActor
-			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
-			, CDistributedAppCommandLineSpecification &o_CommandLine
-			, NStr::CStr const &_ClassName
-		)
-		override
-	{
-		if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
-			return;
-
-		o_ToolsSection.f_RegisterCommand
-			(
-				{
-					"Names"_o= _o["Format"]
-					, "Description"_o= "Format sources that opt in with malterlib_format = malterlib in .editorconfig.\n"
-					, "Category"_o= "Validation"
-					, "Options"_o=
-					{
-						"WorkingDirectory?"_o=
-						{
-							"Names"_o= _o["--working-directory", "-C"]
-							, "Default"_o= CFile::fs_GetCurrentDirectory()
-							, "Description"_o= "Directory that relative files and patterns resolve against.\n"
-						}
-						, "File?"_o=
-						{
-							"Names"_o= _o["--file", "-f"]
-							, "Type"_o= _o[""]
-							, "Default"_o= _o[]
-							, "Description"_o= "Format these files, given as one path or a comma-separated list.\n"
-						}
-						, "Pattern?"_o=
-						{
-							"Names"_o= _o["--pattern", "-p"]
-							, "Type"_o= _o[""]
-							, "Default"_o= _o[]
-							, "Description"_o= "Format files matching these wildcards, given as one pattern or a comma-separated list. Quote patterns so the shell does not expand them.\n"
-						}
-						, "Recursive?"_o=
-						{
-							"Names"_o= _o["--recursive", "-r"]
-							, "Default"_o= false
-							, "Description"_o=
-								"Also match patterns in descendant directories. A directory git ignores, or one a configuration document disables formatting under, is not entered.\n"
-						}
-						, "Check?"_o=
-						{
-							"Names"_o= _o["--check"]
-							, "Default"_o= false
-							, "Description"_o= "Report formatting violations without writing any file.\n"
-						}
-						, "Diff?"_o=
-						{
-							"Names"_o= _o["--diff"]
-							, "Default"_o= false
-							, "Description"_o= "Print the proposed patch without writing any file.\n"
-						}
-						, "Jobs?"_o=
-						{
-							"Names"_o= _o["--jobs", "-j"]
-							, "Default"_o= 0
-							, "Description"_o= "Maximum number of files formatted concurrently. Zero selects a bounded host-capacity default.\n"
-						}
-						, "Lines?"_o=
-						{
-							"Names"_o= _o["--lines"]
-							, "Type"_o= ""
-							, "Description"_o= "Format only these one-based inclusive source lines, written as FIRST:LAST.\n"
-						}
-						, "Offset?"_o=
-						{
-							"Names"_o= _o["--offset"]
-							, "Type"_o= ""
-							, "Description"_o= "Format only the selection starting at this zero-based byte offset. Requires --length.\n"
-						}
-						, "Length?"_o=
-						{
-							"Names"_o= _o["--length"]
-							, "Type"_o= ""
-							, "Description"_o= "Byte length of the --offset selection. A zero length formats the unit at the cursor.\n"
-						}
-						, "StrictRange?"_o=
-						{
-							"Names"_o= _o["--strict-range"]
-							, "Default"_o= false
-							, "Description"_o= "Never modify bytes outside the requested range; report units that would need one instead.\n"
-						}
-					}
-				}
-				, [](CEJsonSorted const _Params, TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
-				{
-					co_await ECoroutineFlag_CaptureExceptions;
-
-					auto Prepared = co_await NTool::NFormat::fg_PrepareAndRunFormat(_Params, _pCommandLine).f_Wrap();
-					if (Prepared)
-						co_return *Prepared;
-
-					// Input, configuration, and worker failures are operational errors, which
-					// stay distinguishable from formatting violations.
-					*_pCommandLine %= "{}\n"_f << Prepared.f_GetExceptionStr();
-
-					co_return 2;
-				}
-			)
-		;
-	}
-};
-
-DMibRuntimeClass(NMib::NConcurrency::CDistributedTool, CTool_Format);

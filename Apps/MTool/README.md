@@ -228,6 +228,19 @@ MTool Format --file Source/Example.cpp --lines 40:75 --diff
 MTool Format --file Source/Example.cpp --lines 40:75 --strict-range
 ```
 
+From a workspace root, `./mib format` runs the same engine over every
+repository whose build-system entry sets `Repository.Format`, one after the
+other, and reports each repository's diagnostics and summary in the table the
+other repository commands use. It takes `--check`, `--diff`, `--jobs`, and the
+repository filters; `--check` exits with an error naming the number of
+repositories with violations. The Malterlib root and module repositories set
+the property; binary and external repositories do not.
+
+```bash
+./mib format --check
+./mib format -n "Malterlib/Concurrency"
+```
+
 `--file` selects explicit files and `--pattern` enumerates regular files with
 the File module's wildcard search, where only the last path component may
 contain wildcards; `--recursive` enables descendant traversal. Both options take

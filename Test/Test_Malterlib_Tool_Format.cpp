@@ -434,6 +434,67 @@ namespace NMib::NTool
 
 				co_return {};
 			};
+
+			DMibTestSuite("Workspace") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Testing mib format over a workspace");
+
+				DMibTestCategory("FormatsRepositoriesThatOptIn") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "FormatsRepositoriesThatOptIn");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write("Source.cpp", gc_Unformatted);
+					auto fConfigure = [&](bool _bFormat)
+						{
+							CStr Configuration = "%Repository \".\"\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n\t\tDefaultBranch \"main\"\n"
+								"\t\tURL \"https://example.invalid/format-fixture.git\"\n"
+							;
+							Configuration += "\t\tLocation " + CEJsonSorted(Repo.m_Path).f_ToString() + "\n";
+							Configuration += _bFormat ? "\t\tFormat true\n\t}\n}\n" : "\t}\n}\n";
+							Repo.f_Write("Test.MBuildSystem", Configuration);
+						}
+					;
+					auto fRun = [&](TCVector<CStr> _Extra)
+						{
+							TCVector<CStr> Params =
+								{
+									"format", "--skip-update", "--no-color", "--build-system", Repo.m_Path / "Test.MBuildSystem"
+									, "--output-directory", Repo.m_Path / "output", "--no-use-user-settings", "--no-use-cached-environment"
+								}
+							;
+							Params.f_Insert(_Extra);
+
+							return Repo.f_Tool(fg_Move(Params), true);
+						}
+					;
+
+					fConfigure(true);
+					auto Checked = co_await fRun({"--check"});
+					DMibExpect(Checked.m_ExitCode, ==, 1u);
+					DMibExpect(Checked.f_GetCombinedOut().f_Find("1 would change"), >=, 0);
+					DMibExpect(Checked.f_GetCombinedOut().f_Find("Formatting violations in 1 repository"), >=, 0);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, gc_Unformatted);
+
+					auto Written = co_await fRun({});
+					DMibExpect(Written.m_ExitCode, ==, 0u);
+					DMibExpect(Written.f_GetCombinedOut().f_Find("1 changed"), >=, 0);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, gc_Formatted);
+
+					// A repository that does not opt in is not visited.
+					Repo.f_Write("Source.cpp", gc_Unformatted);
+					fConfigure(false);
+					auto Skipped = co_await fRun({"--check"});
+					DMibExpect(Skipped.m_ExitCode, ==, 0u);
+					DMibExpect(Skipped.f_GetCombinedOut().f_Find("Formatted"), <, 0);
+
+					co_return {};
+				};
+
+				co_return {};
+			};
 		}
 	};
 
