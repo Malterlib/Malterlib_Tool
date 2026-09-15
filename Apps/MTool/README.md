@@ -79,7 +79,11 @@ attribute speaks, when a NUL byte lies among its first 8000 bytes, as Git does;
 a file the attribute marks as text is audited with its NULs counted as columns.
 
 Audit, staged, and base-comparison summaries include elapsed seconds, the number of files
-checked, and the number excluded by configuration. The audit resolves rules
+checked, and the number excluded by configuration. `--summary` controls the
+summary line; it defaults to off when the tool is started by a managed git
+hook, which it tells from the `MalterlibHookRepository` variable the hook
+dispatcher exports, so a clean commit stays silent while diagnostics and the
+failure notice still show. The audit resolves rules
 per directory and does not enter a directory below which neither a
 `max_line_length` nor the formatting opt-in can apply. Changed-line modes ask
 Git for the changes and avoid generating patches for excluded files.
