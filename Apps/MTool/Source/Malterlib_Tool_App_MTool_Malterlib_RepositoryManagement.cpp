@@ -195,7 +195,13 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					{
 						"Names"_o= _o["--need-action-on-push", "-p"]
 						, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPush", "false") == "true"
-						, "Description"_o= "Consider repositories that needs to be pushed as requiring action when --open-editor is specified.\n"
+						, "Description"_o= "Consider repositories that needs to be pushed to the current branch as requiring action when --open-editor is specified.\n"
+					}
+					, "NeedActionOnPushDefault?"_o=
+					{
+						"Names"_o= _o["--need-action-on-push-default", "-P"]
+						, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("Malterlib_NeedActionOnPushDefault", "false") == "true"
+						, "Description"_o= "Consider repositories that has commits not in the default branch as requiring action when --open-editor is specified.\n"
 					}
 					, "NeedActionOnPull?"_o=
 					{
@@ -255,6 +261,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					Flags |= CBuildSystem::ERepoStatusFlag_NonDefaultToAll;
 				if (_Params["NeedActionOnPush"].f_Boolean())
 					Flags |= CBuildSystem::ERepoStatusFlag_NeedActionOnPush;
+				if (_Params["NeedActionOnPushDefault"].f_Boolean())
+					Flags |= CBuildSystem::ERepoStatusFlag_NeedActionOnPushDefault;
 				if (_Params["NeedActionOnPull"].f_Boolean())
 					Flags |= CBuildSystem::ERepoStatusFlag_NeedActionOnPull;
 				if (_Params["NeedActionOnLocalChanes"].f_Boolean())
