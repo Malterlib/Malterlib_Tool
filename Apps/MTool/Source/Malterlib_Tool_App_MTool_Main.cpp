@@ -121,6 +121,7 @@ class CToolApp : public NMib::CApplication
 public:
 	aint f_Main()
 	{
+		// The low priority work of a short lived interactive tool is the build actions the user is waiting for
 		fg_SetConcurrencyManagerDefaultExecutionPriority(EPriority_Low, EExecutionPriority_Normal);
 
 		return fg_RunApp
