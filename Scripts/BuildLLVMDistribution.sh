@@ -1280,7 +1280,10 @@ BuildCompilerLTO()
 			CleanDistributionDir
 
 			if [[ "$BuildIncremental" == "true" ]]; then
+				# With PGO the distribution is installed by the instrumented stage's own bootstrap, so its stamp is the one that
+				# keeps an up to date build from installing into the distribution directory that was just cleaned
 				rm -f "tools/clang/stage2-stamps/stage2-really-install"
+				rm -f "tools/clang/stage2-instrumented-bins/tools/clang/stage2-stamps/stage2-really-install"
 			fi
 
 			InstallLinuxRuntimeLibraryLinksInDir "$BuildDir/dist_temp"
