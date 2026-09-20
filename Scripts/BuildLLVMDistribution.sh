@@ -1260,7 +1260,7 @@ BuildCompilerLTO()
 
 			(source "$MalterlibRoot/BuildSystem/SharedBuildSettings.sh"; rm -rf "$MalterlibCompiledFilesSourceBase/Tests/Int"; rm -rf "$MalterlibCompiledFilesSourceBase/Tests/Out")
 
-			./mib build Tests || true
+			./mib build Tests
 
 			(source "$MalterlibRoot/BuildSystem/SharedBuildSettings.sh"; rm -rf "$MalterlibCompiledFilesSourceBase/Tests/Int"; rm -rf "$MalterlibCompiledFilesSourceBase/Tests/Out")
 			rm -rf /opt/Deploy/Tests /Deploy/Tests || true
