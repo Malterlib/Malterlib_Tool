@@ -1208,11 +1208,9 @@ BuildCompilerLTO()
 	ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_VP_COUNTERS_PER_SITE=3"
 	ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_CMAKE_INSTALL_PREFIX=$DistributionDir"
 
-	if [[ "$MalterlibPlatform" != "Linux" ]]; then
-		ExtraCMake="$ExtraCMake -DCLANG_PGO_TRAINING_PROFILES_DIR=$BuildDir/profiles/"
-		ExtraCMake="$ExtraCMake -DBOOTSTRAP_CLANG_PGO_TRAINING_PROFILES_DIR=$BuildDir/profiles/"
-		ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_CLANG_PGO_TRAINING_PROFILES_DIR=$BuildDir/profiles/"
-	fi
+	ExtraCMake="$ExtraCMake -DCLANG_PGO_TRAINING_PROFILES_DIR=$BuildDir/profiles/"
+	ExtraCMake="$ExtraCMake -DBOOTSTRAP_CLANG_PGO_TRAINING_PROFILES_DIR=$BuildDir/profiles/"
+	ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_CLANG_PGO_TRAINING_PROFILES_DIR=$BuildDir/profiles/"
 
 	if [[ "$RequestedStage" == "all" || "$RequestedStage" == "stage1" ]]; then
 		pushd "$BuildDir/dist_temp"
