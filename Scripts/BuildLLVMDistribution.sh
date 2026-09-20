@@ -670,6 +670,17 @@ AddBootstrapCMakeCacheValue()
 	ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_${Name}=${Value}"
 }
 
+# The compiler's version string carries the git revision, and clang rejects a precompiled header
+# that a compiler with a different one built. A local build would recompile every stage after each
+# commit, so only the CI build, whose compiler is the one that gets distributed, keeps the revision.
+if [[ "${RunningCI:-}" == "true" || "${GITHUB_ACTIONS:-}" == "true" ]]; then
+	LLVMAppendVCRev="${LLVMAppendVCRev:-ON}"
+else
+	LLVMAppendVCRev="${LLVMAppendVCRev:-OFF}"
+fi
+
+AddCMakeCacheValue "LLVM_APPEND_VC_REV" "$LLVMAppendVCRev"
+
 if [[ "$MalterlibPlatform" != "Linux" ]]; then
 	AddCMakeCacheValue "LLVM_ENABLE_LIBPFM" "OFF"
 fi
