@@ -679,7 +679,43 @@ else
 	LLVMAppendVCRev="${LLVMAppendVCRev:-OFF}"
 fi
 
-AddCMakeCacheValue "LLVM_APPEND_VC_REV" "$LLVMAppendVCRev"
+# Sets the revision of every stage. Usage: ConfigureStageRevisions <stage 1 build directory> <number of stages>
+#
+# Every later stage is compiled by the stage 1 compiler, so that compiler has to keep its version
+# string for as long as the build tree lives. A build that is resumed after a commit, locally or from
+# the restored state of another CI run, would otherwise stop on the precompiled headers of the stages
+# that are already built. Stage 1 therefore has no revision, or keeps the one its build tree was
+# configured with, and only the last stage, which is the one that gets distributed, follows
+# LLVMAppendVCRev.
+ConfigureStageRevisions()
+{
+	local Stage1BuildDir="$1"
+	local nStages="$2"
+	local RevisionHeader="$Stage1BuildDir/include/llvm/Support/VCSRevision.h"
+	local Stage1Revision=""
+	local Stage1Repository=""
+	local StageRevisions=("OFF" "OFF" "OFF")
+
+	StageRevisions[$((nStages - 1))]="$LLVMAppendVCRev"
+
+	if [[ "$nStages" != "1" ]] && [[ -f "$RevisionHeader" ]]; then
+		Stage1Revision="$(sed -n 's/^#define LLVM_REVISION R"(\(.*\))"$/\1/p' "$RevisionHeader")"
+		Stage1Repository="$(sed -n 's/^#define LLVM_REPOSITORY R"(\(.*\))"$/\1/p' "$RevisionHeader")"
+	fi
+
+	if [[ -n "$Stage1Revision" ]]; then
+		echo "Stage 1 keeps the revision of its build tree: $Stage1Revision"
+		StageRevisions[0]="ON"
+		ExtraCMake="$ExtraCMake -DLLVM_FORCE_VC_REVISION=$Stage1Revision"
+		ExtraCMake="$ExtraCMake -DLLVM_FORCE_VC_REPOSITORY=$Stage1Repository"
+	else
+		ExtraCMake="$ExtraCMake -ULLVM_FORCE_VC_REVISION -ULLVM_FORCE_VC_REPOSITORY"
+	fi
+
+	ExtraCMake="$ExtraCMake -DLLVM_APPEND_VC_REV=${StageRevisions[0]}"
+	ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_APPEND_VC_REV=${StageRevisions[1]}"
+	ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLVM_APPEND_VC_REV=${StageRevisions[2]}"
+}
 
 if [[ "$MalterlibPlatform" != "Linux" ]]; then
 	AddCMakeCacheValue "LLVM_ENABLE_LIBPFM" "OFF"
@@ -1203,6 +1239,7 @@ BuildCompilerLTO()
 	popd
 
 	ConfigureLinuxBootstrapBuildRuntimePath "$BuildDir/dist_temp"
+	ConfigureStageRevisions "$BuildDir/dist_temp" 3
 
 	ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_PGO=ON"
 	ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_VP_COUNTERS_PER_SITE=3"
@@ -1301,6 +1338,7 @@ BuildCompiler()
 		local BuildDir="$PWD"
 	popd
 	ConfigureLinuxBootstrapBuildRuntimePath "$BuildDir/dist_temp2"
+	ConfigureStageRevisions "$BuildDir/dist_temp2" 2
 
 	pushd "$RootDir/build/dist_temp2"
 		ExtraCMake="$ExtraCMake -DBOOTSTRAP_CMAKE_INSTALL_PREFIX=$DistributionDir"
@@ -1343,6 +1381,8 @@ BuildDevCompiler()
 	pushd "$RootDir/build"
 		local BuildDir="$PWD"
 	popd
+	ConfigureStageRevisions "$BuildDir/dist_temp2" 1
+
 	pushd "$RootDir/build/dist_temp2"
 		ExtraCMake="$ExtraCMake -DCMAKE_INSTALL_PREFIX=$DistributionDir"
 		ExtraCMake="$ExtraCMake -DLLVM_ENABLE_PGO=OFF"
