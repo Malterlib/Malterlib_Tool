@@ -519,6 +519,20 @@ Repository
 		}
 	}
 
+	// LLVM's license leaves the third-party code in its tree to the license in that code's directory. These two are compiled
+	// into every LLVM binary and ask for their notice in a binary distribution.
+	License #<LicenseFiles.LICENSE> =+ {
+		Source: "../../External/llvm-project/llvm/lib/Support/COPYRIGHT.regex"->MakeAbsolute()
+		, Name: "Henry Spencer's regex (in LLVM, https://github.com/llvm/llvm-project/blob/main/llvm/lib/Support/COPYRIGHT.regex)"
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/xxHash/LICENSE"->MakeAbsolute(), Name: "xxHash (in LLVM, https://github.com/Cyan4973/xxHash)" }
+
+	// The Windows release build replaces the CRT allocator with LLVM's copy of rpmalloc.
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/rpmalloc/LICENSE"->MakeAbsolute(), Name: "rpmalloc (in LLVM, https://github.com/mjansson/rpmalloc)" }
+	{
+		!!RepoPlatformFamily "Windows"
+	}
+
 	// Windows ships a bundled Python runtime (for LLDB scripting) and statically
 	// links libxml2 into the toolchain.
 	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/Python/LICENSE"->MakeAbsolute(), Name: "Python and bundled runtime (https://www.python.org, https://github.com/python/cpython)" }
