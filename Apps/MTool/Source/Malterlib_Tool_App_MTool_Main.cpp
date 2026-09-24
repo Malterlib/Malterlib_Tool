@@ -24,6 +24,14 @@ bool fg_IsMalterlib()
 	return bIsMalterlb;
 }
 
+// The per-user state directory, ~/.Malterlib/MTool unless MToolRootDirectory overrides it.
+NStr::CStr fg_GetToolRootDirectory()
+{
+	auto RootDirectory = fg_GetSys()->f_GetEnvironmentVariable("MToolRootDirectory", NFile::CFile::fs_GetUserHomeDirectory() / ".Malterlib/MTool");
+
+	return NFile::CFile::fs_GetExpandedPath(RootDirectory);
+}
+
 void CTool::f_Register
 	(
 		TCActor<CDistributedToolAppActor> const &_ToolActor
@@ -128,9 +136,8 @@ public:
 			(
 				[]
 				{
-					auto RootDirectory = fg_GetSys()->f_GetEnvironmentVariable("MToolRootDirectory", NFile::CFile::fs_GetUserHomeDirectory() / ".Malterlib/MTool");
 					auto Settings = CDistributedToolSettings("MTool")
-						.f_RootDirectory(NFile::CFile::fs_GetExpandedPath(RootDirectory))
+						.f_RootDirectory(fg_GetToolRootDirectory())
 					;
 
 					if (fg_IsCMake())

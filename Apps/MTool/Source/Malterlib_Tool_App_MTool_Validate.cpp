@@ -6,6 +6,7 @@
 #include <Mib/Git/Helpers/Launch>
 #include <Mib/Develop/EditorConfig>
 #include <Mib/Concurrency/AsyncDestroy>
+#include <Mib/Cryptography/Hashes/SHA>
 #include <Mib/Time/Stopwatch>
 
 namespace
@@ -275,7 +276,18 @@ namespace NMib::NTool::NValidate
 		CSystemEnvironment DiffEnvironment;
 
 		auto GitDirectory = Info[1];
-		auto AttributeDirectory = GitDirectory / "MToolValidate";
+		// The snapshot stays out of the Git directory, and the lock in it avoids the
+		// ".lock" suffix. Clients that watch the Git directory, such as Sublime Merge,
+		// treat new HEAD, refs and *.lock files there as a Git operation in progress
+		// and hold off refreshing until it settles.
+		CStr ValidationId;
+		{
+			NCryptography::CHash_SHA256 GitDirectoryHash;
+			GitDirectoryHash.f_AddData(GitDirectory.f_GetStr(), GitDirectory.f_GetLen());
+			ValidationId = GitDirectoryHash.f_GetDigest().f_GetString().f_Left(16);
+		}
+		auto AttributeDirectory = fg_GetToolRootDirectory() / "Validate" / ValidationId;
+		auto LockPath = GitDirectory / "MToolValidate.lockfile";
 		auto DiffDirectory = AttributeDirectory / "worktree";
 		auto SnapshotGitDirectory = AttributeDirectory / "git";
 		TCUniquePointer<CLockFile> pAttributeLock;
@@ -283,9 +295,9 @@ namespace NMib::NTool::NValidate
 			auto BlockingActor = fg_BlockingActor();
 			pAttributeLock = co_await
 				(
-					g_Dispatch(BlockingActor) / [GitDirectory]()
+					g_Dispatch(BlockingActor) / [LockPath]()
 					{
-						TCUniquePointer<CLockFile> pLock = fg_Construct(GitDirectory / "MToolValidate.lock");
+						TCUniquePointer<CLockFile> pLock = fg_Construct(LockPath);
 						pLock->f_LockWithException(5.0 * 60.0);
 
 						return fg_Move(pLock);
