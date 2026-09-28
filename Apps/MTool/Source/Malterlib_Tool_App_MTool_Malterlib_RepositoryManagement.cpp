@@ -415,7 +415,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				"Names"_o= _o["format"]
 				, "Description"_o=
 					"Format the sources of every repository that sets Repository.Format, as MTool Format does for one: "
-					"the files that opt in with malterlib_format = malterlib in .editorconfig, found under the repository root.\n"
+					"the files that opt in with malterlib_format = malterlib or malterlib-buildsystem in .editorconfig, found under the repository root.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
 				{

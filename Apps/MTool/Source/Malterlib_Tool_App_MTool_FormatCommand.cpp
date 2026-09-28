@@ -139,7 +139,7 @@ struct CTool_Format : CDistributedTool
 			(
 				{
 					"Names"_o= _o["Format"]
-					, "Description"_o= "Format sources that opt in with malterlib_format = malterlib in .editorconfig.\n"
+					, "Description"_o= "Format sources that opt in with malterlib_format = malterlib or malterlib-buildsystem in .editorconfig.\n"
 					, "Category"_o= "Validation"
 					, "Options"_o=
 					{

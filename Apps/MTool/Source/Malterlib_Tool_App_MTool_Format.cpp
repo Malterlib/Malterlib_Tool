@@ -312,7 +312,8 @@ namespace NMib::NTool::NFormat
 		}
 
 		// A file opted in whose language has no formatting backend is only held to its line length.
-		if (_Job.m_Settings.f_IsFormattingEnabled() && fg_DetectCodeLanguage(_Job.m_Path) == ECodeLanguage::mc_Unknown)
+		auto Language = fg_GetCodeFormattingLanguage(_Job.m_Settings, _Job.m_Path);
+		if (_Job.m_Settings.f_IsFormattingEnabled() && Language == ECodeLanguage::mc_Unknown)
 		{
 			_Job.m_Settings.m_Profile = ECodeFormattingProfile::mc_Disabled;
 			if (!_Job.m_bValidateLineLength || !_Job.m_Settings.m_nMaxColumns)
@@ -396,7 +397,7 @@ namespace NMib::NTool::NFormat
 		CCodeFormattingRequest Request;
 		Request.m_Source = Snapshot;
 		Request.m_Path = _Job.m_Path;
-		Request.m_Language = fg_DetectCodeLanguage(_Job.m_Path);
+		Request.m_Language = Language;
 		Request.m_Settings = _Job.m_Settings;
 		Request.m_Ranges = _Job.m_ByteRanges;
 		Request.m_RangePolicy = _Job.m_RangePolicy;

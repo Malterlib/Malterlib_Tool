@@ -448,17 +448,21 @@ namespace NMib::NTool
 					Repo.f_Write
 						(
 							".editorconfig"
-							, "root = true\n\n[*]\nindent_style = tab\ntab_width = 4\nmax_line_length = 190\n\n[*.{MHeader,MRepo,txt}]\nmalterlib_format = malterlib\n"
+							, "root = true\n\n[*]\nindent_style = tab\ntab_width = 4\nmax_line_length = 190\n\n"
+							"[*.{MHeader,Imported}]\nmalterlib_format = malterlib-buildsystem\n\n[*.{MRepo,txt}]\nmalterlib_format = malterlib\n"
 						)
 					;
 					Repo.f_Write("Build.MHeader", "Property\n{\n    A true\n\n\n\tB [\n\"x\"\n\t]\n}\n");
 					Repo.f_Write("Build.MRepo", "{\n    \"A\": 1\n}\n");
 					Repo.f_Write("Notes.txt", "  Indented with spaces\n");
+					Repo.f_Write("Build.Imported", "A\n{\n    B 1\n}\n");
 
-					// Only the build system file has a backend; the others keep their bytes.
+					// The build system profile formats its files whatever they are named; the C++
+					// profile has no backend for the others, which keep their bytes.
 					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "*", "--recursive"});
 					DMibExpect(Result.m_ExitCode, ==, 0u);
-					DMibExpect(Result.f_GetCombinedOut().f_Find("1 changed"), >=, 0);
+					DMibExpect(Result.f_GetCombinedOut().f_Find("2 changed"), >=, 0);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Build.Imported", true), ==, "A\n{\n\tB 1\n}\n");
 					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Build.MHeader", true), ==, "Property\n{\n\tA true\n\n\tB [\n\t\t\"x\"\n\t]\n}\n");
 					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Build.MRepo", true), ==, "{\n    \"A\": 1\n}\n");
 					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Notes.txt", true), ==, "  Indented with spaces\n");
