@@ -266,8 +266,9 @@ namespace NMib::NTool::NFormat
 	// Every job is queued at once and a job that awaits lets the worker start the next, so a
 	// blocking actor checked out per job would mean a thread per file. The run's shared set
 	// bounds that to its capacity, whatever the number of workers and resolvers.
-	CFormatWorker::CFormatWorker(TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors)
+	CFormatWorker::CFormatWorker(TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors, TCActor<CFormatNamingResolver> const &_Naming)
 		: mp_pBlockingActors(_pBlockingActors)
+		, mp_Naming(_Naming)
 	{
 	}
 
@@ -387,6 +388,14 @@ namespace NMib::NTool::NFormat
 		Request.m_Settings = _Job.m_Settings;
 		Request.m_Ranges = _Job.m_ByteRanges;
 		Request.m_RangePolicy = _Job.m_RangePolicy;
+		auto Directory = CFile::fs_GetPath(_Job.m_Path);
+		if (auto pKnown = mp_Namings.f_FindEqual(Directory))
+			Request.m_pNaming = *pKnown;
+		else
+		{
+			Request.m_pNaming = co_await mp_Naming(&CFormatNamingResolver::f_Resolve, Directory);
+			mp_Namings(Directory, Request.m_pNaming);
+		}
 		if (_Job.m_iFirstLine)
 		{
 			CTextLineMap Lines(Snapshot);
@@ -548,6 +557,157 @@ namespace NMib::NTool::NFormat
 			Promise.f_SetResult(Result);
 
 		co_return fg_Move(Result);
+	}
+
+	CFormatNamingResolver::CFormatNamingResolver(TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors)
+		: mp_pBlockingActors(_pBlockingActors)
+	{
+	}
+
+	// The document named '_pName' below the directory or the nearest directory above it,
+	// or empty. Every directory passed on the way shares the answer.
+	CStr CFormatNamingResolver::fp_FindDocument(CStr const &_Directory, ch8 const *_pName)
+	{
+		auto &Cache = CStr(_pName) == ".malterlib-format" ? mp_Documents : mp_Fallbacks;
+		TCVector<CStr> Pending;
+		auto Walk = CFile::fs_CondensePath(_Directory);
+		CStr Found;
+		while (true)
+		{
+			if (auto pKnown = Cache.f_FindEqual(Walk))
+			{
+				Found = *pKnown;
+
+				break;
+			}
+
+			Pending.f_Insert(Walk);
+			auto Candidate = Walk / _pName;
+			if (CFile::fs_FileExists(Candidate))
+			{
+				Found = Candidate;
+
+				break;
+			}
+
+			auto Parent = CFile::fs_CondensePath(CFile::fs_GetPath(Walk));
+			if (!Parent || Parent == Walk)
+				break;
+
+			Walk = Parent;
+		}
+
+		for (auto const &Directory : Pending)
+			Cache(Directory, Found);
+
+		return Found;
+	}
+
+	TCFuture<TCSharedPointer<CCodeFormattingNaming const>> CFormatNamingResolver::f_Resolve(CStr _Directory)
+	{
+		auto Document = fp_FindDocument(_Directory, ".malterlib-format");
+		if (!Document)
+			Document = fp_FindDocument(_Directory, "Malterlib/Core/.malterlib-format");
+
+		if (!Document)
+			co_return TCSharedPointer<CCodeFormattingNaming const>();
+
+		co_return co_await fp_Load(fg_Move(Document), {});
+	}
+
+	// Loads a document and the chain it extends, each file once. A document that is being
+	// loaded is joined rather than read again, and one that extends itself is an error
+	// rather than a wait on its own result. A pending load can belong to another resolve
+	// that started elsewhere in the same cycle, so the bases pending loads wait on are
+	// followed as well as this resolve's own chain.
+	TCFuture<TCSharedPointer<CCodeFormattingNaming const>> CFormatNamingResolver::fp_Load(CStr _Path, TCVector<CStr> _Chain)
+	{
+		auto fInChain = [&](CStr const &_Candidate)
+			{
+				for (auto const &Loading : _Chain)
+				{
+					if (Loading == _Candidate)
+						return true;
+				}
+
+				return false;
+			}
+		;
+
+		if (fInChain(_Path))
+			co_return DMibErrorInstance("'{}' extends itself"_f << _Path);
+
+		if (auto pKnown = mp_Loads.f_FindEqual(_Path))
+		{
+			auto pLoad = *pKnown;
+			if (pLoad->m_Result.f_IsSet())
+				co_return fg_TempCopy(pLoad->m_Result);
+
+			for (umint nSteps = mp_Loads.f_GetLen(), iStep = 0; iStep < nSteps; ++iStep)
+			{
+				auto pWaiting = mp_Loads.f_FindEqual((*pKnown)->m_Extending);
+				if (!pWaiting || (*pWaiting)->m_Result.f_IsSet())
+					break;
+
+				auto &Extending = (*pKnown)->m_Extending;
+				if (fInChain(Extending))
+					co_return DMibErrorInstance("'{}' extends itself"_f << Extending);
+
+				pKnown = pWaiting;
+			}
+
+			co_return co_await pLoad->m_Waiters.f_Insert().f_Future();
+		}
+
+		TCSharedPointer<CLoad> pLoad = fg_Construct();
+		mp_Loads(_Path, pLoad);
+
+		auto Result = co_await fp_Read(_Path, fg_Move(_Chain)).f_Wrap();
+
+		pLoad->m_Result = Result;
+		if (!Result)
+			mp_Loads.f_Remove(_Path);
+
+		auto Waiters = fg_Move(pLoad->m_Waiters);
+		for (auto &Promise : Waiters)
+			Promise.f_SetResult(Result);
+
+		co_return fg_Move(Result);
+	}
+
+	TCFuture<TCSharedPointer<CCodeFormattingNaming const>> CFormatNamingResolver::fp_Read(CStr _Path, TCVector<CStr> _Chain)
+	{
+		auto Yaml = co_await
+			(
+				g_Dispatch(mp_pBlockingActors->f_Next()) / [_Path]() -> CStr
+				{
+					return CFile::fs_ReadStringFromFile(_Path, true);
+				}
+				% ("Reading '{}'"_f << _Path)
+			)
+		;
+
+		CCodeFormattingNamingDocument Document;
+		{
+			auto CaptureScope = co_await (g_CaptureExceptions % ("Reading '{}'"_f << _Path));
+			Document = CCodeFormattingNamingDocument::fs_Parse(Yaml);
+		}
+
+		CCodeFormattingNaming Naming;
+		if (Document.m_Extends)
+		{
+			auto Base = CFile::fs_CondensePath(CFile::fs_GetFullPath(Document.m_Extends, CFile::fs_GetPath(_Path)));
+			_Chain.f_Insert(_Path);
+			if (auto pLoad = mp_Loads.f_FindEqual(_Path))
+				(*pLoad)->m_Extending = Base;
+
+			if (auto pBase = co_await fp_Load(fg_Move(Base), fg_Move(_Chain)))
+				Naming = *pBase;
+		}
+
+		Naming.f_Apply(Document);
+
+		co_return TCSharedPointer<CCodeFormattingNaming const>(fg_Construct(fg_Move(Naming)));
 	}
 
 	CStr fg_NormalizeFormatPath(CStr const &_Path, CStr const &_WorkingDirectory)
@@ -869,14 +1029,17 @@ namespace NMib::NTool::NFormat
 {
 	CFormatWorkerPool::CFormatWorkerPool(umint _nWorkers, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors)
 	{
+		mp_Naming = fg_ConstructActor<CFormatNamingResolver>(_pBlockingActors);
 		for (umint i = 0; i < fg_Max(_nWorkers, umint(1)); ++i)
-			mp_Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(_pBlockingActors));
+			mp_Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(_pBlockingActors, mp_Naming));
 	}
 
 	TCFuture<void> CFormatWorkerPool::fp_Destroy()
 	{
 		for (auto &Worker : mp_Workers)
 			co_await fg_Move(Worker).f_Destroy();
+
+		co_await fg_Move(mp_Naming).f_Destroy();
 
 		co_return {};
 	}

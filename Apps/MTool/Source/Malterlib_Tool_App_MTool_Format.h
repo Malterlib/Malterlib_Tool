@@ -59,12 +59,46 @@ namespace NMib::NTool::NFormat
 		bool m_bFormatted = false;									// The engine analyzed the file.
 	};
 
+	// Resolves the naming a directory's files are formatted with: the nearest
+	// '.malterlib-format' in the directory or above it, or where none is found,
+	// 'Malterlib/Core/.malterlib-format' in the nearest directory above that holds one. The
+	// document a file extends is applied under it. Each directory is looked up and each file
+	// read once per run, and a directory without either reads no name as more than C++ does.
+	struct CFormatNamingResolver : NConcurrency::CActor
+	{
+		explicit CFormatNamingResolver(NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> const &_pBlockingActors);
+
+		NConcurrency::TCFuture<NStorage::TCSharedPointer<NDevelop::CCodeFormattingNaming const>> f_Resolve(NStr::CStr _Directory);
+
+	private:
+		struct CLoad
+		{
+			NConcurrency::TCAsyncResult<NStorage::TCSharedPointer<NDevelop::CCodeFormattingNaming const>> m_Result;
+			NContainer::TCVector<NConcurrency::TCPromise<NStorage::TCSharedPointer<NDevelop::CCodeFormattingNaming const>>> m_Waiters;
+			NStr::CStr m_Extending;														// The base this pending load waits on.
+		};
+
+		NStr::CStr fp_FindDocument(NStr::CStr const &_Directory, ch8 const *_pName);
+		NConcurrency::TCFuture<NStorage::TCSharedPointer<NDevelop::CCodeFormattingNaming const>> fp_Load(NStr::CStr _Path, NContainer::TCVector<NStr::CStr> _Chain);
+		NConcurrency::TCFuture<NStorage::TCSharedPointer<NDevelop::CCodeFormattingNaming const>> fp_Read(NStr::CStr _Path, NContainer::TCVector<NStr::CStr> _Chain);
+
+		NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> mp_pBlockingActors;
+		NContainer::TCMap<NStr::CStr, NStr::CStr> mp_Documents;							// Directory to the document it takes; empty for none.
+		NContainer::TCMap<NStr::CStr, NStr::CStr> mp_Fallbacks;							// Directory to the fallback document above it; empty for none.
+		NContainer::TCMap<NStr::CStr, NStorage::TCSharedPointer<CLoad>> mp_Loads;			// Document path to its naming, loaded or loading.
+	};
+
 	// Workers share no state but the blocking actors their file I/O runs on: the caller owns
 	// selection, ordering, and reporting. A worker resolves its jobs' settings within their
 	// roots, so configuration runs on every core along with the formatting.
 	struct CFormatWorker : NConcurrency::CActor
 	{
-		explicit CFormatWorker(NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> const &_pBlockingActors);
+		CFormatWorker
+			(
+				NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> const &_pBlockingActors
+				, NConcurrency::TCActor<CFormatNamingResolver> const &_Naming
+			)
+		;
 
 		NConcurrency::TCFuture<CFormatJobResult> f_Process(CFormatJob _Job);
 
@@ -74,6 +108,8 @@ namespace NMib::NTool::NFormat
 	private:
 		NContainer::TCMap<NStr::CStr, NConcurrency::TCActor<NDevelop::CEditorConfigResolver>> mp_Configurations;	// One resolver per root.
 		NStorage::TCSharedPointer<NConcurrency::CSharedRoundRobinBlockingActors> mp_pBlockingActors;
+		NConcurrency::TCActor<CFormatNamingResolver> mp_Naming;						// Shared by the pool's workers.
+		NContainer::TCMap<NStr::CStr, NStorage::TCSharedPointer<NDevelop::CCodeFormattingNaming const>> mp_Namings;	// Directory to its naming, so a worker asks once.
 	};
 
 	// The workers of a run, taking jobs in turn, and the blocking actors their file I/O
@@ -89,6 +125,7 @@ namespace NMib::NTool::NFormat
 
 	private:
 		NContainer::TCVector<NConcurrency::TCActor<CFormatWorker>> mp_Workers;
+		NConcurrency::TCActor<CFormatNamingResolver> mp_Naming;
 		umint mp_iNextWorker = 0;
 	};
 

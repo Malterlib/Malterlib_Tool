@@ -435,6 +435,126 @@ namespace NMib::NTool
 				co_return {};
 			};
 
+			DMibTestSuite("Naming") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Testing MTool Format naming");
+
+				// Only a naming that lists 'inline_small' as a specifier moves 'static' in front of it.
+				CStr const c_Source = "constexpr inline_small static int gc_Value = 1;\n";
+				CStr const c_Reordered = "static constexpr inline_small int gc_Value = 1;\n";
+				CStr const c_Naming = "Version: 1\nSpecifierMacros: ['inline_small']\n";
+
+				DMibTestCategory("NoNamingReadsOnlyCpp") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "NoNamingReadsOnlyCpp");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write("Source.cpp", c_Source);
+
+					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Source.cpp"});
+					DMibExpect(Result.m_ExitCode, ==, 0u);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, c_Source);
+
+					co_return {};
+				};
+
+				DMibTestCategory("NearestDocument") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "NearestDocument");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".malterlib-format", c_Naming);
+					Repo.f_Write("Module/.malterlib-format", "Version: 1\n");
+					Repo.f_Write("Source/Deep/Source.cpp", c_Source);
+					Repo.f_Write("Module/Source.cpp", c_Source);
+
+					auto Named = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Source/Deep/Source.cpp"});
+					DMibExpect(Named.m_ExitCode, ==, 0u);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source/Deep/Source.cpp", true), ==, c_Reordered);
+
+					// The nearest document wins, even one that names nothing.
+					auto Empty = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Module/Source.cpp"});
+					DMibExpect(Empty.m_ExitCode, ==, 0u);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Module/Source.cpp", true), ==, c_Source);
+
+					co_return {};
+				};
+
+				DMibTestCategory("ExtendsAndFallback") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "ExtendsAndFallback");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write("Malterlib/Core/.malterlib-format", c_Naming);
+					Repo.f_Write("Malterlib/Module/.malterlib-format", "Version: 1\nExtends: ../Core/.malterlib-format\nTypeNames: ['CValue']\n");
+					Repo.f_Write("Malterlib/Module/Source/Source.cpp", c_Source);
+					Repo.f_Write("Other/Source.cpp", c_Source);
+
+					auto Extended = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Malterlib/Module/Source/Source.cpp"});
+					DMibExpect(Extended.m_ExitCode, ==, 0u);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Malterlib/Module/Source/Source.cpp", true), ==, c_Reordered);
+
+					// Without a document of its own, a file reads Malterlib/Core's.
+					auto Fallback = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Other/Source.cpp"});
+					DMibExpect(Fallback.m_ExitCode, ==, 0u);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Other/Source.cpp", true), ==, c_Reordered);
+
+					co_return {};
+				};
+
+				DMibTestCategory("InvalidDocumentsFail") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "InvalidDocumentsFail");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write("Unknown/.malterlib-format", "Version: 1\nFunctionName: ['f_.*']\n");
+					Repo.f_Write("Unknown/Source.cpp", c_Source);
+					Repo.f_Write("Missing/.malterlib-format", "Version: 1\nExtends: Absent/.malterlib-format\n");
+					Repo.f_Write("Missing/Source.cpp", c_Source);
+
+					auto Unknown = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Unknown/Source.cpp"});
+					DMibExpect(Unknown.m_ExitCode, !=, 0u);
+					DMibExpect(Unknown.f_GetCombinedOut().f_Find("Unknown key 'FunctionName'"), >=, 0);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Unknown/Source.cpp", true), ==, c_Source);
+
+					auto Missing = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Missing/Source.cpp"});
+					DMibExpect(Missing.m_ExitCode, !=, 0u);
+					DMibExpect(Missing.f_GetCombinedOut().f_Find("Absent/.malterlib-format"), >=, 0);
+
+					co_return {};
+				};
+
+				DMibTestCategory("ExtendsCycleFails") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "ExtendsCycleFails");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write("A/.malterlib-format", "Version: 1\nExtends: ../B/.malterlib-format\n");
+					Repo.f_Write("B/.malterlib-format", "Version: 1\nExtends: ../A/.malterlib-format\n");
+					Repo.f_Write("A/Source.cpp", c_Source);
+					Repo.f_Write("B/Source.cpp", c_Source);
+
+					// Both files resolve at once, from the two ends of the cycle.
+					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "*.cpp", "--recursive"});
+					DMibExpect(Result.m_ExitCode, !=, 0u);
+					DMibExpect(Result.f_GetCombinedOut().f_Find("extends itself"), >=, 0);
+
+					co_return {};
+				};
+
+				co_return {};
+			};
+
 			DMibTestSuite("Workspace") -> TCFuture<void>
 			{
 				auto Capture = co_await (g_CaptureExceptions % "Testing mib format over a workspace");
