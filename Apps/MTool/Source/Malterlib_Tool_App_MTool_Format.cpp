@@ -290,7 +290,7 @@ namespace NMib::NTool::NFormat
 		Result.m_Path = _Job.m_Path;
 		if (_Job.m_bResolveSettings)
 		{
-			// The opt-in property decides what is formatted, and what it opts in is C++.
+			// The opt-in property decides what is formatted.
 			auto pConfigurations = mp_Configurations.f_FindEqual(_Job.m_Root);
 			if (!pConfigurations)
 			{
@@ -309,6 +309,18 @@ namespace NMib::NTool::NFormat
 			}
 
 			_Job.m_DisplayPath = CFile::fs_MakePathRelative(_Job.m_Path, _Job.m_Root);
+		}
+
+		// A file opted in whose language has no formatting backend is only held to its line length.
+		if (_Job.m_Settings.f_IsFormattingEnabled() && fg_DetectCodeLanguage(_Job.m_Path) == ECodeLanguage::mc_Unknown)
+		{
+			_Job.m_Settings.m_Profile = ECodeFormattingProfile::mc_Disabled;
+			if (!_Job.m_bValidateLineLength || !_Job.m_Settings.m_nMaxColumns)
+			{
+				Result.m_Outcome = EFormatOutcome::mc_Excluded;
+
+				co_return Result;
+			}
 		}
 
 		auto Snapshot = _Job.m_Source;
@@ -384,7 +396,7 @@ namespace NMib::NTool::NFormat
 		CCodeFormattingRequest Request;
 		Request.m_Source = Snapshot;
 		Request.m_Path = _Job.m_Path;
-		Request.m_Language = ECodeLanguage::mc_Cpp;
+		Request.m_Language = fg_DetectCodeLanguage(_Job.m_Path);
 		Request.m_Settings = _Job.m_Settings;
 		Request.m_Ranges = _Job.m_ByteRanges;
 		Request.m_RangePolicy = _Job.m_RangePolicy;
