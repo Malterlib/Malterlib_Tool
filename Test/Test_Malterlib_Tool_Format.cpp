@@ -492,13 +492,19 @@ namespace NMib::NTool
 					co_await Repo.f_Init();
 					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
 					Repo.f_Write("Malterlib/Core/.malterlib-format", c_Naming);
-					Repo.f_Write("Malterlib/Module/.malterlib-format", "Version: 1\nExtends: ../Core/.malterlib-format\nTypeNames: ['CValue']\n");
-					Repo.f_Write("Malterlib/Module/Source/Source.cpp", c_Source);
+					Repo.f_Write("Malterlib/Module/.malterlib-format", "Version: 1\nExtends: ../Core/.malterlib-format\nSpecifierMacros: {Append: ['inline_medium']}\n");
+					Repo.f_Write("Malterlib/Module/Source/Source.cpp", c_Source + "constexpr inline_medium static int gc_Other = 2;\n");
 					Repo.f_Write("Other/Source.cpp", c_Source);
 
 					auto Extended = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Malterlib/Module/Source/Source.cpp"});
 					DMibExpect(Extended.m_ExitCode, ==, 0u);
-					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Malterlib/Module/Source/Source.cpp", true), ==, c_Reordered);
+					DMibExpect
+						(
+							CFile::fs_ReadStringFromFile(Repo.m_Path / "Malterlib/Module/Source/Source.cpp", true)
+							, ==
+							, c_Reordered + "static constexpr inline_medium int gc_Other = 2;\n"
+						)
+					;
 
 					// Without a document of its own, a file reads Malterlib/Core's.
 					auto Fallback = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Other/Source.cpp"});
