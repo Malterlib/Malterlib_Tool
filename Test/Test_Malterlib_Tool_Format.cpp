@@ -439,9 +439,9 @@ namespace NMib::NTool
 			{
 				auto Capture = co_await (g_CaptureExceptions % "Testing MTool Format of build system files");
 
-				DMibTestCategory("FormatsOnlyWhatHasABackend") -> TCFuture<void>
+				DMibTestCategory("ProfileSelectsTheLanguage") -> TCFuture<void>
 				{
-					auto Capture = co_await (g_CaptureExceptions % "FormatsOnlyWhatHasABackend");
+					auto Capture = co_await (g_CaptureExceptions % "ProfileSelectsTheLanguage");
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
@@ -449,7 +449,7 @@ namespace NMib::NTool
 						(
 							".editorconfig"
 							, "root = true\n\n[*]\nindent_style = tab\ntab_width = 4\nmax_line_length = 190\n\n"
-							"[*.{MHeader,Imported}]\nmalterlib_format = malterlib-buildsystem\n\n[*.{MRepo,txt}]\nmalterlib_format = malterlib\n"
+							"[*.{MHeader,Imported}]\nmalterlib_format = malterlib-buildsystem\n"
 						)
 					;
 					Repo.f_Write("Build.MHeader", "Property\n{\n    A true\n\n\n\tB [\n\"x\"\n\t]\n}\n");
@@ -457,8 +457,7 @@ namespace NMib::NTool
 					Repo.f_Write("Notes.txt", "  Indented with spaces\n");
 					Repo.f_Write("Build.Imported", "A\n{\n    B 1\n}\n");
 
-					// The build system profile formats its files whatever they are named; the C++
-					// profile has no backend for the others, which keep their bytes.
+					// The build system profile formats its files whatever they are named, and what it does not opt in keeps its bytes.
 					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "*", "--recursive"});
 					DMibExpect(Result.m_ExitCode, ==, 0u);
 					DMibExpect(Result.f_GetCombinedOut().f_Find("2 changed"), >=, 0);
