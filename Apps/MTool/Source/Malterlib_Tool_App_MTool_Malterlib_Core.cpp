@@ -54,51 +54,50 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 				if (auto pValue = _Params.f_GetMember("Action"))
 					GenerateOptions.m_Settings.m_Action = pValue->f_String();
 
-				#if defined(DPlatformFamily_macOS) && !defined(DMibSanitizerEnabled)
-					int Signals[] =
-						{
-							SIGHUP,
-							SIGINT,
-							SIGQUIT,
-							SIGILL,
-							SIGABRT,
-							SIGEMT,
-							SIGFPE,
-							SIGKILL,
-							SIGSYS,
-							SIGPIPE,
-							SIGALRM,
-							SIGTERM,
-							SIGURG,
-							SIGSTOP,
-							SIGTSTP,
-							SIGCONT
-						}
-					;
-
-					auto fSignalHandler = [](int _Signal)
-						{
-							DConOut("Ignored signal: {}\n", _Signal);
-						}
-					;
-
-					TCMap<int, void (*)(int)> OldSignals;
-
-					bool bRunningFromXcode = fg_GetSys()->f_GetEnvironmentVariable("XCODE_APP_SUPPORT_DIR") && fg_GetSys()->f_GetEnvironmentVariable("ACTION");
-					if (bRunningFromXcode)
+#if defined(DPlatformFamily_macOS) && !defined(DMibSanitizerEnabled)
+				int Signals[] =
 					{
-						for (auto &Signal : Signals)
-							OldSignals[Signal] = signal(Signal, fSignalHandler);
+						SIGHUP
+						, SIGINT
+						, SIGQUIT
+						, SIGILL
+						, SIGABRT
+						, SIGEMT
+						, SIGFPE
+						, SIGKILL
+						, SIGSYS
+						, SIGPIPE
+						, SIGALRM
+						, SIGTERM
+						, SIGURG
+						, SIGSTOP
+						, SIGTSTP
+						, SIGCONT
 					}
+				;
 
-					auto Cleanup
-						= g_OnScopeExit / [&]
-						{
-							for (auto iOldSignal = OldSignals.f_GetIterator(); iOldSignal; ++iOldSignal)
-								signal(iOldSignal.f_GetKey(), *iOldSignal);
-						}
-					;
-				#endif
+				auto fSignalHandler = [](int _Signal)
+					{
+						DConOut("Ignored signal: {}\n", _Signal);
+					}
+				;
+
+				TCMap<int, void (*)(int)> OldSignals;
+
+				bool bRunningFromXcode = fg_GetSys()->f_GetEnvironmentVariable("XCODE_APP_SUPPORT_DIR") && fg_GetSys()->f_GetEnvironmentVariable("ACTION");
+				if (bRunningFromXcode)
+				{
+					for (auto &Signal : Signals)
+						OldSignals[Signal] = signal(Signal, fSignalHandler);
+				}
+
+				auto Cleanup = g_OnScopeExit / [&]
+					{
+						for (auto iOldSignal = OldSignals.f_GetIterator(); iOldSignal; ++iOldSignal)
+							signal(iOldSignal.f_GetKey(), *iOldSignal);
+					}
+				;
+#endif
 
 				bool bChanged = false;
 

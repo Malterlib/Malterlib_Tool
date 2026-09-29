@@ -8,7 +8,6 @@
 class CTool_BuildDependencies : public CTool2
 {
 public:
-
 	~CTool_BuildDependencies()
 	{
 	}
@@ -83,7 +82,7 @@ public:
 					default:
 						{
 							ch8 Flag[2] = {*pFlag, 0};
-							DError(fg_Format("Unknown flag: {}",  Flag));
+							DError(fg_Format("Unknown flag: {}", Flag));
 						}
 						break;
 					}

@@ -863,7 +863,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					{
 						"Names"_o= _o["--push-pulls"]
 						, "Default"_o= false
-						, "Description"_o= "Also push branches whose same-named remote branch would show as needing pull in status, but only when the local branch tip is reachable from the remote default branch.\n"
+						, "Description"_o= "Also push branches whose same-named remote branch would show as needing pull in status, but only when the local branch tip is reachable from the "
+						"remote default branch.\n"
 					}
 					, Filter_Name
 					, fFilter_Type("")
@@ -1095,13 +1096,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					(
 						[&](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_return co_await _pBuildSystem->f_Action_Repository_ReleasePackage
-								(
-									GenerateOptions
-									, RepoFilter
-									, _pCommandLine
-								)
-							;
+							co_return co_await _pBuildSystem->f_Action_Repository_ReleasePackage(GenerateOptions, RepoFilter, _pCommandLine);
 						}
 						, _pCommandLine
 						, &GenerateOptions

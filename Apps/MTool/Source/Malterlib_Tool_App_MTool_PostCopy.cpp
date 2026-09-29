@@ -18,11 +18,9 @@ public:
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
 
 		for (umint i = 0; i < Files.f_GetLen(); ++i)
-		{
 			fr_DeleteEmptyDirs(Files[i]);
-		}
 
-		Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory|EFileAttrib_File, false);
+		Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory | EFileAttrib_File, false);
 		if (Files.f_GetLen() == 0)
 		{
 			NFile::CFile::fs_DeleteDirectory(_Path);
@@ -305,114 +303,97 @@ public:
 					EFileAttrib ValidAttributes = CFile::fs_GetValidAttributes();
 					CStr LastReportedError;
 					if
+					(
+						CFile::fs_DiffCopyFileOrDirectory
 						(
-							CFile::fs_DiffCopyFileOrDirectory
-							(
-								CFile::fs_GetExpandedPath(_SourceFile)
-								, CFile::fs_GetExpandedPath(FullDestination)
-								, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
+							CFile::fs_GetExpandedPath(_SourceFile)
+							, CFile::fs_GetExpandedPath(FullDestination)
+							, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
+							{
+								switch (_Change)
+								{
+								case CFile::EDiffCopyChange_FileDeleted:
+									{
+										EFileAttrib Attributes = CFile::fs_GetAttributes(_Destination);
+										if ((Attributes & EFileAttrib_ReadOnly) || (!(Attributes & EFileAttrib_UserWrite) && (SupportedAttributes & EFileAttrib_UserWrite)))
+											CFile::fs_SetAttributes(_Destination, (Attributes & ~EFileAttrib_ReadOnly) | (SupportedAttributes & EFileAttrib_UserWrite) | ValidAttributes);
+									}
+									break;
+								case CFile::EDiffCopyChange_FileChanged:
+									{
+										EFileAttrib Attributes = CFile::fs_GetAttributes(_Destination);
+
+										if ((Attributes & EFileAttrib_ReadOnly) || (!(Attributes & EFileAttrib_UserWrite) && (SupportedAttributes & EFileAttrib_UserWrite)))
+										{
+											bool bSuccess = false;
+
+											try
+											{
+												CPerforceClientThrow Client;
+												if (CPerforceClientThrow::fs_GetFromP4Config(_Destination, Client))
+												{
+													Client.f_OpenForEdit(_Destination);
+													DConOut("Opened file for edit in perforce: {}{\n}", _Destination);
+													bSuccess = true;
+												}
+											}
+											catch (NException::CException const &_Error)
+											{
+												CStr Error = _Error.f_GetErrorStr();
+												if (Error != LastReportedError)
+												{
+													LastReportedError = Error;
+													DConErrOut("Failed to checkout via perforce:{\n}{}{\n}", Error);
+												}
+											}
+
+											if (!bSuccess)
+												CFile::fs_SetAttributes(_Destination, (Attributes & ~EFileAttrib_ReadOnly) | (SupportedAttributes & EFileAttrib_UserWrite) | ValidAttributes);
+										}
+									}
+									break;
+								default: break;
+								}
+								if (bHash)
 								{
 									switch (_Change)
 									{
-									case CFile::EDiffCopyChange_FileDeleted:
-										{
-											EFileAttrib Attributes = CFile::fs_GetAttributes(_Destination);
-											if ((Attributes & EFileAttrib_ReadOnly) || (!(Attributes & EFileAttrib_UserWrite) && (SupportedAttributes & EFileAttrib_UserWrite)))
-												CFile::fs_SetAttributes(_Destination, (Attributes & ~EFileAttrib_ReadOnly) | (SupportedAttributes & EFileAttrib_UserWrite) | ValidAttributes);
-										}
-										break;
+									case CFile::EDiffCopyChange_FileCreated:
 									case CFile::EDiffCopyChange_FileChanged:
 										{
-											EFileAttrib Attributes = CFile::fs_GetAttributes(_Destination);
-
-											if ((Attributes & EFileAttrib_ReadOnly) || (!(Attributes & EFileAttrib_UserWrite) && (SupportedAttributes & EFileAttrib_UserWrite)))
-											{
-												bool bSuccess = false;
-
-												try
-												{
-													CPerforceClientThrow Client;
-													if (CPerforceClientThrow::fs_GetFromP4Config(_Destination, Client))
-													{
-														Client.f_OpenForEdit(_Destination);
-														DConOut("Opened file for edit in perforce: {}{\n}", _Destination);
-														bSuccess = true;
-													}
-												}
-												catch (NException::CException const &_Error)
-												{
-													CStr Error = _Error.f_GetErrorStr();
-													if (Error != LastReportedError)
-													{
-														LastReportedError = Error;
-														DConErrOut("Failed to checkout via perforce:{\n}{}{\n}", Error);
-													}
-												}
-
-												if (!bSuccess)
-													CFile::fs_SetAttributes(_Destination, (Attributes & ~EFileAttrib_ReadOnly)  | (SupportedAttributes & EFileAttrib_UserWrite) | ValidAttributes);
-											}
+											HashCache.f_GetHash(_Source);
+											HashCache.f_GetHash(_Destination, _Source);
 										}
 										break;
-									default:
+									case CFile::EDiffCopyChange_NoChange:
+										{
+											// No change, just use tho old hash
+											HashCache.f_SetHash(_Source, pOldHashCache->f_GetHash(_Source));
+											HashCache.f_SetHash(_Destination, pOldHashCache->f_GetHash(_Destination, _Source));
+										}
 										break;
+									default: break;
 									}
-									if (bHash)
-									{
-										switch (_Change)
-										{
-										case CFile::EDiffCopyChange_FileCreated:
-										case CFile::EDiffCopyChange_FileChanged:
-											{
-												HashCache.f_GetHash(_Source);
-												HashCache.f_GetHash(_Destination, _Source);
-											}
-											break;
-										case CFile::EDiffCopyChange_NoChange:
-											{
-												// No change, just use tho old hash
-												HashCache.f_SetHash(_Source, pOldHashCache->f_GetHash(_Source));
-												HashCache.f_SetHash(_Destination, pOldHashCache->f_GetHash(_Destination, _Source));
-											}
-											break;
-										default:
-											break;
-										}
-									}
-									if (bVerbose)
-									{
-										switch (_Change)
-										{
-										case CFile::EDiffCopyChange_DirectoryDeleted:
-											DConOut("Directory deleted: {}" DNewLine, _Destination);
-											break;
-										case CFile::EDiffCopyChange_DirectoryCreated:
-											DConOut("Directory created: {} -> {}" DNewLine, _Source, _Destination);
-											break;
-										case CFile::EDiffCopyChange_FileDeleted:
-											DConOut("File deleted: {}" DNewLine, _Destination);
-											break;
-										case CFile::EDiffCopyChange_FileCreated:
-											DConOut("File created: {} -> {}" DNewLine, _Source, _Destination);
-											break;
-										case CFile::EDiffCopyChange_FileChanged:
-											DConOut("File changed: {} -> {}" DNewLine, _Source, _Destination);
-											break;
-										case CFile::EDiffCopyChange_LinkDeleted:
-											DConOut("Link deleted: {}" DNewLine, _Destination);
-											break;
-										case CFile::EDiffCopyChange_LinkCreated:
-											DConOut("Link created: {} -> {} = {}" DNewLine, _Source, _Destination, _Link);
-											break;
-										case CFile::EDiffCopyChange_NoChange:
-											break;
-										}
-									}
-									return CFile::EDiffCopyChangeAction_Perform;
 								}
-								, ExcludePatterns
-							)
+								if (bVerbose)
+								{
+									switch (_Change)
+									{
+									case CFile::EDiffCopyChange_DirectoryDeleted: DConOut("Directory deleted: {}" DNewLine, _Destination); break;
+									case CFile::EDiffCopyChange_DirectoryCreated: DConOut("Directory created: {} -> {}" DNewLine, _Source, _Destination); break;
+									case CFile::EDiffCopyChange_FileDeleted: DConOut("File deleted: {}" DNewLine, _Destination); break;
+									case CFile::EDiffCopyChange_FileCreated: DConOut("File created: {} -> {}" DNewLine, _Source, _Destination); break;
+									case CFile::EDiffCopyChange_FileChanged: DConOut("File changed: {} -> {}" DNewLine, _Source, _Destination); break;
+									case CFile::EDiffCopyChange_LinkDeleted: DConOut("Link deleted: {}" DNewLine, _Destination); break;
+									case CFile::EDiffCopyChange_LinkCreated: DConOut("Link created: {} -> {} = {}" DNewLine, _Source, _Destination, _Link); break;
+									case CFile::EDiffCopyChange_NoChange: break;
+									}
+								}
+								return CFile::EDiffCopyChangeAction_Perform;
+							}
+							, ExcludePatterns
 						)
+					)
 					{
 						DConOut("{} -> {}" DNewLine, _SourceFile, FullDestination);
 					}
@@ -472,9 +453,7 @@ public:
 
 			CFile::fs_CreateDirectory(CFile::fs_GetPath(ConfigFile));
 			if (CFile::fs_CopyFileDiff(Temp, ConfigFile, CTime::fs_NowUTC()))
-			{
 				DConOut("Wrote new config file: {}" DNewLine, ConfigFile);
-			}
 		}
 
 		return 0;

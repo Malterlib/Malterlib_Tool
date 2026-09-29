@@ -129,9 +129,7 @@ public:
 				[]
 				{
 					auto RootDirectory = fg_GetSys()->f_GetEnvironmentVariable("MToolRootDirectory", NFile::CFile::fs_GetUserHomeDirectory() / ".Malterlib/MTool");
-					auto Settings = CDistributedToolSettings("MTool")
-						.f_RootDirectory(NFile::CFile::fs_GetExpandedPath(RootDirectory))
-					;
+					auto Settings = CDistributedToolSettings("MTool").f_RootDirectory(NFile::CFile::fs_GetExpandedPath(RootDirectory));
 
 					if (fg_IsCMake())
 						fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_None);

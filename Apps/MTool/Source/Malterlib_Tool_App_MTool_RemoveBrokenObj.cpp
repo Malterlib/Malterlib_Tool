@@ -6,7 +6,6 @@
 class CTool_RemoveBrokenObj : public CTool
 {
 public:
-
 	void fr_RemoveBrokenObj(CStr _Path)
 	{
 //		DConOut("Removing broken ojb files for dir: {}" DNewLine, _Path);
@@ -26,7 +25,7 @@ public:
 				{
 					CByteVector Test;
 					CFile File;
-					File.f_Open(Files[i], EFileOpen_Read|EFileOpen_ShareAll);
+					File.f_Open(Files[i], EFileOpen_Read | EFileOpen_ShareAll);
 					umint ToRead = fg_Min(File.f_GetLength(), 16);
 					Test.f_SetLen(ToRead);
 					File.f_Read(Test.f_GetArray(), Test.f_GetLen());
@@ -60,17 +59,15 @@ public:
 		if (NFile::CFile::fs_FileExists(Dir, EFileAttrib_Directory))
 		{
 			fr_RemoveBrokenObj(Dir);
-			DConOut("Done removing broken obj files" DNewLine,0);
+			DConOut("Done removing broken obj files" DNewLine, 0);
 			return 0;
 		}
 
 		if (!NFile::CFile::fs_FileExists(Dir2, EFileAttrib_Directory))
-		{
 			DError((CStr::CFormat("Directory {} does not exist") << Dir).f_GetStr());
-		}
 
 		fr_RemoveBrokenObj(Dir2);
-		DConOut("Done removing broken obj files" DNewLine,0);
+		DConOut("Done removing broken obj files" DNewLine, 0);
 		return 0;
 	}
 };

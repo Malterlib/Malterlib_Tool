@@ -455,7 +455,10 @@ Repository
 				, { Source: "../../External/curl/COPYING"->MakeAbsolute(), Name: "curl (https://github.com/Malterlib/curl, https://github.com/curl/curl)" }
 				, { Source: "../../External/hidapi/LICENSE-bsd.txt"->MakeAbsolute(), Name: "HIDAPI (https://github.com/Malterlib/hidapi, https://github.com/libusb/hidapi)" }
 				, { Source: "../../External/libarchive/COPYING"->MakeAbsolute(), Name: "libarchive (https://github.com/Malterlib/libarchive, https://github.com/libarchive/libarchive)" }
-				, { Source: "../../External/libjpeg-turbo/LICENSE.md"->MakeAbsolute(), Name: "libjpeg-turbo (https://github.com/Malterlib/libjpeg-turbo, https://github.com/libjpeg-turbo/libjpeg-turbo)" }
+				, {
+					Source: "../../External/libjpeg-turbo/LICENSE.md"->MakeAbsolute()
+					, Name: "libjpeg-turbo (https://github.com/Malterlib/libjpeg-turbo, https://github.com/libjpeg-turbo/libjpeg-turbo)"
+				}
 				, { Source: "../../External/libpng/LICENSE"->MakeAbsolute(), Name: "libpng (https://github.com/Malterlib/libpng, https://github.com/glennrp/libpng)" }
 				, { Source: "../../External/llvm-project/LICENSE.TXT"->MakeAbsolute(), Name: "LLVM (https://github.com/Malterlib/llvm-project, https://github.com/llvm/llvm-project)" }
 				, { Source: "../../External/ninja/COPYING"->MakeAbsolute(), Name: "ninja (https://github.com/Malterlib/ninja, https://github.com/ninja-build/ninja)" }
@@ -535,7 +538,10 @@ Repository
 
 	// Windows ships a bundled Python runtime (for LLDB scripting) and statically
 	// links libxml2 into the toolchain.
-	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/Python/LICENSE"->MakeAbsolute(), Name: "Python and bundled runtime (https://www.python.org, https://github.com/python/cpython)" }
+	License #<LicenseFiles.LICENSE> =+ {
+		Source: "ThirdPartyLicenses/Python/LICENSE"->MakeAbsolute()
+		, Name: "Python and bundled runtime (https://www.python.org, https://github.com/python/cpython)"
+	}
 	{
 		!!RepoPlatformFamily "Windows"
 	}
@@ -545,7 +551,10 @@ Repository
 	}
 	// The bundled Python runtime ships OpenSSL (libssl/libcrypto, used by _ssl and
 	// _hashlib) which is not covered by Python's own license.
-	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/OpenSSL/LICENSE"->MakeAbsolute(), Name: "OpenSSL (bundled in the Python runtime, https://www.openssl.org, https://github.com/openssl/openssl)" }
+	License #<LicenseFiles.LICENSE> =+ {
+		Source: "ThirdPartyLicenses/OpenSSL/LICENSE"->MakeAbsolute()
+		, Name: "OpenSSL (bundled in the Python runtime, https://www.openssl.org, https://github.com/openssl/openssl)"
+	}
 	{
 		!!RepoPlatformFamily "Windows"
 	}
@@ -586,7 +595,10 @@ Repository
 			RepoPlatformFamily "macOS"
 		}
 	}
-	License #<LicenseFiles.LICENSE> =+ { Source: "../../External/boringssl/LICENSE"->MakeAbsolute(), Name: "BoringSSL (https://github.com/Malterlib/boringssl, https://github.com/google/boringssl)" }
+	License #<LicenseFiles.LICENSE> =+ {
+		Source: "../../External/boringssl/LICENSE"->MakeAbsolute()
+		, Name: "BoringSSL (https://github.com/Malterlib/boringssl, https://github.com/google/boringssl)"
+	}
 	{
 		|
 		{

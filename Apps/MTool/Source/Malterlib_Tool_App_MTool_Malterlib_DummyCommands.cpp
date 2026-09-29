@@ -84,7 +84,8 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 					{
 						"Names"_o= _o["--repo-root"]
 						, "Default"_o= ""
-						, "Description"_o= "The Malterlib repository root URL to bake into the generated build system file. When omitted, the generated file uses the default root (https://github.com/Malterlib)."
+						, "Description"_o= "The Malterlib repository root URL to bake into the generated build system file. When omitted, the generated file uses the default root "
+						"(https://github.com/Malterlib)."
 					}
 				}
 				, "ShowOptionsInCommandEntry"_o= true

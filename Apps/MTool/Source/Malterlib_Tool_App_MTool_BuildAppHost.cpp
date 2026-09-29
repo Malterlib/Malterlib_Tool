@@ -30,12 +30,12 @@ namespace
 	// FileType byte values from Microsoft.NET.HostModel.Bundle.FileType.
 	enum EBundleFileType : uint8
 	{
-		EBundleFileType_Unknown = 0,
-		EBundleFileType_Assembly = 1,
-		EBundleFileType_NativeBinary = 2,
-		EBundleFileType_DepsJson = 3,
-		EBundleFileType_RuntimeConfigJson = 4,
-		EBundleFileType_Symbols = 5,
+		EBundleFileType_Unknown             = 0
+		, EBundleFileType_Assembly          = 1
+		, EBundleFileType_NativeBinary      = 2
+		, EBundleFileType_DepsJson          = 3
+		, EBundleFileType_RuntimeConfigJson = 4
+		, EBundleFileType_Symbols           = 5
 	};
 
 	struct CBundleFile
@@ -183,12 +183,14 @@ namespace
 	// immediately before this signature hold the bundle_header_offset (int64
 	// little-endian), zero in the template, written here when bundling.
 	uint8 const gc_BundleSignature[32] =
-	{
-		0x8B, 0x12, 0x02, 0xB9, 0x6A, 0x61, 0x20, 0x38,
-		0x72, 0x7B, 0x93, 0x02, 0x14, 0xD7, 0xA0, 0x32,
-		0x13, 0xF5, 0xB9, 0xE6, 0xEF, 0xAE, 0x33, 0x18,
-		0xEE, 0x3B, 0x2D, 0xCE, 0x24, 0xB3, 0x6A, 0xAE
-	};
+		{
+			// malterlib-format columns: 8
+			  0x8B, 0x12, 0x02, 0xB9, 0x6A, 0x61, 0x20, 0x38
+			, 0x72, 0x7B, 0x93, 0x02, 0x14, 0xD7, 0xA0, 0x32
+			, 0x13, 0xF5, 0xB9, 0xE6, 0xEF, 0xAE, 0x33, 0x18
+			, 0xEE, 0x3B, 0x2D, 0xCE, 0x24, 0xB3, 0x6A, 0xAE
+		}
+	;
 
 	void fg_PatchBundleHeaderOffset(CBinaryStreamMemory<> &_AppHost, uint64 _ManifestOffset, CStr const &_TemplatePath)
 	{

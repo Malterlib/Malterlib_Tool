@@ -7,7 +7,6 @@
 #include <Mib/Perforce/Functions>
 #include "Malterlib_Tool_App_MTool_PerforceHelpers.h"
 
-
 class CTool_PerforceSubmitInStream : public CTool2
 {
 public:
@@ -48,8 +47,7 @@ public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -91,7 +89,6 @@ public:
 		CStr SourceComment;
 		TCVector<CStr> SourceJobs;
 		TCVector<CPerforceClient::CChangeList::CFile> SourceFiles;
-
 
 		for (auto iChangeList = ChangeLists.f_GetIterator(); iChangeList; ++iChangeList)
 		{
@@ -211,7 +208,6 @@ public:
 			}
 		}
 
-
 		for (auto iFile = SourceFileInDestinationStream.f_GetIterator(); iFile; ++iFile)
 		{
 			if (AddedFiles.f_FindEqual(*iFile))
@@ -221,9 +217,7 @@ public:
 				pClient->f_Sync(*iFile, fg_Default(), true);
 			}
 			else if (RemovedFiles.f_FindEqual(*iFile))
-			{
 				pClient->f_Revert(*iFile, false);
-			}
 			else
 			{
 				pClient->f_Sync(*iFile, fg_Default());
@@ -237,7 +231,6 @@ public:
 				pClient->f_DeleteShelvedFile(SourceChangelist, *iFile);
 		}
 
-
 		CPerforceClient::CChangeList ChangeList = pClient->f_GetChangelist(SourceChangelist);
 		CPerforceClient::CDescription Description = pClient->f_DescribeShelved(SourceChangelist);
 
@@ -245,9 +238,7 @@ public:
 		{
 			DConOut("Changelist is now empty, deleting it{\n}", 0);
 			if (!ChangeList.m_Jobs.f_IsEmpty())
-			{
 				pClient->f_RemoveJobsFromChangelist(SourceChangelist, ChangeList.m_Jobs);
-			}
 
 			pClient->f_DeleteChangelist(SourceChangelist);
 		}

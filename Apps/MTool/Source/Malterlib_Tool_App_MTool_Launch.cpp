@@ -8,14 +8,11 @@
 class CTool_LaunchTimed : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
 		if (FileName == "012301231023Error")
-		{
 			DError("Wrong number of parameters");
-		}
 
 		CStr Params;
 		int iParam = 1;
@@ -49,8 +46,7 @@ public:
 			)
 		;
 
-		LaunchParams.m_fOnOutput
-			= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+		LaunchParams.m_fOnOutput = [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				switch (_OutputType)
 				{
@@ -59,12 +55,8 @@ public:
 				case EProcessLaunchOutputType_TerminateMessage:
 					DConErrOutRaw(_Output);
 					break;
-				case EProcessLaunchOutputType_StdOut:
-					DConOutRaw(_Output);
-					break;
-				case EProcessLaunchOutputType_Max:
-					DMibNeverGetHere;
-					break;
+				case EProcessLaunchOutputType_StdOut: DConOutRaw(_Output); break;
+				case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
 				}
 			}
 		;
@@ -140,7 +132,6 @@ void fg_OutputWholeLines(CStr &_Buffer, EProcessLaunchOutputType _Type, bool _bF
 class CTool_LaunchParallell : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimeMeasure("LaunchParallell");
@@ -161,7 +152,6 @@ public:
 			{
 				return CProcessLaunchParams::fs_GetParams(m_Params);
 			}
-
 		};
 
 		CStr LockFilePath;
@@ -201,37 +191,21 @@ public:
 					pCurrentProgram->m_Params.f_Insert(Param);
 			}
 			else if (pCurrentProgram)
-			{
 				pCurrentProgram->m_Params.f_Insert(Param);
-			}
 			else if (Param == "p4")
-			{
 				bNextFilterP4 = true;
-			}
 			else if (Param == "sandboxed")
-			{
 				bNextSandboxed = true;
-			}
 			else if (Param == "delay")
-			{
 				bDelayOutput = false;
-			}
 			else if (Param == "sepstderr")
-			{
 				bSeparateStdErr = true;
-			}
 			else if (Param.f_StartsWith("lockfile="))
-			{
 				LockFilePath = Param.f_Extract(9);
-			}
 			else if (Param.f_StartsWith("extrasucess="))
-			{
 				iExtraErrorSuccess = Param.f_Extract(12).f_ToInt(uint32(0));
-			}
 			else
-			{
 				DError("Invalid () secquence");
-			}
 			++iParam;
 		}
 
@@ -250,9 +224,7 @@ public:
 				Result = LockFile.f_Lock(-1);
 
 				if (Result != NFile::CLockFile::ELockResult_Locked)
-				{
 					DError(CStr::CFormat("Failed to lock lockfile. Check that permission are correct: {}") << LockFilePath);
-				}
 			}
 
 			CProcessLaunchHandler LaunchHandler;
@@ -301,8 +273,7 @@ public:
 						)
 					;
 
-					LaunchParams.m_fOnOutput
-						= [&, Program, pStdOutBuffer, pStdErrBuffer](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+					LaunchParams.m_fOnOutput = [&, Program, pStdOutBuffer, pStdErrBuffer](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 						{
 							switch (_OutputType)
 							{
@@ -322,9 +293,7 @@ public:
 									fg_OutputWholeLines(*pStdOutBuffer, EProcessLaunchOutputType_StdOut, Program.m_bFilterP4, false);
 								}
 								break;
-							case EProcessLaunchOutputType_Max:
-								DMibNeverGetHere;
-								break;
+							case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
 							}
 						}
 					;
@@ -337,9 +306,7 @@ public:
 					LaunchHandler.f_AddLaunch(LaunchParams, bDelayOutput);
 				}
 				else
-				{
 					DError("Empty program statements not allowed");
-				}
 			}
 			LaunchHandler.f_BlockOnExit();
 
@@ -352,11 +319,9 @@ public:
 
 DMibRuntimeClass(CTool, CTool_LaunchParallell);
 
-
 class CTool_TestStdOut : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		fp64 Sleep = fg_GetRandomFloat();
@@ -378,14 +343,11 @@ public:
 
 DMibRuntimeClass(CTool, CTool_TestStdOut);
 
-
 class CTool_LaunchSandboxed : public CTool2
 {
 public:
-
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
-
 		CStr FileName, Params;
 
 		{
@@ -395,10 +357,8 @@ public:
 			FileName = *FIter;
 			++FIter;
 
-			for (;FIter;++FIter)
-			{
+			for (; FIter; ++FIter)
 				Params += CStr(" ") + *FIter;
-			}
 		}
 
 		int Ret = 0;
@@ -430,11 +390,7 @@ public:
 		{
 			int iRoot = 0;
 
-			for (
-					auto RIter = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot))
-				;	RIter
-				;	RIter = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot))
-			)
+			for (auto RIter = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)); RIter; RIter = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)))
 			{
 				CStr CurRootStr = *RIter;
 
@@ -447,9 +403,7 @@ public:
 			}
 		}
 
-
-		LaunchParams.m_fOnOutput
-			= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+		LaunchParams.m_fOnOutput = [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				switch (_OutputType)
 				{
@@ -458,25 +412,18 @@ public:
 				case EProcessLaunchOutputType_TerminateMessage:
 					DConErrOutRaw(_Output);
 					break;
-				case EProcessLaunchOutputType_StdOut:
-					DConOutRaw(_Output);
-					break;
-				case EProcessLaunchOutputType_Max:
-					DMibNeverGetHere;
-					break;
+				case EProcessLaunchOutputType_StdOut: DConOutRaw(_Output); break;
+				case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
 				}
 			}
 		;
-
 
 		{
 			CProcessLaunch Launch(LaunchParams, EProcessLaunchCloseFlag_BlockOnExit);
 		}
 
 		return Ret;
-
 	}
-
 };
 
 DMibRuntimeClass(CTool, CTool_LaunchSandboxed);

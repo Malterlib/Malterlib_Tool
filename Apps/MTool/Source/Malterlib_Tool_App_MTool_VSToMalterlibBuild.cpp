@@ -7,7 +7,6 @@
 class CTool_VSToMalterlibBuild : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourcePath = _Params.f_GetValue("0", "NotExist");
@@ -37,7 +36,7 @@ public:
 
 			{
 				CXMLNode const *pChild = nullptr;
-				while ((pChild = XMLFile.f_Iterate(pProject,pChild)))
+				while ((pChild = XMLFile.f_Iterate(pProject, pChild)))
 				{
 					if (auto pElement = pChild->ToElement())
 					{
@@ -46,16 +45,14 @@ public:
 						if (Text == "ItemGroup" && Label.f_IsEmpty())
 						{
 							CXMLNode const *pFile = nullptr;
-							while ((pFile = XMLFile.f_Iterate(pChild,pFile)))
+							while ((pFile = XMLFile.f_Iterate(pChild, pFile)))
 							{
 								if (auto pFileElement = pFile->ToElement())
 								{
 									CStr FileName = XMLFile.f_GetAttribute(pFileElement, "Include");
 
 									if (!FileName.f_IsEmpty())
-									{
 										Files[FileName];
-									}
 								}
 							}
 						}
@@ -65,7 +62,7 @@ public:
 			if (pFiltersProject)
 			{
 				CXMLNode const *pChild = nullptr;
-				while ((pChild = XMLFiltersFile.f_Iterate(pFiltersProject,pChild)))
+				while ((pChild = XMLFiltersFile.f_Iterate(pFiltersProject, pChild)))
 				{
 					if (auto pElement = pChild->ToElement())
 					{
@@ -74,7 +71,7 @@ public:
 						if (Text == "ItemGroup" && Label.f_IsEmpty())
 						{
 							CXMLNode const *pFile = nullptr;
-							while ((pFile = XMLFiltersFile.f_Iterate(pChild,pFile)))
+							while ((pFile = XMLFiltersFile.f_Iterate(pChild, pFile)))
 							{
 								CStr NodeName = XMLFiltersFile.f_GetValue(pFile);
 								if (auto pFileElement = pFile->ToElement())
@@ -146,7 +143,6 @@ public:
 			CStr OutFileName2 = CFile::fs_GetPath(*iFile) + "/" + ProjectName + ".MTarget";
 			if (!CFile::fs_FileExists(OutFileName2))
 				CFile::fs_WriteStringToFile(CStr(OutFileName2), OutRegistry.f_GenerateStr());
-
 		}
 
 		return 0;

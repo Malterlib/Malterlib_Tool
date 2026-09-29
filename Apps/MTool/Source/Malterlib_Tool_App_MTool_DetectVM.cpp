@@ -6,7 +6,6 @@
 class CTool_DetectVM : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		bool bSilent = false;
@@ -17,7 +16,7 @@ public:
 		if (!bSilent)
 			DConOutRaw("Detecting VM...");
 
-		NMib::CVirtualMachineInfo  const& VMInfo = fg_GetSys()->f_GetVirtualMachineInfo();
+		NMib::CVirtualMachineInfo const &VMInfo = fg_GetSys()->f_GetVirtualMachineInfo();
 
 //		NSys::fg_HW_GetVirtualMachineInfo(VMInfo);
 
@@ -25,8 +24,8 @@ public:
 		{
 			DConOutRaw("Done.\n");
 
-			DConOut("Detected VM: {}\n", (VMInfo.m_bDetected ? true : false) );
-			DConOut("VM: {}\n", (VMInfo.m_pName ? VMInfo.m_pName : "none")) ;
+			DConOut("Detected VM: {}\n", (VMInfo.m_bDetected ? true : false));
+			DConOut("VM: {}\n", (VMInfo.m_pName ? VMInfo.m_pName : "none"));
 		}
 
 		return VMInfo.m_bDetected ? 1 : 0;

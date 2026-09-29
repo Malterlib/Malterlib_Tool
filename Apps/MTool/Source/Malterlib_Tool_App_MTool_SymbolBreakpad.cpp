@@ -6,19 +6,14 @@
 class CTool_SymbolBreakpad : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SymbolDir = _Params.f_GetValue("0", "NotExist:/");
 		CStr FileName = _Params.f_GetValue("1", "NotExist.file");
 		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
-		{
 			DError(CStr(CStr::CFormat("File does not exist ({})") << FileName));
-		}
 		if (!NFile::CFile::fs_FileExists(FileName + ".zip", EFileAttrib_File))
-		{
 			DError(CStr(CStr::CFormat("File does not exist ({})") << (FileName + ".zip")));
-		}
 
 		{
 //			DConOut("Deploying: {}" DNewLine, FileName);
@@ -36,8 +31,7 @@ public:
 			CStr GUID;
 			CStr Name;
 
-			auto fl_FindModule
-				= [&] () -> bool
+			auto fl_FindModule = [&]() -> bool
 				{
 					CStrPtr Temp;
 					Temp.f_SetConstPtr(Buffer.f_GetStr() + FindPos, Buffer.f_GetLen() - FindPos);

@@ -7,25 +7,23 @@
 class CTool_ExeFS : public CTool
 {
 public:
-
 	enum ETarget
 	{
-		ETarget_File,		// Operates on a vfs file
-		ETarget_Exe,		// Operates on a exe file
+		ETarget_File  // Operates on a vfs file
+		, ETarget_Exe // Operates on a exe file
 	};
 
 	enum EAction
 	{
-		EAction_Add,			// Adds files to an existing VFS
-		EAction_Create,			// Adds files to a new VFS
-		EAction_Extract,	// Extracts files
-		EAction_List,			// Lists files
+		EAction_Add       // Adds files to an existing VFS
+		, EAction_Create  // Adds files to a new VFS
+		, EAction_Extract // Extracts files
+		, EAction_List    // Lists files
 	};
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-
-		static char const* sc_pHelpText =
+		static char const *sc_pHelpText =
 			"Usage:" DNewLine
 			"MTool <Flags> TargetFile [ SourcePattern [DestPath] ]" DNewLine
 			DNewLine
@@ -48,13 +46,14 @@ public:
 		EAction Action = EAction_Add;
 
 		auto f_IntToStr = [](int _Val) -> CStr
-		{
-			return CStr::CFormat("{}") << _Val;
-		};
+			{
+				return CStr::CFormat("{}") << _Val;
+			}
+		;
 
 		int iCurArg = 0;
 		CStr CurArg;
-		for (;(CurArg = _Params.f_GetValue(f_IntToStr(iCurArg), "")); ++iCurArg)
+		for (; (CurArg = _Params.f_GetValue(f_IntToStr(iCurArg), "")); ++iCurArg)
 		{
 			if (CurArg[0] == '-')
 			{
@@ -102,24 +101,20 @@ public:
 		bool bTargetExists = NFile::CFile::fs_FileExists(TargetFilename, EFileAttrib_File);
 
 		if (TargetType == ETarget_Exe && !bTargetExists)
-		{
 			DError("File does not exist");
-		}
 
 		NFile::TCBinaryStreamFile<> TargetFile;
 		EFileOpen FileMode = EFileOpen_Read | EFileOpen_ShareAll;
 
-		switch(Action)
+		switch (Action)
 		{
-			case EAction_Add:
-				FileMode |= EFileOpen_Write;
-				FileMode |= EFileOpen_DontTruncate;
-				break;
-			case EAction_Create:
-				FileMode |= EFileOpen_Write;
-				break;
-			case EAction_Extract:
-			case EAction_List:
+		case EAction_Add:
+			FileMode |= EFileOpen_Write;
+			FileMode |= EFileOpen_DontTruncate;
+			break;
+		case EAction_Create: FileMode |= EFileOpen_Write; break;
+		case EAction_Extract:
+		case EAction_List:
 			break;
 		}
 
@@ -130,18 +125,18 @@ public:
 		NStream::CBinaryStreamSubStream<> SubStream;
 		NMib::NFile::CVirtualFS VirtualFS;
 
-		const ch8 *pSigReversed = "SFEXESDI";
+		ch8 const *pSigReversed = "SFEXESDI";
 		CStr Sig = CStr(pSigReversed).f_Reverse();
-		const ch8 *pSig = Sig;
+		ch8 const *pSig = Sig;
 
-		int32 const GrowSize = 64*1024;
+		int32 const GrowSize = 64 * 1024;
 		int32 const ClusterSize = 1024;
 
 		int64 MalterlibFsFilePos;
 
 		if (TargetType == ETarget_Exe)
 		{
-			CMibFilePos FileSize = TargetFile.f_GetLength() -(sizeof(int64) + 8);
+			CMibFilePos FileSize = TargetFile.f_GetLength() - (sizeof(int64) + 8);
 
 			TargetFile.f_SetPosition(FileSize);
 
@@ -149,10 +144,10 @@ public:
 
 			{
 				int32 nClustersToSearch = 1024;
-				CMibFilePos FileSize = fg_AlignDown(TargetFile.f_GetLength() -(sizeof(int64) + 8), ClusterSize);
+				CMibFilePos FileSize = fg_AlignDown(TargetFile.f_GetLength() - (sizeof(int64) + 8), ClusterSize);
 
-				const umint SigSize = 8;
-				ch8 Signature[SigSize+1];
+				umint const SigSize = 8;
+				ch8 Signature[SigSize + 1];
 				Signature[SigSize] = 0;
 
 				while (nClustersToSearch && FileSize > 0)
@@ -172,9 +167,7 @@ public:
 						break;
 					}
 					else
-					{
 						FileSize -= ClusterSize;
-					}
 				}
 			}
 
@@ -196,9 +189,7 @@ public:
 		{
 			bExistingFS = bTargetExists;
 
-			if (	(bExistingFS && Action == EAction_Add)
-				||	Action == EAction_List
-				||	Action == EAction_Extract)
+			if ((bExistingFS && Action == EAction_Add) || Action == EAction_List || Action == EAction_Extract)
 				VirtualFS.f_Open(&TargetFile);
 			else
 				VirtualFS.f_Create(&TargetFile, ClusterSize, GrowSize, GrowSize);
@@ -220,7 +211,7 @@ public:
 			umint nFileAdded = 0;
 			for (umint i = 0; i < lSourceFiles.f_GetLen(); ++i)
 			{
-				CStr SourceName = lSourceFiles[i].f_Extract(Len+1);
+				CStr SourceName = lSourceFiles[i].f_Extract(Len + 1);
 				if (SourceName[0] == '.')
 					continue;
 
@@ -246,7 +237,7 @@ public:
 
 			if (TargetType == ETarget_Exe)
 			{
-				const umint SigSize = 8;
+				umint const SigSize = 8;
 				TargetFile.f_SetPositionFromEnd(0);
 				TargetFile.f_FeedBytes(pSig, SigSize);
 				TargetFile << MalterlibFsFilePos;
@@ -264,7 +255,7 @@ public:
 				if (Len == 0)
 					SourceName = Files[i];
 				else
-					SourceName = Files[i].f_Extract(Len+1);
+					SourceName = Files[i].f_Extract(Len + 1);
 
 				DConOut("\t{}" DNewLine, SourceName);
 			}
@@ -283,7 +274,7 @@ public:
 				if (Len == 0)
 					SourceName = Files[i];
 				else
-					SourceName = Files[i].f_Extract(Len+1);
+					SourceName = Files[i].f_Extract(Len + 1);
 
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(DestPath, SourceName);
 

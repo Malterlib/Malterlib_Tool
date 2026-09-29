@@ -18,8 +18,15 @@ namespace NMib::NTool
 
 				TCVector<CStr> Params =
 					{
-						"check-license", "--skip-update", "--no-color", "--build-system", m_Path / "Test.MBuildSystem"
-						, "--output-directory", m_Path / "output", "--no-use-user-settings", "--no-use-cached-environment"
+						"check-license"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, m_Path / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
 					}
 				;
 				if (_bFix)
@@ -48,12 +55,14 @@ namespace NMib::NTool
 						, "LicenseFiles"_o=
 						{
 							"LICENSE"_o= m_Path / "upstream/single.txt"
-							, "BUNDLE"_o= _o[
+							, "BUNDLE"_o= _o
+							[
 								CEJsonOrdered{"Source"_o= m_Path / "upstream/first.txt"}
 								, CEJsonOrdered{"Source"_o= m_Path / "upstream/second.txt", "Name"_o= "Dependency"}
 							]
 						}
-						, "ReuseAnnotations"_o= _o[
+						, "ReuseAnnotations"_o= _o
+						[
 							CEJsonOrdered{"Path"_o= _o["data/*"], "CopyrightText"_o= "Fixture", "LicenseIdentifier"_o= "MIT"}
 						]
 					}

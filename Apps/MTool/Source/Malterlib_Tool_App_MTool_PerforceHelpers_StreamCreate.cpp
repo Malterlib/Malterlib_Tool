@@ -11,7 +11,6 @@
 class CTool_PerforceCreateStream : public CTool2
 {
 public:
-
 	struct CCreateStreamState
 	{
 		CStr m_UniqueCleanName;
@@ -22,7 +21,6 @@ public:
 		{
 		}
 	};
-
 
 	void fr_GetIsolatedPaths(CPerforceClientThrow &_Client, CStr const &_StreamName, TCVector<CStr> &_Ret)
 	{
@@ -80,9 +78,7 @@ public:
 						DError(fg_Format("No unique name found in description in stream ({}) (UniqueName)", _StreamParent));
 				}
 				else
-				{
 					_State.m_UniqueCleanName = fg_GetRandomUuidString();
-				}
 			}
 		}
 
@@ -239,8 +235,7 @@ public:
 		bool bAutoCreateOwned = StreamConfig.f_GetValue("AutoCreateOwned", "false") == "true" || _bAutoCreateOwned;
 		bool bAutoImportSDK = StreamConfig.f_GetValue("AutoImportSDK", "false") == "true" || _bAutoImportSDK;
 
-		auto fl_CreateImported
-			= [&](CStr const& _Stream, CStr const &_Source) -> CStr
+		auto fl_CreateImported = [&](CStr const &_Stream, CStr const &_Source) -> CStr
 			{
 				// Already owned, so we shouldn't try to import this
 				if (OwnedStreams.m_StreamMap.f_FindEqual(_Stream))
@@ -267,7 +262,6 @@ public:
 				// Already imported into stream
 				if (!_State.m_UniqueCleanName.f_IsEmpty() && ImportRegistry.f_GetValue("UniqueName", "") == _State.m_UniqueCleanName)
 					return _Stream;
-
 
 				CStr ImportPrefix = ImportStream.m_Name;
 
@@ -299,14 +293,7 @@ public:
 
 				CStr Reply;
 				if (!bAutoCreate)
-				{
-					Reply = fg_AskUser
-						(
-							_Reader
-							, Ask
-						)
-					;
-				}
+					Reply = fg_AskUser(_Reader, Ask);
 				bool bDefault = Reply == "";
 				if (Reply == "N" || Reply == "n" || (!bOwnedParent && bDefault))
 				{
@@ -317,7 +304,6 @@ public:
 				}
 				else
 				{
-
 					if (Reply == "Y" || Reply == "y" || (bOwnedParent && bDefault))
 					{
 						if (bDefault)
@@ -341,7 +327,23 @@ public:
 						}
 					}
 
-					CStr Ret = fr_CreateStreams(_pFunctions, _StreamSwitcher, _Reader, NewName, ParentStream, false, _State, bJustUpdate, DisableCreateStreams, _bUseDefaults, OwnedStreamsRecursive, bAutoCreateOwned, bAutoImportSDK);
+					CStr Ret = fr_CreateStreams
+						(
+							_pFunctions
+							, _StreamSwitcher
+							, _Reader
+							, NewName
+							, ParentStream
+							, false
+							, _State
+							, bJustUpdate
+							, DisableCreateStreams
+							, _bUseDefaults
+							, OwnedStreamsRecursive
+							, bAutoCreateOwned
+							, bAutoImportSDK
+						)
+					;
 					OwnedStreamsRecursive.f_AddStream(Ret, _Stream);
 					OwnedStreams.f_AddStream(Ret, _Stream);
 					return Ret;
@@ -365,8 +367,7 @@ public:
 		{
 			TCMap<CStr, CStr> TranslatedStreamCache;
 
-			auto fl_GetTranslatedStream
-				= [&](CStr const& _StreamToTranslate) -> CStr
+			auto fl_GetTranslatedStream = [&](CStr const &_StreamToTranslate) -> CStr
 				{
 					auto *pCached = TranslatedStreamCache.f_FindEqual(_StreamToTranslate);
 					if (pCached)
@@ -419,9 +420,7 @@ public:
 					{
 						CStr TranslatedStream = fl_GetTranslatedStream(Stream);
 						if (TranslatedStream.f_IsEmpty())
-						{
 							DError(fg_Format("'{}' stream not found as a parent of any of the owned streams", Stream));
-						}
 						DepotPath = fg_Format("{}{}", TranslatedStream, Import);
 					}
 					else
@@ -457,7 +456,6 @@ public:
 			CStr Path;
 			CStr DepotPath;
 			(CStr::CParse("{} {} {}") >> Type >> Path >> DepotPath).f_Parse(*iPath);
-
 
 			if (Type == "import" || Type == "import+")
 			{
@@ -526,12 +524,7 @@ public:
 				{
 					if (_State.m_bTaskStream)
 					{
-						CStr Reply = fg_AskUser
-							(
-								_Reader
-								, "Would you like to import SDK builds from parent stream? (Y/n){\n}"
-							)
-						;
+						CStr Reply = fg_AskUser(_Reader, "Would you like to import SDK builds from parent stream? (Y/n){\n}");
 						if (Reply == "Y" || Reply == "y" || Reply == "")
 							_State.m_ImportIsolated = 1;
 						else
@@ -539,12 +532,7 @@ public:
 					}
 					else
 					{
-						CStr Reply = fg_AskUser
-							(
-								_Reader
-								, "Would you like to import SDK builds from parent stream? (y/N){\n}"
-							)
-						;
+						CStr Reply = fg_AskUser(_Reader, "Would you like to import SDK builds from parent stream? (y/N){\n}");
 						if (Reply == "Y" || Reply == "y")
 							_State.m_ImportIsolated = 1;
 						else
@@ -598,7 +586,6 @@ public:
 								}
 							}
 						}
-
 					}
 				}
 			}
@@ -623,9 +610,7 @@ public:
 		DConOut("Desc:\n{}", NewStream.m_Description);
 
 		for (auto iPath = NewStream.m_Paths.f_GetIterator(); iPath; ++iPath)
-		{
 			DConOut("{}{\n}", *iPath);
-		}
 #else
 
 		bool bWasCreated = !_pFunctions->f_GetClient().f_StreamExists(CleanName);
@@ -642,8 +627,7 @@ public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -709,24 +693,14 @@ public:
 			{
 				if (StreamType == "Task")
 				{
-					CStr Reply = fg_AskUser
-						(
-							StdInReader
-							, "Please provide a name for the task{\n}"
-						)
-					;
+					CStr Reply = fg_AskUser(StdInReader, "Please provide a name for the task{\n}");
 					if (Reply.f_IsEmpty())
 						DError("Task name cannot be empty");
 					StreamName = ParentStream.m_Name + " (" + Reply + ")";
 				}
 				else
 				{
-					CStr Reply = fg_AskUser
-						(
-							StdInReader
-							, "Please provide the full name for the stream{\n}"
-						)
-					;
+					CStr Reply = fg_AskUser(StdInReader, "Please provide the full name for the stream{\n}");
 					if (Reply.f_IsEmpty())
 						DError("Stream name cannot be empty");
 					StreamName = Reply;
@@ -738,13 +712,28 @@ public:
 					StreamName = ParentStream.m_Name + " (" + NewStreamName + ")";
 				else
 					StreamName = NewStreamName;
-
 			}
 		}
 
 		CCreateStreamState State;
 		CPerforceFunctions::COwnedStreams OwnedStreams;
-		fr_CreateStreams(&Functions, StreamSwitcher, StdInReader, StreamName, ParentStreamName, StreamType == "Task", State, bUpdate, TCSet<CStr>(), bQuite, OwnedStreams, bAutoCreateOwned, bAutoImportSDK);
+		fr_CreateStreams
+			(
+				&Functions
+				, StreamSwitcher
+				, StdInReader
+				, StreamName
+				, ParentStreamName
+				, StreamType == "Task"
+				, State
+				, bUpdate
+				, TCSet<CStr>()
+				, bQuite
+				, OwnedStreams
+				, bAutoCreateOwned
+				, bAutoImportSDK
+			)
+		;
 
 		return 0;
 	}
@@ -755,7 +744,6 @@ DMibRuntimeClass(CTool, CTool_PerforceCreateStream);
 class CTool_PerforceDeleteStream : public CTool2
 {
 public:
-
 	void fr_DeleteStreams(CPerforceClientThrow &_Client, CBlockingStdInReader &_Reader, CStr const &_StreamName, bool _bTaskStream, bool _bForceObliterate)
 	{
 		CPerforceClient::CStream Stream = _Client.f_GetStream(_StreamName);
@@ -785,24 +773,12 @@ public:
 		if (_bTaskStream)
 		{
 			// When we are a task stream, default to deleting the owned streams
-			Reply = fg_AskUser
-				(
-					_Reader
-					, fg_Format("{}: {}? [Y/n]{\n}", Question, _StreamName)
-				)
-			;
+			Reply = fg_AskUser(_Reader, fg_Format("{}: {}? [Y/n]{\n}", Question, _StreamName));
 			if (Reply == "")
 				Reply = "y";
 		}
 		else
-		{
-			Reply = fg_AskUser
-				(
-					_Reader
-					, fg_Format("{}: {}? [y/N]{\n}", Question, _StreamName)
-				)
-			;
-		}
+			Reply = fg_AskUser(_Reader, fg_Format("{}: {}? [y/N]{\n}", Question, _StreamName));
 
 		if (Reply == "Y" || Reply == "y")
 		{
@@ -836,13 +812,11 @@ public:
 				_Client.f_Obliterate(ToObliterate);
 			}
 		}
-
 	}
 
-	void f_DetectPendingMerges(CPerforce_TemporaryStreamSwitcher &_StreamSwitcher, TCUniquePointer<CPerforceClientThrow> & _pClient, CStr const& _Stream)
+	void f_DetectPendingMerges(CPerforce_TemporaryStreamSwitcher &_StreamSwitcher, TCUniquePointer<CPerforceClientThrow> &_pClient, CStr const &_Stream)
 	{
 		CPerforceFunctions Functions(_pClient);
-
 
 		CPerforceFunctions::COwnedStreams OwnedStreams = Functions.f_GetStreamOwned(_Stream, true);
 		TCSet<CStr> Streams;
@@ -850,9 +824,9 @@ public:
 		for (auto iStream = OwnedStreams.m_Streams.f_GetIterator(); iStream; ++iStream)
 			Streams[fg_Get<0>(*iStream)];
 
-		for (auto& Stream : Streams)
+		for (auto &Stream : Streams)
 		{
-			auto& StreamInfo = Functions.f_GetStreamCached(Stream);
+			auto &StreamInfo = Functions.f_GetStreamCached(Stream);
 			if (StreamInfo.m_Parent.f_IsEmpty() || StreamInfo.m_Parent == "none")
 				continue;
 
@@ -880,7 +854,7 @@ public:
 				if (!Error.f_IsEmpty())
 					DConOut("{}\n", Error);
 
-				for (auto& Error : Errors)
+				for (auto &Error : Errors)
 					DConOut("{}: {}\n", Error.m_Path, Error.m_Error);
 
 				if (i == 0)
@@ -893,8 +867,7 @@ public:
 						case CPerforceClient::EAction_Integrate:
 							MustSync.f_Insert(iResult->m_To);
 							break;
-						default:
-							break;
+						default: break;
 						}
 					}
 
@@ -912,7 +885,6 @@ public:
 				for (auto iResult = Integrated.f_GetIterator(); iResult; ++iResult)
 					UniqueResults[*iResult];
 			}
-
 
 			TCMap<CPerforceClient::EAction, zuint32> Actions;
 			TCSet<int32> ChangeLists;
@@ -958,15 +930,13 @@ public:
 					DConOut("{}: {}  {}{\n}{}{\n}", ChangeList, ChangeListInfo.m_PerforceDate, ChangeListInfo.m_User, ChangeListInfo.m_Description);
 				}
 			}
-
 		}
 	}
 
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}

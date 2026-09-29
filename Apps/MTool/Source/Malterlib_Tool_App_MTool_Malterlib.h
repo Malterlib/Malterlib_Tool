@@ -40,6 +40,7 @@ public:
 			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
-		) override
+		)
+		override
 	;
 };

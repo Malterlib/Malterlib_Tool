@@ -56,38 +56,17 @@ namespace
 				{
 					switch (Char)
 					{
-						case 'a':
-							Char = '\a';
-
-							break;
-						case 'b':
-							Char = '\b';
-
-							break;
-						case 't':
-							Char = '\t';
-
-							break;
-						case 'n':
-							Char = '\n';
-
-							break;
-						case 'v':
-							Char = '\v';
-
-							break;
-						case 'f':
-							Char = '\f';
-
-							break;
-						case 'r':
-							Char = '\r';
-
-							break;
-						case '\\':
-						case '"':
-							break;
-						default: DError("Invalid escape in Git path");
+					case 'a': Char = '\a'; break;
+					case 'b': Char = '\b'; break;
+					case 't': Char = '\t'; break;
+					case 'n': Char = '\n'; break;
+					case 'v': Char = '\v'; break;
+					case 'f': Char = '\f'; break;
+					case 'r': Char = '\r'; break;
+					case '\\':
+					case '"':
+						break;
+					default: DError("Invalid escape in Git path");
 					}
 				}
 			}
@@ -138,7 +117,6 @@ namespace
 		return Value;
 	}
 
-
 	struct CLineValidationSettings
 	{
 		explicit CLineValidationSettings(TCMap<CStr, CStr> const &_Properties)
@@ -174,7 +152,7 @@ namespace
 		if (_Line.f_GetLen() > iPrevious)
 		{
 			CStrIteratorUTF8 End(_Line.f_GetStr() + _Line.f_GetLen(), 0);
-			for (CStrIteratorUTF8 Iterator(_Line); ; ++Iterator)
+			for (CStrIteratorUTF8 Iterator(_Line);; ++Iterator)
 			{
 				auto iEnd = _Line.f_GetLen() - umint(End - Iterator);
 				umint nAdvance = 1;
@@ -185,9 +163,7 @@ namespace
 
 				if (nColumns > TCLimitsInt<umint>::mc_Max - nAdvance)
 				{
-					_CommandLine %= "{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f
-						<< _AbsolutePath << _LineNumber << _Settings.m_nMaxColumns
-					;
+					_CommandLine %= "{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f << _AbsolutePath << _LineNumber << _Settings.m_nMaxColumns;
 
 					return false;
 				}
@@ -210,9 +186,7 @@ namespace
 
 	void fg_OutputValidationSummary(CCommandLineControl &_CommandLine, CStr const &_Kind, umint _nFiles, umint _nExcluded, umint _nErrors, fp64 _Seconds)
 	{
-		_CommandLine %= "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f
-			<< _nFiles << _Kind << _nErrors << _nExcluded << _Seconds
-		;
+		_CommandLine %= "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f << _nFiles << _Kind << _nErrors << _nExcluded << _Seconds;
 	}
 
 	TCFuture<CStr> fg_ResolveValidationCommit(CStr _Reference, CStr _Directory)
@@ -234,8 +208,19 @@ namespace
 		auto RepositoryInfo = co_await NGit::fg_LaunchGitWithResult
 			(
 				{
-					"rev-parse", "--show-toplevel", "--absolute-git-dir", "--show-object-format", "--path-format=absolute"
-					, "--git-path", "objects", "--git-path", "index", "--shared-index-path", "--verify", "--quiet", "HEAD^{commit}"
+					"rev-parse"
+					, "--show-toplevel"
+					, "--absolute-git-dir"
+					, "--show-object-format"
+					, "--path-format=absolute"
+					, "--git-path"
+					, "objects"
+					, "--git-path"
+					, "index"
+					, "--shared-index-path"
+					, "--verify"
+					, "--quiet"
+					, "HEAD^{commit}"
 				}
 				, _Directory
 			)
@@ -406,8 +391,18 @@ namespace
 
 		TCVector<CStr> RawParams =
 			{
-				"-c", "core.quotePath=true", "-c", "core.attributesFile=" + (AttributeDirectory / "attributes"), "diff", "--raw", "--no-abbrev", "--find-renames"
-				, "--no-color", "--no-ext-diff", "--no-textconv", "--ignore-submodules=all"
+				"-c"
+				, "core.quotePath=true"
+				, "-c"
+				, "core.attributesFile=" + (AttributeDirectory / "attributes")
+				, "diff"
+				, "--raw"
+				, "--no-abbrev"
+				, "--find-renames"
+				, "--no-color"
+				, "--no-ext-diff"
+				, "--no-textconv"
+				, "--ignore-submodules=all"
 			}
 		;
 		RawParams.f_Insert(Comparison);
@@ -468,9 +463,17 @@ namespace
 			auto PatchPath = AttributeDirectory / "patch";
 			TCVector<CStr> DiffParams =
 				{
-					"-c", "core.attributesFile=" + (AttributeDirectory / "attributes"), "--literal-pathspecs", "diff"
-					, "--no-color", "--no-ext-diff", "--no-textconv", "--unified=2147483647"
-					, "--inter-hunk-context=0", "--ignore-submodules=all", "--output=" + PatchPath
+					"-c"
+					, "core.attributesFile=" + (AttributeDirectory / "attributes")
+					, "--literal-pathspecs"
+					, "diff"
+					, "--no-color"
+					, "--no-ext-diff"
+					, "--no-textconv"
+					, "--unified=2147483647"
+					, "--inter-hunk-context=0"
+					, "--ignore-submodules=all"
+					, "--output=" + PatchPath
 				}
 			;
 			// Compare only the renamed file's blobs, retaining their paths for Git attributes.
@@ -534,12 +537,7 @@ namespace
 		CStopwatch Stopwatch{true};
 		_Directory = (co_await NGit::fg_LaunchGit({"rev-parse", "--show-toplevel"}, _Directory)).f_Trim();
 		// Enumerate names first so Git does not read excluded files to classify their content.
-		auto Index = co_await NGit::fg_LaunchGit
-			(
-				{"-c", "core.quotePath=true", "ls-files", "--cached", "--deduplicate"}
-				, _Directory
-			)
-		;
+		auto Index = co_await NGit::fg_LaunchGit({"-c", "core.quotePath=true", "ls-files", "--cached", "--deduplicate"}, _Directory);
 
 		TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct(_Directory);
 		auto DestroyConfigurations = co_await fg_AsyncDestroy(Configurations);
@@ -569,8 +567,18 @@ namespace
 		{
 			TCVector<CStr> Params =
 				{
-					"--literal-pathspecs", "-c", "core.quotePath=true", "grep", "--no-color", "--no-textconv"
-					, "-I", "--full-name", "-l", "-e", "", "--"
+					"--literal-pathspecs"
+					, "-c"
+					, "core.quotePath=true"
+					, "grep"
+					, "--no-color"
+					, "--no-textconv"
+					, "-I"
+					, "--full-name"
+					, "-l"
+					, "-e"
+					, ""
+					, "--"
 				}
 			;
 			// Bound the escaped argument size, including quotes, for Windows command lines.
@@ -619,7 +627,8 @@ struct CTool_Validate : CDistributedTool
 			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
-		) override
+		)
+		override
 	{
 		if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
 			return;

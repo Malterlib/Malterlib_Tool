@@ -15,7 +15,9 @@ bool fg_IsMalterlib();
 class CTool : public CDistributedTool
 {
 public:
-	virtual ~CTool() {}
+	virtual ~CTool()
+	{
+	}
 
 	virtual void f_Register
 		(
@@ -23,17 +25,23 @@ public:
 			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
-		) override
+		)
+		override
 	;
 
 	virtual aint f_Run(NContainer::CRegistry &_Params) = 0;
-	virtual void f_RequestStop() {};
+	virtual void f_RequestStop()
+	{
+	};
 };
 
 class CTool2 : public CTool
 {
 public:
-	virtual ~CTool2() {}
+	virtual ~CTool2()
+	{
+	}
+
 	virtual aint f_Run(NContainer::CRegistry &_Params) override;
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) = 0;
 
