@@ -159,7 +159,7 @@ namespace NMib::NTool
 			CRepositoryFixture &m_Repo;
 			CStr m_Output;
 			CStr m_Script; // The script that stands in for clang-tidy
-			CStr m_Tool; // What runs the script
+			CStr m_Tool;   // What runs the script
 		};
 	}
 

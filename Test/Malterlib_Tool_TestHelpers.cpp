@@ -201,19 +201,13 @@ namespace NMib::NTool::NTestHelpers
 			{
 				switch (_State.f_GetTypeID())
 				{
-					case EProcessLaunchState_Launched:
-						pState->m_Launched.f_SetResult();
+				case EProcessLaunchState_Launched: pState->m_Launched.f_SetResult(); break;
+				case EProcessLaunchState_LaunchFailed: pState->m_Launched.f_SetException(DMibErrorInstance(_State.f_Get<EProcessLaunchState_LaunchFailed>())); break;
+				case EProcessLaunchState_Exited:
+					pState->m_Result.m_ExitCode = _State.f_Get<EProcessLaunchState_Exited>();
+					pState->m_Exited.f_SetResult();
 
-						break;
-					case EProcessLaunchState_LaunchFailed:
-						pState->m_Launched.f_SetException(DMibErrorInstance(_State.f_Get<EProcessLaunchState_LaunchFailed>()));
-
-						break;
-					case EProcessLaunchState_Exited:
-						pState->m_Result.m_ExitCode = _State.f_Get<EProcessLaunchState_Exited>();
-						pState->m_Exited.f_SetResult();
-
-						break;
+					break;
 				}
 			}
 		;
@@ -232,13 +226,7 @@ namespace NMib::NTool::NTestHelpers
 	}
 
 	// _TextSeen is resolved when the output of the tool contains _Text, and fails when the tool exits without it.
-	TCFuture<CProcessLaunchActor::CSimpleLaunchResult> CRepositoryFixture::f_ToolWatchingOutput
-		(
-			TCVector<CStr> _Params
-			, bool _bMib
-			, CStr _Text
-			, TCPromise<void> _TextSeen
-		)
+	TCFuture<CProcessLaunchActor::CSimpleLaunchResult> CRepositoryFixture::f_ToolWatchingOutput(TCVector<CStr> _Params, bool _bMib, CStr _Text, TCPromise<void> _TextSeen)
 	{
 		auto Capture = co_await (g_CaptureExceptions % "Launching MTool watching its output");
 
@@ -287,17 +275,13 @@ namespace NMib::NTool::NTestHelpers
 			{
 				switch (_State.f_GetTypeID())
 				{
-					case EProcessLaunchState_Launched:
-						break;
-					case EProcessLaunchState_LaunchFailed:
-						pState->m_Exited.f_SetException(DMibErrorInstance(_State.f_Get<EProcessLaunchState_LaunchFailed>()));
+				case EProcessLaunchState_Launched: break;
+				case EProcessLaunchState_LaunchFailed: pState->m_Exited.f_SetException(DMibErrorInstance(_State.f_Get<EProcessLaunchState_LaunchFailed>())); break;
+				case EProcessLaunchState_Exited:
+					pState->m_Result.m_ExitCode = _State.f_Get<EProcessLaunchState_Exited>();
+					pState->m_Exited.f_SetResult();
 
-						break;
-					case EProcessLaunchState_Exited:
-						pState->m_Result.m_ExitCode = _State.f_Get<EProcessLaunchState_Exited>();
-						pState->m_Exited.f_SetResult();
-
-						break;
+					break;
 				}
 			}
 		;

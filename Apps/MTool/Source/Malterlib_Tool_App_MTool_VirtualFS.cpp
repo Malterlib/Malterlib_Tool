@@ -8,13 +8,13 @@
 
 struct CCOFFObject
 {
-
 	struct IMAGE_FILE_HEADER
 	{
 		IMAGE_FILE_HEADER()
 		{
-			fg_MemClear (*this);
+			fg_MemClear(*this);
 		}
+
 		uint16 m_Machine;
 		uint16 m_NumberOfSections;
 		uint32 m_TimeDateStamp;
@@ -40,8 +40,9 @@ struct CCOFFObject
 	{
 		IMAGE_SECTION_HEADER()
 		{
-			fg_MemClear (*this);
+			fg_MemClear(*this);
 		}
+
 		uint8 m_Name[8];
 		uint32 m_VirtualSize;
 		uint32 m_VirtualAddress;
@@ -75,13 +76,14 @@ struct CCOFFObject
 		{
 			fg_MemClear(*this);
 		}
+
 		union
 		{
 			uint8 m_ShortName[8];
 			struct
 			{
-				uint32 m_Short;     // if 0, use LongName
-				uint32 m_Long;      // offset into string table
+				uint32 m_Short; // if 0, use LongName
+				uint32 m_Long;  // offset into string table
 			} m_Name;
 			uint32 m_LongName[2];
 		} m_Name;
@@ -101,7 +103,6 @@ struct CCOFFObject
 			_Stream << m_StorageClass;
 			_Stream << m_NumberOfAuxSymbols;
 		}
-
 	};
 
 	struct STRING_TABLE
@@ -110,6 +111,7 @@ struct CCOFFObject
 			: m_Size(sizeof(uint32))
 		{
 		}
+
 		uint32 m_Size;
 		TCVector<ch8> m_StringData;
 
@@ -146,7 +148,7 @@ struct CCOFFObject
 
 	struct CFile
 	{
-		IMAGE_FILE_HEADER  m_Header;
+		IMAGE_FILE_HEADER m_Header;
 		TCVector<CSection> m_Sections;
 		TCVector<CSymbol> m_Symbols;
 		TCVector<CDataMember> m_DataMembers;
@@ -169,6 +171,7 @@ struct CCOFFObject
 			DataMember.m_Data = _Data;
 			_pSection->m_Symbols.f_Insert(iSymbol);
 		}
+
 		template <typename tf_CStream>
 		void f_Feed(tf_CStream &_Stream)
 		{
@@ -192,6 +195,7 @@ struct CCOFFObject
 				_Stream << iSymbol->m_Header;
 			_Stream << m_StringTable;
 		}
+
 		template <typename tf_CStream>
 		void f_Feed(tf_CStream &_Stream) const
 		{
@@ -229,14 +233,11 @@ struct CCOFFObject
 
 		return Stream.f_MoveVector();
 	}
-
-
 };
 
 class CTool_VirtualFS : public CTool
 {
 public:
-
 	enum ETargetFormat
 	{
 		ETargetFormat_Binary
@@ -245,7 +246,7 @@ public:
 		, ETargetFormat_ASM
 	};
 
-	NTime::CTime f_GetDirectoryWriteTime(NStr::CStr const& _File) const
+	NTime::CTime f_GetDirectoryWriteTime(NStr::CStr const &_File) const
 	{
 		NFile::CFile File;
 		File.f_Open(_File, EFileOpen_ShareAll | EFileOpen_ReadAttribs | EFileOpen_Directory);
@@ -254,8 +255,7 @@ public:
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-
-		static char const* sc_pHelpText =
+		static char const *sc_pHelpText =
 			"Usage:\n"
 			"MTool VirtualFS <Flags> <SourceFile>\n"
 			"\n"
@@ -293,14 +293,15 @@ public:
 		NBuildSystem::CMalterlibDependencyTracker MalterlibDependencyTracker;
 
 		auto f_IntToStr = [](int _Val) -> CStr
-		{
-			return CStr::CFormat("{}") << _Val;
-		};
+			{
+				return CStr::CFormat("{}") << _Val;
+			}
+		;
 
 		int iCurArg = 0;
 		CStr CurArg;
 		CStr SymbolName = "gc_VFS_Bytes";
-		for (;!(CurArg = _Params.f_GetValue(f_IntToStr(iCurArg), "")).f_IsEmpty(); ++iCurArg)
+		for (; !(CurArg = _Params.f_GetValue(f_IntToStr(iCurArg), "")).f_IsEmpty(); ++iCurArg)
 		{
 			if (CurArg[0] == '-')
 			{
@@ -319,14 +320,14 @@ public:
 					TargetFormat = ETargetFormat_COFF;
 				else if (CurArg.f_CmpNoCase("-asm") == 0)
 					TargetFormat = ETargetFormat_ASM;
-				else if ((CurArg.f_CmpNoCase("-o") == 0) ||	(CurArg.f_CmpNoCase("-output") == 0))
+				else if ((CurArg.f_CmpNoCase("-o") == 0) || (CurArg.f_CmpNoCase("-output") == 0))
 				{
 					++iCurArg;
 					TargetFilename = _Params.f_GetValue(f_IntToStr(iCurArg), "");
 					if (TargetFilename.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No out file specified after -o[utput] flag\n");
-					DConOutRaw(sc_pHelpText);
+						DConOutRaw(sc_pHelpText);
 						return -1;
 					}
 				}
@@ -359,7 +360,7 @@ public:
 					if (TargetFilenameCpp.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No out file specified after -ocpp flag\n");
-					DConOutRaw(sc_pHelpText);
+						DConOutRaw(sc_pHelpText);
 						return -1;
 					}
 				}
@@ -370,7 +371,7 @@ public:
 					if (DestPath.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No dest path specified after -dest path\n");
-					DConOutRaw(sc_pHelpText);
+						DConOutRaw(sc_pHelpText);
 						return -1;
 					}
 				}
@@ -396,7 +397,6 @@ public:
 						return -1;
 					}
 				}
-
 
 				else
 				{
@@ -448,7 +448,7 @@ public:
 
 			Source.f_ParseStr(SourceString, SourceFilename);
 		}
-		catch(NFile::CExceptionFile& _Ex)
+		catch (NFile::CExceptionFile &_Ex)
 		{
 			DConOut("Failed to read source file {}: {}\n", SourceFilename, _Ex.f_GetErrorStr());
 			return 1;
@@ -463,13 +463,11 @@ public:
 		};
 
 		TCVector<CInclude> lIncludes;
-		for (auto IncludeIter = Source.f_GetChildIterator()
-			;IncludeIter
-			;++IncludeIter)
+		for (auto IncludeIter = Source.f_GetChildIterator(); IncludeIter; ++IncludeIter)
 		{
 			if (IncludeIter->f_GetName().f_CmpNoCase("Include") == 0)
 			{
-				CRegistryPreserveAllFull* pIncludeReg = IncludeIter;
+				CRegistryPreserveAllFull *pIncludeReg = IncludeIter;
 
 				CInclude Inc;
 				Inc.m_Pattern = pIncludeReg->f_GetValue("Pattern", "");
@@ -487,7 +485,7 @@ public:
 			}
 		}
 
-		NStream::CBinaryStream* pActiveTargetStream = nullptr;
+		NStream::CBinaryStream *pActiveTargetStream = nullptr;
 		NFile::TCBinaryStreamFile<> TargetFileStream;
 		CBinaryStreamMemory<> TargetMemoryStream;
 		NMib::NFile::CVirtualFS VirtualFS;
@@ -499,9 +497,7 @@ public:
 			pActiveTargetStream = &TargetFileStream;
 		}
 		else if (TargetFormat == ETargetFormat_CPP || TargetFormat == ETargetFormat_COFF || TargetFormat == ETargetFormat_ASM)
-		{
 			pActiveTargetStream = &TargetMemoryStream;
-		}
 
 		if (!pActiveTargetStream)
 		{
@@ -536,9 +532,7 @@ public:
 		CFileSystemInterface_Disk DiskSystem;
 
 		umint nFilesAdded = 0;
-		for (auto CurInclude = lIncludes.f_GetIterator()
-			;CurInclude
-			;++CurInclude)
+		for (auto CurInclude = lIncludes.f_GetIterator(); CurInclude; ++CurInclude)
 		{
 			if (bVerbose)
 				DConOut("{}{}\n", CurInclude->m_Pattern, (CurInclude->m_bRecurse ? " (Recursive)" : ""));
@@ -589,15 +583,13 @@ public:
 
 			for (umint i = 0; i < lSourceFiles.f_GetLen(); ++i)
 			{
-				auto & SourceFile = lSourceFiles[i];
+				auto &SourceFile = lSourceFiles[i];
 				{
 					while (!BasePath.f_IsEmpty() && !CFile::fs_FileExists(BasePath, EFileAttrib_Directory))
-					{
 						BasePath = NFile::CFile::fs_GetPath(BasePath);
-					}
 				}
 
-				CStr SourceName = SourceFile.f_Extract(Len+1);
+				CStr SourceName = SourceFile.f_Extract(Len + 1);
 				if (SourceName[0] == '.')
 					continue;
 				if (CFile::fs_GetFile(SourceName) == ".DS_Store")
@@ -636,9 +628,8 @@ public:
 					CStr ToLog = DependDir.f_ReplaceChar('/', '\\').f_UpperCase() + "\\\n";
 					TLogFile.f_Write(ToLog.f_GetStr(), ToLog.f_GetLen());
 #endif
-//					DependencyContents += CStr::CFormat(" \\\n  {}") << DependDir;
+					// DependencyContents += CStr::CFormat(" \\\n  {}") << DependDir;
 				}
-
 			}
 			catch (NException::CException const &_Exception)
 			{
@@ -649,9 +640,7 @@ public:
 		VirtualFS.f_Close();
 
 		if (TargetFormat == ETargetFormat_Binary)
-		{
 			TargetFileStream.f_Close(); // Can this throw?
-		}
 		else if (TargetFormat == ETargetFormat_COFF)
 		{
 			CByteVector lData = TargetMemoryStream.f_MoveVector();
@@ -660,23 +649,23 @@ public:
 
 			CStr UniqueName = Hash.f_GetString();
 
-			CStr CppOutput = CStr::CFormat(
-						"// VFS Blob generated by MTool from {}\n"
-						"namespace NAOCC\n"
-						"{{\n"
-						"	void fg_SetExeFSData(int _nBytes, void const *_pData);\n"
-						"}\n"
-						"\n"
-						"int const gc_VFS_{1}_nBytes = {2};\n"
-						"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];\n\n"
-					)
-					<< SourceFilename
-					<< UniqueName
-					<< lData.f_GetLen();
+			CStr CppOutput = CStr::CFormat
+				(
+					"// VFS Blob generated by MTool from {}\n"
+					"namespace NAOCC\n"
+					"{{\n"
+					"	void fg_SetExeFSData(int _nBytes, void const *_pData);\n"
+					"}\n"
+					"\n"
+					"int const gc_VFS_{1}_nBytes = {2};\n"
+					"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];\n\n"
+				)
+				<< SourceFilename
+				<< UniqueName
+				<< lData.f_GetLen()
+			;
 
-
-			CppOutput +=
-				CStr::CFormat
+			CppOutput += CStr::CFormat
 				(
 					"struct CExeFSSetter\n"
 					"{{\n"
@@ -684,14 +673,15 @@ public:
 					"};\n"
 					"\n"
 					"CExeFSSetter g_SetExeFS;\n\n"
-				) << UniqueName
+				)
+				<< UniqueName
 			;
 
 			try
 			{
 				NFile::CFile::fs_WriteStringToFile(CStr(TargetFilenameCpp), CppOutput, false);
 			}
-			catch(NFile::CExceptionFile& _Ex)
+			catch (NFile::CExceptionFile &_Ex)
 			{
 				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp, _Ex.f_GetErrorStr());
 				return 1;
@@ -705,7 +695,7 @@ public:
 
 				NFile::CFile::fs_WriteFile(CStr(TargetFilename), Data);
 			}
-			catch(NFile::CExceptionFile& _Ex)
+			catch (NFile::CExceptionFile &_Ex)
 			{
 				DConOut("Failed to write target OBJ file {}: {}\n", TargetFilename, _Ex.f_GetErrorStr());
 				return 1;
@@ -719,23 +709,23 @@ public:
 
 			CStr UniqueName = Hash.f_GetString();
 
-			CStr CppOutput = CStr::CFormat(
-						"// VFS Blob generated by MTool from {}\n"
-						"namespace NAOCC\n"
-						"{{\n"
-						"	void fg_SetExeFSData(int _nBytes, void const *_pData);\n"
-						"}\n"
-						"\n"
-						"int const gc_VFS_{1}_nBytes = {2};\n"
-						"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];\n\n"
-					)
-					<< SourceFilename
-					<< UniqueName
-					<< lData.f_GetLen();
+			CStr CppOutput = CStr::CFormat
+				(
+					"// VFS Blob generated by MTool from {}\n"
+					"namespace NAOCC\n"
+					"{{\n"
+					"	void fg_SetExeFSData(int _nBytes, void const *_pData);\n"
+					"}\n"
+					"\n"
+					"int const gc_VFS_{1}_nBytes = {2};\n"
+					"extern \"C\" unsigned char gc_VFS_{1}_Bytes[];\n\n"
+				)
+				<< SourceFilename
+				<< UniqueName
+				<< lData.f_GetLen()
+			;
 
-
-			CppOutput +=
-				CStr::CFormat
+			CppOutput += CStr::CFormat
 				(
 					"struct CExeFSSetter\n"
 					"{{\n"
@@ -743,14 +733,15 @@ public:
 					"};\n"
 					"\n"
 					"CExeFSSetter g_SetExeFS;\n\n"
-				) << UniqueName
+				)
+				<< UniqueName
 			;
 
 			try
 			{
 				NFile::CFile::fs_WriteStringToFile(TargetFilenameCpp, CppOutput, false);
 			}
-			catch(NFile::CExceptionFile& _Ex)
+			catch (NFile::CExceptionFile &_Ex)
 			{
 				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp, _Ex.f_GetErrorStr());
 				return 1;
@@ -764,7 +755,7 @@ public:
 				MalterlibDependencyTracker.f_AddOutputFile(BinFileName);
 				NFile::CFile::fs_WriteFile(BinFileName, lData);
 			}
-			catch(NFile::CExceptionFile& _Ex)
+			catch (NFile::CExceptionFile &_Ex)
 			{
 				DConOut("Failed to write target BIN file {}: {}\n", TargetFilename, _Ex.f_GetErrorStr());
 				return 1;
@@ -772,7 +763,6 @@ public:
 
 			try
 			{
-
 				CStr ASMOutput;
 				if (Platform == "macOS")
 				{
@@ -804,7 +794,7 @@ public:
 				}
 				NFile::CFile::fs_WriteStringToFile(TargetFilename, ASMOutput, false);
 			}
-			catch(NFile::CExceptionFile& _Ex)
+			catch (NFile::CExceptionFile &_Ex)
 			{
 				DConOut("Failed to write target BIN file {}: {}\n", TargetFilename, _Ex.f_GetErrorStr());
 				return 1;
@@ -814,36 +804,55 @@ public:
 		{
 			CByteVector lData = TargetMemoryStream.f_MoveVector();
 
-			CStr CppOutput = CStr::CFormat(
-						"// VFS Blob generated by MTool from {}\n"
-						"namespace NAOCC\n"
-						"{{\n"
-						"	void fg_SetExeFSData(int _nBytes, void const *_pData);\n"
-						"}\n"
-						"\n"
-						"int const gc_VFS_nBytes = {};\n"
-						"unsigned char const gc_VFS_Bytes[] = {{\n"
-					)
-					<< SourceFilename
-//					<< NTime::fg_GetFullTimeStr(NTime::CTime::fs_NowLocal())
-					<< lData.f_GetLen();
+			CStr CppOutput = CStr::CFormat
+				(
+					"// VFS Blob generated by MTool from {}\n"
+					"namespace NAOCC\n"
+					"{{\n"
+					"	void fg_SetExeFSData(int _nBytes, void const *_pData);\n"
+					"}\n"
+					"\n"
+					"int const gc_VFS_nBytes = {};\n"
+					"unsigned char const gc_VFS_Bytes[] = {{\n"
+				)
+				<< SourceFilename
+				// << NTime::fg_GetFullTimeStr(NTime::CTime::fs_NowLocal())
+				<< lData.f_GetLen()
+			;
 
-			auto Formatter = CStr::CFormat("\t0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0},\n");
+			auto Formatter = CStr::CFormat
+				(
+					"\t0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, "
+					"0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0},\n"
+				)
+			;
 			auto ByteFormatter = CStr::CFormat("0x{nfh,sz2,sf0}, ");
 
 			uint8 Input[16];
 			Formatter
-					<< Input[0]  << Input[1]  << Input[2]  << Input[3]
-					<< Input[4]  << Input[5]  << Input[6]  << Input[7]
-					<< Input[8]  << Input[9]  << Input[10] << Input[11]
-					<< Input[12] << Input[13] << Input[14] << Input[15];
+				<< Input[0]
+				<< Input[1]
+				<< Input[2]
+				<< Input[3]
+				<< Input[4]
+				<< Input[5]
+				<< Input[6]
+				<< Input[7]
+				<< Input[8]
+				<< Input[9]
+				<< Input[10]
+				<< Input[11]
+				<< Input[12]
+				<< Input[13]
+				<< Input[14]
+				<< Input[15]
+			;
 			ByteFormatter << Input[0];
-
 
 			umint nBytesLeft = lData.f_GetLen();
 			auto DataIter = lData.f_GetIterator();
 
-			while(nBytesLeft >= 16)
+			while (nBytesLeft >= 16)
 			{
 				fg_MemCopy(Input, &*DataIter, 16);
 				CppOutput += Formatter;
@@ -855,7 +864,7 @@ public:
 			if (nBytesLeft)
 			{
 				CppOutput += "\t";
-				for (;nBytesLeft;--nBytesLeft)
+				for (; nBytesLeft; --nBytesLeft)
 				{
 					Input[0] = *DataIter;
 					CppOutput += ByteFormatter;
@@ -872,13 +881,14 @@ public:
 				"	CExeFSSetter() { NAOCC::fg_SetExeFSData(gc_VFS_nBytes, gc_VFS_Bytes); }\n"
 				"};\n"
 				"\n"
-				"CExeFSSetter g_SetExeFS;\n\n";
+				"CExeFSSetter g_SetExeFS;\n\n"
+			;
 
 			try
 			{
 				NFile::CFile::fs_WriteStringToFile(CStr(TargetFilenameCpp), CppOutput, false);
 			}
-			catch(NFile::CExceptionFile& _Ex)
+			catch (NFile::CExceptionFile &_Ex)
 			{
 				DConOut("Failed to write target CPP file {}: {}\n", TargetFilenameCpp, _Ex.f_GetErrorStr());
 				return 1;
@@ -891,7 +901,7 @@ public:
 			{
 				MalterlibDependencyTracker.f_WriteDependencyFile(MalterlibDependencyFile, DepFile);
 			}
-			catch(NFile::CExceptionFile& _Ex)
+			catch (NFile::CExceptionFile &_Ex)
 			{
 				DConOut("Failed to write dependency file {}: {}\n", MalterlibDependencyFile, _Ex.f_GetErrorStr());
 				return 1;

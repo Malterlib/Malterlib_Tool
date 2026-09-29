@@ -7,10 +7,8 @@
 class CTool_CreateSymLink : public CTool2
 {
 public:
-
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
-
 		if (_Files.f_GetLen() != 2)
 			DError("Wrong number of parameters");
 
@@ -86,7 +84,6 @@ public:
 
 		return 0;
 	}
-
 };
 
 DMibRuntimeClass(CTool, CTool_CreateSymLink);

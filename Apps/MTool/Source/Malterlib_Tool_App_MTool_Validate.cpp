@@ -51,38 +51,17 @@ namespace NMib::NTool::NValidate
 				{
 					switch (Char)
 					{
-						case 'a':
-							Char = '\a';
-
-							break;
-						case 'b':
-							Char = '\b';
-
-							break;
-						case 't':
-							Char = '\t';
-
-							break;
-						case 'n':
-							Char = '\n';
-
-							break;
-						case 'v':
-							Char = '\v';
-
-							break;
-						case 'f':
-							Char = '\f';
-
-							break;
-						case 'r':
-							Char = '\r';
-
-							break;
-						case '\\':
-						case '"':
-							break;
-						default: DError("Invalid escape in Git path");
+					case 'a': Char = '\a'; break;
+					case 'b': Char = '\b'; break;
+					case 't': Char = '\t'; break;
+					case 'n': Char = '\n'; break;
+					case 'v': Char = '\v'; break;
+					case 'f': Char = '\f'; break;
+					case 'r': Char = '\r'; break;
+					case '\\':
+					case '"':
+						break;
+					default: DError("Invalid escape in Git path");
 					}
 				}
 			}
@@ -132,7 +111,6 @@ namespace NMib::NTool::NValidate
 
 		return Value;
 	}
-
 
 	bool fg_ValidateLine(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CCodeFormattingSettings const &_Settings, CFormatSink &_Sink)
 	{
@@ -251,8 +229,19 @@ namespace NMib::NTool::NValidate
 		auto RepositoryInfo = co_await NGit::fg_LaunchGitWithResult
 			(
 				{
-					"rev-parse", "--show-toplevel", "--absolute-git-dir", "--show-object-format", "--path-format=absolute"
-					, "--git-path", "objects", "--git-path", "index", "--shared-index-path", "--verify", "--quiet", "HEAD^{commit}"
+					"rev-parse"
+					, "--show-toplevel"
+					, "--absolute-git-dir"
+					, "--show-object-format"
+					, "--path-format=absolute"
+					, "--git-path"
+					, "objects"
+					, "--git-path"
+					, "index"
+					, "--shared-index-path"
+					, "--verify"
+					, "--quiet"
+					, "HEAD^{commit}"
 				}
 				, _Directory
 			)
@@ -339,8 +328,7 @@ namespace NMib::NTool::NValidate
 				}
 			)
 		;
-		CStr SnapshotHead = Head ? Head : bHasHead ? Info.f_GetLast()
-			: CStr("ref: refs/heads/validation");
+		CStr SnapshotHead = Head ? Head : bHasHead ? Info.f_GetLast() : CStr("ref: refs/heads/validation");
 		co_await
 			(
 				g_Dispatch(fg_BlockingActor()) / [AttributeDirectory, DiffDirectory, SnapshotGitDirectory, SnapshotHead, Info, Head, bHasHead]()
@@ -445,11 +433,7 @@ namespace NMib::NTool::NValidate
 				if (bAttributes)
 					continue;
 
-				co_return DMibErrorInstance
-					(
-						"{} in the validation snapshot must be a regular file: {}"_f << (bStyle ? "A formatting style" : "EditorConfig") << (_Directory / Path)
-					)
-				;
+				co_return DMibErrorInstance("{} in the validation snapshot must be a regular file: {}"_f << (bStyle ? "A formatting style" : "EditorConfig") << (_Directory / Path));
 			}
 
 			auto Contents = co_await NGit::fg_LaunchGit({"cat-file", "blob", Hash}, DiffDirectory, DiffEnvironment);
@@ -486,8 +470,18 @@ namespace NMib::NTool::NValidate
 
 		TCVector<CStr> RawParams =
 			{
-				"-c", "core.quotePath=true", "-c", "core.attributesFile=" + (AttributeDirectory / "attributes"), "diff", "--raw", "--no-abbrev", "--find-renames"
-				, "--no-color", "--no-ext-diff", "--no-textconv", "--ignore-submodules=all"
+				"-c"
+				, "core.quotePath=true"
+				, "-c"
+				, "core.attributesFile=" + (AttributeDirectory / "attributes")
+				, "diff"
+				, "--raw"
+				, "--no-abbrev"
+				, "--find-renames"
+				, "--no-color"
+				, "--no-ext-diff"
+				, "--no-textconv"
+				, "--ignore-submodules=all"
 			}
 		;
 		RawParams.f_Insert(Comparison);
@@ -549,9 +543,17 @@ namespace NMib::NTool::NValidate
 			auto PatchPath = AttributeDirectory / ("patch-{}"_f << Counts.m_nFiles);
 			TCVector<CStr> DiffParams =
 				{
-					"-c", "core.attributesFile=" + (AttributeDirectory / "attributes"), "--literal-pathspecs", "diff"
-					, "--no-color", "--no-ext-diff", "--no-textconv", "--unified=2147483647"
-					, "--inter-hunk-context=0", "--ignore-submodules=all", "--output=" + PatchPath
+					"-c"
+					, "core.attributesFile=" + (AttributeDirectory / "attributes")
+					, "--literal-pathspecs"
+					, "diff"
+					, "--no-color"
+					, "--no-ext-diff"
+					, "--no-textconv"
+					, "--unified=2147483647"
+					, "--inter-hunk-context=0"
+					, "--ignore-submodules=all"
+					, "--output=" + PatchPath
 				}
 			;
 			// Compare only the renamed file's blobs, retaining their paths for Git attributes.

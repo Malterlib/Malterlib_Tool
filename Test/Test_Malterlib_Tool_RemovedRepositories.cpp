@@ -65,8 +65,7 @@ namespace NMib::NTool
 				co_await Repo.f_Git({"remote", "add", "origin", Remotes / "Root.git"});
 
 				// The build systems differ in which repositories they use through UseB and UseC
-				auto fUpdate = [&](CStr _BuildSystem, bool _bUseB, bool _bUseC, TCVector<CStr> _Extra)
-					-> TCFuture<CProcessLaunchActor::CSimpleLaunchResult>
+				auto fUpdate = [&](CStr _BuildSystem, bool _bUseB, bool _bUseC, TCVector<CStr> _Extra) -> TCFuture<CProcessLaunchActor::CSimpleLaunchResult>
 					{
 						Repo.m_Environment["UseB"] = _bUseB ? "true" : "false";
 						Repo.m_Environment["UseC"] = _bUseC ? "true" : "false";
@@ -202,13 +201,7 @@ namespace NMib::NTool
 				{
 					// A state from before the list of build systems, without LeaveWhenRemoved, as older MTools write it
 					CFile::fs_DeleteFile(Repo.m_Path / "BuildSystem/BuildSystems.json");
-					CFile::fs_WriteStringToFile
-						(
-							Repo.m_Path / "BuildSystem/Default/RepositoryState.json"
-							, "{\"SeenRepositories\": {\"\": 1, \"Repos/A\": 1}}"
-							, false
-						)
-					;
+					CFile::fs_WriteStringToFile(Repo.m_Path / "BuildSystem/Default/RepositoryState.json", "{\"SeenRepositories\": {\"\": 1, \"Repos/A\": 1}}", false);
 
 					auto Result = co_await fUpdate("Default", false, false, {});
 					DMibExpect(Result.m_ExitCode, ==, 0);
@@ -256,13 +249,7 @@ namespace NMib::NTool
 
 					// An older MTool updates the state of Other without the list of build systems
 					CFile::fs_CreateDirectory(Repo.m_Path / "BuildSystem/Other");
-					CFile::fs_WriteStringToFile
-						(
-							Repo.m_Path / "BuildSystem/Other/RepositoryState.json"
-							, "{\"SeenRepositories\": {\"\": 1, \"Repos/A\": 1, \"Repos/B\": 1}}"
-							, false
-						)
-					;
+					CFile::fs_WriteStringToFile(Repo.m_Path / "BuildSystem/Other/RepositoryState.json", "{\"SeenRepositories\": {\"\": 1, \"Repos/A\": 1, \"Repos/B\": 1}}", false);
 
 					auto Result = co_await fUpdate("Default", false, false, {"--reconcile-removed=*:delete"});
 					DMibExpect(Result.m_ExitCode, ==, 0);

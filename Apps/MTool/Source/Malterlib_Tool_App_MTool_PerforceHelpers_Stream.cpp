@@ -14,8 +14,7 @@ public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -71,16 +70,13 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceInitializeStream);
 
-
 class CTool_PerforceSwitchWorkspaceTaskStream : public CTool2
 {
 public:
-
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -117,9 +113,7 @@ public:
 			if (pOwned)
 			{
 				for (auto iOwned = pOwned->f_GetChildIterator(); iOwned; ++iOwned)
-				{
 					CPerforceFunctions::fs_SwitchStream(Functions, iOwned->f_GetThisValue(), true);
-				}
 			}
 		}
 
@@ -129,15 +123,12 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceSwitchWorkspaceTaskStream);
 
-
 class CTool_PerforceCreateStreamBranches : public CTool2
 {
 public:
-
 	static void fs_CreateStreamBranchForStreams(CPerforceFunctions &_Functions, CStr const &_BranchName, CStr const &_From, CStr const &_To)
 	{
-		auto fl_GetRelated
-			= [&](CStr const &_Stream) -> TCVector<CStr>
+		auto fl_GetRelated = [&](CStr const &_Stream) -> TCVector<CStr>
 			{
 				TCSet<CStr> RelatedStreamsSet;
 				TCVector<CStr> RelatedStreams;
@@ -210,7 +201,6 @@ public:
 
 			if (!bFound)
 				DConOut("Warning: No common parent stream found for {}{\n}", Stream);
-
 		}
 
 		CPerforceClient::CBranchSpec Branch;
@@ -219,8 +209,7 @@ public:
 
 		CPerforceClient::CStream Stream = _Functions.f_GetStreamCached(_From);
 
-		auto fl_AddBranchMapping
-			= [&](CStr const &_From, CStr const &_To)
+		auto fl_AddBranchMapping = [&](CStr const &_From, CStr const &_To)
 			{
 				if (_From == _To)
 					return;
@@ -285,8 +274,7 @@ public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -314,8 +302,7 @@ public:
 		CPerforceClient::CStream Stream = Functions.f_GetStreamCached(StreamRoot);
 		CPerforceClient::CStream ParentStream = Functions.f_GetStreamCached(Stream.m_Parent);
 
-		CStr FromParentName
-			= fg_Format
+		CStr FromParentName = fg_Format
 			(
 				"//{}/{} -> //{}/{}"
 				, CPerforceFunctions::fs_GetDepot(Stream.m_Parent)
@@ -325,8 +312,7 @@ public:
 			)
 		;
 
-		CStr ToParentName
-			= fg_Format
+		CStr ToParentName = fg_Format
 			(
 				"//{}/{} -> //{}/{}"
 				, CPerforceFunctions::fs_GetDepot(StreamRoot)
@@ -339,7 +325,7 @@ public:
 		FromParentName = FromParentName.f_Replace(" ", "_").f_Replace("(", "").f_Replace(")", "");
 		ToParentName = ToParentName.f_Replace(" ", "_").f_Replace("(", "").f_Replace(")", "");
 
-		fs_CreateStreamBranchForStreams(Functions, FromParentName , Stream.m_Parent, StreamRoot);
+		fs_CreateStreamBranchForStreams(Functions, FromParentName, Stream.m_Parent, StreamRoot);
 		fs_CreateStreamBranchForStreams(Functions, ToParentName, StreamRoot, Stream.m_Parent);
 		return 0;
 	}
@@ -350,11 +336,9 @@ DMibRuntimeClass(CTool, CTool_PerforceCreateStreamBranches);
 class CTool_PerforceCreatePatchesForStream : public CTool2
 {
 public:
-
 	static void fs_CreatePatchesForStream(CPerforceFunctions &_Functions, CStr const &_From, CStr const &_To)
 	{
-		auto fl_GetRelated
-			= [&](CStr const &_Stream) -> TCVector<CStr>
+		auto fl_GetRelated = [&](CStr const &_Stream) -> TCVector<CStr>
 			{
 				TCSet<CStr> RelatedStreamsSet;
 				TCVector<CStr> RelatedStreams;
@@ -417,7 +401,7 @@ public:
 				if (pParents)
 				{
 					MappedStreams[Stream] = *pParents->f_FindSmallest();
-//					DConOut("{} -> {}\n", Stream, *pParents->f_FindSmallest());
+					// DConOut("{} -> {}\n", Stream, *pParents->f_FindSmallest());
 					bFound = true;
 					break;
 				}
@@ -428,7 +412,6 @@ public:
 
 			if (!bFound)
 				DConOut("Warning: No common parent stream found for {}{\n}", Stream);
-
 		}
 
 		auto DisableCreate = _Functions.f_GetDisabledCreate(_Functions.f_GetStreamCached(_From));
@@ -486,8 +469,7 @@ public:
 			}
 			CStr BranchName = fg_Format("Temp_{}", NCryptography::fg_GetRandomUuidString());
 			_Functions.f_GetClient().f_CreateBranch(BranchName, Branch);
-			auto Cleanup
-				= fg_OnScopeExit
+			auto Cleanup = fg_OnScopeExit
 				(
 					[&]
 					{
@@ -503,9 +485,7 @@ public:
 				)
 			;
 
-
-			auto fl_GeneratePatch
-				= [&](bool _bFullContext)
+			auto fl_GeneratePatch = [&](bool _bFullContext)
 				{
 					CStr Patch;
 					if (!_Functions.f_GetClient().f_NoThrow().f_CreatePatch(BranchName, _bFullContext, Patch))
@@ -544,8 +524,7 @@ public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -583,9 +562,7 @@ public:
 		{
 			TCVector<CStr> Streams = pClient->f_FindStreams(fg_Format("Parent={}", StreamRoot));
 			for (auto &Stream : Streams)
-			{
 				fs_CreatePatchesForStream(Functions, StreamRoot, Stream);
-			}
 		}
 		else
 		{
@@ -599,16 +576,13 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceCreatePatchesForStream);
 
-
 class CTool_PerforceSetBuildServer : public CTool2
 {
 public:
-
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -704,9 +678,7 @@ public:
 				if (!Errors.f_IsEmpty())
 				{
 					for (auto &Error : Errors)
-					{
 						DConErrOut("{}: {}\n", Error.m_Path, Error.m_Error);
-					}
 				}
 				if (!IntegrateResult.f_IsEmpty())
 				{

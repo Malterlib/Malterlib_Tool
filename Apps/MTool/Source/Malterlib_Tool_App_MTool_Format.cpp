@@ -1263,12 +1263,12 @@ namespace NMib::NTool::NFormat
 	struct CFormatWalkRepository
 	{
 		CStr m_Root;
-		bool m_bGit = false;         // False for the working directory standing in for no repository.
-		bool m_bIgnoreCase = false;  // The repository's core.ignoreCase.
+		bool m_bGit = false;        // False for the working directory standing in for no repository.
+		bool m_bIgnoreCase = false; // The repository's core.ignoreCase.
 		NGit::CGitIgnore m_Ignore;
 		NGit::CGitAttributes m_Attributes;
-		TCSet<CStr> m_Tracked;       // The paths git tracks below those asked about, relative to the root, and the directories holding them.
-		TCSet<CStr> m_Asked;         // The ignored paths git was asked about, relative to the root.
+		TCSet<CStr> m_Tracked;      // The paths git tracks below those asked about, relative to the root, and the directories holding them.
+		TCSet<CStr> m_Asked;        // The ignored paths git was asked about, relative to the root.
 		TCActor<NDevelop::CEditorConfigResolver> m_Configurations;
 	};
 

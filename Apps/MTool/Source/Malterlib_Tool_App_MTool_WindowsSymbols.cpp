@@ -15,7 +15,7 @@ namespace NMib::NTool
 		File.f_Open(_Path, EFileOpen_Read | EFileOpen_ShareAll);
 		CFilePos FLen;
 		{
-			FLen = fg_Min(File.f_GetLength(), 128*1024);
+			FLen = fg_Min(File.f_GetLength(), 128 * 1024);
 			Mem.f_SetLen(FLen);
 			File.f_Read(Mem.f_GetArray(), FLen);
 		}
@@ -45,7 +45,6 @@ namespace NMib::NTool
 		if (!pGeneralHeaders)
 			DError(fg_Format("Could not find PE header: {}", _Path));
 
-
 		auto fExtractGuid = [&](auto &_Header)
 			{
 				ReturnInfo.m_TimestampRaw = _Header.m_FileHeader.m_TimeDateStamp;
@@ -66,11 +65,10 @@ namespace NMib::NTool
 				{
 					auto SectionSize = Section.m_Misc.m_VirtualSize;
 
-					if( SectionSize == 0 ) // compensate for Watcom linker strangeness, according to Matt Pietrek
+					if (SectionSize == 0) // compensate for Watcom linker strangeness, according to Matt Pietrek
 						SectionSize = Section.m_SizeOfRawData;
 
-					if( ( DebugRva >= Section.m_VirtualAddress ) &&
-						( DebugRva < Section.m_VirtualAddress + SectionSize ) )
+					if ((DebugRva >= Section.m_VirtualAddress) && (DebugRva < Section.m_VirtualAddress + SectionSize))
 					{
 						// Yes, the RVA belongs to this section
 						pDebugSection = &Section;
@@ -83,7 +81,7 @@ namespace NMib::NTool
 
 				// Look up the file offset using the section header
 
-				umint Diff = (umint)( pDebugSection->m_VirtualAddress - pDebugSection->m_PointerToRawData);
+				umint Diff = (umint)(pDebugSection->m_VirtualAddress - pDebugSection->m_PointerToRawData);
 
 				umint FileOffset = DebugRva - Diff;
 
@@ -94,7 +92,8 @@ namespace NMib::NTool
 				fReadData(DebugInfo.m_PointerToRawData, &PDB, sizeof(PDB));
 
 				ReturnInfo.m_PDBFile = PDB.m_PdbFileName;
-				ReturnInfo.m_PDBGuid = "{nfh,sj8,sf0}{nfh,sj4,sf0}{nfh,sj4,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh}"_f
+				ReturnInfo.m_PDBGuid
+					= "{nfh,sj8,sf0}{nfh,sj4,sf0}{nfh,sj4,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh,sj2,sf0}{nfh}"_f
 					<< PDB.m_Signature.m_Data1
 					<< PDB.m_Signature.m_Data2
 					<< PDB.m_Signature.m_Data3

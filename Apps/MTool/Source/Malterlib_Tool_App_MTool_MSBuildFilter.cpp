@@ -138,13 +138,7 @@ public:
 			if (_CommandLine.f_Find("\\CL.exe") > 0 || _CommandLine.f_Find("\\clang-cl.exe") > 0)
 				++m_CommandCounts.m_nCompile;
 			// Check for link/lib commands
-			else if
-			(
-				_CommandLine.f_Find("\\link.exe") > 0
-				|| _CommandLine.f_Find("\\Lib.exe") > 0
-				|| _CommandLine.f_Find("\\lld-link.exe") > 0
-				|| _CommandLine.f_Find("\\llvm-lib.exe") > 0
-			)
+			else if (_CommandLine.f_Find("\\link.exe") > 0 || _CommandLine.f_Find("\\Lib.exe") > 0 || _CommandLine.f_Find("\\lld-link.exe") > 0 || _CommandLine.f_Find("\\llvm-lib.exe") > 0)
 				++m_CommandCounts.m_nLink;
 			else
 				++m_CommandCounts.m_nOther;
@@ -157,7 +151,7 @@ public:
 
 			auto CurrentTime = m_LastProgressUpdate.f_GetTime();
 
-			constexpr static auto c_TimeInterval = 33.3333333333_ms;
+			static constexpr auto c_TimeInterval = 33.3333333333_ms;
 
 			if (m_bProgressShown && CurrentTime < c_TimeInterval && !_bForce)
 				co_return {};
@@ -231,7 +225,7 @@ public:
 			co_return {};
 		}
 
-		TCFuture<void>  f_OutputProject(umint _iProject)
+		TCFuture<void> f_OutputProject(umint _iProject)
 		{
 			auto *pProject = m_ProjectMap.f_FindEqual(_iProject);
 			if (!pProject)
@@ -505,9 +499,8 @@ public:
 						if (CleanLine.f_StartsWith("  \"") && CleanLine.f_EndsWith("\""))
 							bSkipThisLine = true;
 						else
-						 	ProjectInfo.m_bLastWasLink = false;
+							ProjectInfo.m_bLastWasLink = false;
 					}
-
 
 					if (bSkipThisLine || CleanTrimmed == ":VCEnd")
 					{
@@ -586,12 +579,7 @@ public:
 							}
 							else
 							{
-								for
-								(
-									auto iProject = m_ProjectMap.f_GetIterator_SmallestGreaterThanEqual(m_iLastOutput)
-									; iProject && iProject->m_bIsCompleted
-									; ++iProject
-								)
+								for (auto iProject = m_ProjectMap.f_GetIterator_SmallestGreaterThanEqual(m_iLastOutput); iProject && iProject->m_bIsCompleted; ++iProject)
 								{
 									auto &ProjectInfo = *iProject;
 
@@ -642,7 +630,6 @@ public:
 					}
 					else
 					{
-
 						if (bVerbose)
 							co_await pCommandLine->f_StdOut("\n=== Incomplete Project {} ({}) ===\n"_f << ProjectInfo.m_ProjectName << iProject);
 						for (auto const &BufferedLine : ProjectInfo.m_BufferedLines)
@@ -787,14 +774,7 @@ public:
 						auto Subscription = co_await StdInActor
 							(
 								&CStdInActor::f_RegisterForInputBinary
-								, g_ActorFunctor /
-								[
-									pCommandLine = _pCommandLine
-									, bVerbose
-									, bPassThrough
-									, EofPromise = fg_Move(EofDone.m_Promise)
-									, pState
-								]
+								, g_ActorFunctor / [pCommandLine = _pCommandLine, bVerbose, bPassThrough, EofPromise = fg_Move(EofDone.m_Promise), pState]
 								(EStdInReaderOutputType _Type, CIOByteVector _Input, CStr _Error) -> TCFuture<void>
 								{
 									using namespace NMib::NStr;

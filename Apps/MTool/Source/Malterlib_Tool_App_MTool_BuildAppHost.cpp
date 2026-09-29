@@ -30,12 +30,12 @@ namespace
 	// FileType byte values from Microsoft.NET.HostModel.Bundle.FileType.
 	enum EBundleFileType : uint8
 	{
-		EBundleFileType_Unknown = 0,
-		EBundleFileType_Assembly = 1,
-		EBundleFileType_NativeBinary = 2,
-		EBundleFileType_DepsJson = 3,
-		EBundleFileType_RuntimeConfigJson = 4,
-		EBundleFileType_Symbols = 5,
+		EBundleFileType_Unknown             = 0
+		, EBundleFileType_Assembly          = 1
+		, EBundleFileType_NativeBinary      = 2
+		, EBundleFileType_DepsJson          = 3
+		, EBundleFileType_RuntimeConfigJson = 4
+		, EBundleFileType_Symbols           = 5
 	};
 
 	struct CBundleFile
@@ -247,10 +247,9 @@ public:
 			(
 				{
 					"Names"_o= _o["BuildAppHost"]
-					, "Description"_o=
-						"Patch a .NET apphost.exe template into the launcher for a managed assembly.\n"
-						"With one or more --bundle-file, additionally append a .NET 8 single-file\n"
-						"bundle (format v6) embedding the managed assembly and runtimeconfig.json.\n"
+					, "Description"_o= "Patch a .NET apphost.exe template into the launcher for a managed assembly.\n"
+					"With one or more --bundle-file, additionally append a .NET 8 single-file\n"
+					"bundle (format v6) embedding the managed assembly and runtimeconfig.json.\n"
 					, "Category"_o= "Build"
 					, "Options"_o=
 					{
@@ -283,12 +282,11 @@ public:
 							"Names"_o= _o["--bundle-file"]
 							, "Type"_o= _o[""]
 							, "Default"_o= _o[]
-							, "Description"_o=
-								"Comma-separated paths of files to embed in a single-file bundle.\n"
-								"Type is inferred from each extension: .dll = assembly, .runtimeconfig.json\n"
-								"= runtimeconfig, .deps.json = depsjson, .pdb = symbols, .exe/.so/.dylib =\n"
-								"native, otherwise unknown. Omit to skip bundle generation. When bundling,\n"
-								"the file list must include the managed entry-point .dll named in --assembly.\n"
+							, "Description"_o= "Comma-separated paths of files to embed in a single-file bundle.\n"
+							"Type is inferred from each extension: .dll = assembly, .runtimeconfig.json\n"
+							"= runtimeconfig, .deps.json = depsjson, .pdb = symbols, .exe/.so/.dylib =\n"
+							"native, otherwise unknown. Omit to skip bundle generation. When bundling,\n"
+							"the file list must include the managed entry-point .dll named in --assembly.\n"
 						}
 					}
 				}

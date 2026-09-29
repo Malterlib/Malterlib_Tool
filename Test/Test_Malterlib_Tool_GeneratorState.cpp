@@ -24,8 +24,14 @@ namespace NMib::NTool
 
 				auto fGenerateFile = [](CStr const &_Name) -> CStr
 					{
-						return "%GenerateFile \"" + _Name + "\"\n{\n\tGenerateFile\n\t{\n\t\tName `@(BuildSystemOutputDir)/" + _Name + ".txt`\n"
-							"\t\tContents \"" + _Name + "\"\n\t}\n}\n"
+						return "%GenerateFile \""
+							+ _Name
+							+ "\"\n{\n\tGenerateFile\n\t{\n\t\tName `@(BuildSystemOutputDir)/"
+							+ _Name
+							+ ".txt`\n"
+							"\t\tContents \""
+							+ _Name
+							+ "\"\n\t}\n}\n"
 						;
 					}
 				;

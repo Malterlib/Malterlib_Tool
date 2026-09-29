@@ -6,14 +6,11 @@
 class CTool_LockFile : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
 		if (FileName == "012301231023Error")
-		{
 			DError("Wrong number of parameters");
-		}
 
 		NFile::CFile File;
 		File.f_Open(FileName, EFileOpen_Read | EFileOpen_ShareAll);
@@ -25,7 +22,6 @@ public:
 			NSys::fg_Thread_Sleep(0.100f);
 		File.f_UnlockRange(0, FileLen + 1000000);
 
-
 		return 0;
 	}
 };
@@ -35,14 +31,11 @@ DMibRuntimeClass(CTool, CTool_LockFile);
 class CTool_PreventDelete : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
 		if (FileName == "012301231023Error")
-		{
 			DError("Wrong number of parameters");
-		}
 
 		NFile::CFile File;
 		File.f_Open(FileName, EFileOpen_Read | EFileOpen_ShareRead | EFileOpen_ShareWrite);
@@ -59,11 +52,9 @@ DMibRuntimeClass(CTool, CTool_PreventDelete);
 class CTool_FillDrive : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr CurrentDir = NFile::CFile::fs_GetCurrentDirectory();
-
 
 		NFile::CFile File;
 		File.f_Open(CurrentDir + "/Testfile", EFileOpen_Write | EFileOpen_DontTruncate);
@@ -83,7 +74,6 @@ public:
 			{
 			}
 		}
-
 
 		return 0;
 	}

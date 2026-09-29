@@ -10,10 +10,10 @@ namespace NMib
 	namespace NStr
 	{
 		template <typename tf_CStr, typename tf_FOnLine>
-		void fg_StrForEachLine(tf_CStr const& _Str, tf_FOnLine && _fOnLine)
+		void fg_StrForEachLine(tf_CStr const &_Str, tf_FOnLine &&_fOnLine)
 		{
 			using CStrPtrType = typename NMib::NStr::TCStrPtrFromCharType<typename tf_CStr::CChar>::CType;
-			auto const* pParse = _Str.f_GetStr();
+			auto const *pParse = _Str.f_GetStr();
 			while (*pParse)
 			{
 				auto pStart = pParse;
@@ -31,7 +31,6 @@ namespace NMib
 class CTool_CheckDependencies : public CTool2
 {
 public:
-
 	struct CDirectory
 	{
 		CStr m_Path;
@@ -60,7 +59,7 @@ public:
 
 		bool f_AlreadyDirty() const
 		{
-			for (auto & File : m_Outputs)
+			for (auto &File : m_Outputs)
 			{
 				if (CFile::fs_FileExists(File))
 					return false;
@@ -70,7 +69,7 @@ public:
 
 		void f_NeedsUpdating() const
 		{
-			for (auto & File : m_Outputs)
+			for (auto &File : m_Outputs)
 			{
 				if (CFile::fs_FileExists(File))
 					CFile::fs_DeleteFile(File);
@@ -85,7 +84,7 @@ public:
 		m_WriteTimes.f_Destroy();
 	}
 
-	NTime::CTime f_GetWriteTime(NStr::CStr const& _File)
+	NTime::CTime f_GetWriteTime(NStr::CStr const &_File)
 	{
 		auto WriteTime = (*m_WriteTimes)(_File);
 		if (!WriteTime.f_WasCreated())
@@ -93,7 +92,6 @@ public:
 		*WriteTime = CFile::fs_GetWriteTime(_File);
 		return *WriteTime;
 	}
-
 
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
@@ -108,7 +106,7 @@ public:
 		bool bVerbose = pVerbose ? *pVerbose == "true" : false;
 
 		CStr const *pRelative = _Params.f_FindEqual("Relative");
-		bool bRelative = pRelative? *pRelative == "true" : false;
+		bool bRelative = pRelative ? *pRelative == "true" : false;
 
 		CStr const *pOutputDirty = _Params.f_FindEqual("OutputDirty");
 
@@ -158,7 +156,7 @@ public:
 				if (Line.f_IsEmpty())
 					continue;
 
-				if (Line[Line.f_GetLen()-1] == '/')
+				if (Line[Line.f_GetLen() - 1] == '/')
 					Line = Line.f_Left(Line.f_GetLen() - 1);
 
 				Directories.f_Insert(Line);
@@ -166,13 +164,11 @@ public:
 		}
 
 		TCVector<CStr> Files;
-		for (auto & Dir : Directories)
+		for (auto &Dir : Directories)
 		{
 			auto FoundFiles = CFile::fs_FindFiles(Dir + "/*.MalterlibDependency");
-			for (auto & File : FoundFiles)
-			{
+			for (auto &File : FoundFiles)
 				Files.f_Insert(File);
-			}
 		}
 
 		if (Files.f_IsEmpty())
@@ -187,9 +183,9 @@ public:
 		fg_ParallellForEach
 			(
 				Files
-				, [&Dependencies, &DependenciesLock, &UsesDigest, &ParamsDesc](CStr const& _File)
+				, [&Dependencies, &DependenciesLock, &UsesDigest, &ParamsDesc](CStr const &_File)
 				{
-					CStr const& File = _File;
+					CStr const &File = _File;
 
 					CDirectory *pLastDirectory = nullptr;
 					CDependency Dependency;
@@ -197,9 +193,9 @@ public:
 					fg_StrForEachLine
 						(
 							Contents
-							, [&](CStrPtr const& _Str)
+							, [&](CStrPtr const &_Str)
 							{
-								CStrPtr const& Line = _Str;
+								CStrPtr const &Line = _Str;
 								if (Line.f_IsEmpty())
 									return;
 
@@ -232,7 +228,6 @@ public:
 									}
 								}
 
-
 								if (Line.f_StartsWith("Output "))
 								{
 									CStr Path;
@@ -251,7 +246,9 @@ public:
 									uint64 Fraction;
 									uint32 Attributes;
 									int32 bFollowLinks;
-									aint nChars = (CStrPtr::CParse("Directory {} {nfh} {} {nfh} {nfh} ") >> bRecursive >> Attributes >> bFollowLinks >> Seconds >> Fraction).f_Parse(Line, nParsed);
+									aint nChars = (CStrPtr::CParse("Directory {} {nfh} {} {nfh} {nfh} ") >> bRecursive >> Attributes >> bFollowLinks >> Seconds >> Fraction)
+										.f_Parse(Line, nParsed)
+									;
 
 									if (nParsed != 5)
 										DError("Invalid 'Directory' entry in dependency file [{}]", ParamsDesc);
@@ -280,7 +277,6 @@ public:
 									if (nParsed != 3)
 										DError("Invalid 'FileDigest' entry in dependency file [{}]", ParamsDesc);
 
-
 									CStr Path;
 									Path.f_AddStr(Line.f_GetStr() + nChars, Line.f_GetLen() - nChars);
 
@@ -302,7 +298,6 @@ public:
 
 									if (nParsed != 2)
 										DError("Invalid 'File' entry in dependency file [{}]", ParamsDesc);
-
 
 									CStr Path;
 									Path.f_AddStr(Line.f_GetStr() + nChars, Line.f_GetLen() - nChars);
@@ -336,22 +331,22 @@ public:
 		fg_ParallellForEach
 			(
 				Dependencies
-				, [this, bVerbose, bUsesDigest, &fConvertPath, &bAnyNeedsUpdating, &ParamsDesc](CDependency const& _Dependency)
+				, [this, bVerbose, bUsesDigest, &fConvertPath, &bAnyNeedsUpdating, &ParamsDesc](CDependency const &_Dependency)
 				{
-					CDependency const& Dependency = _Dependency;
+					CDependency const &Dependency = _Dependency;
 					TCAtomic<bool> bNeedsUpdating(false);
 					do
 					{
 						if (Dependency.f_AlreadyDirty())
 							break;
 
-//						fg_ParallellForEach // Thread pool implementation is too poor for now
+						// fg_ParallellForEach // Thread pool implementation is too poor for now
 						fg_ForEach
 							(
 								Dependency.m_Files
-								, [this, bVerbose, &bNeedsUpdating, &ParamsDesc](CDependencyFile const& _File)
+								, [this, bVerbose, &bNeedsUpdating, &ParamsDesc](CDependencyFile const &_File)
 								{
-									CDependencyFile const& File = _File;
+									CDependencyFile const &File = _File;
 									try
 									{
 										CTime WriteTime = f_GetWriteTime(File.m_Path);
@@ -367,7 +362,7 @@ public:
 											bNeedsUpdating = true;
 										}
 									}
-									catch (CExceptionFile const& _Exception)
+									catch (CExceptionFile const &_Exception)
 									{
 										if (bVerbose)
 											DConOut("Dependency check [{}]: Exception reading file write time({}): {}\n", ParamsDesc, File.m_Path, _Exception.f_GetErrorStr());
@@ -382,7 +377,7 @@ public:
 
 						try
 						{
-							for (auto & Directory : Dependency.m_Directories)
+							for (auto &Directory : Dependency.m_Directories)
 							{
 								if (!bUsesDigest)
 								{
@@ -423,13 +418,23 @@ public:
 								if (Files != Directory.m_FoundFiles)
 								{
 									if (bVerbose)
-										DConOut("Dependency check [{}]: Found files differ ({}): {} != {}\n", ParamsDesc, Directory.m_Path, Files.f_GetLen(), Directory.m_FoundFiles.f_GetLen());
+									{
+										DConOut
+											(
+												"Dependency check [{}]: Found files differ ({}): {} != {}\n"
+												, ParamsDesc
+												, Directory.m_Path
+												, Files.f_GetLen()
+												, Directory.m_FoundFiles.f_GetLen()
+											)
+										;
+									}
 									bNeedsUpdating = true;
 									break;
 								}
 							}
 						}
-						catch (CExceptionFile const& _Exception)
+						catch (CExceptionFile const &_Exception)
 						{
 							if (bVerbose)
 								DConOut("Dependency check [{}]: Exception checking file finds: {}\n", ParamsDesc, _Exception.f_GetErrorStr());

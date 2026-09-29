@@ -488,9 +488,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		(
 			{
 				"Names"_o= _o["format"]
-				, "Description"_o=
-					"Format the sources of every repository that sets Repository.Format, as MTool Format does for one: "
-					"the files that opt in with malterlib_format = malterlib, malterlib-c or malterlib-buildsystem in .editorconfig, found under the repository root.\n"
+				, "Description"_o= "Format the sources of every repository that sets Repository.Format, as MTool Format does for one: "
+				"the files that opt in with malterlib_format = malterlib, malterlib-c or malterlib-buildsystem in .editorconfig, found under the repository root.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
 				{
@@ -652,9 +651,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		(
 			{
 				"Names"_o= _o["validate"]
-				, "Description"_o=
-					"Validate the text files of every repository that sets Repository.Format, as MTool Validate does for one, "
-					"in one run with one summary.\n"
+				, "Description"_o= "Validate the text files of every repository that sets Repository.Format, as MTool Validate does for one, "
+				"in one run with one summary.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
 				{
@@ -816,12 +814,11 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		(
 			{
 				"Names"_o= _o["tidy"]
-				, "Description"_o=
-					"Run clang-tidy over the sources of every repository that sets Repository.Tidy.Enabled, with the compile commands the build system "
-					"generated for their targets. The .clang-tidy files of the sources choose the checks. A file is checked when the deepest repository "
-					"it is in sets Repository.Tidy.Enabled, and its path relative to that repository matches Repository.Tidy.IncludeFiles, if there are "
-					"any, and not Repository.Tidy.ExcludeFiles. A source's compile reports the source and the checked headers of every repository, as "
-					"the checks plugin does in a build: a problem in a template shows where it is instantiated.\n"
+				, "Description"_o= "Run clang-tidy over the sources of every repository that sets Repository.Tidy.Enabled, with the compile commands the build system "
+				"generated for their targets. The .clang-tidy files of the sources choose the checks. A file is checked when the deepest repository "
+				"it is in sets Repository.Tidy.Enabled, and its path relative to that repository matches Repository.Tidy.IncludeFiles, if there are "
+				"any, and not Repository.Tidy.ExcludeFiles. A source's compile reports the source and the checked headers of every repository, as "
+				"the checks plugin does in a build: a problem in a template shows where it is instantiated.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
 				{
@@ -829,15 +826,14 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					{
 						"Names"_o= _o["--mode"]
 						, "Default"_o= "file"
-						, "Description"_o=
-							"Which compile commands are checked:\n"
-							"@Indent=11\r"
-							"   file:    Each source once, with the command of the best target and configuration: the targets of --target first, then "
-							"those of --workspace, then any other; the configuration by name first, then by base name, then any.\r"
-							"   target:  Every source of the targets of --target, each with its database in --workspace, or else in its highest "
-							"priority workspace.\r"
-							"   all:     Every source of every target, once per distinct command, so each source is checked with every set of defines it "
-							"is built with.\r"
+						, "Description"_o= "Which compile commands are checked:\n"
+						"@Indent=11\r"
+						"   file:    Each source once, with the command of the best target and configuration: the targets of --target first, then "
+						"those of --workspace, then any other; the configuration by name first, then by base name, then any.\r"
+						"   target:  Every source of the targets of --target, each with its database in --workspace, or else in its highest "
+						"priority workspace.\r"
+						"   all:     Every source of every target, once per distinct command, so each source is checked with every set of defines it "
+						"is built with.\r"
 					}
 					, "Target?"_o=
 					{
@@ -857,9 +853,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						"Names"_o= _o["--config"]
 						, "Type"_o= _o[""]
 						, "Default"_o= _o[]
-						, "Description"_o=
-							"The configurations, as a comma-separated list of \"<Platform> <Architecture> <Configuration>\" or names of configuration files, "
-							"each checked in turn for more coverage. Without one, each target is checked with its highest priority configuration.\n"
+						, "Description"_o= "The configurations, as a comma-separated list of \"<Platform> <Architecture> <Configuration>\" or names of configuration files, "
+						"each checked in turn for more coverage. Without one, each target is checked with its highest priority configuration.\n"
 					}
 					, "Checks?"_o=
 					{
@@ -983,14 +978,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						{
 							auto RunOptions = Options;
 							TCMap<CStr, CBuildSystem::CRepoTidyFiles> TidyFiles;
-							if (auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations
-									(
-										GenerateOptions
-										, RepoFilter
-										, RunOptions.m_CheckedRepositories
-										, &RunOptions.m_AllRepositories
-										, &TidyFiles
-									)
+							if
+							(
+								auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations
+								(
+									GenerateOptions
+									, RepoFilter
+									, RunOptions.m_CheckedRepositories
+									, &RunOptions.m_AllRepositories
+									, &TidyFiles
+								)
 								; Retry != CBuildSystem::ERetry_None
 							)
 							{
@@ -1582,7 +1579,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					{
 						"Names"_o= _o["--push-pulls"]
 						, "Default"_o= false
-						, "Description"_o= "Also push branches whose same-named remote branch would show as needing pull in status, but only when the local branch tip is reachable from the remote default branch.\n"
+						, "Description"_o= "Also push branches whose same-named remote branch would show as needing pull in status, but only when the local branch tip is reachable from the "
+						"remote default branch.\n"
 					}
 					, Filter_Name
 					, fFilter_Type("")
@@ -1825,13 +1823,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					(
 						[&](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_return co_await _pBuildSystem->f_Action_Repository_ReleasePackage
-								(
-									GenerateOptions
-									, RepoFilter
-									, _pCommandLine
-								)
-							;
+							co_return co_await _pBuildSystem->f_Action_Repository_ReleasePackage(GenerateOptions, RepoFilter, _pCommandLine);
 						}
 						, _pCommandLine
 						, &GenerateOptions

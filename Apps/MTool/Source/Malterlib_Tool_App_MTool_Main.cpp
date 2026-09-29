@@ -138,10 +138,7 @@ public:
 				{
 					// Commands run in the process that starts them, so many MTool processes, such as LFS transfer agents, can start
 					// at once without listeners of their own
-					auto Settings = CDistributedToolSettings("MTool")
-						.f_RootDirectory(fg_GetToolRootDirectory())
-						.f_InProcessCommandLineOnly(true)
-					;
+					auto Settings = CDistributedToolSettings("MTool").f_RootDirectory(fg_GetToolRootDirectory()).f_InProcessCommandLineOnly(true);
 
 					if (fg_IsCMake())
 						fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_None);

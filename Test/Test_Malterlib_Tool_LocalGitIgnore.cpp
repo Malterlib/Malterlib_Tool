@@ -53,7 +53,8 @@ namespace NMib::NTool
 						return Repo.f_Run
 							(
 								Repo.m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension)
-								, {
+								,
+								{
 									"update-repos"
 									, "--no-color"
 									, "--build-system"

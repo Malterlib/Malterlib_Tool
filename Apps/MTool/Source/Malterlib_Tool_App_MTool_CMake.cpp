@@ -7,7 +7,7 @@
 
 #ifdef DMToolEmbedCMake
 
-int cmake_main(int ac, char const* const* av);
+int cmake_main(int ac, char const * const *av);
 
 class CTool_CMake : public CDistributedTool
 {
@@ -43,7 +43,7 @@ public:
 				, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
 				{
 					TCVector<CStr> Commands;
-					TCVector<const ch8 *> ArgV;
+					TCVector<ch8 const *> ArgV;
 					ArgV.f_Insert(Commands.f_Insert(CFile::fs_GetProgramPath()).f_GetStr());
 					if (auto pParams = _Params.f_GetMember("Params"))
 					{

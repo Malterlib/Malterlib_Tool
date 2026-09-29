@@ -10,7 +10,6 @@
 class CTool_ReadJson : public CTool2
 {
 public:
-
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		TCVector<CStr> Params = _Files;
@@ -48,8 +47,7 @@ public:
 			Request.m_Method = CHttpClientActor::EMethod_GET;
 			Request.m_Cookies = fg_Move(Cookies);
 
-			HttpClientActor(&CHttpClientActor::f_SendRequest, fg_Move(Request)) > fg_Move(Contents.m_Promise) / [ContentsPromise = Contents.m_Promise]
-				(CHttpClientActor::CResult &&_Result)
+			HttpClientActor(&CHttpClientActor::f_SendRequest, fg_Move(Request)) > fg_Move(Contents.m_Promise) / [ContentsPromise = Contents.m_Promise](CHttpClientActor::CResult &&_Result)
 				{
 					if (_Result.m_StatusCode >= 300)
 						ContentsPromise.f_SetException(DMibErrorInstance("Error status: {}: {}"_f << _Result.m_StatusCode << _Result.m_Body));

@@ -11,7 +11,6 @@
 class CTool_KillAllTree : public CTool
 {
 public:
-
 	class CProcessEntry
 	{
 	public:
@@ -19,11 +18,13 @@ public:
 		{
 			m_AllProcess.f_DeleteAllDefiniteType();
 		}
+
 		CProcessEntry()
 		{
 			m_pParent = nullptr;
 			m_ParentID = 0;
 		}
+
 		CProcessEntry *m_pParent;
 		CStr m_FileName;
 		uint32 m_Process;
@@ -40,21 +41,20 @@ public:
 			return m_Process == _Process;
 		}
 
-		bool operator == (const CStr &_Process) const noexcept
+		bool operator == (CStr const &_Process) const noexcept
 		{
 			return m_FileName == _Process;
 		}
 
 		void f_MapProcess(uint32 _ID, uint32 _ParentID, CWStr _FileName)
 		{
-			CProcessEntry * pEntry = m_AllProcess.f_Find(_ID);
+			CProcessEntry *pEntry = m_AllProcess.f_Find(_ID);
 
 			if (!pEntry)
 			{
 				pEntry = DNew CProcessEntry;
 				pEntry->m_Process = _ID;
 				m_AllProcess.f_Insert(pEntry);
-
 			}
 			pEntry->m_FileName = CStr(_FileName);
 			pEntry->m_ParentID = _ParentID;
@@ -113,12 +113,10 @@ public:
 				if (bFound)
 				{
 					TerminateProcess(hProcess, 44);
-					DConOut("{sf ,sj*}Killed process id {}: {} Parent: {}" DNewLine, "", _Depth*4, m_Process, m_FileName, m_ParentID);
+					DConOut("{sf ,sj*}Killed process id {}: {} Parent: {}" DNewLine, "", _Depth * 4, m_Process, m_FileName, m_ParentID);
 				}
 				else
-				{
-					DConOut("{sf ,sj*}Did NOT kill process id {}: {} Parent: {}" DNewLine, "", _Depth*4, m_Process, m_FileName, m_ParentID);
-				}
+					DConOut("{sf ,sj*}Did NOT kill process id {}: {} Parent: {}" DNewLine, "", _Depth * 4, m_Process, m_FileName, m_ParentID);
 				CloseHandle(hProcess);
 			}
 			CProcessEntry *pEntry = m_Children.f_Pop();
@@ -129,18 +127,20 @@ public:
 			}
 			delete this;
 		}
+
 		void f_TraceTree(int32 _Depth = 0)
 		{
-			DConOut("{sf ,sj*}Process id {}: {} Parent: {}" DNewLine, "", _Depth*4, m_Process, m_FileName, m_ParentID);
+			DConOut("{sf ,sj*}Process id {}: {} Parent: {}" DNewLine, "", _Depth * 4, m_Process, m_FileName, m_ParentID);
 			DLinkDS_Iter(CProcessEntry, m_Link) Iter = m_Children;
 			while (Iter)
 			{
-				Iter->f_TraceTree(_Depth+1);
+				Iter->f_TraceTree(_Depth + 1);
 
 				++Iter;
 			}
 		}
 	};
+
 	void f_TerminateProcessTree(TCVector<CStr> &_ProcessNames, uint32 _ParentOf)
 	{
 		{
@@ -149,25 +149,24 @@ public:
 			PROCESSENTRY32 pe32;
 
 			// Take a snapshot of all processes in the system.
-			hProcessSnap = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
-			if( hProcessSnap != INVALID_HANDLE_VALUE )
+			hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+			if (hProcessSnap != INVALID_HANDLE_VALUE)
 			{
-				pe32.dwSize = sizeof( PROCESSENTRY32 );
+				pe32.dwSize = sizeof(PROCESSENTRY32);
 
-				if(Process32First( hProcessSnap, &pe32 ) )
+				if (Process32First(hProcessSnap, &pe32))
 				{
 					do
 					{
-
 						RootProcess.f_MapProcess(pe32.th32ProcessID, pe32.th32ParentProcessID, pe32.szExeFile);
 					}
-					while( Process32Next( hProcessSnap, &pe32 ) );
+					while (Process32Next(hProcessSnap, &pe32));
 				}
 
-				CloseHandle( hProcessSnap );
+				CloseHandle(hProcessSnap);
 			}
 
-RestartSearch:
+		RestartSearch:
 			{
 				CProcessEntry::CAllIter Iter = RootProcess.m_AllProcess;
 				while (Iter)
@@ -194,7 +193,6 @@ RestartSearch:
 				}
 			}
 		}
-
 	}
 
 	aint f_Run(NContainer::CRegistry &_Params)
@@ -207,7 +205,7 @@ RestartSearch:
 			++iParam;
 		}
 		f_TerminateProcessTree(ProcessNames, -1);
-		DConOut("Done killing processes" DNewLine,0);
+		DConOut("Done killing processes" DNewLine, 0);
 		return 0;
 	}
 };

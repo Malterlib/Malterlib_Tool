@@ -4,7 +4,6 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include <Mib/Cryptography/UUID>
 
-
 namespace
 {
 	struct CBuildServerIPC
@@ -45,7 +44,7 @@ namespace
 				CFile File;
 				File.f_Open(TempFile, EFileOpen_Write | EFileOpen_ShareAll);
 			}
-//			DConOut("Starting IPC: {}\n", TempFile);
+			// DConOut("Starting IPC: {}\n", TempFile);
 
 			// Start IPC
 			CFile::fs_RenameFile(InputTempFile, InputFile);
@@ -66,22 +65,22 @@ namespace
 
 			return Registry;
 		}
+
 		void f_HandleResults(CRegistry const &_Registry)
 		{
 			CStr Error;
 			for (auto iError = _Registry.f_GetChildIterator("Error"); iError && iError->f_GetName() == "Error"; ++iError)
-			{
 				fg_AddStrSep(Error, "error: " + iError->f_GetThisValue(), "\r\n");
-			}
 			if (!Error.f_IsEmpty())
 				DError(Error);
-
 		}
+
 		struct CRemoteFile
 		{
 			CStr m_LocalFile;
 			TCVector<CStr> m_RemoteFiles;
 		};
+
 		void f_PutFiles(TCVector<CRemoteFile> const &_Files)
 		{
 			TCVector<CStr> Params;
@@ -98,6 +97,7 @@ namespace
 			auto Results = f_RunCommand("BuildServerPut", CStr(), Params);
 			f_HandleResults(Results);
 		}
+
 		TCMap<CStr, CStr> f_GetFiles(CStr const &_Source, CStr const &_DestinationDir, bool _bRecursive)
 		{
 			TCVector<CStr> Params;
@@ -115,6 +115,7 @@ namespace
 
 			return FilesCopied;
 		}
+
 		void f_DeleteFiles(TCVector<CStr> const &_Files)
 		{
 			TCVector<CStr> Params;
@@ -123,6 +124,7 @@ namespace
 			auto Results = f_RunCommand("BuildServerDelete", CStr(), Params);
 			f_HandleResults(Results);
 		}
+
 		CRegistry f_RunTool(CStr const &_Command, TCVector<CStr> const &_Params)
 		{
 			return f_RunCommand("RunTool", _Command, _Params);
@@ -135,7 +137,6 @@ void fg_LogVerbose(CFile::EDiffCopyChange _Change, CStr const &_Source, CStr con
 class CTool_BuildServerPut : public CTool2
 {
 public:
-
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		if (fg_GetSys()->f_GetEnvironmentVariable("BUILDSERVER") == "")
@@ -145,14 +146,10 @@ public:
 			DError("Free arguments not allowed (Use X=Y form)");
 
 		if (!_Params.f_FindEqual("Source"))
-		{
 			DError("Source not specified");
-		}
 
 		if (!_Params.f_FindEqual("DestinationDir"))
-		{
 			DError("DestinationDir not specified");
-		}
 
 		CStr Source = CFile::fs_GetExpandedPath(_Params["Source"], true);
 		CStr DestinationDir = _Params["DestinationDir"];
@@ -161,20 +158,18 @@ public:
 			bRecursive = _Params["Recursive"].f_ToInt(1) != 0;
 
 		CStr ExtraDir;
-        if (NFile::CFile::fs_FileExists(Source, EFileAttrib_Directory))
-        {
+		if (NFile::CFile::fs_FileExists(Source, EFileAttrib_Directory))
+		{
 			ExtraDir = CFile::fs_GetFile(Source);
-            bRecursive = true;
-            Source += "/*";
-        }
+			bRecursive = true;
+			Source += "/*";
+		}
 		CStr SourceDir = CFile::fs_GetPath(Source);
 
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(Source, EFileAttrib_File | EFileAttrib_Link, bRecursive, false);
 
 		if (Files.f_IsEmpty())
-		{
 			DError(CStr::CFormat("No files found for source: {}") << Source);
-		}
 
 		TCVector<CBuildServerIPC::CRemoteFile> RemoteFiles;
 
@@ -197,7 +192,6 @@ public:
 
 				DConOut("Put on build server store: {} -> {}" DNewLine, *iFile, OutputDir);
 			}
-
 		}
 
 		CBuildServerIPC BuildServer;
@@ -213,7 +207,6 @@ DMibRuntimeClass(CTool, CTool_BuildServerPut);
 class CTool_BuildServerGet : public CTool2
 {
 public:
-
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		if (fg_GetSys()->f_GetEnvironmentVariable("BUILDSERVER") == "")
@@ -223,14 +216,10 @@ public:
 			DError("Free arguments not allowed (Use X=Y form)");
 
 		if (!_Params.f_FindEqual("Source"))
-		{
 			DError("Source not specified");
-		}
 
 		if (!_Params.f_FindEqual("DestinationDir"))
-		{
 			DError("DestinationDir not specified");
-		}
 
 		CStr Source = _Params["Source"];
 		CStr DestinationDir = CFile::fs_GetExpandedPath(_Params["DestinationDir"], true);
@@ -243,9 +232,7 @@ public:
 		TCMap<CStr, CStr> FilesCopied = BuildServer.f_GetFiles(Source, DestinationDir, bRecursive);
 
 		for (auto iFile = FilesCopied.f_GetIterator(); iFile; ++iFile)
-		{
 			DConOut("Get from build server store: {} -> {}" DNewLine, iFile.f_GetKey(), *iFile);
-		}
 
 		return 0;
 	}
@@ -296,6 +283,7 @@ public:
 			CStr m_Path;
 			zbool m_bRecursive;
 		};
+
 		TCMap<CStr, CUploaded> UploadedFiles;
 		TCVector<CStr> Params;
 		TCVector<CStr> ExtraToUpload;
@@ -312,8 +300,7 @@ public:
 				if (CFile::fs_FileExists(Param))
 				{
 					CStr DestinationDir
-						= DestinationPath
-						+ CUniversallyUniqueIdentifier(EUniversallyUniqueIdentifierGenerate_Random).f_GetAsString(EUniversallyUniqueIdentifierFormat_AlphaNum)
+						= DestinationPath + CUniversallyUniqueIdentifier(EUniversallyUniqueIdentifierGenerate_Random).f_GetAsString(EUniversallyUniqueIdentifierFormat_AlphaNum)
 					;
 					ToDelete.f_Insert(DestinationDir);
 					CStr OriginalParam = CFile::fs_GetExpandedPath(Param, true);
@@ -391,7 +378,8 @@ public:
 
 			if (!RemoteFiles.f_IsEmpty())
 			{
-/*				for (auto iFile = RemoteFiles.f_GetIterator(); iFile; ++iFile)
+				/*
+				for (auto iFile = RemoteFiles.f_GetIterator(); iFile; ++iFile)
 				{
 					DConOut("Copying file to build server: {} -> {}" DNewLine, iFile->m_LocalFile, iFile->m_RemoteFile);
 				}*/
@@ -463,20 +451,20 @@ public:
 				}
 
 				if
+				(
+					CFile::fs_DiffCopyFileOrDirectory
 					(
-						CFile::fs_DiffCopyFileOrDirectory
-						(
-							FullPath
-							, iFile->m_Path
-							, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
-							{
-								if (bVerbose)
-									fg_LogVerbose(_Change, _Source, _Destination, _Link);
+						FullPath
+						, iFile->m_Path
+						, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
+						{
+							if (bVerbose)
+								fg_LogVerbose(_Change, _Source, _Destination, _Link);
 
-								return CFile::EDiffCopyChangeAction_Perform;
-							}
-						)
+							return CFile::EDiffCopyChangeAction_Perform;
+						}
 					)
+				)
 				{
 					if (!bQuiet)
 						DConOut("Copied back: {} -> {}" DNewLine, FullPath, iFile->m_Path);
@@ -494,15 +482,12 @@ public:
 
 DMibRuntimeClass(CTool, CTool_BuildServerTool);
 
-
 class CTool_ChangeDirectory : public CTool2
 {
 public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
-
 		CStr Directory = _Files[0];
-
 
 		CUniversallyUniqueIdentifier UniqueID(EUniversallyUniqueIdentifierGenerate_Random);
 		CStr FileName = UniqueID.f_GetAsString(EUniversallyUniqueIdentifierFormat_AlphaNum);
@@ -520,7 +505,6 @@ public:
 };
 
 DMibRuntimeClass(CTool, CTool_ChangeDirectory);
-
 
 class CTool_AppendFile : public CTool2
 {

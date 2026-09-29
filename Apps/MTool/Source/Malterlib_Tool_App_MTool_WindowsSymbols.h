@@ -7,14 +7,14 @@ namespace NMib::NTool
 {
 	enum EPEImageFileMachine : uint16
 	{
-		EPEImageFileMachine_I386 = 0x014c  // Intel 386.
-		, EPEImageFileMachine_ARM = 0x01c0  // ARM Little-Endian
-		, EPEImageFileMachine_THUMB = 0x01c2  // ARM Thumb/Thumb-2 Little-Endian
-		, EPEImageFileMachine_ARMNT = 0x01c4  // ARM Thumb-2 Little-Endian
-		, EPEImageFileMachine_POWERPC = 0x01F0  // IBM PowerPC Little-Endian
-		, EPEImageFileMachine_IA64 = 0x0200  // Intel 64
-		, EPEImageFileMachine_AMD64 = 0x8664  // AMD64 (K8)
-		, EPEImageFileMachine_ARM64 = 0xAA64  // ARM64 Little-Endian
+		EPEImageFileMachine_I386      = 0x014c // Intel 386.
+		, EPEImageFileMachine_ARM     = 0x01c0 // ARM Little-Endian
+		, EPEImageFileMachine_THUMB   = 0x01c2 // ARM Thumb/Thumb-2 Little-Endian
+		, EPEImageFileMachine_ARMNT   = 0x01c4 // ARM Thumb-2 Little-Endian
+		, EPEImageFileMachine_POWERPC = 0x01F0 // IBM PowerPC Little-Endian
+		, EPEImageFileMachine_IA64    = 0x0200 // Intel 64
+		, EPEImageFileMachine_AMD64   = 0x8664 // AMD64 (K8)
+		, EPEImageFileMachine_ARM64   = 0xAA64 // ARM64 Little-Endian
 	};
 
 	struct CNTImageFileHeader
@@ -35,8 +35,7 @@ namespace NMib::NTool
 			case EPEImageFileMachine_AMD64:
 			case EPEImageFileMachine_ARM64:
 				return true;
-			default:
-				return false;
+			default: return false;
 			}
 			return false;
 		}
@@ -51,8 +50,7 @@ namespace NMib::NTool
 			case EPEImageFileMachine_ARMNT:
 			case EPEImageFileMachine_POWERPC:
 				return true;
-			default:
-				return false;
+			default: return false;
 			}
 			return false;
 		}
@@ -200,9 +198,9 @@ namespace NMib::NTool
 	struct CV_INFO_PDB70
 	{
 		uint32 m_CvSignature;
-		CGuid m_Signature;     // unique identifier
-		uint32 m_Age;          // an always-incrementing value
-		ch8 m_PdbFileName[65535];  // zero terminated string with the name of the PDB file
+		CGuid m_Signature;        // unique identifier
+		uint32 m_Age;             // an always-incrementing value
+		ch8 m_PdbFileName[65535]; // zero terminated string with the name of the PDB file
 	};
 
 	struct CWindowsExecutableInfo

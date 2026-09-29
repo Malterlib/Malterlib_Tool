@@ -8,13 +8,9 @@
 #include "Malterlib_Tool_App_MTool_PerforceHelpers.h"
 #include <Mib/Concurrency/ParallellForEach>
 
-
-
-
 class CTool_PerforceMerge : public CTool2
 {
 public:
-
 	struct CIntegrationPair
 	{
 		CStr m_From;
@@ -51,9 +47,7 @@ public:
 				OwnedFrom[Parent] = fg_Get<1>(*iStream);
 			}
 			for (auto iStream = OwnedToRaw.m_Streams.f_GetIterator(); iStream; ++iStream)
-			{
 				OwnedTo[_Functions.f_GetStreamRootParent(fg_Get<1>(*iStream))] = fg_Get<1>(*iStream);
-			}
 
 			for (auto iStream = OwnedFrom.f_GetIterator(); iStream; ++iStream)
 			{
@@ -71,8 +65,7 @@ public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -137,9 +130,7 @@ public:
 		TCSet<CStr> ExtraChildren;
 
 		for (auto iChild = Registry.f_GetChildIterator("ExtraChild"); iChild && iChild->f_GetName() == "ExtraChild"; ++iChild)
-		{
 			ExtraChildren[iChild->f_GetThisValue()];
-		}
 
 		CStr IntegrateFromStream = StreamName;
 		TCVector<CStr> IntegrateToStreams;
@@ -153,9 +144,7 @@ public:
 			bToParent = true;
 			IntegrateToStreams.f_Insert(Stream.m_Parent);
 			if (Stream.m_Parent.f_IsEmpty() || Stream.m_Parent == "none")
-			{
 				DError(fg_Format("Stream {} has no parent", StreamName));
-			}
 
 			if (Stream.m_Options.f_Contains("toparent") < 0)
 				DError(fg_Format("Integration to parent stream not allowed", StreamName));
@@ -215,9 +204,7 @@ public:
 				DError("No streams allows integration from parent stream");
 
 			if (Streams.f_GetLen() == 1)
-			{
 				IntegrateToStreams.f_Insert(Streams.f_GetFirst());
-			}
 			else if (Streams.f_GetLen() > 1)
 			{
 				DConOut("Children: {\n}", 0);
@@ -237,9 +224,7 @@ public:
 					Result = Child;
 
 				if (Result == "a" || Result == "A")
-				{
 					IntegrateToStreams.f_Insert(Streams);
-				}
 				else
 				{
 					aint ChoosenNumber = Result.f_ToInt(aint(-1));
@@ -315,8 +300,7 @@ public:
 		umint nThreads = 16;
 		g_ThreadPool.f_Construct(nThreads);
 
-		auto fl_Integrate
-			= [&](bool _bPretend, bool _bNoSubmit) -> bool
+		auto fl_Integrate = [&](bool _bPretend, bool _bNoSubmit) -> bool
 			{
 				bool bDoSomething = false;
 				TCVector<CIntegrationPair> NewIntegrationPairs;
@@ -369,8 +353,7 @@ public:
 					CPerforceClient::CStream FromStream = Functions.f_GetStreamCached(Pair.m_From);
 
 					CPerforceClient::CStream ToStream = Functions.f_GetStreamCached(Pair.m_To);
-					auto fl_RealError
-						= [&](CStr const &_Error, CStr& _oRetryChangelist)
+					auto fl_RealError = [&](CStr const &_Error, CStr &_oRetryChangelist)
 						{
 							if (_Error.f_Find("- resolve move to") >= 0 && _Error.f_Find("before integrating from"))
 								return false;
@@ -549,15 +532,12 @@ public:
 								case CPerforceClient::EAction_Integrate:
 									MustSync.f_Insert(iResult->m_To);
 									break;
-								default:
-									break;
+								default: break;
 								}
 							}
 
 							for (auto &Error : Errors)
-							{
 								DConErrOut("{}: {}", Error.m_Path, Error.m_Error);
-							}
 
 							if (!MustSync.f_IsEmpty())
 							{
@@ -600,9 +580,7 @@ public:
 							TCMap<CStr, CStr> IntegrateTo;
 							umint nIntegrations = 0;
 							for (auto iResult = UniqueResults.f_GetIterator(); iResult; ++iResult)
-							{
 								nIntegrations += iResult->m_EndFromRev - iResult->m_StartFromRev;
-							}
 
 							TCAtomic<umint> nDoneIntegrations;
 
@@ -625,7 +603,6 @@ public:
 									auto &New = ToProcess.f_Insert();
 									New.m_From = CStr::CFormat("{0}#{1},{1}") << iResult->m_From << (iRev + 1);
 									New.m_To = iResult->m_To;
-
 								}
 							}
 
@@ -689,9 +666,7 @@ public:
 										if (CurrentTime - LastDisplayValue > 2.0)
 										{
 											if (LastDisplay.f_CompareExchangeStrong(LastDisplayValue, CurrentTime))
-											{
 												DConOut("\t\t{fe2} %\n", (fp64(nDoneIntegrations.f_Load()) / fp64(nIntegrations)) * 100.0);
-											}
 										}
 									}
 								)
@@ -771,11 +746,11 @@ public:
 										{
 											umint Length = 1;
 											for
-												(
-													ch8 Char = Line.f_GetAt(iMention + Length)
-													; fg_CharIsAlphabetical(Char) || Char == '_' || fg_CharIsNumber(Char)
-													; Char = Line.f_GetAt(iMention + Length)
-												)
+											(
+												ch8 Char = Line.f_GetAt(iMention + Length)
+												; fg_CharIsAlphabetical(Char) || Char == '_' || fg_CharIsNumber(Char)
+												; Char = Line.f_GetAt(iMention + Length)
+											)
 											{
 												++Length;
 											}
@@ -830,16 +805,13 @@ public:
 										Line += " (integrated)";
 
 									if (pLastComment && bDetailedDescription)
-									{
 										pLastComment->m_Lines.f_Insert(Line);
-									}
 									else
 									{
 										pLastComment = &Comments[CurrentProduct].f_Insert();
 										pLastComment->m_OneLine = Line;
 									}
 								}
-
 							}
 
 							umint nComments = 0;

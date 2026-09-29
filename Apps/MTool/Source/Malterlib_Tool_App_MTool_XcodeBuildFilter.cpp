@@ -79,37 +79,38 @@ public:
 		static bool fs_IsCommandLine(CStr const &_Line)
 		{
 			static constexpr ch8 const *c_CommandPrefixes[] =
-			{
-				"Compile"
-				, "SwiftCompile"
-				, "CompileSwift"
-				, "CompileSwiftSources"
-				, "CompileAssetCatalog"
-				, "Ld "
-				, "Link"
-				, "CodeSign"
-				, "Process"
-				, "ProcessPCH"
-				, "ProcessInfoPlistFile"
-				, "ProcessProductPackaging"
-				, "ProcessStoryboard"
-				, "PhaseScriptExecution"
-				, "GenerateDSYMFile"
-				, "CreateUniversalBinary"
-				, "CpResource"
-				, "Copy"
-				, "Touch"
-				, "WriteAuxiliaryFile"
-				, "WriteFile"
-				, "MkDir"
-				, "SetOwnerAndGroup"
-				, "Chmod"
-				, "SymLink"
-				, "Libtool"
-				, "Strip"
-				, "RegisterExecutionPolicyException"
-				, "builtin-"
-			};
+				{
+					"Compile"
+					, "SwiftCompile"
+					, "CompileSwift"
+					, "CompileSwiftSources"
+					, "CompileAssetCatalog"
+					, "Ld "
+					, "Link"
+					, "CodeSign"
+					, "Process"
+					, "ProcessPCH"
+					, "ProcessInfoPlistFile"
+					, "ProcessProductPackaging"
+					, "ProcessStoryboard"
+					, "PhaseScriptExecution"
+					, "GenerateDSYMFile"
+					, "CreateUniversalBinary"
+					, "CpResource"
+					, "Copy"
+					, "Touch"
+					, "WriteAuxiliaryFile"
+					, "WriteFile"
+					, "MkDir"
+					, "SetOwnerAndGroup"
+					, "Chmod"
+					, "SymLink"
+					, "Libtool"
+					, "Strip"
+					, "RegisterExecutionPolicyException"
+					, "builtin-"
+				}
+			;
 
 			for (auto const *pPrefix : c_CommandPrefixes)
 			{
@@ -130,7 +131,7 @@ public:
 
 		static bool fs_IsSplitIncludeFirstLine(CStr const &_Trimmed)
 		{
-			constexpr static auto c_Prefix = gc_Str<"In file included from ">.m_Str;
+			static constexpr auto c_Prefix = gc_Str<"In file included from ">.m_Str;
 			if (!_Trimmed.f_StartsWith(c_Prefix) && !c_Prefix.f_StartsWith(_Trimmed))
 				return false;
 
@@ -170,7 +171,7 @@ public:
 
 			auto CurrentTime = m_LastProgressUpdate.f_GetTime();
 
-			constexpr static auto c_TimeInterval = 33.3333333333_ms;
+			static constexpr auto c_TimeInterval = 33.3333333333_ms;
 
 			if (m_bProgressShown && CurrentTime < c_TimeInterval && !_bForce)
 				co_return {};
@@ -465,14 +466,8 @@ public:
 					m_pPendingIncludeLineFix = nullptr;
 				}
 
-				if
-				(
-					CleanLine.f_StartsWith("    Target ")
-					|| CleanLine.f_StartsWith(str_utf8("        ➜ Explicit dependency on target"))
-				)
-				{
+				if (CleanLine.f_StartsWith("    Target ") || CleanLine.f_StartsWith(str_utf8("        ➜ Explicit dependency on target")))
 					continue; // Ignore
-				}
 
 				auto fMaybeTrackSplitInclude = [&](CStr *_pStoredLine)
 					{
@@ -662,13 +657,7 @@ public:
 						auto Subscription = co_await StdInActor
 							(
 								&CStdInActor::f_RegisterForInputBinary
-								, g_ActorFunctor /
-								[
-									pCommandLine = _pCommandLine
-									, bPassThrough
-									, EofPromise = fg_Move(EofDone.m_Promise)
-									, pState
-								]
+								, g_ActorFunctor / [pCommandLine = _pCommandLine, bPassThrough, EofPromise = fg_Move(EofDone.m_Promise), pState]
 								(EStdInReaderOutputType _Type, CIOByteVector _Input, CStr _Error) -> TCFuture<void>
 								{
 									auto Subscription = co_await pState->m_InputSequencer.f_Sequence();

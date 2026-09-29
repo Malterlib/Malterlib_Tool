@@ -11,7 +11,6 @@
 class CTool_Symbol : public CTool
 {
 public:
-
 	void fs_CompressOrCopy(CStr const &_Source, CStr const &_Destination)
 	{
 		try
@@ -53,13 +52,9 @@ public:
 		CStr SymbolDir = _Params.f_GetValue("0", "NotExist:/");
 		CStr FileName = _Params.f_GetValue("1", "NotExist.file");
 		if (!NFile::CFile::fs_FileExists(SymbolDir, EFileAttrib_Directory))
-		{
 			DError(CStr(CStr::CFormat("Directory does not exist ({})") << SymbolDir));
-		}
 		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
-		{
 			DError(CStr(CStr::CFormat("File does not exist ({})") << FileName));
-		}
 
 		DConOut("Deploying: {}" DNewLine, FileName);
 
