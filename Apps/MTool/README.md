@@ -229,6 +229,64 @@ The implementation separates file selection, configuration resolution, and line
 validation. Additional rules can use the same input selection and resolved
 properties in audit, staged, and base-comparison modes.
 
+# Semantic checks
+
+The Malterlib checks of clang-tidy (`malterlib-*`) check the naming conventions
+and the coding rules that need the AST, which formatting cannot see. They ship
+with the MalterlibLLVM binaries in two front ends built from the same source:
+`clang-tidy`, and a plugin linked into the Malterlib `clang` that runs them in
+the compile. Which checks run comes from the `.clang-tidy` files of the
+sources, so clang-tidy, the build, and clangd agree; a repository enables a
+check in its `.clang-tidy` once its sources are clean for it, and `NOLINT` or
+`NOLINTNEXTLINE` marks an intentional exception.
+
+```yaml
+Checks: '-*,malterlib-function-naming,malterlib-struct-not-class'
+```
+
+From the workspace root, `./mib tidy` runs clang-tidy over the sources of every
+repository whose build-system entry sets `Repository.Tidy`, with the compile
+commands the build system generated for their targets, so generate first; CI
+generates none unless `MalterlibGenerateCompileCommands` is set. A source's run
+reports the source and the headers of its own repository, but not those of the
+repositories nested in it, which their own sources report. Each diagnostic is
+written once, in path order, however many sources report it, and the command
+exits with 1 when any check reports.
+
+`--mode` selects the compile commands:
+
+- `file`, the default, checks each source once, with the command of the best
+  target and configuration: the targets of `--target` first, then those of
+  `--workspace`, then any other; the configuration by name first, then by base
+  name, so `Release Testing` matches `Release Testing (Tests)`, then any.
+- `target` checks every source of the targets of `--target`, each with its
+  database in `--workspace`, or else in its highest priority workspace.
+- `all` checks every source of every target, once per distinct command, so each
+  source is checked with every set of defines it is built with.
+
+`--config` names configurations, each as `"<Platform> <Architecture>
+<Configuration>"` or the name of its configuration file, in a comma-separated
+list; each is checked in turn for more coverage. Without one, each target is
+checked with its highest priority configuration. `--target` takes a list the
+same way. `--staged` and `--base REF` check only the
+changed files and the sources that include them, as their dependency files
+from the last build tell, and report only the changed files. `--checks` adds to
+the checks of the `.clang-tidy` files, `--fix` applies the fixes the checks
+offer, none of which renames a declaration, and `--jobs` bounds the number of
+clang-tidy processes. It takes the repository filters too.
+
+```bash
+./mib tidy
+./mib tidy -n "Malterlib/Concurrency" --checks '-*,malterlib-coroutine-*'
+./mib tidy --mode all --config "macOS arm64 Debug,Linux x86_64 Debug"
+./mib tidy --staged --fix
+```
+
+The build runs the checks of the sources of the repositories that set
+`Repository.Tidy` when `MalterlibTidyInBuild` is true, which it is in CI, so a
+violation of an enabled check fails the build like a warning does. A compile
+reports the headers of its source's repository, like `mib tidy`.
+
 # Source formatting
 
 `MTool Format`, in the Validation command group, formats sources that opt in
