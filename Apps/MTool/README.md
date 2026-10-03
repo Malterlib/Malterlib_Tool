@@ -245,13 +245,29 @@ Checks: '-*,malterlib-function-naming,malterlib-struct-not-class'
 ```
 
 From the workspace root, `./mib tidy` runs clang-tidy over the sources of every
-repository whose build-system entry sets `Repository.Tidy`, with the compile
-commands the build system generated for their targets, so generate first; CI
-generates none unless `MalterlibGenerateCompileCommands` is set. A source's run
-reports the source and the headers of its own repository, but not those of the
-repositories nested in it, which their own sources report. Each diagnostic is
-written once, in path order, however many sources report it, and the command
-exits with 1 when any check reports.
+repository whose build-system entry sets `Repository.Tidy {Enabled: true}`,
+with the compile commands the build system generated for their targets, so
+generate first; CI generates none unless `MalterlibGenerateCompileCommands` is
+set. A file is checked when the deepest repository it is in is enabled, and
+its path relative to that repository matches one of the wildcards of
+`IncludeFiles`, if there are any, and none of `ExcludeFiles`:
+
+```
+Repository
+{
+	Tidy {Enabled: true, ExcludeFiles: ["ImportCache/*"]}
+}
+```
+
+A source's run reports the source and the checked headers of every repository,
+also of other repositories than its own: the checks decide from what templates
+are instantiated with, so a problem in a template shows in the sources that
+instantiate it, which can be in any repository. A warning in a template is
+followed by notes of where it was instantiated, like clang's own errors, back
+to the code that isn't instantiated. Each diagnostic is
+written once, however many sources report it, as soon as the first source that
+reports it is checked, or with `--sorted` in path order once all are, so that
+runs compare. The command exits with 1 when any check reports.
 
 `--mode` selects the compile commands:
 
@@ -283,9 +299,11 @@ clang-tidy processes. It takes the repository filters too.
 ```
 
 The build runs the checks of the sources of the repositories that set
-`Repository.Tidy` when `MalterlibTidyInBuild` is true, which it is in CI, so a
-violation of an enabled check fails the build like a warning does. A compile
-reports the headers of its source's repository, like `mib tidy`.
+`Repository.Tidy {Enabled: true}` when `MalterlibTidyInBuild` is true, which it
+is in CI, so a violation of an enabled check fails the build like a warning
+does. The plugin reads the rules of every repository from a generated file, so
+a compile checks the same files as `mib tidy`, and runs again when the rules
+change.
 
 # Source formatting
 

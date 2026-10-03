@@ -683,9 +683,11 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			{
 				"Names"_o= _o["tidy"]
 				, "Description"_o=
-					"Run clang-tidy over the sources of every repository that sets Repository.Tidy, with the compile commands the build system generated "
-					"for their targets. The .clang-tidy files of the sources choose the checks. A source's compile reports the source and the headers of "
-					"its repository, but not those of repositories nested in it, as the checks plugin does in a build.\n"
+					"Run clang-tidy over the sources of every repository that sets Repository.Tidy.Enabled, with the compile commands the build system "
+					"generated for their targets. The .clang-tidy files of the sources choose the checks. A file is checked when the deepest repository "
+					"it is in sets Repository.Tidy.Enabled, and its path relative to that repository matches Repository.Tidy.IncludeFiles, if there are "
+					"any, and not Repository.Tidy.ExcludeFiles. A source's compile reports the source and the checked headers of every repository, as "
+					"the checks plugin does in a build: a problem in a template shows where it is instantiated.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
 				{
@@ -755,6 +757,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_o= 0
 						, "Description"_o= "Maximum number of clang-tidy processes run at once. Zero selects the number of cores.\n"
 					}
+					, "Sorted?"_o=
+					{
+						"Names"_o= _o["--sorted"]
+						, "Default"_o= false
+						, "Description"_o= "Report the diagnostics in path order once all are checked, instead of as each source is, so runs compare.\n"
+					}
 					, "ClangTidy?"_o=
 					{
 						"Names"_o= _o["--clang-tidy"]
@@ -804,6 +812,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				Options.m_Checks = _Params["Checks"].f_String();
 				Options.m_bStaged = _Params["Staged"].f_Boolean();
 				Options.m_bFix = _Params["Fix"].f_Boolean();
+				Options.m_bSorted = _Params["Sorted"].f_Boolean();
 				if (auto pBase = _Params.f_GetMember("Base"))
 				{
 					if (Options.m_bStaged || pBase->f_String().f_IsEmpty())
@@ -839,12 +848,14 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
 							auto RunOptions = Options;
+							TCMap<CStr, CBuildSystem::CRepoTidyFiles> TidyFiles;
 							if (auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations
 									(
 										GenerateOptions
 										, RepoFilter
 										, RunOptions.m_CheckedRepositories
 										, &RunOptions.m_AllRepositories
+										, &TidyFiles
 									)
 								; Retry != CBuildSystem::ERetry_None
 							)
@@ -852,9 +863,18 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return Retry;
 							}
 
+							for (auto iFiles = TidyFiles.f_GetIterator(); iFiles; ++iFiles)
+							{
+								if (iFiles->m_IncludeFiles.f_IsEmpty() && iFiles->m_ExcludeFiles.f_IsEmpty())
+									continue;
+								auto &Files = RunOptions.m_RepositoryFiles[iFiles.f_GetKey()];
+								Files.m_IncludeFiles = fg_Move(iFiles->m_IncludeFiles);
+								Files.m_ExcludeFiles = fg_Move(iFiles->m_ExcludeFiles);
+							}
+
 							if (RunOptions.m_CheckedRepositories.f_IsEmpty())
 							{
-								*_pCommandLine %= "No repository sets Repository.Tidy\n";
+								*_pCommandLine %= "No repository sets Repository.Tidy.Enabled\n";
 
 								co_return CBuildSystem::ERetry_None;
 							}

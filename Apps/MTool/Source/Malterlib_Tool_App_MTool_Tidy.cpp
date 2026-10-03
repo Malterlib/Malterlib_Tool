@@ -51,6 +51,16 @@ namespace NMib::NTool::NTidy
 		bool m_bWithoutChecks = false;								// No .clang-tidy enables a check for the source.
 	};
 
+	struct CTidyDiagnostic
+	{
+		CStr m_Path;
+		umint m_Line = 0;
+		umint m_Column = 0;
+		CStr m_Header;												// The diagnostic line after its location.
+		CStr m_Text;
+		bool m_bError = false;
+	};
+
 	struct CTidyState
 	{
 		CTidyOptions m_Options;
@@ -60,12 +70,21 @@ namespace NMib::NTool::NTidy
 		CStr m_RunDirectory;										// Holds the database of each command and its fixes.
 		NFunction::TCFunctionMovable<void (NStr::CStr const &_Text)> m_fProgress;	// The sink's report, which the progress also goes to.
 
+		TCAtomic<umint> m_iNextCommand = 0;							// The next command a lane takes.
 		TCAtomic<umint> m_nDone = 0;
 		TCAtomic<umint> m_nRunning = 0;
 		CStopwatch m_Stopwatch{true};
-		CMutual m_ProgressLock;
+		CMutual m_ProgressLock;										// Guards what follows, which the lanes share.
 		fp64 m_LastProgressTime = 0.0;
 		umint m_LastProgressLength = 0;
+
+		CTidySummary m_Summary;
+		TCMap<CStr, CStr> m_InvalidConfigurations;					// By directory of the sources.
+		TCSet<CStr> m_ReportedConfigurations;
+		TCSet<CStr> m_Seen;											// The diagnostics reported, which several sources can report.
+		TCSet<CStr> m_CheckedFiles;
+		TCVector<CTidyDiagnostic> m_Diagnostics;					// With --sorted, reported once all are done.
+		CStr m_Failures;
 	};
 
 	struct CTidyInventory
@@ -78,16 +97,6 @@ namespace NMib::NTool::NTidy
 		TCSet<CStr> m_AllSources;									// The sources of the checked repositories that any database compiles.
 		TCVector<CStr> m_UnbuiltChangedSources;						// Changed sources that no database compiles.
 		CStr m_Error;												// A selector that matches no database.
-	};
-
-	struct CTidyDiagnostic
-	{
-		CStr m_Path;
-		umint m_Line = 0;
-		umint m_Column = 0;
-		CStr m_Header;												// The diagnostic line after its location.
-		CStr m_Text;
-		bool m_bError = false;
 	};
 
 	CStr fg_EscapeTidyRegex(CStr const &_Path)
@@ -121,6 +130,31 @@ namespace NMib::NTool::NTidy
 		}
 
 		return Repository;
+	}
+
+	bool fg_IsTidyChecked(CStr const &_Path, CTidyOptions const &_Options)
+	{
+		CStr Repository = fg_GetTidyRepository(_Path, _Options.m_AllRepositories);
+		if (!Repository || _Options.m_CheckedRepositories.f_Contains(Repository) < 0)
+			return false;
+
+		auto *pFiles = _Options.m_RepositoryFiles.f_FindEqual(Repository);
+		if (!pFiles)
+			return true;
+
+		CStr Relative = _Path.f_Extract(Repository.f_GetLen() + 1);
+		auto fMatches = [&](TCVector<CStr> const &_Wildcards)
+			{
+				for (auto &Wildcard : _Wildcards)
+				{
+					if (NStr::fg_StrMatchWildcard(Relative.f_GetStr(), Wildcard.f_GetStr()) == NStr::EMatchWildcardResult_WholeStringMatchedAndPatternExhausted)
+						return true;
+				}
+				return false;
+			}
+		;
+
+		return (pFiles->m_IncludeFiles.f_IsEmpty() || fMatches(pFiles->m_IncludeFiles)) && !fMatches(pFiles->m_ExcludeFiles);
 	}
 
 	// The name of a configuration without the variant in parentheses, as "Release Testing (Tests)" is a
@@ -413,10 +447,6 @@ namespace NMib::NTool::NTidy
 		auto Databases = fg_FindTidyDatabases(_Options);
 		Inventory.m_nDatabases = Databases.f_GetLen();
 
-		TCSet<CStr> Checked;
-		for (auto &Location : _Options.m_CheckedRepositories)
-			Checked[Location];
-
 		// The passes of the run: one per requested configuration, or one with any configuration.
 		TCVector<CStr> Passes = _Options.m_Configurations;
 		if (Passes.f_IsEmpty())
@@ -602,9 +632,9 @@ namespace NMib::NTool::NTidy
 					while (Directory.f_GetLen() > 1 && Directory.f_EndsWith("/"))
 						Directory = Directory.f_Left(Directory.f_GetLen() - 1);
 					CStr File = CFile::fs_CondensePath(CFile::fs_GetFullPath(pFile->f_String(), Directory));
-					CStr Repository = fg_GetTidyRepository(File, _Options.m_AllRepositories);
-					if (!Repository || !Checked.f_FindEqual(Repository))
+					if (!fg_IsTidyChecked(File, _Options))
 						continue;
+					CStr Repository = fg_GetTidyRepository(File, _Options.m_AllRepositories);
 
 					TCVector<CStr> Arguments;
 					for (auto &Argument : pArguments->f_Array())
@@ -740,11 +770,10 @@ namespace NMib::NTool::NTidy
 
 	// Keeps the commands that compile a changed file or include one, as their dependency file or else Ninja's
 	// dependencies tell, and counts the changed files that none of them covers.
-	void fg_FilterTidyChanged(CTidyInventory &o_Inventory, TCSet<CStr> const &_Changed, TCMap<CStr, TCVector<CStr>> const &_NinjaDependencies, TCVector<CStr> const &_AllRepositories)
+	void fg_FilterTidyChanged(CTidyInventory &o_Inventory, TCSet<CStr> const &_Changed, TCMap<CStr, TCVector<CStr>> const &_NinjaDependencies, CTidyOptions const &_Options)
 	{
 		TCSet<CStr> Covered;
 		TCSet<CStr> Sources;
-		TCSet<CStr> RepositoriesWithoutDependencies;
 		TCVector<CTidyCommand> Commands;
 		for (auto &Command : o_Inventory.m_Commands)
 			Sources[Command.m_File];
@@ -774,18 +803,15 @@ namespace NMib::NTool::NTidy
 			for (umint i = 0; i < Command.m_EquivalentOutputs.f_GetLen(); ++i)
 				fAddDependencies(Command.m_EquivalentDependencyFiles[i], Command.m_EquivalentOutputs[i]);
 			if (Dependencies.f_IsEmpty())
-			{
 				++o_Inventory.m_nWithoutDependencies;
-				RepositoriesWithoutDependencies[Command.m_Repository];
-			}
 
 			// Paths are compared as spelled, also on file systems that ignore case: an include spelled with other
 			// case than the file is an error of the compile, as clang's -Wnonportable-include-path is on by default
 			// and Malterlib compiles with -Werror.
-			// A command only reports, and so covers, the headers of its own repository.
+			// A command reports, and so covers, the checked headers of every repository.
 			for (auto &Dependency : Dependencies)
 			{
-				if (_Changed.f_FindEqual(Dependency) && fg_GetTidyRepository(Dependency, _AllRepositories) == Command.m_Repository)
+				if (_Changed.f_FindEqual(Dependency) && fg_IsTidyChecked(Dependency, _Options))
 				{
 					bChanged = true;
 					Covered[Dependency];
@@ -811,8 +837,8 @@ namespace NMib::NTool::NTidy
 			if (bSource && !o_Inventory.m_AllSources.f_FindEqual(File) && CFile::fs_FileExists(File, EFileAttrib_File))
 				o_Inventory.m_UnbuiltChangedSources.f_Insert(File);
 
-			// A command of the header's repository whose includes are not known may include it with other defines.
-			if (!Sources.f_FindEqual(File) && RepositoriesWithoutDependencies.f_FindEqual(fg_GetTidyRepository(File, _AllRepositories)))
+			// A command whose includes are not known may include it with other defines.
+			if (!Sources.f_FindEqual(File) && o_Inventory.m_nWithoutDependencies)
 				++o_Inventory.m_nUncertainChanged;
 		}
 
@@ -871,13 +897,17 @@ namespace NMib::NTool::NTidy
 
 	// clang-tidy's header filter matches a header by the name it was included with, absolute or relative to the
 	// directory of the compile, and with dot segments, like "../Include/X.h" or "/Other/../Repo/X.h". The
-	// filter only narrows what clang-tidy reports, so it lets every relative name and every name with dot
-	// segments through, and reporting keeps what is in the source's repository, not in one nested in it, once
-	// the names are resolved. Ownership is by location as the build system spells it, so a header included
-	// through a symbolic link from elsewhere is not the repository's.
-	CStr fg_GetTidyHeaderFilter(CStr const &_Location)
+	// filter only narrows what clang-tidy reports, so it lets the checked repositories, every relative name and
+	// every name with dot segments through, and reporting keeps the files that are checked once the names are
+	// resolved. Ownership is by location as the build system spells it, so a header included through a symbolic
+	// link from elsewhere is not the repository's.
+	CStr fg_GetTidyHeaderFilter(TCVector<CStr> const &_Locations)
 	{
-		return "^({}/|[^/])|/\\.\\.?/"_f << fg_EscapeTidyRegex(_Location);
+		CStr Filter = "^(";
+		for (auto &Location : _Locations)
+			Filter += "{}/|"_f << fg_EscapeTidyRegex(Location);
+
+		return Filter + "[^/])|/\\.\\.?/";
 	}
 
 	TCVector<CStr> fg_GetTidyArguments(CTidyState const &_State, CTidyCommand const &_Command, CStr const &_DatabaseDirectory, CStr const &_FixesFile)
@@ -888,7 +918,7 @@ namespace NMib::NTool::NTidy
 		TCVector<CStr> Arguments =
 			{
 				"-p", _DatabaseDirectory, "--quiet", "--use-color=false"
-				, "--header-filter={}"_f << fg_GetTidyHeaderFilter(_Command.m_Repository)
+				, "--header-filter={}"_f << fg_GetTidyHeaderFilter(_Options.m_CheckedRepositories)
 			}
 		;
 
@@ -907,17 +937,18 @@ namespace NMib::NTool::NTidy
 	}
 
 	// Reports how many commands are done and running: on a terminal one line rewritten in place, which _bDone
-	// clears, and otherwise a line every ten seconds.
-	void fg_ReportTidyProgress(CTidyState &_State, bool _bDone)
+	// clears, and otherwise a line every ten seconds. _bForce redraws the line a report just replaced. The caller
+	// holds the lock.
+	void fg_DrawTidyProgress(CTidyState &_State, bool _bDone, bool _bForce = false)
 	{
 		if (!_State.m_Options.m_bShowProgress || !_State.m_fProgress)
 			return;
 
-		DMibLock(_State.m_ProgressLock);
-
 		umint nDone = _State.m_nDone.f_Load();
 		umint nTotal = _State.m_Commands.f_GetLen();
-		CStr Progress = "  clang-tidy: {}/{} done, {} running, {} left"_f << nDone << nTotal << _State.m_nRunning.f_Load() << (nTotal - nDone);
+		// A lane that just finished its command and has not yet taken the next still counts, so no more run than are left.
+		umint nRunning = fg_Min(_State.m_nRunning.f_Load(), nTotal - nDone);
+		CStr Progress = "  clang-tidy: {}/{} done, {} running, {} left"_f << nDone << nTotal << nRunning << (nTotal - nDone);
 		fp64 Now = _State.m_Stopwatch.f_GetTime();
 
 		if (_State.m_Options.m_bAnsiProgress)
@@ -930,7 +961,7 @@ namespace NMib::NTool::NTidy
 				return;
 			}
 			// Redrawn about ten times a second at most.
-			if (Now - _State.m_LastProgressTime < 0.1)
+			if (!_bForce && Now - _State.m_LastProgressTime < 0.1)
 				return;
 			_State.m_LastProgressTime = Now;
 			_State.m_fProgress("\x1B[2K{}\x1B[{}D"_f << Progress << Progress.f_GetLen());
@@ -944,6 +975,16 @@ namespace NMib::NTool::NTidy
 		_State.m_LastProgressTime = Now;
 		_State.m_fProgress(Progress + "\n");
 	}
+
+	void fg_ReportTidyProgress(CTidyState &_State, bool _bDone)
+	{
+		DMibLock(_State.m_ProgressLock);
+		fg_DrawTidyProgress(_State, _bDone);
+	}
+
+	// Reports a command's result: its diagnostics as they come, once each, or with --sorted once all are done, and
+	// its failures at the end. The caller holds the lock.
+	void fg_HandleTidyResult(CTidyState &_State, umint _iCommand);
 
 	bool fg_IsTidyCancelled(CTidyOptions const &_Options)
 	{
@@ -1003,21 +1044,50 @@ namespace NMib::NTool::NTidy
 		return {};
 	}
 
-	// Runs the commands whose index is _iLane modulo the number of lanes, one after the other, so that no more
-	// than that many clang-tidy processes run at once.
-	TCFuture<void> fg_RunTidyLane(TCSharedPointer<CTidyState> _pState, umint _iLane, umint _nLanes)
+	// Runs commands one after the other, each the next one no lane has taken, so that no more clang-tidy processes
+	// run at once than there are lanes, and a lane that is free takes what is left, also when a command of another
+	// lane takes long.
+	TCFuture<void> fg_RunTidyLane(TCSharedPointer<CTidyState> _pState)
 	{
-		for (umint iCommand = _iLane; iCommand < _pState->m_Commands.f_GetLen(); iCommand += _nLanes)
+		// The lane runs from when it takes its first command until no command is left for it, also between commands,
+		// so that taking the next one doesn't show as a lane less.
+		bool bRunning = false;
+		auto Running = g_OnScopeExit / [&]
+			{
+				if (bRunning)
+					--_pState->m_nRunning;
+			}
+		;
+
+		for (umint iCommand = _pState->m_iNextCommand.f_FetchAdd(1); iCommand < _pState->m_Commands.f_GetLen(); iCommand = _pState->m_iNextCommand.f_FetchAdd(1))
 		{
 			if (fg_IsTidyCancelled(_pState->m_Options))
 				break;
 
-			// A launch actor runs one process.
-			TCActor<CProcessLaunchActor> ProcessLaunch = fg_Construct();
-			auto Destroy = co_await fg_AsyncDestroy(ProcessLaunch);
+			if (!bRunning)
+			{
+				bRunning = true;
+				++_pState->m_nRunning;
+			}
+
 
 			auto &Command = _pState->m_Commands[iCommand];
 			auto &JobResult = _pState->m_Results[iCommand];
+
+			// A source whose configuration is not valid is not checked.
+			if (_pState->m_InvalidConfigurations.f_FindEqual(CFile::fs_GetPath(Command.m_File)))
+			{
+				++_pState->m_nDone;
+				DMibLock(_pState->m_ProgressLock);
+				if (!_pState->m_Options.m_bSorted)
+					fg_HandleTidyResult(*_pState, iCommand);
+				fg_DrawTidyProgress(*_pState, false);
+				continue;
+			}
+
+			// A launch actor runs one process.
+			TCActor<CProcessLaunchActor> ProcessLaunch = fg_Construct();
+			auto Destroy = co_await fg_AsyncDestroy(ProcessLaunch);
 
 			// The command alone in a database, so clang-tidy runs it and not the other commands of the source.
 			CStr DatabaseDirectory = _pState->m_RunDirectory / ("{}"_f << iCommand);
@@ -1034,6 +1104,10 @@ namespace NMib::NTool::NTidy
 			if (!Written)
 			{
 				JobResult.m_StdErr = Written.f_GetExceptionStr();
+				++_pState->m_nDone;
+				DMibLock(_pState->m_ProgressLock);
+				if (!_pState->m_Options.m_bSorted)
+					fg_HandleTidyResult(*_pState, iCommand);
 				continue;
 			}
 
@@ -1055,34 +1129,40 @@ namespace NMib::NTool::NTidy
 
 			TCSharedPointer<TCAtomic<bool>> pDone = fg_Construct(false);
 			auto Stopper = fg_StopTidyOnCancel(ProcessLaunch, _pState->m_Options.m_pCancelled, pDone);
-			++_pState->m_nRunning;
 			fg_ReportTidyProgress(*_pState, false);
 			auto Result = co_await ProcessLaunch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(Launch)).f_Wrap();
-			--_pState->m_nRunning;
-			++_pState->m_nDone;
-			fg_ReportTidyProgress(*_pState, false);
 			pDone->f_Exchange(true);
 			co_await fg_Move(Stopper);
 
 			if (!Result)
-			{
 				JobResult.m_StdErr = Result.f_GetExceptionStr();
-				continue;
-			}
-
-			JobResult.m_bLaunched = true;
-			JobResult.m_ExitCode = Result->m_ExitCode;
-			JobResult.m_StdOut = Result->f_GetStdOut();
-			JobResult.m_StdErr = Result->f_GetStdErr();
-
-			// A repository enables checks one at a time, so a source none is enabled for yet is skipped.
-			// It is that error alone, which a configuration error comes before.
-			if (JobResult.m_ExitCode && JobResult.m_StdErr.f_Trim() == "Error: no checks enabled.")
+			else
 			{
-				JobResult.m_bWithoutChecks = true;
-				JobResult.m_StdOut = CStr();
-				JobResult.m_StdErr = CStr();
+				JobResult.m_bLaunched = true;
+				JobResult.m_ExitCode = Result->m_ExitCode;
+				JobResult.m_StdOut = Result->f_GetStdOut();
+				JobResult.m_StdErr = Result->f_GetStdErr();
+
+				// A repository enables checks one at a time, so a source none is enabled for yet is skipped.
+				// It is that error alone, which a configuration error comes before.
+				if (JobResult.m_ExitCode && JobResult.m_StdErr.f_Trim() == "Error: no checks enabled.")
+				{
+					JobResult.m_bWithoutChecks = true;
+					JobResult.m_StdOut = CStr();
+					JobResult.m_StdErr = CStr();
+				}
 			}
+
+			++_pState->m_nDone;
+
+			// An aborted command is not reported, as its output is not complete.
+			if (fg_IsTidyCancelled(_pState->m_Options))
+				break;
+
+			DMibLock(_pState->m_ProgressLock);
+			if (!_pState->m_Options.m_bSorted)
+				fg_HandleTidyResult(*_pState, iCommand);
+			fg_DrawTidyProgress(*_pState, false);
 		}
 
 		co_return {};
@@ -1247,6 +1327,129 @@ namespace NMib::NTool::NTidy
 		return Head + Kept + Tail;
 	}
 
+	void fg_HandleTidyResult(CTidyState &_State, umint _iCommand)
+	{
+		auto &Command = _State.m_Commands[_iCommand];
+		auto &Result = _State.m_Results[_iCommand];
+		if (auto *pInvalid = _State.m_InvalidConfigurations.f_FindEqual(CFile::fs_GetPath(Command.m_File)))
+		{
+			++_State.m_Summary.m_nFailed;
+			CStr Directory = CFile::fs_GetPath(Command.m_File);
+			if (!_State.m_ReportedConfigurations.f_FindEqual(Directory))
+			{
+				_State.m_ReportedConfigurations[Directory];
+				_State.m_Failures += "{}: the configuration of the sources is not valid: {}\n"_f << Directory << *pInvalid;
+			}
+
+			// The fixes of a configuration that is not valid are not applied.
+			CStr FixesFile = _State.m_RunDirectory / ("{}.yaml"_f << _iCommand);
+			if (CFile::fs_FileExists(FixesFile, EFileAttrib_File))
+				CFile::fs_DeleteFile(FixesFile);
+			return;
+		}
+		if (Result.m_bWithoutChecks)
+		{
+			++_State.m_Summary.m_nWithoutChecks;
+			return;
+		}
+		_State.m_CheckedFiles[Command.m_File];
+		++_State.m_Summary.m_nCommands;
+
+		bool bReportedError = false;
+		bool bCompileError = false;
+		for (auto &Diagnostic : fg_ParseTidyOutput(Result.m_StdOut, Command.m_Directory))
+		{
+			bReportedError = bReportedError || Diagnostic.m_bError;
+			// Any error of the compiler, also a warning that -Werror makes one.
+			bCompileError = bCompileError || (Diagnostic.m_bError && Diagnostic.m_Header.f_Find("[clang-diagnostic-") >= 0);
+			// One without a location is about the run, like its configuration, and is always reported.
+			if (Diagnostic.m_Path)
+			{
+				if (_State.m_Changed && !_State.m_Changed->f_FindEqual(Diagnostic.m_Path))
+					continue;
+
+				// The filter of clang-tidy lets more through than is checked, and a check can report in a header it
+				// was not asked to, when a note is in a reported file.
+				if (!fg_IsTidyChecked(Diagnostic.m_Path, _State.m_Options))
+					continue;
+			}
+			CStr Key = "{}\x1F{}\x1F{}\x1F{}"_f << Diagnostic.m_Path << Diagnostic.m_Line << Diagnostic.m_Column << Diagnostic.m_Header;
+			if (_State.m_Seen.f_FindEqual(Key))
+				continue;
+			_State.m_Seen[Key];
+
+			if (Diagnostic.m_bError)
+				++_State.m_Summary.m_nErrors;
+			else
+				++_State.m_Summary.m_nWarnings;
+
+			if (_State.m_Options.m_bSorted)
+				_State.m_Diagnostics.f_Insert(fg_Move(Diagnostic));
+			else
+			{
+				// Over the progress line on a terminal, which is drawn again below it.
+				if (_State.m_LastProgressLength)
+					_State.m_fProgress("\x1B[2K");
+				_State.m_fProgress(Diagnostic.m_Text);
+				if (_State.m_Options.m_bAnsiProgress)
+				{
+					_State.m_LastProgressLength = 0;
+					_State.m_LastProgressTime = 0.0;
+				}
+			}
+		}
+
+		// A compile error can be in a header of another repository, so name the source it stopped. It fails the
+		// command, also when the error is in a file that is not reported.
+		if (bCompileError)
+		{
+			++_State.m_Summary.m_nFailed;
+			_State.m_Failures += "{}: does not compile with the command of its database, which may be out of date\n"_f << Command.m_File;
+
+			// As clang-tidy does without --fix-errors, the fixes of a source that does not compile are left.
+			CStr FixesFile = _State.m_RunDirectory / ("{}.yaml"_f << _iCommand);
+			if (CFile::fs_FileExists(FixesFile, EFileAttrib_File))
+				CFile::fs_DeleteFile(FixesFile);
+		}
+		// clang-tidy fails a command with errors, which it reports; any other failure is the command's.
+		else if (!Result.m_bLaunched || (Result.m_ExitCode && !bReportedError))
+		{
+			++_State.m_Summary.m_nFailed;
+			// The cause can be on either stream, like an argument clang does not know.
+			_State.m_Failures += "{}: clang-tidy failed{}: {}\n"_f
+				<< Command.m_File
+				<< (Result.m_bLaunched ? CStr(" with exit code {}"_f << Result.m_ExitCode) : CStr(" to launch"))
+				<< (Result.m_StdOut.f_Trim() + "\n" + Result.m_StdErr.f_Trim()).f_Trim()
+			;
+		}
+
+		// Only the fixes of files the command reports are applied, also of the replacements a check offers in
+		// other files.
+		if (_State.m_Options.m_bFix && !bCompileError)
+		{
+			CStr FixesFile = _State.m_RunDirectory / ("{}.yaml"_f << _iCommand);
+			if (CFile::fs_FileExists(FixesFile, EFileAttrib_File))
+			{
+				CStr Filtered = fg_FilterTidyFixes
+					(
+						CFile::fs_ReadStringFromFile(FixesFile, true)
+						, [&](CStr const &_File)
+						{
+							CStr File = CFile::fs_CondensePath(CFile::fs_GetFullPath(_File, Command.m_Directory));
+							if (!fg_IsTidyChecked(File, _State.m_Options))
+								return false;
+							return !_State.m_Changed || !!_State.m_Changed->f_FindEqual(File);
+						}
+					)
+				;
+				if (Filtered)
+					CFile::fs_WriteStringToFile(FixesFile, Filtered, false);
+				else
+					CFile::fs_DeleteFile(FixesFile);
+			}
+		}
+	}
+
 	TCFuture<CTidyRunResult> fg_RunTidy(CTidyOptions _Options, NFormat::CFormatSink _Sink)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % "Running clang-tidy");
@@ -1255,14 +1458,24 @@ namespace NMib::NTool::NTidy
 		auto &Summary = RunResult.m_Summary;
 
 		// Locations are compared with condensed paths, without a trailing separator.
+		auto fCondenseLocation = [](CStr const &_Location)
+			{
+				CStr Location = CFile::fs_CondensePath(_Location);
+				while (Location.f_GetLen() > 1 && Location.f_EndsWith("/"))
+					Location = Location.f_Left(Location.f_GetLen() - 1);
+				return Location;
+			}
+		;
 		for (auto *pLocations : {&_Options.m_CheckedRepositories, &_Options.m_AllRepositories})
 		{
 			for (auto &Location : *pLocations)
-			{
-				Location = CFile::fs_CondensePath(Location);
-				while (Location.f_GetLen() > 1 && Location.f_EndsWith("/"))
-					Location = Location.f_Left(Location.f_GetLen() - 1);
-			}
+				Location = fCondenseLocation(Location);
+		}
+		{
+			TCMap<CStr, CTidyRepositoryFiles> RepositoryFiles;
+			for (auto iFiles = _Options.m_RepositoryFiles.f_GetIterator(); iFiles; ++iFiles)
+				RepositoryFiles[fCondenseLocation(iFiles.f_GetKey())] = fg_Move(*iFiles);
+			_Options.m_RepositoryFiles = fg_Move(RepositoryFiles);
 		}
 
 		if (!CFile::fs_FileExists(_Options.m_ClangTidy, EFileAttrib_File))
@@ -1298,7 +1511,11 @@ namespace NMib::NTool::NTidy
 			for (auto &Files : co_await fg_AllDone(Pending))
 			{
 				for (auto &File : Files)
-					ChangedFiles[File];
+				{
+					// A file the rules of its repository leave out is not checked.
+					if (fg_IsTidyChecked(File, _Options))
+						ChangedFiles[File];
+				}
 			}
 		}
 
@@ -1316,7 +1533,8 @@ namespace NMib::NTool::NTidy
 		if (Inventory.m_Error)
 			co_return DMibErrorInstance(Inventory.m_Error);
 
-		// A repository that no generated workspace builds is not checked.
+		// The sources of a repository that no generated workspace builds are not checked, only its headers that other
+		// sources include.
 		{
 			TCSet<CStr> Built;
 			for (auto &Command : Inventory.m_Commands)
@@ -1331,7 +1549,7 @@ namespace NMib::NTool::NTidy
 					Unbuilt.f_Insert(Repository);
 			}
 			if (!Unbuilt.f_IsEmpty())
-				_Sink.m_fReport("No compile command compiles a source of {}, so {} not checked\n"_f << CStr::fs_Join(Unbuilt, ", ") << (Unbuilt.f_GetLen() == 1 ? "it is" : "they are"));
+				_Sink.m_fReport("No compile command compiles a source of {}, so only the headers the sources of other repositories include are checked\n"_f << CStr::fs_Join(Unbuilt, ", "));
 		}
 		if (fg_IsTidyCancelled(_Options))
 			co_return DMibErrorInstance("Aborted");
@@ -1382,10 +1600,10 @@ namespace NMib::NTool::NTidy
 						Inventory = fg_Move(Inventory)
 						, Changed = *Changed
 						, NinjaDependencies = fg_Move(NinjaDependencies)
-						, AllRepositories = _Options.m_AllRepositories
+						, Options = _Options
 					]() mutable -> CTidyInventory
 					{
-						fg_FilterTidyChanged(Inventory, Changed, NinjaDependencies, AllRepositories);
+						fg_FilterTidyChanged(Inventory, Changed, NinjaDependencies, Options);
 						return fg_Move(Inventory);
 					}
 				)
@@ -1404,8 +1622,6 @@ namespace NMib::NTool::NTidy
 			}
 		}
 
-		Summary.m_nUncheckedChanged = Inventory.m_nUncheckedChanged;
-
 		TCSharedPointer<CTidyState> pState = fg_Construct();
 		pState->m_Options = _Options;
 		pState->m_Commands = fg_Move(Inventory.m_Commands);
@@ -1423,30 +1639,14 @@ namespace NMib::NTool::NTidy
 			}
 		;
 
-		{
-			umint nLanes = fg_Max(fg_Min(_Options.m_nJobs, pState->m_Commands.f_GetLen()), umint(1));
-			TCFutureVector<void> Lanes;
-			for (umint iLane = 0; iLane < nLanes; ++iLane)
-				fg_RunTidyLane(pState, iLane, nLanes) > Lanes;
-			auto LaneResults = co_await fg_AllDoneWrapped(Lanes);
-			fg_ReportTidyProgress(*pState, true);
-			co_await (fg_Move(LaneResults) | g_Unwrap);
-		}
-
-		if (fg_IsTidyCancelled(_Options))
-			co_return DMibErrorInstance("Aborted");
-
 		// clang-tidy leaves out a misspelled check or option, and a configuration it cannot read, so the
 		// configuration of each directory of a checked source is verified. A configuration that enables no check
 		// because of a misspelling is no skip either.
-		TCMap<CStr, CStr> InvalidConfigurations;
+		// It is verified first, so the findings of the sources can be reported as they come.
 		{
 			TCSet<CStr> Directories;
-			for (umint iCommand = 0; iCommand < pState->m_Commands.f_GetLen(); ++iCommand)
-			{
-				if (pState->m_Results[iCommand].m_bLaunched)
-					Directories[CFile::fs_GetPath(pState->m_Commands[iCommand].m_File)];
-			}
+			for (auto &Command : pState->m_Commands)
+				Directories[CFile::fs_GetPath(Command.m_File)];
 
 			TCVector<CStr> Pending;
 			for (auto &Directory : Directories)
@@ -1469,127 +1669,41 @@ namespace NMib::NTool::NTidy
 				{
 					auto &Result = Results[i - iFirst];
 					if (!Result)
-						InvalidConfigurations[Pending[i]] = Result.f_GetExceptionStr();
+						pState->m_InvalidConfigurations[Pending[i]] = Result.f_GetExceptionStr();
 					else if (CStr Problems = fg_GetTidyConfigurationProblems(*Result))
-						InvalidConfigurations[Pending[i]] = Problems;
+						pState->m_InvalidConfigurations[Pending[i]] = Problems;
 				}
 			}
 		}
 
-		// Each diagnostic once, in path order, also those of a header that several sources report.
-		TCVector<CTidyDiagnostic> Diagnostics;
-		TCSet<CStr> Seen;
-		CStr Failures;
-		TCSet<CStr> CheckedFiles;
-		TCSet<CStr> ReportedConfigurations;
-		umint nCheckedCommands = 0;
-		for (umint iCommand = 0; iCommand < pState->m_Commands.f_GetLen(); ++iCommand)
 		{
-			auto &Command = pState->m_Commands[iCommand];
-			auto &Result = pState->m_Results[iCommand];
-			if (auto *pInvalid = InvalidConfigurations.f_FindEqual(CFile::fs_GetPath(Command.m_File)))
-			{
-				++Summary.m_nFailed;
-				CStr Directory = CFile::fs_GetPath(Command.m_File);
-				if (!ReportedConfigurations.f_FindEqual(Directory))
-				{
-					ReportedConfigurations[Directory];
-					Failures += "{}: the configuration of the sources is not valid: {}\n"_f << Directory << *pInvalid;
-				}
-
-				// The fixes of a configuration that is not valid are not applied.
-				CStr FixesFile = pState->m_RunDirectory / ("{}.yaml"_f << iCommand);
-				if (CFile::fs_FileExists(FixesFile, EFileAttrib_File))
-					CFile::fs_DeleteFile(FixesFile);
-				continue;
-			}
-			if (Result.m_bWithoutChecks)
-			{
-				++Summary.m_nWithoutChecks;
-				continue;
-			}
-			CheckedFiles[Command.m_File];
-			++nCheckedCommands;
-
-			bool bReportedError = false;
-			bool bCompileError = false;
-			for (auto &Diagnostic : fg_ParseTidyOutput(Result.m_StdOut, Command.m_Directory))
-			{
-				bReportedError = bReportedError || Diagnostic.m_bError;
-				// Any error of the compiler, also a warning that -Werror makes one.
-				bCompileError = bCompileError || (Diagnostic.m_bError && Diagnostic.m_Header.f_Find("[clang-diagnostic-") >= 0);
-				// One without a location is about the run, like its configuration, and is always reported.
-				if (Diagnostic.m_Path)
-				{
-					if (Changed && !Changed->f_FindEqual(Diagnostic.m_Path))
-						continue;
-
-					// A check can report in a header it was not asked to, when a note is in a reported file.
-					if (fg_GetTidyRepository(Diagnostic.m_Path, _Options.m_AllRepositories) != Command.m_Repository)
-						continue;
-				}
-				CStr Key = "{}\x1F{}\x1F{}\x1F{}"_f << Diagnostic.m_Path << Diagnostic.m_Line << Diagnostic.m_Column << Diagnostic.m_Header;
-				if (Seen.f_FindEqual(Key))
-					continue;
-				Seen[Key];
-				Diagnostics.f_Insert(fg_Move(Diagnostic));
-			}
-
-			// A compile error can be in a header of another repository, so name the source it stopped. It fails the
-			// command, also when the error is in a file that is not reported.
-			if (bCompileError)
-			{
-				++Summary.m_nFailed;
-				Failures += "{}: does not compile with the command of its database, which may be out of date\n"_f << Command.m_File;
-
-				// As clang-tidy does without --fix-errors, the fixes of a source that does not compile are left.
-				CStr FixesFile = pState->m_RunDirectory / ("{}.yaml"_f << iCommand);
-				if (CFile::fs_FileExists(FixesFile, EFileAttrib_File))
-					CFile::fs_DeleteFile(FixesFile);
-			}
-			// clang-tidy fails a command with errors, which it reports; any other failure is the command's.
-			else if (!Result.m_bLaunched || (Result.m_ExitCode && !bReportedError))
-			{
-				++Summary.m_nFailed;
-				// The cause can be on either stream, like an argument clang does not know.
-				Failures += "{}: clang-tidy failed{}: {}\n"_f
-					<< Command.m_File
-					<< (Result.m_bLaunched ? CStr(" with exit code {}"_f << Result.m_ExitCode) : CStr(" to launch"))
-					<< (Result.m_StdOut.f_Trim() + "\n" + Result.m_StdErr.f_Trim()).f_Trim()
-				;
-			}
-
-			// Only the fixes of files the command reports are applied, also of the replacements a check offers in
-			// other files.
-			if (_Options.m_bFix && !bCompileError)
-			{
-				CStr FixesFile = pState->m_RunDirectory / ("{}.yaml"_f << iCommand);
-				if (CFile::fs_FileExists(FixesFile, EFileAttrib_File))
-				{
-					CStr Filtered = fg_FilterTidyFixes
-						(
-							CFile::fs_ReadStringFromFile(FixesFile, true)
-							, [&](CStr const &_File)
-							{
-								CStr File = CFile::fs_CondensePath(CFile::fs_GetFullPath(_File, Command.m_Directory));
-								if (fg_GetTidyRepository(File, _Options.m_AllRepositories) != Command.m_Repository)
-									return false;
-								return !Changed || !!Changed->f_FindEqual(File);
-							}
-						)
-					;
-					if (Filtered)
-						CFile::fs_WriteStringToFile(FixesFile, Filtered, false);
-					else
-						CFile::fs_DeleteFile(FixesFile);
-				}
-			}
+			umint nLanes = fg_Max(fg_Min(_Options.m_nJobs, pState->m_Commands.f_GetLen()), umint(1));
+			TCFutureVector<void> Lanes;
+			for (umint iLane = 0; iLane < nLanes; ++iLane)
+				fg_RunTidyLane(pState) > Lanes;
+			auto LaneResults = co_await fg_AllDoneWrapped(Lanes);
+			fg_ReportTidyProgress(*pState, true);
+			co_await (fg_Move(LaneResults) | g_Unwrap);
 		}
 
-		Summary.m_nCommands = nCheckedCommands;
-		Summary.m_nFiles = CheckedFiles.f_GetLen();
+		if (fg_IsTidyCancelled(_Options))
+			co_return DMibErrorInstance("Aborted");
 
-		Diagnostics.f_Sort
+		// With --sorted, the results are handled in command order, so the same diagnostic of several sources and
+		// the failures come from the same sources whichever finished first.
+		if (_Options.m_bSorted)
+		{
+			DMibLock(pState->m_ProgressLock);
+			for (umint iCommand = 0; iCommand < pState->m_Commands.f_GetLen(); ++iCommand)
+				fg_HandleTidyResult(*pState, iCommand);
+		}
+
+		Summary = pState->m_Summary;
+		Summary.m_nFiles = pState->m_CheckedFiles.f_GetLen();
+		Summary.m_nUncheckedChanged = Inventory.m_nUncheckedChanged;
+
+		// With --sorted, each diagnostic once in path order, also those of a header that several sources report.
+		pState->m_Diagnostics.f_Sort
 			(
 				[](CTidyDiagnostic const &_Left, CTidyDiagnostic const &_Right)
 				{
@@ -1603,18 +1717,11 @@ namespace NMib::NTool::NTidy
 				}
 			)
 		;
-
-		for (auto &Diagnostic : Diagnostics)
-		{
-			if (Diagnostic.m_bError)
-				++Summary.m_nErrors;
-			else
-				++Summary.m_nWarnings;
+		for (auto &Diagnostic : pState->m_Diagnostics)
 			pState->m_fProgress(Diagnostic.m_Text);
-		}
 
-		if (Failures)
-			pState->m_fProgress(Failures);
+		if (pState->m_Failures)
+			pState->m_fProgress(pState->m_Failures);
 
 		if (_Options.m_bFix && !CFile::fs_FindFiles(pState->m_RunDirectory / "*.yaml", EFileAttrib_File, false).f_IsEmpty())
 		{

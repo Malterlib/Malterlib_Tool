@@ -9,8 +9,8 @@ namespace NMib::NTool
 
 	namespace
 	{
-		// Stands in for clang-tidy: logs its arguments, one run per line, and reports a diagnostic in the source
-		// and one in a header every source includes.
+		// Stands in for clang-tidy: logs its arguments, one run per line, and reports a diagnostic in the source,
+		// one in a header every source includes, and one in a header of the repository in Lib, when there is one.
 		CStr const gc_FakeClangTidy =
 			"#!/bin/sh\n"
 			"if [ \"$1\" = --verify-config ]; then echo 'No config errors detected.'; exit 0; fi\n"
@@ -19,6 +19,9 @@ namespace NMib::NTool
 			"printf '%s\\n' \"$*\" >> \"$(dirname \"$0\")/tidy.log\"\n"
 			"printf '%s:1:2: warning: in source [fake-check]\\n    1 | x\\n      | ^\\n' \"$Last\"\n"
 			"printf '%s/Shared.h:3:4: warning: in header [fake-check]\\n' \"$(dirname \"$Last\")\"\n"
+			"if [ -e \"$(dirname \"$Last\")/Lib/Other.h\" ]; then\n"
+			"  printf '%s/Lib/Other.h:5:6: warning: in other repository [fake-check]\\n' \"$(dirname \"$Last\")\"\n"
+			"fi\n"
 		;
 
 		struct CTidyFixture
@@ -33,13 +36,22 @@ namespace NMib::NTool
 				CFile::fs_SetAttributes(m_Tool, CFile::fs_GetAttributes(m_Tool) | EFileAttrib_Executable);
 			}
 
-			void f_Configure(bool _bTidy) const
+			// The repository, with Repository.Tidy when _Tidy is given, and with _LibTidy a repository in Lib nested in it.
+			void f_Configure(CStr const &_Tidy, CStr const &_LibTidy = {}) const
 			{
-				CStr Configuration = "%Repository \".\"\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n\t\tDefaultBranch \"main\"\n"
-					"\t\tURL \"https://example.invalid/tidy-fixture.git\"\n"
+				auto fRepository = [&](CStr const &_Name, CStr const &_Location, CStr const &_RepositoryTidy)
+					{
+						CStr Repository = "%Repository " + CEJsonSorted(_Name).f_ToString() + "\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n";
+						Repository += "\t\tDefaultBranch \"main\"\n\t\tURL \"https://example.invalid/tidy-fixture.git\"\n";
+						Repository += "\t\tLocation " + CEJsonSorted(_Location).f_ToString() + "\n";
+						if (_RepositoryTidy)
+							Repository += "\t\tTidy " + _RepositoryTidy + "\n";
+						return Repository + "\t}\n}\n";
+					}
 				;
-				Configuration += "\t\tLocation " + CEJsonSorted(m_Repo.m_Path).f_ToString() + "\n";
-				Configuration += _bTidy ? "\t\tTidy true\n\t}\n}\n" : "\t}\n}\n";
+				CStr Configuration = fRepository(".", m_Repo.m_Path, _Tidy);
+				if (_LibTidy)
+					Configuration += fRepository("Lib", m_Repo.m_Path / "Lib", _LibTidy);
 				m_Repo.f_Write("Test.MBuildSystem", Configuration);
 			}
 
@@ -159,7 +171,7 @@ namespace NMib::NTool
 					Repo.f_Write("B.cpp", "");
 					Repo.f_Write("Shared.h", "");
 					CTidyFixture Tidy(Repo);
-					Tidy.f_Configure(true);
+					Tidy.f_Configure("{Enabled: true}");
 
 					// Two targets of one workspace build A.cpp alike, and B.cpp is built by another workspace's target.
 					Tidy.f_AddDatabase("Main", 200, "Lib_A", "Debug", 101, {"A.cpp"}, "DEBUG");
@@ -170,13 +182,13 @@ namespace NMib::NTool
 
 					{
 						DMibTestPath("File");
-						auto Result = co_await Tidy.f_Run({});
+						auto Result = co_await Tidy.f_Run({"--sorted"});
 						DMibExpect(Result.m_ExitCode, ==, 1u);
 						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"A.cpp", "B.cpp"}));
 						CStr Output = Result.f_GetCombinedOut();
 						DMibExpect(Output.f_Find("Checked 2 files with 2 commands: 3 warnings, 0 errors"), >=, 0);
 
-						// The header both sources report is written once, after the diagnostics of the sources before it.
+						// The header both sources report is written once, and with --sorted, in path order.
 						aint iA = Output.f_Find(Repo.m_Path / "A.cpp:1:2: warning: in source [fake-check]");
 						aint iB = Output.f_Find(Repo.m_Path / "B.cpp:1:2: warning: in source [fake-check]");
 						aint iShared = Output.f_Find(Repo.m_Path / "Shared.h:3:4: warning: in header [fake-check]");
@@ -258,11 +270,76 @@ namespace NMib::NTool
 					{
 						// A repository that does not opt in is not checked, and none is no error.
 						DMibTestPath("NotOptedIn");
-						Tidy.f_Configure(false);
+						Tidy.f_Configure("");
 						auto Result = co_await Tidy.f_Run({});
 						DMibExpect(Result.m_ExitCode, ==, 0u);
 						DMibExpect(Result.f_GetCombinedOut().f_Find("No repository sets Repository.Tidy"), >=, 0);
 						DMibExpect(Tidy.f_Checked(), ==, TCVector<CStr>{});
+					}
+
+					co_return {};
+				};
+
+				DMibTestCategory("Repositories") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "Repositories");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write("A.cpp", "");
+					Repo.f_Write("B.cpp", "");
+					Repo.f_Write("Shared.h", "");
+					Repo.f_Write("Lib/Other.h", "");
+					// A repository needs its own Git directory.
+					auto LibInit = co_await Repo.f_Run("git", {"init", "-q", "-b", "main", Repo.m_Path / "Lib"}, Repo.m_Path);
+					DMibAssert(LibInit.m_ExitCode, ==, 0u);
+					CTidyFixture Tidy(Repo);
+					Tidy.f_AddDatabase("Main", 200, "Lib_A", "Debug", 101, {"A.cpp", "B.cpp"}, "DEBUG");
+
+					{
+						// The headers of every checked repository are reported, as a problem in a template shows where it is
+						// instantiated.
+						DMibTestPath("OtherRepository");
+						Tidy.f_Configure("{Enabled: true}", "{Enabled: true}");
+						auto Result = co_await Tidy.f_Run({"--sorted"});
+						DMibExpect(Result.m_ExitCode, ==, 1u);
+						CStr Output = Result.f_GetCombinedOut();
+						DMibExpect(Output.f_Find(Repo.m_Path / "Lib/Other.h:5:6: warning: in other repository [fake-check]"), >=, 0);
+						DMibExpect(Output.f_Find("Checked 2 files with 2 commands: 4 warnings, 0 errors"), >=, 0);
+					}
+
+					{
+						// But not those of a repository that does not check its files, also when it is nested in one that does.
+						DMibTestPath("UncheckedRepository");
+						Tidy.f_Configure("{Enabled: true}", "{Enabled: false}");
+						auto Result = co_await Tidy.f_Run({"--sorted"});
+						CStr Output = Result.f_GetCombinedOut();
+						DMibExpect(Output.f_Find("in other repository"), <, 0);
+						DMibExpect(Output.f_Find("Checked 2 files with 2 commands: 3 warnings, 0 errors"), >=, 0);
+					}
+
+					{
+						// The files a repository excludes are neither checked nor reported.
+						DMibTestPath("ExcludeFiles");
+						Tidy.f_Configure("{Enabled: true, ExcludeFiles: [\"B.cpp\", \"*.h\"]}");
+						auto Result = co_await Tidy.f_Run({"--sorted"});
+						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"A.cpp"}));
+						CStr Output = Result.f_GetCombinedOut();
+						DMibExpect(Output.f_Find("in header"), <, 0);
+						DMibExpect(Output.f_Find("in other repository"), <, 0);
+						DMibExpect(Output.f_Find("Checked 1 file with 1 command: 1 warning, 0 errors"), >=, 0);
+					}
+
+					{
+						// With includes, only the files that match one are.
+						DMibTestPath("IncludeFiles");
+						Tidy.f_Configure("{Enabled: true, IncludeFiles: [\"B.*\", \"Lib/*\"]}");
+						auto Result = co_await Tidy.f_Run({"--sorted"});
+						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"B.cpp"}));
+						CStr Output = Result.f_GetCombinedOut();
+						DMibExpect(Output.f_Find("in header"), <, 0);
+						DMibExpect(Output.f_Find(Repo.m_Path / "Lib/Other.h:5:6: warning: in other repository [fake-check]"), >=, 0);
+						DMibExpect(Output.f_Find("Checked 1 file with 1 command: 2 warnings, 0 errors"), >=, 0);
 					}
 
 					co_return {};
@@ -277,7 +354,7 @@ namespace NMib::NTool
 					co_await Repo.f_Init();
 					Repo.f_Write("Unchecked.cpp", "");
 					CTidyFixture Tidy(Repo);
-					Tidy.f_Configure(true);
+					Tidy.f_Configure("{Enabled: true}");
 					Tidy.f_AddDatabase("Main", 200, "Lib_Unchecked", "Debug", 101, {"Unchecked.cpp"}, "DEBUG");
 
 					auto Result = co_await Tidy.f_Run({});

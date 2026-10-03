@@ -15,6 +15,14 @@ namespace NMib::NTool::NTidy
 		, mc_AllTargets		// Every source of every target, once per distinct command.
 	};
 
+	// The files of a checked repository that are checked, from Repository.Tidy: wildcards matched against the paths
+	// relative to the repository.
+	struct CTidyRepositoryFiles
+	{
+		NContainer::TCVector<NStr::CStr> m_IncludeFiles;			// The files checked, or all when empty.
+		NContainer::TCVector<NStr::CStr> m_ExcludeFiles;			// The files not checked.
+	};
+
 	struct CTidyOptions
 	{
 		ETidyMode m_Mode = ETidyMode::mc_File;
@@ -31,7 +39,9 @@ namespace NMib::NTool::NTidy
 		umint m_nJobs = 1;
 		NContainer::TCVector<NStr::CStr> m_CheckedRepositories;		// The locations of the repositories checked.
 		NContainer::TCVector<NStr::CStr> m_AllRepositories;			// Every repository location, which tells what nests in them.
+		NContainer::TCMap<NStr::CStr, CTidyRepositoryFiles> m_RepositoryFiles;	// By location: the files checked repositories check.
 		NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> m_pCancelled;	// Set when the user aborts: no command starts and the running ones stop.
+		bool m_bSorted = false;										// Report the diagnostics in path order once all are done, not as they come.
 		bool m_bShowProgress = false;								// Report how many commands are left as they run.
 		bool m_bAnsiProgress = false;								// Rewrite one progress line in place, instead of a line now and then.
 	};
@@ -55,10 +65,10 @@ namespace NMib::NTool::NTidy
 	};
 
 	// Runs clang-tidy over the compile commands the build system generated for the sources of the checked
-	// repositories, a bounded number at a time. A compile reports its source and the headers of the
-	// repository the source is in, but not the headers of repositories nested in it, which their own
-	// sources report, as the checks plugin does in a build. Diagnostics are written once each, in path
-	// order, through the sink's report.
+	// repositories, a bounded number at a time. A compile reports the files that are checked, its source and the
+	// headers of every checked repository, as the checks plugin does in a build: a problem in a template shows
+	// where it is instantiated, which can be in the sources of another repository. Diagnostics are written once
+	// each, through the sink's report.
 	NConcurrency::TCFuture<CTidyRunResult> fg_RunTidy(CTidyOptions _Options, NFormat::CFormatSink _Sink);
 
 	NStr::CStr fg_DescribeTidySummary(CTidySummary const &_Summary, fp64 _Seconds);
@@ -68,4 +78,8 @@ namespace NMib::NTool::NTidy
 
 	// The location of the repository a path is in: the deepest of the locations that hold it, or empty.
 	NStr::CStr fg_GetTidyRepository(NStr::CStr const &_Path, NContainer::TCVector<NStr::CStr> const &_Locations);
+
+	// Whether a file is checked: the deepest repository it is in is checked, and the path relative to it matches
+	// an include, when there are any, and no exclude.
+	bool fg_IsTidyChecked(NStr::CStr const &_Path, CTidyOptions const &_Options);
 }
