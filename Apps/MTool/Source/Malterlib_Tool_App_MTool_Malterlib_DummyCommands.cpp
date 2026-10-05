@@ -99,6 +99,25 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 				, "Description"_o= "Build a workspace."
 				, "GlobalOptions"_o= HelpGlobalOptions
 				, "ShowParametersStart"_o= false
+				, "Options"_o=
+				{
+					"OutputDirectory?"_o=
+					{
+						"Names"_o= _o["--output-directory"]
+						, "Default"_o= "BuildSystem/Default"
+						, "Description"_o= "The generated build system to build in, as for generate. A build system that has not been generated yet is "
+						"generated for Ninja."
+					}
+					, "WaitForLock?"_o=
+					{
+						"Names"_o= _o["--wait-for-lock"]
+						, "Default"_o= false
+						, "Description"_o= "Wait for another build of the same configuration to finish, instead of refusing to build. Builds that this "
+						"build runs, as of host tools, wait as well. Also set by MalterlibBuildLockWait=true."
+						, "CanNegate"_o= false
+					}
+				}
+				, "ShowOptionsInCommandEntry"_o= true
 				, "Parameters"_o=
 				{
 					"Workspace"_o=
@@ -138,6 +157,25 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 				"only one build may run in a configuration's build directory at a time, and a second one is refused."
 				, "GlobalOptions"_o= HelpGlobalOptions
 				, "ShowParametersStart"_o= false
+				, "Options"_o=
+				{
+					"OutputDirectory?"_o=
+					{
+						"Names"_o= _o["--output-directory"]
+						, "Default"_o= "BuildSystem/Default"
+						, "Description"_o= "The generated build system to build in, as for generate. A build system that has not been generated yet is "
+						"generated for Ninja."
+					}
+					, "WaitForLock?"_o=
+					{
+						"Names"_o= _o["--wait-for-lock"]
+						, "Default"_o= false
+						, "Description"_o= "Wait for another build of the same configuration to finish, instead of refusing to build. Builds that this "
+						"build runs, as of host tools, wait as well. Also set by MalterlibBuildLockWait=true."
+						, "CanNegate"_o= false
+					}
+				}
+				, "ShowOptionsInCommandEntry"_o= true
 				, "Parameters"_o=
 				{
 					"Workspace"_o=
