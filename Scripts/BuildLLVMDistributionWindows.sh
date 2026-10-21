@@ -19,6 +19,7 @@ pushd ../../..
 popd
 
 source "$MalterlibRoot/Malterlib/Core/Scripts/Detect.sh"
+source "$ScriptDir/LLVMToolchainTools.sh"
 
 DetectedMalterlibPlatform="$MalterlibPlatform"
 DetectedMalterlibArch="$MalterlibArch"
@@ -279,6 +280,9 @@ case "$MalterlibArch" in
 	x64) export python64_dir=`cygpath -w "$LLVMPythonHome"` ;;
 	arm64) export pythonarm64_dir=`cygpath -w "$LLVMPythonHome"` ;;
 esac
+
+# The release bat sets LLVM_TOOLCHAIN_TOOLS from this.
+export LLVM_TOOLCHAIN_TOOLS="$LLVMToolchainTools"
 
 if [[ "$BuildIncremental" != "true" ]]; then
 	case "$LLVMBuildStage" in

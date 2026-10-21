@@ -14,6 +14,7 @@ pushd ../../..
 popd
 
 source "$MalterlibRoot/Malterlib/Core/Scripts/Detect.sh"
+source "$ScriptDir/LLVMToolchainTools.sh"
 
 DetectedMalterlibPlatform="$MalterlibPlatform"
 DetectedMalterlibArch="$MalterlibArch"
@@ -1187,6 +1188,7 @@ AddCMakeCacheValue "LLVM_ENABLE_ZSTD" "FORCE_ON"
 ExtraCMake="$ExtraCMake -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_INSTALL_TOOLCHAIN_ONLY=ON"
 ExtraCMake="$ExtraCMake -DBOOTSTRAP_BOOTSTRAP_LLVM_INSTALL_TOOLCHAIN_ONLY=ON"
+AddCMakeCacheValue "LLVM_TOOLCHAIN_TOOLS" "$LLVMToolchainTools"
 
 # Enable Python support for LLDB
 ExtraCMake="$ExtraCMake -DLLDB_ENABLE_PYTHON=ON"
