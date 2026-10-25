@@ -5,6 +5,7 @@
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
 #include "Malterlib_Tool_App_MTool_Format.h"
 #include "Malterlib_Tool_App_MTool_Validate.h"
+#include "Malterlib_Tool_App_MTool_Tidy.h"
 
 #include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Process/ProcessLaunch>
@@ -724,6 +725,240 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							}
 
 							pOutcome->m_ExitCode = Counts.f_GetErrors() || Counts.m_nFormatFailed ? 1 : 0;
+
+							co_return CBuildSystem::ERetry_None;
+						}
+						, _pCommandLine
+						, &GenerateOptions
+					)
+				;
+
+				co_return Code ? Code : pOutcome->m_ExitCode;
+			}
+		)
+	;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["tidy"]
+				, "Description"_o=
+					"Run clang-tidy over the sources of every repository that sets Repository.Tidy.Enabled, with the compile commands the build system "
+					"generated for their targets. The .clang-tidy files of the sources choose the checks. A file is checked when the deepest repository "
+					"it is in sets Repository.Tidy.Enabled, and its path relative to that repository matches Repository.Tidy.IncludeFiles, if there are "
+					"any, and not Repository.Tidy.ExcludeFiles. A source's compile reports the source and the checked headers of every repository, as "
+					"the checks plugin does in a build: a problem in a template shows where it is instantiated.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
+				{
+					"Mode?"_o=
+					{
+						"Names"_o= _o["--mode"]
+						, "Default"_o= "file"
+						, "Description"_o=
+							"Which compile commands are checked:\n"
+							"@Indent=11\r"
+							"   file:    Each source once, with the command of the best target and configuration: the targets of --target first, then "
+							"those of --workspace, then any other; the configuration by name first, then by base name, then any.\r"
+							"   target:  Every source of the targets of --target, each with its database in --workspace, or else in its highest "
+							"priority workspace.\r"
+							"   all:     Every source of every target, once per distinct command, so each source is checked with every set of defines it "
+							"is built with.\r"
+					}
+					, "Target?"_o=
+					{
+						"Names"_o= _o["--target"]
+						, "Type"_o= _o[""]
+						, "Default"_o= _o[]
+						, "Description"_o= "The targets, as a comma-separated list of wildcards: those checked by --mode target, and those preferred by --mode file.\n"
+					}
+					, "Workspace?"_o=
+					{
+						"Names"_o= _o["--workspace"]
+						, "Default"_o= ""
+						, "Description"_o= "The workspace, as a wildcard: the only one checked by --mode target and all, and the one preferred by --mode file.\n"
+					}
+					, "Config?"_o=
+					{
+						"Names"_o= _o["--config"]
+						, "Type"_o= _o[""]
+						, "Default"_o= _o[]
+						, "Description"_o=
+							"The configurations, as a comma-separated list of \"<Platform> <Architecture> <Configuration>\" or names of configuration files, "
+							"each checked in turn for more coverage. Without one, each target is checked with its highest priority configuration.\n"
+					}
+					, "Checks?"_o=
+					{
+						"Names"_o= _o["--checks"]
+						, "Default"_o= ""
+						, "Description"_o= "Checks added to those the .clang-tidy files enable, like '-*,malterlib-function-naming'.\n"
+					}
+					, "Staged?"_o=
+					{
+						"Names"_o= _o["--staged"]
+						, "Default"_o= false
+						, "Description"_o= "Only check the files changed in each index, and the sources that include them.\n"
+					}
+					, "Base?"_o=
+					{
+						"Names"_o= _o["--base"]
+						, "Type"_o= ""
+						, "Description"_o= "Only check the files changed from the merge base with this reference to HEAD, and the sources that include them.\n"
+					}
+					, "Fix?"_o=
+					{
+						"Names"_o= _o["--fix"]
+						, "Default"_o= false
+						, "Description"_o= "Apply the fixes the checks offer. The Malterlib checks do not rename, so no fix renames a declaration.\n"
+					}
+					, "Jobs?"_o=
+					{
+						"Names"_o= _o["--jobs", "-j"]
+						, "Default"_o= 0
+						, "Description"_o= "Maximum number of clang-tidy processes run at once. Zero selects the number of cores.\n"
+					}
+					, "Sorted?"_o=
+					{
+						"Names"_o= _o["--sorted"]
+						, "Default"_o= false
+						, "Description"_o= "Report the diagnostics in path order once all are checked, instead of as each source is, so runs compare.\n"
+					}
+					, "ClangTidy?"_o=
+					{
+						"Names"_o= _o["--clang-tidy"]
+						, "Default"_o= ""
+						, "Description"_o= "The clang-tidy executable. Defaults to the one of the MalterlibLLVM binaries of the workspace.\n"
+					}
+					, Filter_Name
+					, fFilter_Type("")
+					, Filter_Tags
+					, Filter_Branch
+					, fs_CachedEnvironmentOption(true)
+				}
+			}
+			, [=, this](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				CStopwatch Stopwatch{true};
+				NMib::NTool::NTidy::CTidyOptions Options;
+
+				CStr Mode = _Params["Mode"].f_String();
+				if (Mode == "file")
+					Options.m_Mode = NMib::NTool::NTidy::ETidyMode::mc_File;
+				else if (Mode == "target")
+					Options.m_Mode = NMib::NTool::NTidy::ETidyMode::mc_Target;
+				else if (Mode == "all")
+					Options.m_Mode = NMib::NTool::NTidy::ETidyMode::mc_AllTargets;
+				else
+				{
+					*_pCommandLine %= "Unknown --mode '{}': use file, target or all\n"_f << Mode;
+
+					co_return 2;
+				}
+
+				for (auto &Target : _Params["Target"].f_Array())
+					Options.m_Targets.f_Insert(Target.f_String());
+				for (auto &Configuration : _Params["Config"].f_Array())
+					Options.m_Configurations.f_Insert(Configuration.f_String());
+				if (Options.m_Mode == NMib::NTool::NTidy::ETidyMode::mc_Target && Options.m_Targets.f_IsEmpty())
+				{
+					*_pCommandLine %= "--mode target requires --target\n";
+
+					co_return 2;
+				}
+
+				Options.m_Workspace = _Params["Workspace"].f_String();
+				Options.m_Checks = _Params["Checks"].f_String();
+				Options.m_bStaged = _Params["Staged"].f_Boolean();
+				Options.m_bFix = _Params["Fix"].f_Boolean();
+				Options.m_bSorted = _Params["Sorted"].f_Boolean();
+				if (auto pBase = _Params.f_GetMember("Base"))
+				{
+					if (Options.m_bStaged || pBase->f_String().f_IsEmpty())
+					{
+						*_pCommandLine %= Options.m_bStaged ? "--base and --staged cannot be combined\n" : "--base requires a nonempty commit reference\n";
+
+						co_return 2;
+					}
+
+					Options.m_Base = pBase->f_String();
+				}
+
+				if (_Params["Jobs"].f_Integer() < 0)
+				{
+					*_pCommandLine %= "--jobs cannot be negative\n";
+
+					co_return 2;
+				}
+
+				Options.m_nJobs = umint(_Params["Jobs"].f_Integer());
+				if (!Options.m_nJobs)
+					Options.m_nJobs = fg_Max(umint(NSys::fg_Thread_GetVirtualCores()), umint(1));
+
+				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+				RepoFilter.m_bTidy = true;
+
+				// A finding is not an error of the build system, so the exit code comes back beside its result.
+				NStorage::TCSharedPointer<NMib::NTool::CFormatOutcome> pOutcome = fg_Construct();
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				CStr ClangTidy = _Params["ClangTidy"].f_String();
+				auto Code = co_await f_RunBuildSystem
+					(
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
+						{
+							auto RunOptions = Options;
+							TCMap<CStr, CBuildSystem::CRepoTidyFiles> TidyFiles;
+							if (auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations
+									(
+										GenerateOptions
+										, RepoFilter
+										, RunOptions.m_CheckedRepositories
+										, &RunOptions.m_AllRepositories
+										, &TidyFiles
+									)
+								; Retry != CBuildSystem::ERetry_None
+							)
+							{
+								co_return Retry;
+							}
+
+							for (auto iFiles = TidyFiles.f_GetIterator(); iFiles; ++iFiles)
+							{
+								if (iFiles->m_IncludeFiles.f_IsEmpty() && iFiles->m_ExcludeFiles.f_IsEmpty())
+									continue;
+								auto &Files = RunOptions.m_RepositoryFiles[iFiles.f_GetKey()];
+								Files.m_IncludeFiles = fg_Move(iFiles->m_IncludeFiles);
+								Files.m_ExcludeFiles = fg_Move(iFiles->m_ExcludeFiles);
+							}
+
+							if (RunOptions.m_CheckedRepositories.f_IsEmpty())
+							{
+								*_pCommandLine %= "No repository sets Repository.Tidy.Enabled\n";
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							CStr BinDirectory = _pBuildSystem->f_GetBaseDir() / "Binaries/MalterlibLLVM/HostPlatformArchitecture/bin";
+							if (ClangTidy)
+								RunOptions.m_ClangTidy = CFile::fs_GetFullPath(ClangTidy, _Params["CurrentDirectory"].f_String());
+							else
+								RunOptions.m_ClangTidy = BinDirectory / ("clang-tidy" + CFile::mc_ExecutableExtension);
+							RunOptions.m_ApplyReplacements = CFile::fs_GetPath(RunOptions.m_ClangTidy) / ("clang-apply-replacements" + CFile::mc_ExecutableExtension);
+							RunOptions.m_ConfigStore = GenerateOptions.m_Settings.m_OutputDir / "ConfigStore";
+							RunOptions.m_pCancelled = _pBuildSystem->f_GetCancelledPointer();
+							RunOptions.m_bShowProgress = _pBuildSystem->f_ShowProgress();
+							RunOptions.m_bAnsiProgress = (_pBuildSystem->f_AnsiFlags() & NCommandLine::EAnsiEncodingFlag_Color) != NCommandLine::EAnsiEncodingFlag_None;
+
+							NMib::NTool::NFormat::CFormatSink Sink;
+							Sink.m_fReport = [_pCommandLine](CStr const &_Text)
+								{
+									*_pCommandLine %= _Text;
+								}
+							;
+							auto Run = co_await NMib::NTool::NTidy::fg_RunTidy(fg_Move(RunOptions), fg_Move(Sink));
+							*_pCommandLine %= NMib::NTool::NTidy::fg_DescribeTidySummary(Run.m_Summary, Stopwatch.f_GetTime());
+							pOutcome->m_ExitCode = Run.m_ExitCode;
 
 							co_return CBuildSystem::ERetry_None;
 						}

@@ -46,6 +46,9 @@ namespace NMib::NTool::NValidate
 	// a caller points the tool at an alternate index.
 	bool fg_IsRunningUnderGitHook();
 
+	// A path as git prints it with core.quotePath: as is, or quoted with C escapes.
+	NStr::CStr fg_UnquoteGitPath(NStr::CStr const &_Path);
+
 	// The lines a validation ends with: the failure notice of a changed-line validation
 	// with errors, and the summary.
 	NStr::CStr fg_DescribeValidationFailure(NStr::CStr const &_Kind, CValidationCounts const &_Counts);

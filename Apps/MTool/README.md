@@ -236,6 +236,82 @@ The implementation separates file selection, configuration resolution, and line
 validation. Additional rules can use the same input selection and resolved
 properties in audit, staged, and base-comparison modes.
 
+# Semantic checks
+
+The Malterlib checks of clang-tidy (`malterlib-*`) check the naming conventions
+and the coding rules that need the AST, which formatting cannot see. They ship
+with the MalterlibLLVM binaries in two front ends built from the same source:
+`clang-tidy`, and a plugin linked into the Malterlib `clang` that runs them in
+the compile. Which checks run comes from the `.clang-tidy` files of the
+sources, so clang-tidy, the build, and clangd agree; a repository enables a
+check in its `.clang-tidy` once its sources are clean for it, and `NOLINT` or
+`NOLINTNEXTLINE` marks an intentional exception.
+
+```yaml
+Checks: '-*,malterlib-function-naming,malterlib-struct-not-class'
+```
+
+From the workspace root, `./mib tidy` runs clang-tidy over the sources of every
+repository whose build-system entry sets `Repository.Tidy {Enabled: true}`,
+with the compile commands the build system generated for their targets, so
+generate first; CI generates none unless `MalterlibGenerateCompileCommands` is
+set. A file is checked when the deepest repository it is in is enabled, and
+its path relative to that repository matches one of the wildcards of
+`IncludeFiles`, if there are any, and none of `ExcludeFiles`:
+
+```
+Repository
+{
+	Tidy {Enabled: true, ExcludeFiles: ["ImportCache/*"]}
+}
+```
+
+A source's run reports the source and the checked headers of every repository,
+also of other repositories than its own: the checks decide from what templates
+are instantiated with, so a problem in a template shows in the sources that
+instantiate it, which can be in any repository. A warning in a template is
+followed by notes of where it was instantiated, like clang's own errors, back
+to the code that isn't instantiated. Each diagnostic is
+written once, however many sources report it, as soon as the first source that
+reports it is checked, or with `--sorted` in path order once all are, so that
+runs compare. The command exits with 1 when any check reports.
+
+`--mode` selects the compile commands:
+
+- `file`, the default, checks each source once, with the command of the best
+  target and configuration: the targets of `--target` first, then those of
+  `--workspace`, then any other; the configuration by name first, then by base
+  name, so `Release Testing` matches `Release Testing (Tests)`, then any.
+- `target` checks every source of the targets of `--target`, each with its
+  database in `--workspace`, or else in its highest priority workspace.
+- `all` checks every source of every target, once per distinct command, so each
+  source is checked with every set of defines it is built with.
+
+`--config` names configurations, each as `"<Platform> <Architecture>
+<Configuration>"` or the name of its configuration file, in a comma-separated
+list; each is checked in turn for more coverage. Without one, each target is
+checked with its highest priority configuration. `--target` takes a list the
+same way. `--staged` and `--base REF` check only the
+changed files and the sources that include them, as their dependency files
+from the last build tell, and report only the changed files. `--checks` adds to
+the checks of the `.clang-tidy` files, `--fix` applies the fixes the checks
+offer, none of which renames a declaration, and `--jobs` bounds the number of
+clang-tidy processes. It takes the repository filters too.
+
+```bash
+./mib tidy
+./mib tidy -n "Malterlib/Concurrency" --checks '-*,malterlib-coroutine-*'
+./mib tidy --mode all --config "macOS arm64 Debug,Linux x86_64 Debug"
+./mib tidy --staged --fix
+```
+
+The build runs the checks of the sources of the repositories that set
+`Repository.Tidy {Enabled: true}` when `MalterlibTidyInBuild` is true, which it
+is in CI, so a violation of an enabled check fails the build like a warning
+does. The plugin reads the rules of every repository from a generated file, so
+a compile checks the same files as `mib tidy`, and runs again when the rules
+change.
+
 # Source formatting
 
 `MTool Format`, in the Validation command group, formats sources that opt in
