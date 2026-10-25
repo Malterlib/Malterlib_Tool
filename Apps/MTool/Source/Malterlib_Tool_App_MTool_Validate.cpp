@@ -1,28 +1,23 @@
 // Copyright © Unbroken AB
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include "Malterlib_Tool_App_MTool_Main.h"
+#include "Malterlib_Tool_App_MTool_Validate.h"
 
 #include <Mib/Git/Helpers/Launch>
 #include <Mib/Develop/EditorConfig>
 #include <Mib/Concurrency/AsyncDestroy>
+#include <Mib/Cryptography/Hashes/SHA>
 #include <Mib/Time/Stopwatch>
 
 namespace
 {
-	void fg_NormalizeValidationNuls(CStr &_Text)
-	{
-		// NUL occupies one column, just like space. Normalize it before string
-		// splitting, whose substring constructors treat a leading NUL as empty.
-		auto pStart = _Text.f_GetStrUniqueWritable();
-		auto pEnd = pStart + _Text.f_GetLen();
-		for (auto pParse = pStart; pParse != pEnd; ++pParse)
-		{
-			if (*pParse == 0)
-				*pParse = ' ';
-		}
-	}
+	using namespace NMib::NDevelop;
+	using namespace NMib::NTool::NFormat;
+	using namespace NMib::NTool::NValidate;
+}
 
+namespace NMib::NTool::NValidate
+{
 	CStr fg_UnquoteGitPath(CStr const &_Path)
 	{
 		if (!_Path.f_StartsWith("\""))
@@ -139,80 +134,103 @@ namespace
 	}
 
 
-	struct CLineValidationSettings
+	bool fg_ValidateLine(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CCodeFormattingSettings const &_Settings, CFormatSink &_Sink)
 	{
-		explicit CLineValidationSettings(TCMap<CStr, CStr> const &_Properties)
+		CStr Report;
+		bool bValid = fg_ValidateLineLength(_Line, _AbsolutePath, _LineNumber, _Settings, Report);
+		if (Report)
+			_Sink.m_fReport(Report);
+
+		return bValid;
+	}
+
+	umint CValidationCounts::f_GetErrors() const
+	{
+		return m_nLineErrors + m_nFormatErrors;
+	}
+
+	CValidationCounts &CValidationCounts::operator += (CValidationCounts const &_Other)
+	{
+		m_nFiles += _Other.m_nFiles;
+		m_nExcluded += _Other.m_nExcluded;
+		m_nLineErrors += _Other.m_nLineErrors;
+		m_nFormatFiles += _Other.m_nFormatFiles;
+		m_nFormatErrors += _Other.m_nFormatErrors;
+		m_nFormatFailed += _Other.m_nFormatFailed;
+
+		return *this;
+	}
+
+	bool fg_IsRunningUnderGitHook()
+	{
+		return bool(fg_GetSys()->f_GetEnvironmentVariable("MalterlibHookRepository"));
+	}
+
+	CStr fg_DescribeValidationFailure(CStr const &_Kind, CValidationCounts const &_Counts)
+	{
+		auto nErrors = _Counts.f_GetErrors();
+		if (!nErrors || _Kind == "text")
+			return {};
+
+		return "Commit validation failed: {} changed line(s) violate the configured rules.\n"_f << nErrors;
+	}
+
+	// Line-length-only repositories keep the original summary so existing output stays compatible.
+	CStr fg_DescribeValidationSummary(CStr const &_Kind, CValidationCounts const &_Counts, fp64 _Seconds)
+	{
+		if (!_Counts.m_nFormatFiles)
 		{
-			if (auto pValue = _Properties.f_FindEqual("max_line_length"))
-			{
-				auto Value = pValue->f_LowerCase();
-				if (Value != "off" && Value != "unset")
-					m_nMaxColumns = fg_ParsePositive(Value, "max_line_length");
-			}
-
-			auto pWidth = _Properties.f_FindEqual("tab_width");
-			if (!pWidth || *pWidth == "unset")
-				pWidth = _Properties.f_FindEqual("indent_size");
-
-			if (pWidth && *pWidth != "unset" && *pWidth != "tab")
-				m_nTabWidth = fg_ParsePositive(*pWidth, "tab_width");
+			return "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f
+				<< _Counts.m_nFiles
+				<< _Kind
+				<< _Counts.m_nLineErrors
+				<< _Counts.m_nExcluded
+				<< _Seconds
+			;
 		}
 
-		umint m_nMaxColumns = 0;
-		umint m_nTabWidth = 4;
-	};
+		return "Validated {} {} file(s): {} line length violation(s), {} formatting violation(s) in {} formatted file(s), {} unanalyzable. Excluded {} file(s). Time: {fe2} s.\n"_f
+			<< _Counts.m_nFiles
+			<< _Kind
+			<< _Counts.m_nLineErrors
+			<< _Counts.m_nFormatErrors
+			<< _Counts.m_nFormatFiles
+			<< _Counts.m_nFormatFailed
+			<< _Counts.m_nExcluded
+			<< _Seconds
+		;
+	}
 
-	bool fg_ValidateLine(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CLineValidationSettings const &_Settings, CCommandLineControl &_CommandLine)
+	// Whether a NUL stands in a record the new snapshot keeps: a context or added line of a hunk. Deleted records are
+	// not part of the snapshot, so a change that removes the last NUL leaves a clean one.
+	bool fg_KeptRecordsHaveNul(CStr const &_Diff)
 	{
-		if (!_Settings.m_nMaxColumns)
-			return true;
-
-		// The iterator's character value may be NUL before the end of its input.
-		// File-leading BOM removal is handled by the caller.
-		umint nColumns = 0;
-		umint iPrevious = 0;
-		if (_Line.f_GetLen() > iPrevious)
+		auto pParse = _Diff.f_GetStr();
+		auto pEnd = pParse + _Diff.f_GetLen();
+		bool bInHunk = false;
+		while (pParse != pEnd)
 		{
-			CStrIteratorUTF8 End(_Line.f_GetStr() + _Line.f_GetLen(), 0);
-			for (CStrIteratorUTF8 Iterator(_Line); ; ++Iterator)
-			{
-				auto iEnd = _Line.f_GetLen() - umint(End - Iterator);
-				umint nAdvance = 1;
-				if (Iterator.f_IsBroken() || !Iterator.f_IsWholeCodePoint())
-					nAdvance = iEnd - iPrevious;
-				else if (*Iterator == '\t')
-					nAdvance = _Settings.m_nTabWidth - nColumns % _Settings.m_nTabWidth;
+			auto pLineEnd = pParse;
+			bool bNul = false;
+			for (; pLineEnd != pEnd && *pLineEnd != '\n'; ++pLineEnd)
+				bNul |= *pLineEnd == 0;
 
-				if (nColumns > TCLimitsInt<umint>::mc_Max - nAdvance)
-				{
-					_CommandLine %= "{}:{}: line length overflows the column counter and exceeds max_line_length = {}\n"_f
-						<< _AbsolutePath << _LineNumber << _Settings.m_nMaxColumns
-					;
+			if (pLineEnd - pParse >= 3 && pParse[0] == '@' && pParse[1] == '@' && pParse[2] == ' ')
+				bInHunk = true;
+			else if (bInHunk && bNul && (*pParse == '+' || *pParse == ' '))
+				return true;
 
-					return false;
-				}
-
-				nColumns += nAdvance;
-				iPrevious = iEnd;
-
-				if (Iterator - End >= 0)
-					break;
-			}
+			pParse = pLineEnd == pEnd ? pEnd : pLineEnd + 1;
 		}
-
-		if (nColumns <= _Settings.m_nMaxColumns)
-			return true;
-
-		_CommandLine %= "{}:{}: line length {} exceeds max_line_length = {}\n"_f << _AbsolutePath << _LineNumber << nColumns << _Settings.m_nMaxColumns;
 
 		return false;
 	}
 
-	void fg_OutputValidationSummary(CCommandLineControl &_CommandLine, CStr const &_Kind, umint _nFiles, umint _nExcluded, umint _nErrors, fp64 _Seconds)
+	// Validation never writes, so an opted-in file is analyzed as a whole snapshot and
+	// reported through the shared engine instead of a second set of layout checks.
+	bool fg_UsesFormattingEngine(CCodeFormattingSettings const &_Settings)
 	{
-		_CommandLine %= "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f
-			<< _nFiles << _Kind << _nErrors << _nExcluded << _Seconds
-		;
+		return _Settings.f_IsFormattingEnabled();
 	}
 
 	TCFuture<CStr> fg_ResolveValidationCommit(CStr _Reference, CStr _Directory)
@@ -226,11 +244,10 @@ namespace
 		co_return Result.f_GetStdOut().f_Trim();
 	}
 
-	TCFuture<uint32> fg_ValidateChanges(CStr _Directory, CStr _Base, TCSharedPointer<CCommandLineControl> _pCommandLine)
+	TCFuture<CValidationResult> fg_ValidateChanges(CStr _Directory, CStr _Base, TCActor<CFormatWorkerPool> _Workers, CFormatSink _Sink)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % ("Validating changes in '{}'"_f << _Directory));
 
-		CStopwatch Stopwatch{true};
 		auto RepositoryInfo = co_await NGit::fg_LaunchGitWithResult
 			(
 				{
@@ -272,7 +289,18 @@ namespace
 		CSystemEnvironment DiffEnvironment;
 
 		auto GitDirectory = Info[1];
-		auto AttributeDirectory = GitDirectory / "MToolValidate";
+		// The snapshot stays out of the Git directory, and the lock in it avoids the
+		// ".lock" suffix. Clients that watch the Git directory, such as Sublime Merge,
+		// treat new HEAD, refs and *.lock files there as a Git operation in progress
+		// and hold off refreshing until it settles.
+		CStr ValidationId;
+		{
+			NCryptography::CHash_SHA256 GitDirectoryHash;
+			GitDirectoryHash.f_AddData(GitDirectory.f_GetStr(), GitDirectory.f_GetLen());
+			ValidationId = GitDirectoryHash.f_GetDigest().f_GetString().f_Left(16);
+		}
+		auto AttributeDirectory = fg_GetToolRootDirectory() / "Validate" / ValidationId;
+		auto LockPath = GitDirectory / "MToolValidate.lockfile";
 		auto DiffDirectory = AttributeDirectory / "worktree";
 		auto SnapshotGitDirectory = AttributeDirectory / "git";
 		TCUniquePointer<CLockFile> pAttributeLock;
@@ -280,9 +308,9 @@ namespace
 			auto BlockingActor = fg_BlockingActor();
 			pAttributeLock = co_await
 				(
-					g_Dispatch(BlockingActor) / [GitDirectory]()
+					g_Dispatch(BlockingActor) / [LockPath]()
 					{
-						TCUniquePointer<CLockFile> pLock = fg_Construct(GitDirectory / "MToolValidate.lock");
+						TCUniquePointer<CLockFile> pLock = fg_Construct(LockPath);
 						pLock->f_LockWithException(5.0 * 60.0);
 
 						return fg_Move(pLock);
@@ -296,32 +324,59 @@ namespace
 				[AttributeDirectory, pAttributeLock = fg_Move(pAttributeLock)]() mutable -> TCFuture<void>
 				{
 					auto CaptureScope = co_await (g_CaptureExceptions % "Removing temporary validation attributes");
-					if (AttributeDirectory && CFile::fs_FileExists(AttributeDirectory))
-						CFile::fs_DeleteDirectoryRecursive(AttributeDirectory);
-					pAttributeLock.f_Clear();
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor()) / [AttributeDirectory, pAttributeLock = fg_Move(pAttributeLock)]() mutable
+							{
+								if (AttributeDirectory && CFile::fs_FileExists(AttributeDirectory))
+									CFile::fs_DeleteDirectoryRecursive(AttributeDirectory);
+								pAttributeLock.f_Clear();
+							}
+						)
+					;
 
 					co_return {};
 				}
 			)
 		;
-		// Isolate the Git directory as well as the worktree: info/attributes takes
-		// precedence over snapshot attributes, even when GIT_ATTR_SOURCE is supported.
-		if (CFile::fs_FileExists(AttributeDirectory))
-			CFile::fs_DeleteDirectoryRecursive(AttributeDirectory);
-
-		CFile::fs_CreateDirectory(DiffDirectory);
-		CFile::fs_CreateDirectory(SnapshotGitDirectory / "objects");
-		CFile::fs_CreateDirectory(SnapshotGitDirectory / "refs");
-		CStr SnapshotHead = Head ? Head : bHasHead ? Info.f_GetLast() : CStr("ref: refs/heads/validation");
-		CFile::fs_WriteStringToFile(SnapshotGitDirectory / "HEAD", SnapshotHead + "\n", false);
-		CFile::fs_WriteStringToFile
+		CStr SnapshotHead = Head ? Head : bHasHead ? Info.f_GetLast()
+			: CStr("ref: refs/heads/validation");
+		co_await
 			(
-				SnapshotGitDirectory / "config"
-				, "[core]\nrepositoryformatversion = 1\nbare = false\nfsmonitor = false\n[extensions]\nobjectformat = " + Info[2] + "\n"
-				, false
+				g_Dispatch(fg_BlockingActor()) / [AttributeDirectory, DiffDirectory, SnapshotGitDirectory, SnapshotHead, Info, Head, bHasHead]()
+				{
+					// Isolate the Git directory as well as the worktree: info/attributes takes
+					// precedence over snapshot attributes, even when GIT_ATTR_SOURCE is supported.
+					if (CFile::fs_FileExists(AttributeDirectory))
+						CFile::fs_DeleteDirectoryRecursive(AttributeDirectory);
+
+					// The snapshot holds the repository's contents, which only its owner may read where the repository is private.
+					CFile::fs_CreateDirectory(AttributeDirectory);
+#ifndef DPlatformFamily_Windows
+					CFile::fs_SetAttributes(AttributeDirectory, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_UserWrite | EFileAttrib_UserExecute);
+#endif
+					CFile::fs_CreateDirectory(DiffDirectory);
+					CFile::fs_CreateDirectory(SnapshotGitDirectory / "objects");
+					CFile::fs_CreateDirectory(SnapshotGitDirectory / "refs");
+					CFile::fs_WriteStringToFile(SnapshotGitDirectory / "HEAD", SnapshotHead + "\n", false);
+					CFile::fs_WriteStringToFile
+						(
+							SnapshotGitDirectory / "config"
+							, "[core]\nrepositoryformatversion = 1\nbare = false\nfsmonitor = false\n[extensions]\nobjectformat = " + Info[2] + "\n"
+							, false
+						)
+					;
+					CFile::fs_WriteStringToFile(AttributeDirectory / "attributes", "", false);
+
+					if (!Head && CFile::fs_FileExists(Info[4]))
+					{
+						CFile::fs_WriteFile(SnapshotGitDirectory / "index", CFile::fs_ReadFile(Info[4]));
+						if (Info.f_GetLen() > 5 + umint(bHasHead))
+							CFile::fs_WriteFile(SnapshotGitDirectory / CFile::fs_GetFile(Info[5]), CFile::fs_ReadFile(Info[5]));
+					}
+				}
 			)
 		;
-		CFile::fs_WriteStringToFile(AttributeDirectory / "attributes", "", false);
 		DiffEnvironment["GIT_DIR"] = SnapshotGitDirectory;
 		DiffEnvironment["GIT_COMMON_DIR"] = SnapshotGitDirectory;
 		DiffEnvironment["GIT_WORK_TREE"] = DiffDirectory;
@@ -345,16 +400,14 @@ namespace
 			Alternates += InheritedAlternates;
 		}
 		DiffEnvironment["GIT_ALTERNATE_OBJECT_DIRECTORIES"] = fg_Move(Alternates);
-		if (!Head && CFile::fs_FileExists(Info[4]))
-		{
-			CFile::fs_WriteFile(SnapshotGitDirectory / "index", CFile::fs_ReadFile(Info[4]));
-			if (Info.f_GetLen() > 5 + umint(bHasHead))
-				CFile::fs_WriteFile(SnapshotGitDirectory / CFile::fs_GetFile(Info[5]), CFile::fs_ReadFile(Info[5]));
-		}
 
 		// Read configuration from the selected snapshot: HEAD for --base, or the
 		// committing index (including GIT_INDEX_FILE) for --staged.
 		TCMap<CStr, CStr> ConfigurationContents;
+		TCSharedPointer<CFormatStyleSnapshot> pStyleSnapshot = fg_Construct();
+		pStyleSnapshot->m_Root = CFile::fs_CondensePath(_Directory);
+		pStyleSnapshot->m_GitDirectory = DiffDirectory;
+		pStyleSnapshot->m_GitEnvironment = DiffEnvironment;
 		TCVector<CStr> ListParams = {"-c", "core.quotePath=true"};
 		if (Head)
 			ListParams.f_Insert({"ls-tree", "-r", "--full-tree", Head});
@@ -376,26 +429,53 @@ namespace
 				co_return DMibErrorInstance("Cannot validate an unmerged index: {}"_f << (_Directory / Path));
 
 			bool bAttributes = CFile::fs_GetFile(Path) == ".gitattributes";
-			if (CFile::fs_GetFile(Path) != ".editorconfig" && !bAttributes)
-				continue;
+			bool bStyle = CFile::fs_GetFile(Path) == ".malterlib-format";
+			if (CFile::fs_GetFile(Path) != ".editorconfig" && !bAttributes && !bStyle)
+			{
+				if (Mode == "100644" || Mode == "100755")
+					pStyleSnapshot->m_Blobs(pStyleSnapshot->m_Root / Path, Hash);
 
+				continue;
+			}
+
+			// git reads no .gitattributes through a symbolic link. A style the working tree reaches through one would apply
+			// there and not here, so it is refused as an EditorConfig is.
 			if (Mode != "100644" && Mode != "100755")
 			{
 				if (bAttributes)
 					continue;
 
-				co_return DMibErrorInstance("EditorConfig in the validation snapshot must be a regular file: {}"_f << (_Directory / Path));
+				co_return DMibErrorInstance
+					(
+						"{} in the validation snapshot must be a regular file: {}"_f << (bStyle ? "A formatting style" : "EditorConfig") << (_Directory / Path)
+					)
+				;
 			}
 
 			auto Contents = co_await NGit::fg_LaunchGit({"cat-file", "blob", Hash}, DiffDirectory, DiffEnvironment);
 			if (bAttributes)
 			{
-				CFile::fs_CreateDirectoryForFile(DiffDirectory / Path);
-				CFile::fs_WriteStringToFile(DiffDirectory / Path, Contents, false);
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor()) / [Destination = DiffDirectory / Path, Contents]()
+						{
+							CFile::fs_CreateDirectoryForFile(Destination);
+							CFile::fs_WriteStringToFile(Destination, Contents, false);
+						}
+					)
+				;
+
 				continue;
 			}
 
 			// Git returns raw bytes; unlike CFile::fs_ReadString*, it does not strip the BOM.
+			if (bStyle)
+			{
+				pStyleSnapshot->m_Documents(pStyleSnapshot->m_Root / Path, Contents.f_RemovePrefix("\xEF\xBB\xBF"));
+
+				continue;
+			}
+
 			ConfigurationContents(Path, Contents.f_RemovePrefix("\xEF\xBB\xBF"));
 		}
 
@@ -415,11 +495,7 @@ namespace
 		auto Changes = fg_ParseRawDiff(co_await NGit::fg_LaunchGit(fg_Move(RawParams), DiffDirectory, DiffEnvironment));
 
 		if (Changes.f_IsEmpty())
-		{
-			fg_OutputValidationSummary(*_pCommandLine, Kind, 0, 0, 0, Stopwatch.f_GetTime());
-
-			co_return 0;
-		}
+			co_return CValidationResult{Kind, {}};
 
 		TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct
 			(
@@ -436,9 +512,12 @@ namespace
 		;
 		auto DestroyConfigurations = co_await fg_AsyncDestroy(Configurations);
 
-		umint nErrors = 0;
-		umint nFiles = 0;
-		umint nExcluded = 0;
+		// The style comes from the snapshot as the configuration does, a document another repository holds from disk.
+		TCActor<CFormatStyleResolver> Styles = fg_Construct(fg_Construct<CSharedRoundRobinBlockingActors>(umint(1)), pStyleSnapshot);
+		auto DestroyStyles = co_await fg_AsyncDestroy(Styles);
+
+		CValidationCounts Counts;
+		TCVector<CFormatJob> FormatJobs;
 		for (umint i = 0; i < Changes.f_GetLen(); ++i)
 		{
 			auto Header = Changes[i];
@@ -457,15 +536,17 @@ namespace
 
 			auto Properties = co_await Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, _Directory / Path);
 
-			CLineValidationSettings Settings(Properties);
-			if (!Settings.m_nMaxColumns)
+			CCodeFormattingSettings Settings(Properties);
+			bool bFormat = fg_UsesFormattingEngine(Settings);
+			if (!Settings.m_nMaxColumns && !bFormat)
 			{
-				++nExcluded;
+				++Counts.m_nExcluded;
 				continue;
 			}
 
-			++nFiles;
-			auto PatchPath = AttributeDirectory / "patch";
+			++Counts.m_nFiles;
+			// Every parallel job needs its own patch file, so the path carries the file index.
+			auto PatchPath = AttributeDirectory / ("patch-{}"_f << Counts.m_nFiles);
 			TCVector<CStr> DiffParams =
 				{
 					"-c", "core.attributesFile=" + (AttributeDirectory / "attributes"), "--literal-pathspecs", "diff"
@@ -487,127 +568,192 @@ namespace
 			// endings in unchanged content. Only '+' records are checked. A patch file
 			// also preserves NULs that text process-output handling can discard.
 			co_await NGit::fg_LaunchGit(fg_Move(DiffParams), DiffDirectory, DiffEnvironment);
-			auto Diff = CFile::fs_ReadStringFromFile(PatchPath, true);
+			auto Diff = co_await
+				(
+					g_Dispatch(fg_BlockingActor()) / [PatchPath]() -> CStr
+					{
+						return CFile::fs_ReadStringFromFile(PatchPath, true);
+					}
+				)
+			;
+			// Formatting analyses the exact snapshot bytes, so a file needing NUL normalization
+			// is reported as unanalyzable instead of being rewritten into something parseable.
+			bool bNormalizedNuls = fg_KeptRecordsHaveNul(Diff);
 			fg_NormalizeValidationNuls(Diff);
 
 			CStr AbsolutePath = _Directory / Path;
+			CStr Snapshot;
+			TCVector<umint> AddedLines;
+			bool bWholeFile = true;
 			umint iLine = 0;
+			CPlainFormatDirectives Directives;
+			bool bOffLineAdded = false;
+			bool bLastRecordKept = false; // A missing final newline marker follows the record it belongs to, kept or deleted.
 			// Git patch records are LF-delimited; a bare CR belongs to the file content.
 			for (auto const &Line : Diff.f_Split("\n"))
 			{
 				if (Line.f_StartsWith("diff --git "))
+				{
 					iLine = 0;
+					Snapshot.f_Clear();
+					AddedLines.f_Clear();
+					Directives = {};
+				}
 				else if (Line.f_StartsWith("@@ "))
 				{
 					auto Range = Line.f_Extract(Line.f_Find(" +") + 2);
 					auto Number = fg_GetStrSeparators(Range, " ,");
 					iLine = Number == "0" ? 0 : fg_ParsePositive(Number, "diff line number");
+					// Maximal context produces one hunk covering the file; anything else
+					// would leave gaps that cannot be reassembled into a complete snapshot.
+					bWholeFile &= iLine == 1 && Snapshot.f_IsEmpty();
 				}
+				else if (Line.f_StartsWith("\\ "))
+				{
+					if (bLastRecordKept)
+						Snapshot = Snapshot.f_RemoveSuffix("\n");
+				}
+				else if (Line.f_StartsWith("-"))
+					bLastRecordKept = false;
 				else if (iLine && (Line.f_StartsWith("+") || Line.f_StartsWith(" ")))
 				{
-					auto SourceRecord = Line.f_Extract(1).f_RemoveSuffix("\r");
+					bLastRecordKept = true;
+					auto Record = Line.f_Extract(1);
+					Snapshot += Record;
+					Snapshot += "\n";
+					auto SourceRecord = Record.f_RemoveSuffix("\r");
 					if (iLine == 1)
 						SourceRecord = SourceRecord.f_RemovePrefix("\xEF\xBB\xBF");
 
 					for (auto const &SourceLine : SourceRecord.f_SplitLine())
 					{
-						if (Line.f_StartsWith("+"))
-							nErrors += !fg_ValidateLine(SourceLine, AbsolutePath, iLine, Settings, *_pCommandLine);
+						bool bAdded = Line.f_StartsWith("+");
+						bool bDisabled = false;
+						if (!bFormat)
+						{
+							// Only a changed directive line is reported, as only changed lines are checked.
+							CStr DirectiveReport;
+							umint nDirectiveErrors = 0;
+							bool bWasOff = Directives.m_iOffLine != 0;
+							bDisabled = Directives.f_IsDisabled(SourceLine, AbsolutePath, iLine, DirectiveReport, nDirectiveErrors);
+							if (!bWasOff && Directives.m_iOffLine)
+								bOffLineAdded = bAdded;
+
+							if (bAdded && nDirectiveErrors)
+							{
+								_Sink.m_fReport(DirectiveReport);
+								Counts.m_nLineErrors += nDirectiveErrors;
+							}
+						}
+
+						if (bAdded)
+						{
+							AddedLines.f_Insert(iLine);
+							if (!bFormat && !bDisabled)
+								Counts.m_nLineErrors += !fg_ValidateLine(SourceLine, AbsolutePath, iLine, Settings, _Sink);
+						}
+
 						++iLine;
 					}
 				}
 			}
-		}
 
-		if (nErrors)
-			*_pCommandLine %= "Commit validation failed: {} changed line(s) exceed the configured limit.\n"_f << nErrors;
-
-		fg_OutputValidationSummary(*_pCommandLine, Kind, nFiles, nExcluded, nErrors, Stopwatch.f_GetTime());
-
-		co_return nErrors ? 1 : 0;
-	}
-
-	TCFuture<uint32> fg_ValidateRepository(CStr _Directory, TCSharedPointer<CCommandLineControl> _pCommandLine)
-	{
-		auto CaptureScope = co_await (g_CaptureExceptions % ("Auditing repository '{}'"_f << _Directory));
-
-		CStopwatch Stopwatch{true};
-		_Directory = (co_await NGit::fg_LaunchGit({"rev-parse", "--show-toplevel"}, _Directory)).f_Trim();
-		// Enumerate names first so Git does not read excluded files to classify their content.
-		auto Index = co_await NGit::fg_LaunchGit
-			(
-				{"-c", "core.quotePath=true", "ls-files", "--cached", "--deduplicate"}
-				, _Directory
-			)
-		;
-
-		TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct(_Directory);
-		auto DestroyConfigurations = co_await fg_AsyncDestroy(Configurations);
-		TCMap<CStr, CLineValidationSettings> SettingsByPath;
-		TCVector<CStr> CandidatePaths;
-		umint nExcluded = 0;
-		for (auto const &EncodedPath : Index.f_SplitLine<true>())
-		{
-			auto Path = fg_UnquoteGitPath(EncodedPath);
-			auto Properties = co_await Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, _Directory / Path);
-
-			CLineValidationSettings Settings(Properties);
-			if (!Settings.m_nMaxColumns)
+			if (!bFormat && bOffLineAdded)
 			{
-				++nExcluded;
+				CStr DirectiveReport;
+				umint nDirectiveErrors = 0;
+				Directives.f_Finish(AbsolutePath, DirectiveReport, nDirectiveErrors);
+				if (nDirectiveErrors)
+				{
+					_Sink.m_fReport(DirectiveReport);
+					Counts.m_nLineErrors += nDirectiveErrors;
+				}
+			}
+
+			// A change with no added or modified lines has nothing to report, which also
+			// covers deletion-only hunks and a file emptied by the change.
+			if (!bFormat || AddedLines.f_IsEmpty())
+				continue;
+
+			++Counts.m_nFormatFiles;
+			if (!bWholeFile || bNormalizedNuls)
+			{
+				++Counts.m_nFormatFailed;
+				_Sink.m_fReport("{}: the changed snapshot could not be reassembled for formatting analysis\n"_f << AbsolutePath);
+
 				continue;
 			}
 
-			CandidatePaths.f_Insert(Path);
-			SettingsByPath(Path, Settings);
+			auto pStyle = co_await Styles(&CFormatStyleResolver::f_Resolve, CFile::fs_GetPath(CFile::fs_CondensePath(AbsolutePath)));
+
+			auto &Job = FormatJobs.f_Insert();
+			Job.m_pStyle = fg_Move(pStyle);
+			Job.m_bHasStyle = true;
+			Job.m_Path = AbsolutePath;
+			Job.m_DisplayPath = Path;
+			Job.m_Settings = Settings;
+			Job.m_Source = fg_Move(Snapshot);
+			Job.m_bHasSource = true;
+			Job.m_ReportedLines = fg_Move(AddedLines);
+			Job.m_Mode = EFormatMode::mc_Report;
 		}
 
-		umint nFiles = 0;
-		umint nErrors = 0;
-		umint iPath = 0;
-		while (iPath < CandidatePaths.f_GetLen())
+		for (auto const &Result : co_await fg_RunFormatJobs(_Workers, fg_Move(FormatJobs)))
 		{
-			TCVector<CStr> Params =
-				{
-					"--literal-pathspecs", "-c", "core.quotePath=true", "grep", "--no-color", "--no-textconv"
-					, "-I", "--full-name", "-l", "-e", "", "--"
-				}
-			;
-			// Bound the escaped argument size, including quotes, for Windows command lines.
-			umint nArgumentChars = 0;
-			do
-			{
-				auto const &Path = CandidatePaths[iPath++];
-				Params.f_Insert(Path);
-				nArgumentChars += Path.f_GetLen() * 2 + 3;
-			}
-			while (iPath < CandidatePaths.f_GetLen() && nArgumentChars + CandidatePaths[iPath].f_GetLen() * 2 + 3 < 12000)
-			;
+			if (Result.m_Report)
+				_Sink.m_fReport(Result.m_Report);
 
-			// Git selects nonempty, non-binary working-tree files from this filtered set.
-			// Exit 1 means no matching files, rather than a launch failure.
-			auto Result = co_await NGit::fg_LaunchGitWithResult(fg_Move(Params), _Directory);
-			if (Result.m_ExitCode > 1)
-				co_return DMibErrorInstance("Cannot select text files for validation: {}"_f << Result.f_GetStdErr());
-
-			for (auto const &EncodedPath : Result.f_GetStdOut().f_SplitLine<true>())
-			{
-				auto Path = fg_UnquoteGitPath(EncodedPath);
-				auto const &Settings = *SettingsByPath.f_FindEqual(Path);
-				CStr AbsolutePath = _Directory / Path;
-				auto Contents = CFile::fs_ReadStringFromFile(AbsolutePath, true);
-				fg_NormalizeValidationNuls(Contents);
-				umint iLine = 0;
-				for (auto const &Line : Contents.f_SplitLine())
-					nErrors += !fg_ValidateLine(Line, AbsolutePath, ++iLine, Settings, *_pCommandLine);
-
-				++nFiles;
-			}
+			Counts.m_nFormatErrors += Result.m_nReported;
+			Counts.m_nFormatFailed += Result.m_Outcome == EFormatOutcome::mc_Failed;
 		}
 
-		fg_OutputValidationSummary(*_pCommandLine, "tracked text", nFiles, nExcluded, nErrors, Stopwatch.f_GetTime());
+		co_return CValidationResult{Kind, Counts};
+	}
 
-		co_return nErrors ? 1 : 0;
+	TCFuture<CValidationResult> fg_ValidateRepositories(TCVector<CStr> _Directories, CFormatSink _Sink, TCSharedPointer<TCAtomic<bool>> _pCancelled)
+	{
+		auto CaptureScope = co_await (g_CaptureExceptions % "Auditing repositories");
+
+		TCVector<CFormatSelection> Selections;
+		for (auto const &Directory : _Directories)
+		{
+			auto Full = CFile::fs_GetFullPath(Directory, CFile::fs_GetCurrentDirectory());
+			auto Root = co_await
+				(
+					g_Dispatch(fg_BlockingActor()) / [Full]() -> CStr
+					{
+						if (!CFile::fs_FileExists(Full, EFileAttrib_Directory))
+							DMibError("'{}' is not an existing directory"_f << Full);
+
+						return NGit::fg_FindGitWorkingTreeRoot(Full);
+					}
+				)
+			;
+			auto &Selection = Selections.f_Insert();
+			Selection.m_WorkingDirectory = Root ? Root : Full;
+			Selection.m_Patterns = {"*"};
+			Selection.m_bRecursive = true;
+			Selection.m_bOwnRepository = true;
+		}
+
+		CFormatOptions Options;
+		Options.m_Mode = EFormatMode::mc_Report;
+		Options.m_nJobs = fg_GetDefaultFormatJobs();
+		Options.m_bValidateLineLength = true;
+		Options.m_bRequireFiles = false;
+		Options.m_pCancelled = fg_Move(_pCancelled);
+		auto Run = co_await fg_RunFormat(fg_Move(Selections), fg_Move(Options), fg_Move(_Sink));
+
+		auto const &Summary = Run.m_Summary;
+		CValidationCounts Counts;
+		Counts.m_nFiles = Summary.m_nSelected - Summary.m_nExcluded;
+		Counts.m_nExcluded = Summary.m_nExcluded;
+		Counts.m_nLineErrors = Summary.m_nLineErrors;
+		Counts.m_nFormatFiles = Summary.m_nFormatFiles;
+		Counts.m_nFormatErrors = Summary.m_nReported;
+		Counts.m_nFormatFailed = Summary.m_nFailed;
+
+		co_return CValidationResult{"text", Counts};
 	}
 }
 
@@ -619,7 +765,8 @@ struct CTool_Validate : CDistributedTool
 			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
-		) override
+		)
+		override
 	{
 		if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
 			return;
@@ -628,7 +775,7 @@ struct CTool_Validate : CDistributedTool
 			(
 				{
 					"Names"_o= _o["Validate"]
-					, "Description"_o= "Validate tracked text files using .editorconfig. Currently checks max_line_length.\n"
+					, "Description"_o= "Validate the text files of a repository using .editorconfig: max_line_length, and the formatting rules of files that opt in.\n"
 					, "Category"_o= "Validation"
 					, "Options"_o=
 					{
@@ -650,12 +797,20 @@ struct CTool_Validate : CDistributedTool
 							, "Type"_o= ""
 							, "Description"_o= "Validate committed changes from the merge base with this reference to HEAD, using HEAD's .editorconfig files.\n"
 						}
+						, "Summary?"_o=
+						{
+							"Names"_o= _o["--summary"]
+							, "Default"_o= !fg_IsRunningUnderGitHook()
+							, "Description"_o= "End with the summary line. Defaults to off when run by a git hook, so a clean commit stays silent.\n"
+						}
 					}
 				}
 				, [](CEJsonSorted const _Params, TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 				{
 					auto CaptureScope = co_await (g_CaptureExceptions % "Running Validate");
 
+					CStopwatch Stopwatch{true};
+					CStr Base;
 					if (auto pBase = _Params.f_GetMember("Base"))
 					{
 						if (_Params["Staged"].f_Boolean())
@@ -663,13 +818,30 @@ struct CTool_Validate : CDistributedTool
 						if (pBase->f_String().f_IsEmpty())
 							co_return DMibErrorInstance("--base requires a nonempty commit reference");
 
-						co_return co_await fg_ValidateChanges(_Params["WorkingDirectory"].f_String(), pBase->f_String(), fg_Move(_pCommandLine));
+						Base = pBase->f_String();
 					}
 
-					if (_Params["Staged"].f_Boolean())
-						co_return co_await fg_ValidateChanges(_Params["WorkingDirectory"].f_String(), {}, fg_Move(_pCommandLine));
+					CFormatSink Sink;
+					Sink.m_fReport = [_pCommandLine](CStr const &_Text)
+						{
+							*_pCommandLine %= _Text;
+						}
+					;
+					auto Directory = _Params["WorkingDirectory"].f_String();
+					CValidationResult Result;
+					if (Base || _Params["Staged"].f_Boolean())
+					{
+						auto Workers = fg_ConstructFormatWorkerPool(fg_GetDefaultFormatJobs());
+						auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
+						Result = co_await fg_ValidateChanges(Directory, Base, Workers, fg_Move(Sink));
+					}
+					else
+						Result = co_await fg_ValidateRepositories({Directory}, fg_Move(Sink));
+					*_pCommandLine %= fg_DescribeValidationFailure(Result.m_Kind, Result.m_Counts);
+					if (_Params["Summary"].f_Boolean())
+						*_pCommandLine %= fg_DescribeValidationSummary(Result.m_Kind, Result.m_Counts, Stopwatch.f_GetTime());
 
-					co_return co_await fg_ValidateRepository(_Params["WorkingDirectory"].f_String(), fg_Move(_pCommandLine));
+					co_return Result.m_Counts.f_GetErrors() || Result.m_Counts.m_nFormatFailed ? 1 : 0;
 				}
 			)
 		;

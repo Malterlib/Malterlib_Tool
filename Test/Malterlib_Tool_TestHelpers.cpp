@@ -126,7 +126,8 @@ namespace NMib::NTool::NTestHelpers
 
 	bool CRepositoryFixture::f_HasTemporaryAttributes() const
 	{
-		return CFile::fs_FileExists(m_Path / ".git/MToolValidate", EFileAttrib_Directory);
+		// The fixture points MToolRootDirectory at m_Root / "mtool".
+		return !CFile::fs_FindFiles(m_Root / "mtool" / "Validate" / "*", EFileAttrib_Directory).f_IsEmpty();
 	}
 
 	TCFuture<CStr> CRepositoryFixture::f_Validate(CStr _Case, uint32 _Expected, bool _bStaged, CStr _Base)

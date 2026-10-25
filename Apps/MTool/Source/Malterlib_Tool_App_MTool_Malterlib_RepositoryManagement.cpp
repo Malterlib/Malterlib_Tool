@@ -3,8 +3,20 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include "Malterlib_Tool_App_MTool_Malterlib.h"
+#include "Malterlib_Tool_App_MTool_Format.h"
+#include "Malterlib_Tool_App_MTool_Validate.h"
 
+#include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Process/ProcessLaunch>
+#include <Mib/Time/Stopwatch>
+
+namespace NMib::NTool
+{
+	struct CFormatOutcome
+	{
+		uint32 m_ExitCode = 0;
+	};
+}
 
 void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
 {
@@ -393,6 +405,334 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, &GenerateOptions
 					)
 				;
+			}
+		)
+	;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["format"]
+				, "Description"_o=
+					"Format the sources of every repository that sets Repository.Format, as MTool Format does for one: "
+					"the files that opt in with malterlib_format = malterlib, malterlib-c or malterlib-buildsystem in .editorconfig, found under the repository root.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
+				{
+					"Check?"_o=
+					{
+						"Names"_o= _o["--check"]
+						, "Default"_o= false
+						, "Description"_o= "Report formatting violations without writing any file.\n"
+					}
+					, "Diff?"_o=
+					{
+						"Names"_o= _o["--diff"]
+						, "Default"_o= false
+						, "Description"_o= "Print the proposed patches without writing any file.\n"
+					}
+					, "Jobs?"_o=
+					{
+						"Names"_o= _o["--jobs", "-j"]
+						, "Default"_o= 0
+						, "Description"_o= "Maximum number of files formatted concurrently in a repository. Zero selects a bounded host-capacity default.\n"
+					}
+					, "Slowest?"_o=
+					{
+						"Names"_o= _o["--slowest"]
+						, "Default"_o= 0
+						, "Description"_o= "After the run, list this many of the files the formatting engine took the longest on, with its times.\n"
+					}
+					, Filter_Name
+					, fFilter_Type("")
+					, Filter_Tags
+					, Filter_Branch
+					, fs_CachedEnvironmentOption(true)
+				}
+			}
+			, [=, this](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				// The time reported covers finding the repositories as well as formatting them.
+				CStopwatch Stopwatch{true};
+				bool bCheck = _Params["Check"].f_Boolean();
+				bool bDiff = _Params["Diff"].f_Boolean();
+				if (bCheck && bDiff)
+				{
+					*_pCommandLine %= "--check and --diff cannot be combined\n";
+
+					co_return 2;
+				}
+
+				NMib::NTool::NFormat::CFormatOptions Options;
+				if (bCheck)
+					Options.m_Mode = NMib::NTool::NFormat::EFormatMode::mc_Check;
+				else if (bDiff)
+					Options.m_Mode = NMib::NTool::NFormat::EFormatMode::mc_Diff;
+
+				if (_Params["Jobs"].f_Integer() < 0 || _Params["Slowest"].f_Integer() < 0)
+				{
+					*_pCommandLine %= "--jobs and --slowest cannot be negative\n";
+
+					co_return 2;
+				}
+
+				Options.m_nJobs = umint(_Params["Jobs"].f_Integer());
+				if (!Options.m_nJobs)
+					Options.m_nJobs = NMib::NTool::NFormat::fg_GetDefaultFormatJobs();
+
+				Options.m_nSlowest = umint(_Params["Slowest"].f_Integer());
+
+				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+				RepoFilter.m_bFormat = true;
+
+				// One run formats every repository at once, so the walks and the formatting
+				// spread over the cores together; a violation is not an error of the build
+				// system, so the exit code comes back beside its result.
+				NStorage::TCSharedPointer<NMib::NTool::CFormatOutcome> pOutcome = fg_Construct();
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				auto Code = co_await f_RunBuildSystem
+					(
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
+						{
+							TCVector<CStr> Locations;
+							if (auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations(GenerateOptions, RepoFilter, Locations); Retry != CBuildSystem::ERetry_None)
+								co_return Retry;
+
+							if (Locations.f_IsEmpty())
+							{
+								*_pCommandLine %= "No repository sets Repository.Format\n";
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							TCVector<NMib::NTool::NFormat::CFormatSelection> Selections;
+							for (auto &Location : Locations)
+							{
+								auto &Selection = Selections.f_Insert();
+								Selection.m_WorkingDirectory = fg_Move(Location);
+								Selection.m_Patterns = {"*"};
+								Selection.m_bRecursive = true;
+								Selection.m_bOwnRepository = true;
+							}
+
+							NMib::NTool::NFormat::CFormatSink Sink;
+							Sink.m_fReport = [_pCommandLine](CStr const &_Text)
+								{
+									*_pCommandLine %= _Text;
+								}
+							;
+							// A patch is written as bytes: a NUL in a changed line would end text written to a console.
+							Sink.m_fPatch = [_pCommandLine](CStr const &_Text)
+								{
+									NContainer::CByteVector Bytes;
+									Bytes.f_Insert((uint8 const *)_Text.f_GetStr(), _Text.f_GetLen());
+									*_pCommandLine += Bytes;
+								}
+							;
+							// The repositories' patches go together, each named from the workspace.
+							auto RunOptions = Options;
+							RunOptions.m_pCancelled = _pBuildSystem->f_GetCancelledPointer();
+							RunOptions.m_PatchRoot = _pBuildSystem->f_GetBaseDir();
+							auto Ran = co_await NMib::NTool::NFormat::fg_RunFormat(fg_Move(Selections), fg_Move(RunOptions), fg_Move(Sink)).f_Wrap();
+							co_await _pBuildSystem->f_CheckCancelled();
+
+							// A selection that fails, as a directory that cannot be listed does, is an operational failure too.
+							if (!Ran)
+							{
+								*_pCommandLine %= "{}\n"_f << Ran.f_GetExceptionStr();
+								pOutcome->m_ExitCode = 2;
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							auto &Run = *Ran;
+							*_pCommandLine %= NMib::NTool::NFormat::fg_DescribeFormatSummary(Run.m_Summary, Options.m_Mode, Stopwatch.f_GetTime());
+							if (Run.m_Summary.m_nFailed)
+							{
+								// A file that could not be formatted is an operational failure, told apart from a violation as MTool
+								// Format tells it.
+								*_pCommandLine %= "{} file(s) could not be formatted\n"_f << Run.m_Summary.m_nFailed;
+								pOutcome->m_ExitCode = 2;
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							pOutcome->m_ExitCode = Run.m_ExitCode;
+
+							co_return CBuildSystem::ERetry_None;
+						}
+						, _pCommandLine
+						, &GenerateOptions
+					)
+				;
+
+				co_return Code ? Code : pOutcome->m_ExitCode;
+			}
+		)
+	;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["validate"]
+				, "Description"_o=
+					"Validate the text files of every repository that sets Repository.Format, as MTool Validate does for one, "
+					"in one run with one summary.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
+				{
+					"Staged?"_o=
+					{
+						"Names"_o= _o["--staged"]
+						, "Default"_o= false
+						, "Description"_o= "Only validate added or modified lines in each index, using staged .editorconfig files.\n"
+					}
+					, "Base?"_o=
+					{
+						"Names"_o= _o["--base"]
+						, "Type"_o= ""
+						, "Description"_o= "Validate committed changes from the merge base with this reference to HEAD, using HEAD's .editorconfig files.\n"
+					}
+					, "Summary?"_o=
+					{
+						"Names"_o= _o["--summary"]
+						, "Default"_o= !NMib::NTool::NValidate::fg_IsRunningUnderGitHook()
+						, "Description"_o= "End with the summary line. Defaults to off when run by a git hook.\n"
+					}
+					, Filter_Name
+					, fFilter_Type("")
+					, Filter_Tags
+					, Filter_Branch
+					, fs_CachedEnvironmentOption(true)
+				}
+			}
+			, [=, this](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				CStopwatch Stopwatch{true};
+				bool bStaged = _Params["Staged"].f_Boolean();
+				bool bSummary = _Params["Summary"].f_Boolean();
+				CStr Base;
+				if (auto pBase = _Params.f_GetMember("Base"))
+				{
+					if (bStaged || pBase->f_String().f_IsEmpty())
+					{
+						*_pCommandLine %= bStaged ? "--base and --staged cannot be combined\n" : "--base requires a nonempty commit reference\n";
+
+						co_return 2;
+					}
+
+					Base = pBase->f_String();
+				}
+
+				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+				RepoFilter.m_bFormat = true;
+
+				// The repositories are validated at once on one pool of workers. Each one's
+				// diagnostics are kept apart and written in repository order once all are
+				// done, so a parallel run reads the same from one run to the next.
+				NStorage::TCSharedPointer<NMib::NTool::CFormatOutcome> pOutcome = fg_Construct();
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				auto Code = co_await f_RunBuildSystem
+					(
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
+						{
+							TCVector<CStr> Locations;
+							if (auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations(GenerateOptions, RepoFilter, Locations); Retry != CBuildSystem::ERetry_None)
+								co_return Retry;
+
+							if (Locations.f_IsEmpty())
+							{
+								*_pCommandLine %= "No repository sets Repository.Format\n";
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							// An audit needs no git and is one Format run over every repository; the
+							// changed-line modes ask git per repository, at once on one pool, and their
+							// diagnostics are written in repository order once all are done.
+							CStr Kind = Base ? "committed" : bStaged ? "staged" : "text";
+							NMib::NTool::NValidate::CValidationCounts Counts;
+							umint nFailed = 0;
+							if (!bStaged && !Base)
+							{
+								NMib::NTool::NFormat::CFormatSink Sink;
+								Sink.m_fReport = [_pCommandLine](CStr const &_Text)
+									{
+										*_pCommandLine %= _Text;
+									}
+								;
+								auto Audited = co_await NMib::NTool::NValidate::fg_ValidateRepositories(Locations, fg_Move(Sink), _pBuildSystem->f_GetCancelledPointer()).f_Wrap();
+								co_await _pBuildSystem->f_CheckCancelled();
+
+								if (!Audited)
+								{
+									*_pCommandLine %= "{}\n"_f << Audited.f_GetExceptionStr();
+									pOutcome->m_ExitCode = 2;
+
+									co_return CBuildSystem::ERetry_None;
+								}
+
+								Counts = Audited->m_Counts;
+							}
+							else
+							{
+								auto Workers = NMib::NTool::NFormat::fg_ConstructFormatWorkerPool(NMib::NTool::NFormat::fg_GetDefaultFormatJobs());
+								auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
+								TCVector<CStr> Reports;
+								Reports.f_SetLen(Locations.f_GetLen());
+								TCFutureVector<NMib::NTool::NValidate::CValidationResult> Pending;
+								for (umint i = 0; i < Locations.f_GetLen(); ++i)
+								{
+									NMib::NTool::NFormat::CFormatSink Sink;
+									Sink.m_fReport = [pReport = &Reports[i]](CStr const &_Text)
+										{
+											*pReport += _Text;
+										}
+									;
+									NMib::NTool::NValidate::fg_ValidateChanges(Locations[i], Base, Workers, fg_Move(Sink)) > Pending;
+								}
+
+								auto Outcomes = co_await fg_AllDoneWrapped(Pending);
+								for (umint i = 0; i < Locations.f_GetLen(); ++i)
+								{
+									*_pCommandLine %= Reports[i];
+									if (Outcomes[i])
+										Counts += Outcomes[i]->m_Counts;
+									else
+									{
+										*_pCommandLine %= "{}: {}\n"_f << Locations[i] << Outcomes[i].f_GetExceptionStr();
+										++nFailed;
+									}
+								}
+							}
+
+							co_await _pBuildSystem->f_CheckCancelled();
+
+							*_pCommandLine %= NMib::NTool::NValidate::fg_DescribeValidationFailure(Kind, Counts);
+							if (bSummary)
+								*_pCommandLine %= NMib::NTool::NValidate::fg_DescribeValidationSummary(Kind, Counts, Stopwatch.f_GetTime());
+							if (nFailed)
+							{
+								*_pCommandLine %= "{} {} could not be validated\n"_f << nFailed << (nFailed == 1 ? "repository" : "repositories");
+								pOutcome->m_ExitCode = 2;
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							pOutcome->m_ExitCode = Counts.f_GetErrors() || Counts.m_nFormatFailed ? 1 : 0;
+
+							co_return CBuildSystem::ERetry_None;
+						}
+						, _pCommandLine
+						, &GenerateOptions
+					)
+				;
+
+				co_return Code ? Code : pOutcome->m_ExitCode;
 			}
 		)
 	;

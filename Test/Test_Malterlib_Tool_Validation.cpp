@@ -26,7 +26,8 @@ namespace NMib::NTool
 					auto Audit = co_await Repo.f_Validate("Audit", 0, false);
 
 					DMibExpect(Staged.f_Find("Validated 0 staged file(s)"), >=, 0);
-					DMibExpect(Audit.f_Find("Validated 0 tracked text file(s)"), >=, 0);
+					// The audit walks the working tree, so the fixture's untracked configuration counts.
+					DMibExpect(Audit.f_Find("Validated 1 text file(s)"), >=, 0);
 					DMibExpect(CFile::fs_FileExists(Repo.m_Root / "mtool/TrustDatabase.MTool", EFileAttrib_Directory), ==, true);
 
 					co_return {};
@@ -127,6 +128,48 @@ namespace NMib::NTool
 					co_return {};
 				};
 
+				DMibTestCategory("FormatOffDirectives") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "FormatOffDirectives");
+
+					auto Long = fg_Repeat("x", 191);
+					{
+						CRepositoryFixture Repo;
+						co_await Repo.f_Init();
+						Repo.f_Write(".editorconfig", "root = true\n[*]\nmax_line_length = 190\n");
+						Repo.f_Write("script.sh", "# malterlib-format off\n" + Long + "\n\t# malterlib-format on\nshort\n");
+						Repo.f_Write("page.xml", "<!-- malterlib-format off -->\n" + Long + "\n<!-- malterlib-format on -->\n");
+						Repo.f_Write("after.sh", "# malterlib-format off\n# malterlib-format on\n" + Long + "\n");
+						co_await Repo.f_Stage();
+
+						auto Staged = co_await Repo.f_Validate("Disabled", 1);
+						auto Audit = co_await Repo.f_Validate("DisabledAudit", 1, false);
+
+						DMibExpect(Staged.f_Find("after.sh:3:"), >=, 0);
+						DMibExpect(Audit.f_Find("after.sh:3:"), >=, 0);
+						DMibExpect(Audit.f_Find("script.sh"), <, 0);
+						DMibExpect(Audit.f_Find("page.xml"), <, 0);
+					}
+					{
+						CRepositoryFixture Repo;
+						co_await Repo.f_Init();
+						Repo.f_Write(".editorconfig", "root = true\n[*]\nmax_line_length = 190\n");
+						Repo.f_Write("unmatched.sh", "# malterlib-format off\nshort\n");
+						Repo.f_Write("stray.sh", "short\n// malterlib-format on\n");
+						co_await Repo.f_Stage();
+
+						auto Audit = co_await Repo.f_Validate("UnmatchedAudit", 1, false);
+						auto Staged = co_await Repo.f_Validate("Unmatched", 1);
+
+						DMibExpect(Audit.f_Find("unmatched.sh:1: 'malterlib-format off' has no matching 'malterlib-format on'"), >=, 0);
+						DMibExpect(Audit.f_Find("stray.sh:2: 'malterlib-format on' has no matching 'malterlib-format off'"), >=, 0);
+						DMibExpect(Staged.f_Find("unmatched.sh:1:"), >=, 0);
+						DMibExpect(Staged.f_Find("stray.sh:2:"), >=, 0);
+					}
+
+					co_return {};
+				};
+
 				DMibTestCategory("MarkdownExclusion") -> TCFuture<void>
 				{
 					auto Capture = co_await (g_CaptureExceptions % "MarkdownExclusion");
@@ -142,7 +185,7 @@ namespace NMib::NTool
 					auto Audit = co_await Repo.f_Validate("Audit", 0, false);
 
 					DMibExpect(Staged.f_Find("Excluded 1 file(s)"), >=, 0);
-					DMibExpect(Audit.f_Find("Validated 2 tracked text file(s)"), >=, 0);
+					DMibExpect(Audit.f_Find("Validated 2 text file(s)"), >=, 0);
 
 					co_return {};
 				};
@@ -646,6 +689,46 @@ namespace NMib::NTool
 					co_return {};
 				};
 
+				DMibTestCategory("SummaryUnderGitHook") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "SummaryUnderGitHook");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write("file.cpp", fg_Repeat("x", 191) + "\n");
+					co_await Repo.f_Stage();
+					auto fRun = [&](TCVector<CStr> _Extra)
+						{
+							TCVector<CStr> Params = {"Validate", "--no-color", "-C", Repo.m_Path, "--staged"};
+							Params.f_Insert(_Extra);
+
+							return Repo.f_Tool(fg_Move(Params));
+						}
+					;
+
+					// The dispatcher's variable marks a hook; the diagnostics and the failure
+					// notice still come, the summary does not unless asked for.
+					auto Plain = co_await fRun({});
+					DMibExpect(Plain.m_ExitCode, ==, 1u);
+					DMibExpect(Plain.f_GetCombinedOut().f_Find("staged file(s): 1 line length violation(s)"), >=, 0);
+
+					Repo.m_Environment["MalterlibHookRepository"] = Repo.m_Path;
+					auto Hooked = co_await fRun({});
+					DMibExpect(Hooked.m_ExitCode, ==, 1u);
+					DMibExpect(Hooked.f_GetCombinedOut().f_Find("file.cpp:1: line length 191"), >=, 0);
+					DMibExpect(Hooked.f_GetCombinedOut().f_Find("Commit validation failed"), >=, 0);
+					DMibExpect(Hooked.f_GetCombinedOut().f_Find("Validated"), <, 0);
+
+					auto Asked = co_await fRun({"--summary"});
+					DMibExpect(Asked.f_GetCombinedOut().f_Find("staged file(s): 1 line length violation(s)"), >=, 0);
+
+					Repo.m_Environment.f_Remove("MalterlibHookRepository");
+					auto Silenced = co_await fRun({"--no-summary"});
+					DMibExpect(Silenced.f_GetCombinedOut().f_Find("Validated"), <, 0);
+
+					co_return {};
+				};
+
 				DMibTestCategory("UntrackedConfiguration") -> TCFuture<void>
 				{
 					auto Capture = co_await (g_CaptureExceptions % "UntrackedConfiguration");
@@ -838,6 +921,145 @@ namespace NMib::NTool
 					co_return {};
 				};
 
+				DMibTestCategory("AuditSkipsBinaryUnread") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "Testing an audit of an unreadable binary");
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 190\n");
+					Repo.f_Write(".gitattributes", "*.bin -diff\n");
+					Repo.f_Write("locked.bin", fg_Repeat("x", 191));
+					CFile::fs_SetAttributes(Repo.m_Path / "locked.bin", EFileAttrib_UnixAttributesValid | EFileAttrib_UserWrite);
+					co_await Repo.f_Validate("Audit", 0, false);
+					CFile::fs_SetAttributes(Repo.m_Path / "locked.bin", EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_UserWrite);
+
+					co_return {};
+				};
+
+				// A UTF-16 file's signature is taken out once by its decoding, and a U+FEFF behind it is a column of its first line.
+				DMibTestCategory("AuditDecodedLeadingFeff") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "Testing an audit of a UTF-16 file starting with U+FEFF");
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 190\n");
+					Repo.f_Write(".gitattributes", "*.txt diff\n");
+					NContainer::CByteVector Data;
+					for (uint8 Byte : {0xFF, 0xFE, 0xFF, 0xFE})
+						Data.f_Insert(Byte);
+					for (umint i = 0; i < 190; ++i)
+					{
+						Data.f_Insert(uint8('x'));
+						Data.f_Insert(uint8(0));
+					}
+					CFile::fs_WriteFile(Repo.m_Path / "wide.txt", Data);
+
+					// A U+0000 in decoded text is a column too.
+					NContainer::CByteVector Nul;
+					for (uint8 Byte : {0xFE, 0xFF, 0x00, 0x00})
+						Nul.f_Insert(Byte);
+					for (umint i = 0; i < 190; ++i)
+					{
+						Nul.f_Insert(uint8(0));
+						Nul.f_Insert(uint8('x'));
+					}
+					CFile::fs_WriteFile(Repo.m_Path / "zero.txt", Nul);
+
+					auto Output = co_await Repo.f_Validate("Audit", 1, false);
+					DMibExpect(Output.f_Find("wide.txt:1: line length 191"), >=, 0);
+					DMibExpect(Output.f_Find("zero.txt:1: line length 191"), >=, 0);
+
+					co_return {};
+				};
+
+				// git ignores only what it does not track, so a file added under an ignore rule is audited.
+				DMibTestCategory("AuditTrackedIgnored") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "Testing an audit of a tracked file an ignore rule matches");
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 190\n");
+					Repo.f_Write(".gitignore", "ignored.txt\nIgnoredDirectory/\n");
+					Repo.f_Write("ignored.txt", fg_Repeat("x", 191) + "\n");
+					Repo.f_Write("IgnoredDirectory/tracked.txt", fg_Repeat("x", 191) + "\n");
+					Repo.f_Write("IgnoredDirectory/untracked.txt", fg_Repeat("x", 191) + "\n");
+					co_await Repo.f_Git({"add", "-f", "ignored.txt", "IgnoredDirectory/tracked.txt"});
+
+					auto Output = co_await Repo.f_Validate("Audit", 1, false);
+					DMibExpect(Output.f_Find("ignored.txt:1: line length 191"), >=, 0);
+					DMibExpect(Output.f_Find("tracked.txt:1: line length 191"), >=, 0);
+					DMibExpect(Output.f_Find("untracked.txt"), ==, -1);
+
+					// Also where a walk starts below the ignored directory.
+					Repo.f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 190\n\n[*.cpp]\nmalterlib_format = malterlib\nindent_style = tab\n");
+					Repo.f_Write("IgnoredDirectory/Sub/Tracked.cpp", "int  a;\n");
+					Repo.f_Write("IgnoredDirectory/Sub/Untracked.cpp", "int  a;\n");
+					co_await Repo.f_Git({"add", "-f", "IgnoredDirectory/Sub/Tracked.cpp"});
+					auto Below = co_await Repo.f_Tool({"Format", "--no-color", "--check", "-C", Repo.m_Path / "IgnoredDirectory/Sub", "--pattern", "*.cpp"});
+					DMibExpect(Below.f_GetCombinedOut().f_Find("Tracked.cpp"), >=, 0);
+					DMibExpect(Below.f_GetCombinedOut().f_Find("Untracked.cpp"), ==, -1);
+
+					co_return {};
+				};
+
+				DMibTestCategory("AuditGlobalAttributes") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "Testing an audit with global attributes");
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 190\n");
+					Repo.f_Write("zero.dat", fg_Repeat("x", 191) + "\n");
+					auto Data = CFile::fs_ReadFile(Repo.m_Path / "zero.dat");
+					Data[5] = 0;
+					CFile::fs_WriteFile(Repo.m_Path / "zero.dat", Data);
+					Repo.f_Write("text.bin", fg_Repeat("x", 191) + "\n");
+					CFile::fs_WriteStringToFile(Repo.m_Root / "global.attributes", "zero.dat diff\ntext.bin -diff\n", false);
+					co_await Repo.f_Git({"config", "--global", "core.attributesFile", Repo.m_Root / "global.attributes"});
+
+					auto Output = co_await Repo.f_Validate("Audit", 1, false);
+					DMibExpect(Output.f_Find("zero.dat:1: line length 191"), >=, 0);
+					DMibExpect(Output.f_Find("text.bin:"), ==, -1);
+
+					co_return {};
+				};
+
+				// A repository checked out inside the audited one is a selection of its own, which the audit leaves to it.
+				DMibTestCategory("AuditStopsAtNestedRepository") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "Testing an audit around a nested repository");
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 190\n");
+					co_await Repo.f_Git({"init", "-q", "Nested"});
+					Repo.f_Write("Nested/long.txt", fg_Repeat("x", 191) + "\n");
+
+					auto Output = co_await Repo.f_Validate("Audit", 0, false);
+					DMibExpect(Output.f_Find("long.txt"), ==, -1);
+
+					co_return {};
+				};
+
+				// A formatting style reached through a symbolic link would apply to the working tree and not to the snapshot.
+				DMibTestCategory("SnapshotStyleSymlink") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "Testing a symlinked style in a snapshot");
+
+#ifndef DPlatformFamily_Windows
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write("style.yaml", "Version: 1\n");
+					CFile::fs_CreateSymbolicLink("style.yaml", Repo.m_Path / ".malterlib-format", EFileAttrib_File, ESymbolicLinkFlag_Relative);
+					Repo.f_Write("file.cpp", "short\n");
+					co_await Repo.f_Stage();
+
+					auto Result = co_await Repo.f_Tool({"Validate", "-C", Repo.m_Path, "--staged", "--no-color"});
+					DMibExpect(Result.m_ExitCode, !=, 0u);
+					DMibExpect(Result.f_GetCombinedOut().f_Find("A formatting style in the validation snapshot must be a regular file"), >=, 0);
+#endif
+
+					co_return {};
+				};
+
 				DMibTestCategory("BaseCommittedAttributes") -> TCFuture<void>
 				{
 					auto Capture = co_await (g_CaptureExceptions % "Testing committed attributes");
@@ -913,6 +1135,15 @@ namespace NMib::NTool
 
 					DMibExpect(Invalid.m_ExitCode, !=, 0);
 
+					for (auto const &Directory : {Repo.m_Path / "missing", Repo.m_Path / "file.cpp"})
+					{
+						DMibTestPath(Directory);
+						auto Audit = co_await Repo.f_Tool({"Validate", "-C", Directory, "--no-color"});
+
+						DMibExpect(Audit.m_ExitCode, !=, 0);
+						DMibExpect(Audit.f_GetCombinedOut().f_Find("is not an existing directory"), >=, 0);
+					}
+
 					co_return {};
 				};
 
@@ -937,6 +1168,67 @@ namespace NMib::NTool
 					Repo.f_Write("file.cpp", "short\n");
 					co_await Repo.f_Stage();
 					co_await Repo.f_Git({"commit", "-qm", "accepted"});
+
+					co_return {};
+				};
+
+				co_return {};
+			};
+
+			DMibTestSuite("Workspace") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Testing mib validate over a workspace");
+
+				DMibTestCategory("ValidatesRepositoriesThatOptIn") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "ValidatesRepositoriesThatOptIn");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 20\n");
+					Repo.f_Write("Long.txt", "This line is well past the twenty column limit.\n");
+					co_await Repo.f_Stage();
+					auto fConfigure = [&](bool _bFormat)
+						{
+							CStr Configuration = "%Repository \".\"\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n\t\tDefaultBranch \"main\"\n"
+								"\t\tURL \"https://example.invalid/validate-fixture.git\"\n"
+							;
+							Configuration += "\t\tLocation " + CEJsonSorted(Repo.m_Path).f_ToString() + "\n";
+							Configuration += _bFormat ? "\t\tFormat true\n\t}\n}\n" : "\t}\n}\n";
+							// Outside the repository, where the audit would otherwise read it.
+							CFile::fs_WriteStringToFile(Repo.m_Root / "Test.MBuildSystem", Configuration, false);
+						}
+					;
+					auto fRun = [&](TCVector<CStr> _Extra)
+						{
+							TCVector<CStr> Params =
+								{
+									"validate", "--skip-update", "--no-color", "--build-system", Repo.m_Root / "Test.MBuildSystem"
+									, "--output-directory", Repo.m_Root / "output", "--no-use-user-settings", "--no-use-cached-environment"
+								}
+							;
+							Params.f_Insert(_Extra);
+
+							return Repo.f_Tool(fg_Move(Params), true);
+						}
+					;
+
+					fConfigure(true);
+					auto Audited = co_await fRun({});
+					DMibExpect(Audited.m_ExitCode, ==, 1u);
+					DMibExpect(Audited.f_GetCombinedOut().f_Find("Long.txt:1: line length 47 exceeds max_line_length = 20"), >=, 0);
+					DMibExpect(Audited.f_GetCombinedOut().f_Find("text file(s): 1 line length violation(s)"), >=, 0);
+
+					auto Staged = co_await fRun({"--staged"});
+					DMibExpect(Staged.m_ExitCode, ==, 1u);
+					DMibExpect(Staged.f_GetCombinedOut().f_Find("Commit validation failed: 1 changed line(s)"), >=, 0);
+					DMibExpect(Staged.f_GetCombinedOut().f_Find("staged file(s): 1 line length violation(s)"), >=, 0);
+
+					// A repository that does not opt in is not visited, and none is no error.
+					fConfigure(false);
+					auto Skipped = co_await fRun({});
+					DMibExpect(Skipped.m_ExitCode, ==, 0u);
+					DMibExpect(Skipped.f_GetCombinedOut().f_Find("Validated"), <, 0);
 
 					co_return {};
 				};
