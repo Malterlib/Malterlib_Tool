@@ -124,6 +124,71 @@ namespace NMib::NTool::NTestHelpers
 		co_return co_await f_Run(m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension), fg_Move(_Params), m_Root, _bMib);
 	}
 
+	// The input is sent once the tool has launched, and stdin is closed behind it.
+	TCFuture<CProcessLaunchActor::CSimpleLaunchResult> CRepositoryFixture::f_ToolWithStdIn(TCVector<CStr> _Params, CStr _Input)
+	{
+		auto Capture = co_await (g_CaptureExceptions % "Launching MTool with stdin");
+
+		struct CState
+		{
+			CProcessLaunchActor::CSimpleLaunchResult m_Result;
+			TCPromise<void> m_Launched;
+			TCPromise<void> m_Exited;
+		};
+
+		NStorage::TCSharedPointer<CState> pState = fg_Construct();
+		CProcessLaunchActor::CSimpleLaunch Launch
+			{
+				m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension)
+				, fg_Move(_Params)
+				, m_Root
+				, CProcessLaunchActor::ESimpleLaunchFlag_None
+			}
+		;
+		Launch.m_Params.m_Environment = m_Environment;
+		Launch.m_Params.m_bMergeEnvironment = false;
+		Launch.m_bWholeLineOutput = false;
+		Launch.m_Params.m_fOnOutput = [pState](EProcessLaunchOutputType _Type, CStr const &_Output)
+			{
+				auto &Output = pState->m_Result.m_Output.f_Insert();
+				Output.m_Type = _Type;
+				Output.m_Output = _Output;
+			}
+		;
+		Launch.m_Params.m_fOnStateChange = [pState](CProcessLaunchStateChangeVariant const &_State, fp64 _TimeSinceStart)
+			{
+				switch (_State.f_GetTypeID())
+				{
+					case EProcessLaunchState_Launched:
+						pState->m_Launched.f_SetResult();
+
+						break;
+					case EProcessLaunchState_LaunchFailed:
+						pState->m_Launched.f_SetException(DMibErrorInstance(_State.f_Get<EProcessLaunchState_LaunchFailed>()));
+
+						break;
+					case EProcessLaunchState_Exited:
+						pState->m_Result.m_ExitCode = _State.f_Get<EProcessLaunchState_Exited>();
+						pState->m_Exited.f_SetResult();
+
+						break;
+				}
+			}
+		;
+
+		TCActor<CProcessLaunchActor> Process = fg_Construct();
+		auto Destroy = co_await fg_AsyncDestroy(Process);
+		auto Launched = pState->m_Launched.f_Future();
+		auto Exited = pState->m_Exited.f_Future();
+		auto Subscription = co_await Process(&CProcessLaunchActor::f_Launch, fg_Move(Launch), fg_CurrentActor());
+		co_await fg_Move(Launched);
+		co_await Process(&CProcessLaunchActor::f_SendStdIn, _Input);
+		co_await Process(&CProcessLaunchActor::f_CloseStdIn);
+		co_await fg_Move(Exited);
+
+		co_return pState->m_Result;
+	}
+
 	bool CRepositoryFixture::f_HasTemporaryAttributes() const
 	{
 		// The fixture points MToolRootDirectory at m_Root / "mtool".

@@ -866,6 +866,96 @@ namespace NMib::NTool
 				co_return {};
 			};
 
+			DMibTestSuite("Stdin") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Testing MTool Format --stdin");
+
+				DMibTestCategory("FormatsTheBuffer") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "FormatsTheBuffer");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write("Source.cpp", gc_Formatted);
+
+					// The buffer is formatted as the file would be, which is neither read nor written.
+					auto Changed = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--stdin", "--file", "Source.cpp"}, gc_Unformatted);
+					DMibExpect(Changed.m_ExitCode, ==, 0u);
+					DMibExpect(Changed.f_GetStdOut(), ==, gc_Formatted);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, gc_Formatted);
+
+					// A file that does not exist yet formats as one would, and an unchanged buffer comes back as it is.
+					auto Unchanged = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--stdin", "--file", "New.cpp"}, gc_Formatted);
+					DMibExpect(Unchanged.m_ExitCode, ==, 0u);
+					DMibExpect(Unchanged.f_GetStdOut(), ==, gc_Formatted);
+					DMibExpectFalse(CFile::fs_FileExists(Repo.m_Path / "New.cpp"));
+
+					// The range refers to the buffer's lines.
+					auto Ranged = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--stdin", "--file", "Source.cpp", "--lines", "5:5"}, gc_Unformatted);
+					DMibExpect(Ranged.m_ExitCode, ==, 0u);
+					DMibExpect(Ranged.f_GetStdOut(), ==, "void fg_Test()\n{\n\n    int a;   \n\tif (a == 2)\n\t\tfg_Other(a,1);\n}\n");
+
+					co_return {};
+				};
+
+				DMibTestCategory("UnresolvedAndExcluded") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "UnresolvedAndExcluded");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+
+					CStr Long = "char const *g_p = \"";
+					for (umint i = 0; i < 200; ++i)
+						Long += "x";
+
+					Long += "\";\n";
+					auto Unresolved = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--stdin", "--file", "Long.cpp"}, Long);
+					DMibExpect(Unresolved.m_ExitCode, ==, 1u);
+					DMibExpect(Unresolved.f_GetStdOut(), ==, Long);
+					DMibExpect(Unresolved.f_GetStdErr().f_Find("Long.cpp:1:1: line-length:"), >=, 0);
+
+					// A file that does not opt in is told apart, and gives nothing back.
+					auto Excluded = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--stdin", "--file", "Notes.md"}, "Prose\n");
+					DMibExpect(Excluded.m_ExitCode, ==, 3u);
+					DMibExpect(Excluded.f_GetStdOut(), ==, "");
+
+					co_return {};
+				};
+
+				DMibTestCategory("RejectedCombinations") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "RejectedCombinations");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					TCVector<CRejectedCase> Cases =
+						{
+							{"Check", {"--stdin", "--file", "A.cpp", "--check"}}
+							, {"Diff", {"--stdin", "--file", "A.cpp", "--diff"}}
+							, {"Pattern", {"--stdin", "--pattern", "*.cpp"}}
+							, {"TwoFiles", {"--stdin", "--file", "A.cpp,B.cpp"}}
+							, {"MissingDirectory", {"--stdin", "--file", "Missing/A.cpp"}}
+						}
+					;
+					for (auto const &Case : Cases)
+					{
+						DMibTestPath(Case.m_Name);
+						TCVector<CStr> Params = {"Format", "--no-color", "-C", Repo.m_Path};
+						Params.f_Insert(Case.m_Params);
+						auto Result = co_await Repo.f_ToolWithStdIn(fg_Move(Params), "int a;\n");
+						DMibExpect(Result.m_ExitCode, ==, 2u);
+						DMibExpect(Result.f_GetStdOut(), ==, "");
+					}
+
+					co_return {};
+				};
+
+				co_return {};
+			};
+
 			DMibTestSuite("Workspace") -> TCFuture<void>
 			{
 				auto Capture = co_await (g_CaptureExceptions % "Testing mib format over a workspace");

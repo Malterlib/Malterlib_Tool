@@ -28,6 +28,56 @@ namespace NMib::NTool::NFormat
 		return Value;
 	}
 
+	// All of stdin, as an editor pipes an unsaved buffer.
+	TCFuture<CStr> fg_ReadFormatStdIn(TCSharedPointer<CCommandLineControl> _pCommandLine)
+	{
+		struct CState
+		{
+			CByteVector m_Input;
+			TCPromise<void> m_Done;
+			bool m_bDone = false;
+		};
+
+		TCSharedPointer<CState> pState = fg_Construct();
+		auto Done = pState->m_Done.f_Future();
+		auto Subscription = co_await _pCommandLine->f_RegisterForStdInBinary
+			(
+				g_ActorFunctor / [pState](NProcess::EStdInReaderOutputType _Type, CIOByteVector _Input, CStr _Error) -> TCFuture<void>
+				{
+					if (pState->m_bDone)
+						co_return {};
+
+					switch (_Type)
+					{
+					case NProcess::EStdInReaderOutputType_StdIn: pState->m_Input.f_Insert(_Input.f_GetArray(), _Input.f_GetLen()); break;
+					case NProcess::EStdInReaderOutputType_GeneralError:
+						pState->m_bDone = true;
+						pState->m_Done.f_SetException(DMibErrorInstance("Reading stdin failed: {}"_f << _Error));
+
+						break;
+					case NProcess::EStdInReaderOutputType_EndOfFile:
+						pState->m_bDone = true;
+						pState->m_Done.f_SetResult();
+
+						break;
+					}
+
+					co_return {};
+				}
+				, NProcess::EStdInReaderFlag_None
+			)
+		;
+
+		auto Input = fg_Move(Subscription).f_GetSubscription();
+		auto Result = co_await fg_Move(Done).f_Wrap();
+		co_await Input->f_Destroy();
+
+		if (!Result)
+			co_return Result.f_GetException();
+
+		co_return fg_StrFromBytes(pState->m_Input.f_GetArray(), pState->m_Input.f_GetLen());
+	}
+
 	TCFuture<uint32> fg_PrepareAndRunFormat(CEJsonSorted _Params, TCSharedPointer<CCommandLineControl> _pCommandLine)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % "Preparing Format");
@@ -100,6 +150,38 @@ namespace NMib::NTool::NFormat
 
 		if ((Options.m_iFirstLine || !Options.m_ByteRanges.f_IsEmpty()) && (Files.f_GetLen() != 1 || !Patterns.f_IsEmpty()))
 			co_return DMibErrorInstance("Range options require exactly one --file and no --pattern");
+
+		if (_Params["Stdin"].f_Boolean())
+		{
+			if (Files.f_GetLen() != 1 || !Patterns.f_IsEmpty())
+				co_return DMibErrorInstance("--stdin requires exactly one --file and no --pattern");
+
+			if (bCheck || bDiff)
+				co_return DMibErrorInstance("--stdin cannot be combined with --check or --diff");
+
+			auto Source = co_await fg_ReadFormatStdIn(_pCommandLine);
+			auto Snapshot = co_await fg_FormatSnapshot(_Params["WorkingDirectory"].f_String(), Files[0], Source, fg_Move(Options));
+			auto const &Result = Snapshot.m_Result;
+			if (Result.m_Report)
+				*_pCommandLine %= Result.m_Report;
+
+			*_pCommandLine %= fg_DescribeFormatSummary(Snapshot.m_Summary, EFormatMode::mc_Output, Stopwatch.f_GetTime());
+
+			if (Result.m_Outcome == EFormatOutcome::mc_Failed)
+				co_return DMibErrorInstance("The source could not be formatted");
+
+			// The editor tells the user, and keeps the buffer.
+			if (Result.m_Outcome == EFormatOutcome::mc_Excluded)
+				co_return 3;
+
+			// Written as bytes: a NUL the buffer holds, in a comment, would end text written to a console.
+			auto const &Output = Result.m_Outcome == EFormatOutcome::mc_Changed ? Result.m_Formatted : Source;
+			NContainer::CIOByteVector Bytes;
+			Bytes.f_Insert((uint8 const *)Output.f_GetStr(), Output.f_GetLen());
+			co_await _pCommandLine->f_StdOutBinary(fg_Move(Bytes));
+
+			co_return Result.m_nUnresolved ? 1 : 0;
+		}
 
 		CFormatSink Sink;
 		Sink.m_fReport = [_pCommandLine](CStr const &_Text)
@@ -231,6 +313,13 @@ struct CTool_Format : CDistributedTool
 							"Names"_o= _o["--length"]
 							, "Type"_o= ""
 							, "Description"_o= "Byte length of the --offset selection. A zero length formats the unit at the cursor.\n"
+						}
+						, "Stdin?"_o=
+						{
+							"Names"_o= _o["--stdin"]
+							, "Default"_o= false
+							, "Description"_o= "Format the source read from stdin as the one --file would be, with its configuration, and write the result to stdout. The file is"
+							" neither read nor written. Exits with 3, writing nothing, when the file does not opt in.\n"
 						}
 						, "StrictRange?"_o=
 						{

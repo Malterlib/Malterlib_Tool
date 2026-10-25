@@ -19,6 +19,7 @@ namespace NMib::NTool::NFormat
 		, mc_Check  // Report violations without writing.
 		, mc_Diff   // Print the proposed patch without writing.
 		, mc_Report // Report violations for a caller-supplied snapshot; never touches the filesystem.
+		, mc_Output // Give the formatted snapshot back to the caller; never touches the file.
 	};
 
 	enum class EFormatOutcome
@@ -61,6 +62,7 @@ namespace NMib::NTool::NFormat
 		EFormatOutcome m_Outcome = EFormatOutcome::mc_Unchanged;
 		NStr::CStr m_Report;       // Diagnostics for stderr.
 		NStr::CStr m_Patch;        // Unified diff for stdout.
+		NStr::CStr m_Formatted;    // With mc_Output, the formatted source of a changed file.
 		umint m_nReported = 0;     // Diagnostics that survived the reporting mask.
 		umint m_nUnresolved = 0;   // Reported diagnostics without an automatic fix.
 		umint m_nLineErrors = 0;   // Lines over max_line_length, in a file the engine did not format.
@@ -297,6 +299,17 @@ namespace NMib::NTool::NFormat
 	// to read, write, or format a file is an error, distinct from a violation.
 	NConcurrency::TCFuture<CFormatRunResult> fg_RunFormat(NContainer::TCVector<CFormatSelection> _Selections, CFormatOptions _Options, CFormatSink _Sink);
 	NStr::CStr fg_DescribeFormatSummary(CFormatSummary const &_Summary, EFormatMode _Mode, fp64 _Seconds);
+	void fg_AddFormatResult(CFormatJobResult const &_Result, CFormatSummary &o_Summary);
+
+	// Formats a snapshot as the file at a path would be, with that path's configuration, and gives the result back:
+	// an editor's unsaved buffer. The file at the path is never read or written and need not exist.
+	struct CFormatSnapshotResult
+	{
+		CFormatJobResult m_Result;
+		CFormatSummary m_Summary;
+	};
+
+	NConcurrency::TCFuture<CFormatSnapshotResult> fg_FormatSnapshot(NStr::CStr _WorkingDirectory, NStr::CStr _Path, NStr::CStr _Source, CFormatOptions _Options);
 
 	// The max_line_length check of one line, appending its diagnostic to the report; false
 	// when the line is over the limit. NUL occupies one column, like space, and is

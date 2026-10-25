@@ -390,6 +390,20 @@ path order, so a parallel run and a single-job run produce identical output.
 `--slowest N` lists, after the run, the N files the engine took the longest on
 with the time each one's analysis took, which is where a slow case shows.
 
+`--stdin` formats an editor's buffer: the source is all of stdin, formatted as
+the one `--file` would be, with its configuration, style and repository, and the
+result goes to stdout, the input unchanged when nothing changes. The file is
+neither read nor written and need not exist, though its directory must. Ranges
+refer to the bytes and lines of stdin. Diagnostics left unresolved and the summary
+go to stderr. It exits with 0, or 1 where violations remain, after writing
+stdout; with 3, writing nothing, when the file does not opt in; and with 2 on an
+error. It cannot be combined with `--pattern`, several files, `--check` or `--diff`.
+
+```bash
+MTool Format --stdin --file Source/Example.cpp < Buffer.cpp
+MTool Format --stdin --file Source/Example.cpp --offset 120 --length 48 < Buffer.cpp
+```
+
 Range options require exactly one selected file and cannot be combined with
 patterns or several files. `--lines` uses one-based inclusive source lines.
 `--offset` and `--length` use zero-based byte offsets in the original on-disk

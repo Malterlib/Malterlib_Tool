@@ -279,7 +279,7 @@ namespace NMib::NTool::NFormat
 	// stays unresolved is listed then.
 	void fg_DescribeDiagnostics(CFormatJob const &_Job, CStr const &_Source, TCVector<CCodeFormattingDiagnostic> const &_Diagnostics, CFormatJobResult &o_Result)
 	{
-		bool bFixing = _Job.m_Mode == EFormatMode::mc_Write || _Job.m_Mode == EFormatMode::mc_Diff;
+		bool bFixing = _Job.m_Mode == EFormatMode::mc_Write || _Job.m_Mode == EFormatMode::mc_Diff || _Job.m_Mode == EFormatMode::mc_Output;
 		for (auto const &Diagnostic : _Diagnostics)
 		{
 			// A diagnostic is reported where a changed line is any line of its span, not only the one it starts on.
@@ -725,6 +725,13 @@ namespace NMib::NTool::NFormat
 			}
 
 			Result.m_Patch = fg_BuildFormatPatch(_Job.m_DisplayPath, Snapshot, Analysis.m_Edits);
+
+			co_return Result;
+		}
+
+		if (_Job.m_Mode == EFormatMode::mc_Output)
+		{
+			Result.m_Formatted = fg_ApplyCodeFormattingEdits(Snapshot, Analysis.m_Edits);
 
 			co_return Result;
 		}
@@ -2268,7 +2275,6 @@ namespace NMib::NTool::NFormat
 		;
 
 		CFormatSummary Summary;
-		Summary.m_nSelected = Results.f_GetLen();
 		for (auto const &Result : Results)
 		{
 			if (Result.m_Report)
@@ -2277,21 +2283,7 @@ namespace NMib::NTool::NFormat
 			if (Result.m_Patch)
 				_Sink.m_fPatch(Result.m_Patch);
 
-			Summary.m_nUnresolved += Result.m_nUnresolved;
-			Summary.m_nLineErrors += Result.m_nLineErrors;
-			if (Result.m_bFormatted)
-			{
-				++Summary.m_nFormatFiles;
-				Summary.m_nReported += Result.m_nReported;
-			}
-
-			switch (Result.m_Outcome)
-			{
-			case EFormatOutcome::mc_Excluded: ++Summary.m_nExcluded; break;
-			case EFormatOutcome::mc_Changed: ++Summary.m_nChanged; break;
-			case EFormatOutcome::mc_Failed: ++Summary.m_nFailed; break;
-			default: ++Summary.m_nUnchanged; break;
-			}
+			fg_AddFormatResult(Result, Summary);
 		}
 
 		if (mp_Options.m_nSlowest && !Results.f_IsEmpty())
@@ -2335,6 +2327,74 @@ namespace NMib::NTool::NFormat
 			Run.m_ExitCode = 1;
 
 		co_return Run;
+	}
+
+	void fg_AddFormatResult(CFormatJobResult const &_Result, CFormatSummary &o_Summary)
+	{
+		++o_Summary.m_nSelected;
+		o_Summary.m_nUnresolved += _Result.m_nUnresolved;
+		o_Summary.m_nLineErrors += _Result.m_nLineErrors;
+
+		if (_Result.m_bFormatted)
+		{
+			++o_Summary.m_nFormatFiles;
+			o_Summary.m_nReported += _Result.m_nReported;
+		}
+
+		switch (_Result.m_Outcome)
+		{
+		case EFormatOutcome::mc_Excluded: ++o_Summary.m_nExcluded; break;
+		case EFormatOutcome::mc_Changed: ++o_Summary.m_nChanged; break;
+		case EFormatOutcome::mc_Failed: ++o_Summary.m_nFailed; break;
+		default: ++o_Summary.m_nUnchanged; break;
+		}
+	}
+
+	// The snapshot is formatted as the file at the path, so its configuration resolves within the repository the path's
+	// directory belongs to, which has to exist; the file need not.
+	TCFuture<CFormatSnapshotResult> fg_FormatSnapshot(CStr _WorkingDirectory, CStr _Path, CStr _Source, CFormatOptions _Options)
+	{
+		auto CaptureScope = co_await (g_CaptureExceptions % "Formatting a snapshot");
+
+		auto WorkingDirectory = fg_NormalizeFormatPath(_WorkingDirectory, CFile::fs_GetCurrentDirectory());
+		auto Path = fg_NormalizeFormatPath(_Path, WorkingDirectory);
+		auto Directory = CFile::fs_GetPath(Path);
+		TCSharedPointer<CSharedRoundRobinBlockingActors> pBlockingActors = fg_Construct(gc_nFormatBlockingActors);
+		bool bDirectory = co_await
+			(
+				g_Dispatch(pBlockingActors->f_Next()) / [Directory]() -> bool
+				{
+					return CFile::fs_FileExists(Directory, EFileAttrib_Directory);
+				}
+			)
+		;
+		if (!bDirectory)
+			co_return DMibErrorInstance("'{}' is not an existing directory"_f << Directory);
+
+		TCActor<CFormatRootResolver> RootResolver = fg_ConstructActor<CFormatRootResolver>(pBlockingActors);
+		auto DestroyRootResolver = co_await fg_AsyncDestroy(RootResolver);
+		auto Root = co_await RootResolver(&CFormatRootResolver::f_Resolve, Directory);
+
+		TCActor<CFormatWorkerPool> Workers = fg_ConstructActor<CFormatWorkerPool>(umint(1), pBlockingActors);
+		auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
+
+		CFormatJob Job;
+		Job.m_Path = Path;
+		Job.m_Root = Root ? Root : fg_GetFormatBoundary(WorkingDirectory, Directory);
+		Job.m_bResolveSettings = true;
+		Job.m_Source = fg_Move(_Source);
+		Job.m_bHasSource = true;
+		Job.m_ByteRanges = fg_Move(_Options.m_ByteRanges);
+		Job.m_iFirstLine = _Options.m_iFirstLine;
+		Job.m_iLastLine = _Options.m_iLastLine;
+		Job.m_RangePolicy = _Options.m_RangePolicy;
+		Job.m_Mode = EFormatMode::mc_Output;
+
+		CFormatSnapshotResult Snapshot;
+		Snapshot.m_Result = co_await Workers(&CFormatWorkerPool::f_Process, fg_Move(Job));
+		fg_AddFormatResult(Snapshot.m_Result, Snapshot.m_Summary);
+
+		co_return fg_Move(Snapshot);
 	}
 
 	CStr fg_DescribeFormatSummary(CFormatSummary const &_Summary, EFormatMode _Mode, fp64 _Seconds)
