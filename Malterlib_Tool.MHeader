@@ -673,7 +673,112 @@ Property
 				, Dependency.Stage: "Runtime"
 			}
 		}
+		, {
+			Name: "Tool_Malterlib_Tool_RunTestHostTool"
+			, Properties: {
+				Dependency.Target: "Malterlib_Tool_RunTestHostTool"
+				, Dependency.Link: false
+			}
+		}
 	]
+}
+
+// A host tool that only exists for the tests, so that every Tests build that has the Tool module runs the build of host
+// tools from inside ninja. It depends on nothing of Malterlib, so that changes do not rebuild Malterlib for host tools. The
+// build system of host tools has it whatever its own settings enable, since the build that runs it asks for it
+Property
+{
+	|
+	{
+		MalterlibEnableInternalTests true
+		MalterlibHostToolsBuildSystem true
+	}
+
+	MalterlibHostTools =+ ["Malterlib_Tool_TestHostTool"]
+	MalterlibToolTestHostToolFile: string = `@(MalterlibHostToolsBinaries)/TestHostTool@(HostExecutableExtension)`
+}
+
+%Target "Malterlib_Tool_TestHostTool"
+{
+	!!MalterlibHostToolsBuildSystem true
+
+	Property
+	{
+		MalterlibDisableMalterlib true
+		MalterlibEnableBreakpad false
+	}
+	Target
+	{
+		BaseName "TestHostTool"
+		Type "ConsoleExecutable"
+		Group "Tools/Test"
+		GenerateScheme false
+		LDFlags =+ "-nostdlib++"
+		{
+			!PlatformFamily "Windows"
+		}
+		// The static C++ sanitizer runtime throws std::bad_alloc and so needs the C++ ABI library this tool does not link
+		LDFlags =+ "-fno-sanitize-link-c++-runtime"
+		{
+			!PlatformFamily "Windows"
+		}
+	}
+	Compile
+	{
+		!!Compile.Type "C++"
+		PrefixHeader undefined
+		DefaultHeaders "NoStdIncludeCxx"
+		DefaultLibraries "NoStdLibCxx"
+	}
+	%Group "Source"
+	{
+		%File "Test/HostTool/*"
+	}
+}
+
+%Target "Malterlib_Tool_TestHostTools"
+{
+	&
+	{
+		MalterlibEnableInternalTests true
+		!MalterlibHostToolsBuildSystem true
+	}
+
+	Property.HostToolsTargets ["Com_TestHostTool"]
+
+	Target
+	{
+		Type "Tool"
+		Group "Tools/Test"
+		CommandLine_Outputs =+ MalterlibToolTestHostToolFile
+	}
+}
+
+%Target "Malterlib_Tool_RunTestHostTool"
+{
+	&
+	{
+		MalterlibEnableInternalTests true
+		!MalterlibHostToolsBuildSystem true
+	}
+
+	Property.MalterlibToolTestHostToolOutput: string = `@(Target.IntermediateDirectory)TestHostToolOutput.txt`
+
+	Target
+	{
+		Type "Tool"
+		Group "Tools/Test"
+		CommandLine_Build `"@(MalterlibToolTestHostToolFile)" "@(MalterlibToolTestHostToolOutput)"`
+		CommandLine_Inputs =+ MalterlibToolTestHostToolFile
+		CommandLine_Outputs =+ MalterlibToolTestHostToolOutput
+	}
+	%Dependency {
+		Name: "Tool_Malterlib_Tool_TestHostTools"
+		, Properties: {
+			Dependency.Target: "Malterlib_Tool_TestHostTools"
+			, Dependency.Link: false
+		}
+	}
 }
 
 Property.Malterlib_Tool_App_Targets: [type(CEntity)] = []
