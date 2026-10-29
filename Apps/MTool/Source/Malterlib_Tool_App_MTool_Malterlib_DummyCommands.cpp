@@ -112,9 +112,16 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 					{
 						"Names"_o= _o["--wait-for-lock"]
 						, "Default"_o= false
-						, "Description"_o= "Wait for another build of the same configuration to finish, instead of refusing to build. Builds that this "
-						"build runs, as of host tools, wait as well. Also set by MalterlibBuildLockWait=true."
+						, "Description"_o= "Wait for another build of the same configuration to finish, instead of refusing to build. Builds that "
+						"another build runs, as of host tools, always wait. Also set by MalterlibBuildLockWait=true."
 						, "CanNegate"_o= false
+					}
+					, "LockTimeout?"_o=
+					{
+						"Names"_o= _o["--lock-timeout"]
+						, "Default"_o= -1.0
+						, "Description"_o= "Wait for another build of the same configuration for at most this many seconds, also in the builds "
+						"that this build runs. Zero or more implies --wait-for-lock, and negative sets no limit. Also set by MalterlibBuildLockTimeout."
 					}
 				}
 				, "ShowOptionsInCommandEntry"_o= true
@@ -170,9 +177,16 @@ void CTool_Malterlib::f_Register_DummyCommands(CDistributedAppCommandLineSpecifi
 					{
 						"Names"_o= _o["--wait-for-lock"]
 						, "Default"_o= false
-						, "Description"_o= "Wait for another build of the same configuration to finish, instead of refusing to build. Builds that this "
-						"build runs, as of host tools, wait as well. Also set by MalterlibBuildLockWait=true."
+						, "Description"_o= "Wait for another build of the same configuration to finish, instead of refusing to build. Builds that "
+						"another build runs, as of host tools, always wait. Also set by MalterlibBuildLockWait=true."
 						, "CanNegate"_o= false
+					}
+					, "LockTimeout?"_o=
+					{
+						"Names"_o= _o["--lock-timeout"]
+						, "Default"_o= -1.0
+						, "Description"_o= "Wait for another build of the same configuration for at most this many seconds, also in the builds "
+						"that this build runs. Zero or more implies --wait-for-lock, and negative sets no limit. Also set by MalterlibBuildLockTimeout."
 					}
 				}
 				, "ShowOptionsInCommandEntry"_o= true
