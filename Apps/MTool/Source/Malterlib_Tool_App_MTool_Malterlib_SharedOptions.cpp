@@ -119,6 +119,14 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					"   leave:   Leave removed repositories on disk\r"
 					"   delete:  Delete removed repositories from disk (WARNING repository and all unpushed history will be deleted permanently)\r"
 				}
+				, "IgnoreLeave?"_o=
+				{
+					"Names"_o= _o["--ignore-leave"]
+					, "Default"_o= false
+					, "Description"_o= "Reconcile removed repositories as if none set Repository.ReconcileRemoved \"Leave\". The repositories that were left on"
+					" disk are removed repositories again, and --reconcile-removed decides what happens to them. Without it, the command lists them and"
+					" stops.\n"
+				}
 				, "ReconcileForce?"_o=
 				{
 					"Names"_o= _o["--reconcile-force"]

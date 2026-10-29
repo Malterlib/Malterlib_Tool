@@ -102,6 +102,7 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJsonSorted 
 	GenerateOptions.m_bForceUpdateRemotes = _Params["ForceUpdateRemotes"].f_Boolean();
 	GenerateOptions.m_bForceUpdateHooks = _Params["ForceUpdateHooks"].f_Boolean();
 	GenerateOptions.f_ParseReconcileActions(_Params);
+	GenerateOptions.m_bIgnoreLeave = _Params["IgnoreLeave"].f_Boolean();
 
 	auto &DetailedPositions = _Params["DetailedPositions"];
 	if (DetailedPositions.f_IsString() && DetailedPositions.f_String() == "OnDemand")
