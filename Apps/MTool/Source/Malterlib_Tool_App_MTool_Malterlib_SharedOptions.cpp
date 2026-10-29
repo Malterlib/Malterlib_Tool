@@ -155,6 +155,19 @@ void CTool_Malterlib::f_Register_SharedOptions(CDistributedAppCommandLineSpecifi
 					, "Description"_o= "Show values for contributing positions.\n"
 					"Enabling detailed values is going to significantly affect performance"
 				}
+				, "WaitForLock?"_o=
+				{
+					"Names"_o= _o["--wait-for-lock"]
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildLockWait", "false") == "true"
+					, "Description"_o= "Wait for another generation of the same build system to finish, instead of refusing to generate.\n"
+				}
+				, "LockTimeout?"_o=
+				{
+					"Names"_o= _o["--lock-timeout"]
+					, "Default"_o= fg_GetSys()->f_GetEnvironmentVariable("MalterlibBuildLockTimeout", "-1").f_ToFloat(fp64(-1.0))
+					, "Description"_o= "Wait for a lock of the build system for at most this many seconds. Zero or more implies --wait-for-lock, and"
+					" negative sets no limit.\n"
+				}
 				, "ShowRepoProgress?"_o=
 				{
 					"Names"_o= _o["--show-repo-progress"]

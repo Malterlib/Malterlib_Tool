@@ -189,6 +189,95 @@ namespace NMib::NTool::NTestHelpers
 		co_return pState->m_Result;
 	}
 
+	// _TextSeen is resolved when the output of the tool contains _Text, and fails when the tool exits without it.
+	TCFuture<CProcessLaunchActor::CSimpleLaunchResult> CRepositoryFixture::f_ToolWatchingOutput
+		(
+			TCVector<CStr> _Params
+			, bool _bMib
+			, CStr _Text
+			, TCPromise<void> _TextSeen
+		)
+	{
+		auto Capture = co_await (g_CaptureExceptions % "Launching MTool watching its output");
+
+		struct CState
+		{
+			CProcessLaunchActor::CSimpleLaunchResult m_Result;
+			CStr m_Output;
+			CStr m_Text;
+			TCPromise<void> m_TextSeen;
+			TCPromise<void> m_Exited;
+			bool m_bTextSeen = false;
+		};
+
+		NStorage::TCSharedPointer<CState> pState = fg_Construct();
+		pState->m_Text = _Text;
+		pState->m_TextSeen = _TextSeen;
+
+		CProcessLaunchActor::CSimpleLaunch Launch
+			{
+				m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension)
+				, fg_Move(_Params)
+				, m_Root
+				, CProcessLaunchActor::ESimpleLaunchFlag_None
+			}
+		;
+		Launch.m_Params.m_Environment = m_Environment;
+		Launch.m_Params.m_bMergeEnvironment = false;
+		if (_bMib)
+			Launch.m_Params.m_Environment["MToolIsMalterlib"] = "true";
+		Launch.m_bWholeLineOutput = false;
+		Launch.m_Params.m_fOnOutput = [pState](EProcessLaunchOutputType _Type, CStr const &_Output)
+			{
+				auto &Output = pState->m_Result.m_Output.f_Insert();
+				Output.m_Type = _Type;
+				Output.m_Output = _Output;
+
+				pState->m_Output += _Output;
+				if (!pState->m_bTextSeen && pState->m_Output.f_Find(pState->m_Text) >= 0)
+				{
+					pState->m_bTextSeen = true;
+					pState->m_TextSeen.f_SetResult();
+				}
+			}
+		;
+		Launch.m_Params.m_fOnStateChange = [pState](CProcessLaunchStateChangeVariant const &_State, fp64 _TimeSinceStart)
+			{
+				switch (_State.f_GetTypeID())
+				{
+					case EProcessLaunchState_Launched:
+						break;
+					case EProcessLaunchState_LaunchFailed:
+						pState->m_Exited.f_SetException(DMibErrorInstance(_State.f_Get<EProcessLaunchState_LaunchFailed>()));
+
+						break;
+					case EProcessLaunchState_Exited:
+						pState->m_Result.m_ExitCode = _State.f_Get<EProcessLaunchState_Exited>();
+						pState->m_Exited.f_SetResult();
+
+						break;
+				}
+			}
+		;
+
+		TCActor<CProcessLaunchActor> Process = fg_Construct();
+		auto Destroy = co_await fg_AsyncDestroy(Process);
+		auto Exited = pState->m_Exited.f_Future();
+		auto Subscription = co_await Process(&CProcessLaunchActor::f_Launch, fg_Move(Launch), fg_CurrentActor());
+		auto ExitResult = co_await fg_Move(Exited).f_Wrap();
+
+		if (!pState->m_bTextSeen)
+		{
+			pState->m_bTextSeen = true;
+			pState->m_TextSeen.f_SetException(DMibErrorInstance("MTool exited without writing '{}': {}"_f << _Text << pState->m_Output));
+		}
+
+		if (!ExitResult)
+			co_return ExitResult.f_GetException();
+
+		co_return pState->m_Result;
+	}
+
 	bool CRepositoryFixture::f_HasTemporaryAttributes() const
 	{
 		// The fixture points MToolRootDirectory at m_Root / "mtool".

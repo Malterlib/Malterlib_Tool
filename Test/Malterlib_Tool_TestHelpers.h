@@ -35,6 +35,7 @@ namespace NMib::NTool::NTestHelpers
 		TCFuture<CStr> f_Git(TCVector<CStr> _Params);
 		TCFuture<CProcessLaunchActor::CSimpleLaunchResult> f_Tool(TCVector<CStr> _Params, bool _bMib = false);
 		TCFuture<CProcessLaunchActor::CSimpleLaunchResult> f_ToolWithStdIn(TCVector<CStr> _Params, CStr _Input);
+		TCFuture<CProcessLaunchActor::CSimpleLaunchResult> f_ToolWatchingOutput(TCVector<CStr> _Params, bool _bMib, CStr _Text, TCPromise<void> _TextSeen);
 
 		bool f_HasTemporaryAttributes() const;
 		TCFuture<CStr> f_Validate(CStr _Case, uint32 _Expected = 0, bool _bStaged = true, CStr _Base = {});

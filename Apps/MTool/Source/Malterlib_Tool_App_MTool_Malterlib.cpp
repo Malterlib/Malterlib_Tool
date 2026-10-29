@@ -116,6 +116,10 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJsonSorted 
 
 	GenerateOptions.m_bDetailedValues = _Params["DetailedValues"].f_Boolean();
 
+	GenerateOptions.m_LockSettings.m_Timeout = _Params["LockTimeout"].f_AsFloat();
+	if (_Params["WaitForLock"].f_Boolean() || GenerateOptions.m_LockSettings.m_Timeout >= 0.0)
+		GenerateOptions.m_LockSettings.m_Wait = EBuildSystemLockWait::mc_Wait;
+
 	GenerateOptions.m_bStash = _Params["Stash"].f_Boolean();
 	GenerateOptions.m_bShowProgress = _Params["ShowRepoProgress"].f_Boolean();
 
