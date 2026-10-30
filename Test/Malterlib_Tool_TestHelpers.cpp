@@ -58,6 +58,31 @@ namespace NMib::NTool::NTestHelpers
 		co_await f_Git({"init", "-q", "-b", "main"});
 		f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 190\ntab_width = 4\n");
 
+#ifdef DPlatformFamily_Windows
+		// The sh of Git for Windows, a few directories above its exec path, such as <Git>/mingw64/libexec/git-core
+		CStr Directory = (co_await f_Git({"--exec-path"})).f_Trim();
+		for (umint iLevel = 0; iLevel < 5 && m_Shell.f_IsEmpty(); ++iLevel)
+		{
+			for (auto *pCandidate : {"usr/bin/sh.exe", "bin/sh.exe"})
+			{
+				if (CFile::fs_FileExists(Directory / pCandidate))
+				{
+					m_Shell = Directory / pCandidate;
+					break;
+				}
+			}
+			Directory = CFile::fs_GetPath(Directory);
+		}
+		if (m_Shell.f_IsEmpty())
+			co_return DMibErrorInstance("Found no sh of Git for Windows above '{}'"_f << (co_await f_Git({"--exec-path"})).f_Trim());
+
+		// The scripts use the POSIX tools next to the shell, which a Windows PATH doesn't have, where find and sort are others
+		auto &Path = m_Environment["PATH"];
+		Path = CFile::fs_GetPath(m_Shell).f_Replace("/", "\\") + ";" + Path;
+#else
+		m_Shell = "/bin/sh";
+#endif
+
 		co_return {};
 	}
 
@@ -326,16 +351,7 @@ namespace NMib::NTool::NTestHelpers
 		co_await m_Repo.f_Run("git", {"init", "-q", "--bare", "-b", "main"}, f_Remote("Root"));
 
 		for (auto &Name : _Repositories)
-		{
-			CStr Remote = f_Remote(Name);
-			CStr Work = m_Repo.m_Root / "work" / Name;
-			CFile::fs_CreateDirectory(Remote);
-			CFile::fs_CreateDirectory(Work);
-			co_await m_Repo.f_Run("git", {"init", "-q", "--bare", "-b", "main"}, Remote);
-			co_await m_Repo.f_Run("git", {"init", "-q", "-b", "main"}, Work);
-			co_await f_CommitIn(Work, "Initial");
-			co_await f_GitIn(Work, {"push", "-q", Remote, "main"});
-		}
+			co_await f_CreateRemote(Name);
 
 		m_Repo.f_Write("Test.MBuildSystem", f_Configuration(_Repositories, _ExtraConfiguration, _RepositoryProperties));
 		m_Repo.f_Write(".gitignore", "/BuildSystem/\n/Repos/\n/Repos.MRepoState\n");
@@ -344,6 +360,21 @@ namespace NMib::NTool::NTestHelpers
 		co_await m_Repo.f_Git({"push", "-q", "-u", "origin", "main"});
 
 		co_return {};
+	}
+
+	// A bare repository with one commit on main, pushed from a work clone in work/<Name>. Returns the commit.
+	TCFuture<CStr> CCheckoutFixture::f_CreateRemote(CStr _Name)
+	{
+		CStr Remote = f_Remote(_Name);
+		CStr Work = m_Repo.m_Root / "work" / _Name;
+		CFile::fs_CreateDirectory(Remote);
+		CFile::fs_CreateDirectory(Work);
+		co_await m_Repo.f_Run("git", {"init", "-q", "--bare", "-b", "main"}, Remote);
+		co_await m_Repo.f_Run("git", {"init", "-q", "-b", "main"}, Work);
+		CStr Commit = co_await f_CommitIn(Work, "Initial");
+		co_await f_GitIn(Work, {"push", "-q", Remote, "main"});
+
+		co_return Commit;
 	}
 
 	TCFuture<CProcessLaunchActor::CSimpleLaunchResult> CCheckoutFixture::f_Mib(TCVector<CStr> _Params)

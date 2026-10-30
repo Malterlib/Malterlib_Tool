@@ -43,6 +43,7 @@ namespace NMib::NTool::NTestHelpers
 		CStr m_Root;
 		CStr m_Path;
 		CStr m_ToolDirectory;
+		CStr m_Shell; // The POSIX shell, Git for Windows' on Windows, that runs the shell scripts of the tests
 		CSystemEnvironment m_Environment;
 	};
 
@@ -53,6 +54,7 @@ namespace NMib::NTool::NTestHelpers
 		CCheckoutFixture(CRepositoryFixture &_Repo);
 
 		TCFuture<void> f_Init(TCVector<CStr> _Repositories, CStr _ExtraConfiguration = {}, TCMap<CStr, CStr> _RepositoryProperties = {});
+		TCFuture<CStr> f_CreateRemote(CStr _Name);
 		CStr f_Remote(CStr const &_Name) const;
 		CStr f_Repository(CStr const &_Name) const;
 		CStr f_Configuration(TCVector<CStr> const &_Repositories, CStr const &_Extra, TCMap<CStr, CStr> const &_RepositoryProperties) const;

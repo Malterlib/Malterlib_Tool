@@ -65,6 +65,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_o= false
 						, "Description"_o= "Remove orphaned LFS assets from releases on hosting provider.\n"
 					}
+					, "VerifyHook?"_o=
+					{
+						"Names"_o= _o["--verify-hook"]
+						, "Type"_o= ""
+						, "Description"_o= "Run this command on each batch of repositories, a level of the repositories at a time, after fetching and before"
+						" checking out anything of the batch. The command line is split like a shell's, and run without one, in the root, with"
+						" this command's environment and without a timeout. It gets the batch on stdin as JSON: {\"Batch\": <number from 1>,"
+						" \"Repositories\": [{Path, Url, From, To, New, Submodule, Parent, ConfigFile, ConfigKey}]}. A non-zero exit stops the"
+						" update before the batch, with the command's stderr. Submodules are batches of their own.\n"
+					}
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
