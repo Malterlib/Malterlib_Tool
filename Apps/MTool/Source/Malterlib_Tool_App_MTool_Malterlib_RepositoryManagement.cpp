@@ -1556,6 +1556,17 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						"Names"_o= _o["--force", "-f"]
 						, "Default"_o= false
 						, "Description"_o= "Force push to remotes.\n"
+						"A forced push of a default branch leases on, and tags, the head it overwrites, which has to be the commit that the"
+						" parent's origin default branch pins, when the parent has one. Other branches lease on the head that was last"
+						" fetched.\n"
+					}
+					, "Json?"_o=
+					{
+						"Names"_o= _o["--json"]
+						, "Default"_o= false
+						, "Description"_o= "With --pretend, print every push as a JSON array instead: Path, Remote, Branch, RemoteHead, Target, Kind (New,"
+						" Update, ForceUpdate or SeedDefault), Lease, LeaseSource (PreviousPin, RemoteHead or RemoteTrackingRef) and BackupTags"
+						" (Name, Commit and Action: Create or Publish).\n"
 					}
 					, "PushPulls?"_o=
 					{
@@ -1599,20 +1610,31 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					Flags |= CBuildSystem::ERepoPushFlag_Force;
 				if (_Params["PushPulls"].f_Boolean())
 					Flags |= CBuildSystem::ERepoPushFlag_PushPulls;
+				if (_Params["Json"].f_Boolean())
+				{
+					if (!(Flags & CBuildSystem::ERepoPushFlag_Pretend))
+						DMibError("--json needs --pretend");
+
+					Flags |= CBuildSystem::ERepoPushFlag_Json;
+				}
 
 				TCVector<CStr> Remotes;
 				for (auto &Param : _Params["Remotes"].f_Array())
 					Remotes.f_Insert(Param.f_String());
 
+				// The JSON is the only output on stdout
 				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				if (Flags & CBuildSystem::ERepoPushFlag_Json)
+					GenerateOptions.m_bShowProgress = false;
 				co_return co_await f_RunBuildSystem
 					(
 						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
-							co_return co_await _pBuildSystem->f_Action_Repository_Push(GenerateOptions, RepoFilter, Remotes, Flags);
+							co_return co_await _pBuildSystem->f_Action_Repository_Push(GenerateOptions, RepoFilter, Remotes, Flags, _pCommandLine);
 						}
 						, _pCommandLine
 						, &GenerateOptions
+						, (Flags & CBuildSystem::ERepoPushFlag_Json) != 0
 					)
 				;
 			}
