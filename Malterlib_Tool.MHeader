@@ -657,7 +657,9 @@ Property
 
 	MalterlibTests =+ "Malterlib_Tool"
 	MalterlibTestFiles_Malterlib_Tool: [type(CEntity)] = ["Test/*.cpp"->MakeAbsolute()]
-	MalterlibTestDependencies_Malterlib_Tool: [type(CEntity)] = [
+	// The dependencies are appended, as an append to a property drops its default value
+	MalterlibTestDependencies_Malterlib_Tool: [type(CEntity)] = []
+	MalterlibTestDependencies_Malterlib_Tool =+ [
 		{
 			Name: "Com_MTool"
 			, Properties: {
@@ -681,6 +683,59 @@ Property
 			}
 		}
 	]
+	MalterlibTestDependencies_Malterlib_Tool =+ [
+		{
+			Name: "Com_TestShellShim"
+			, Properties: {
+				Dependency.Target: "Malterlib_Tool_TestShellShim"
+				, Dependency.Link: false
+				, Dependency.Stage: "Runtime"
+			}
+		}
+	]
+	{
+		!!PlatformFamily "Windows"
+	}
+}
+
+// Runs the shell scripts that the tests write in place of tools, as Windows only starts executables
+%Target "Malterlib_Tool_TestShellShim"
+{
+	&
+	{
+		MalterlibEnableInternalTests true
+		PlatformFamily "Windows"
+	}
+
+	Property
+	{
+		MalterlibDisableMalterlib true
+		MalterlibEnableBreakpad false
+		MalterlibTestApp true
+		MalterlibTargetNameType "Normal" // The tests copy it by this name in every configuration
+		// The tests copy it away from the sanitizer runtimes, which a sanitized executable needs beside it
+		MalterlibSupportSanitizerEnable_UndefinedBehavior false
+		MalterlibSupportSanitizerEnable_Thread false
+		MalterlibSupportSanitizerEnable_Address false
+	}
+	Target
+	{
+		BaseName "TestShellShim"
+		Type "ConsoleExecutable"
+		Group "Tools/Test"
+		GenerateScheme false
+	}
+	Compile
+	{
+		!!Compile.Type "C++"
+		PrefixHeader undefined
+		DefaultHeaders "NoStdIncludeCxx"
+		DefaultLibraries "NoStdLibCxx"
+	}
+	%Group "Source"
+	{
+		%File "Test/ShellShim/*"
+	}
 }
 
 // A host tool that only exists for the tests, so that every Tests build that has the Tool module runs the build of host

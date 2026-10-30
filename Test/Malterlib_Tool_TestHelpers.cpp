@@ -79,11 +79,28 @@ namespace NMib::NTool::NTestHelpers
 		// The scripts use the POSIX tools next to the shell, which a Windows PATH doesn't have, where find and sort are others
 		auto &Path = m_Environment["PATH"];
 		Path = CFile::fs_GetPath(m_Shell).f_Replace("/", "\\") + ";" + Path;
+
+		m_Environment["MalterlibTestShell"] = m_Shell;
 #else
 		m_Shell = "/bin/sh";
 #endif
 
 		co_return {};
+	}
+
+	// Makes a shell script that stands in for a tool runnable as one, and returns the path to run. Windows only starts
+	// executables, so there a copy of the shell shim next to the script runs it.
+	CStr CRepositoryFixture::f_ShellScriptTool(CStr const &_Script) const
+	{
+#ifdef DPlatformFamily_Windows
+		CStr Shim = _Script + CFile::mc_ExecutableExtension;
+		if (!CFile::fs_FileExists(Shim))
+			CFile::fs_CopyFile(CFile::fs_GetProgramDirectory() / "TestApps/TestShellShim/TestShellShim.exe", Shim);
+		return Shim;
+#else
+		CFile::fs_SetAttributes(_Script, CFile::fs_GetAttributes(_Script) | EFileAttrib_Executable);
+		return _Script;
+#endif
 	}
 
 	void CRepositoryFixture::f_Write(CStr const &_Name, CStr const &_Contents) const

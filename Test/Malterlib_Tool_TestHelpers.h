@@ -37,6 +37,7 @@ namespace NMib::NTool::NTestHelpers
 		TCFuture<CProcessLaunchActor::CSimpleLaunchResult> f_ToolWithStdIn(TCVector<CStr> _Params, CStr _Input);
 		TCFuture<CProcessLaunchActor::CSimpleLaunchResult> f_ToolWatchingOutput(TCVector<CStr> _Params, bool _bMib, CStr _Text, TCPromise<void> _TextSeen);
 
+		CStr f_ShellScriptTool(CStr const &_Script) const;
 		bool f_HasTemporaryAttributes() const;
 		TCFuture<CStr> f_Validate(CStr _Case, uint32 _Expected = 0, bool _bStaged = true, CStr _Base = {});
 

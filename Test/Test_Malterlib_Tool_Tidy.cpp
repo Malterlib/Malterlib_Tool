@@ -29,11 +29,11 @@ namespace NMib::NTool
 			CTidyFixture(CRepositoryFixture &_Repo)
 				: m_Repo(_Repo)
 				, m_Output(_Repo.m_Root / "output")
-				, m_Tool(_Repo.m_Root / "bin/clang-tidy")
+				, m_Script(_Repo.m_Root / "bin/clang-tidy")
 			{
-				CFile::fs_CreateDirectoryForFile(m_Tool);
-				CFile::fs_WriteStringToFile(m_Tool, gc_FakeClangTidy, false);
-				CFile::fs_SetAttributes(m_Tool, CFile::fs_GetAttributes(m_Tool) | EFileAttrib_Executable);
+				CFile::fs_CreateDirectoryForFile(m_Script);
+				CFile::fs_WriteStringToFile(m_Script, gc_FakeClangTidy, false);
+				m_Tool = _Repo.f_ShellScriptTool(m_Script);
 			}
 
 			// The repository, with Repository.Tidy when _Tidy is given, and with _LibTidy a repository in Lib nested in it.
@@ -158,7 +158,8 @@ namespace NMib::NTool
 
 			CRepositoryFixture &m_Repo;
 			CStr m_Output;
-			CStr m_Tool;
+			CStr m_Script; // The script that stands in for clang-tidy
+			CStr m_Tool; // What runs the script
 		};
 	}
 
@@ -166,7 +167,6 @@ namespace NMib::NTool
 	{
 		void f_DoTests()
 		{
-#ifndef DPlatformFamily_Windows
 			DMibTestSuite("Tidy") -> TCFuture<void>
 			{
 				auto Capture = co_await (g_CaptureExceptions % "Testing mib tidy over a workspace");
@@ -395,7 +395,7 @@ namespace NMib::NTool
 					CTidyFixture Tidy(Repo);
 					CFile::fs_WriteStringToFile
 						(
-							Tidy.m_Tool
+							Tidy.m_Script
 							, "#!/bin/sh\n"
 							"if [ \"$1\" = --verify-config ]; then\n"
 							"  if grep -q Invalid .clang-tidy 2>/dev/null; then echo \"error: unknown check 'Invalid'\"; exit 1; fi\n"
@@ -404,7 +404,7 @@ namespace NMib::NTool
 							, false
 						)
 					;
-					CFile::fs_SetAttributes(Tidy.m_Tool, CFile::fs_GetAttributes(Tidy.m_Tool) | EFileAttrib_Executable);
+					Repo.f_ShellScriptTool(Tidy.m_Script);
 					Tidy.f_Configure("{Enabled: true, ExcludeFiles: [\"Vendor/*\"]}");
 					Tidy.f_AddDatabase("Main", 200, "Lib_A", "Debug", 101, {"A.cpp"}, "DEBUG");
 
@@ -437,7 +437,7 @@ namespace NMib::NTool
 					CTidyFixture Tidy(Repo);
 					CFile::fs_WriteStringToFile
 						(
-							Tidy.m_Tool
+							Tidy.m_Script
 							, "#!/bin/sh\n"
 							"if [ \"$1\" = --verify-config ]; then echo 'No config errors detected.'; exit 0; fi\n"
 							"for Last; do :; done\n"
@@ -450,10 +450,10 @@ namespace NMib::NTool
 							, false
 						)
 					;
-					CFile::fs_SetAttributes(Tidy.m_Tool, CFile::fs_GetAttributes(Tidy.m_Tool) | EFileAttrib_Executable);
+					Repo.f_ShellScriptTool(Tidy.m_Script);
 					CStr Apply = CFile::fs_GetPath(Tidy.m_Tool) / "clang-apply-replacements";
 					CFile::fs_WriteStringToFile(Apply, "#!/bin/sh\ntouch \"$(dirname \"$0\")/apply.log\"\n", false);
-					CFile::fs_SetAttributes(Apply, CFile::fs_GetAttributes(Apply) | EFileAttrib_Executable);
+					Repo.f_ShellScriptTool(Apply);
 					Tidy.f_Configure("{Enabled: true}");
 					Tidy.f_AddDatabase("Main", 200, "Lib_A", "Debug", 101, {"A.cpp"}, "DEBUG");
 
@@ -480,7 +480,7 @@ namespace NMib::NTool
 					CTidyFixture Tidy(Repo);
 					CFile::fs_WriteStringToFile
 						(
-							Tidy.m_Tool
+							Tidy.m_Script
 							, "#!/bin/sh\n"
 							"if [ \"$1\" = --verify-config ]; then echo 'No config errors detected.'; exit 0; fi\n"
 							"for Last; do :; done\n"
@@ -494,10 +494,10 @@ namespace NMib::NTool
 							, false
 						)
 					;
-					CFile::fs_SetAttributes(Tidy.m_Tool, CFile::fs_GetAttributes(Tidy.m_Tool) | EFileAttrib_Executable);
+					Repo.f_ShellScriptTool(Tidy.m_Script);
 					CStr Apply = CFile::fs_GetPath(Tidy.m_Tool) / "clang-apply-replacements";
 					CFile::fs_WriteStringToFile(Apply, "#!/bin/sh\ntouch \"$(dirname \"$0\")/apply.log\"\n", false);
-					CFile::fs_SetAttributes(Apply, CFile::fs_GetAttributes(Apply) | EFileAttrib_Executable);
+					Repo.f_ShellScriptTool(Apply);
 					Tidy.f_Configure("{Enabled: true}");
 					Tidy.f_AddDatabase("Main", 200, "Lib_A", "Debug", 101, {"A.cpp"}, "DEBUG");
 
@@ -536,7 +536,6 @@ namespace NMib::NTool
 
 				co_return {};
 			};
-#endif
 		}
 	};
 
