@@ -52,10 +52,10 @@ namespace NMib::NTool::NTestHelpers
 	{
 		CCheckoutFixture(CRepositoryFixture &_Repo);
 
-		TCFuture<void> f_Init(TCVector<CStr> _Repositories, CStr _ExtraConfiguration = {});
+		TCFuture<void> f_Init(TCVector<CStr> _Repositories, CStr _ExtraConfiguration = {}, TCMap<CStr, CStr> _RepositoryProperties = {});
 		CStr f_Remote(CStr const &_Name) const;
 		CStr f_Repository(CStr const &_Name) const;
-		CStr f_Configuration(TCVector<CStr> const &_Repositories, CStr const &_Extra) const;
+		CStr f_Configuration(TCVector<CStr> const &_Repositories, CStr const &_Extra, TCMap<CStr, CStr> const &_RepositoryProperties) const;
 
 		TCFuture<CProcessLaunchActor::CSimpleLaunchResult> f_Mib(TCVector<CStr> _Params);
 		TCFuture<CStr> f_MibSucceeds(TCVector<CStr> _Params);

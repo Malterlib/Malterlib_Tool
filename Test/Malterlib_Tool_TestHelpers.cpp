@@ -296,7 +296,7 @@ namespace NMib::NTool::NTestHelpers
 		return m_Repo.m_Path / "Repos" / _Name;
 	}
 
-	CStr CCheckoutFixture::f_Configuration(TCVector<CStr> const &_Repositories, CStr const &_Extra) const
+	CStr CCheckoutFixture::f_Configuration(TCVector<CStr> const &_Repositories, CStr const &_Extra, TCMap<CStr, CStr> const &_RepositoryProperties) const
 	{
 		CStr Configuration = "%Repository \"Root\"\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n\t\tDefaultBranch \"main\"\n";
 		Configuration += "\t\tURL " + CEJsonSorted(f_Remote("Root")).f_ToString() + "\n";
@@ -307,14 +307,18 @@ namespace NMib::NTool::NTestHelpers
 			Configuration += "\t\tURL " + CEJsonSorted(f_Remote(Name)).f_ToString() + "\n";
 			Configuration += "\t\tLocation \"Repos/" + Name + "\"->MakeAbsolute()\n";
 			Configuration += "\t\tConfigFile \"Repos.MRepo\"->MakeAbsolute()\n";
-			Configuration += "\t\tStateFile \"Repos.MRepoState\"->MakeAbsolute()\n\t}\n}\n";
+			Configuration += "\t\tStateFile \"Repos.MRepoState\"->MakeAbsolute()\n";
+			if (auto *pProperties = _RepositoryProperties.f_FindEqual(Name))
+				Configuration += *pProperties;
+			Configuration += "\t}\n}\n";
 		}
 
 		return Configuration + _Extra;
 	}
 
-	// Each sub-repository starts with one commit on main, and the root with the build system, both pushed
-	TCFuture<void> CCheckoutFixture::f_Init(TCVector<CStr> _Repositories, CStr _ExtraConfiguration)
+	// Each sub-repository starts with one commit on main, and the root with the build system, both pushed. _RepositoryProperties
+	// adds lines to the Repository block of each sub-repository named, and _ExtraConfiguration to the build system file.
+	TCFuture<void> CCheckoutFixture::f_Init(TCVector<CStr> _Repositories, CStr _ExtraConfiguration, TCMap<CStr, CStr> _RepositoryProperties)
 	{
 		auto Capture = co_await (g_CaptureExceptions % "Initializing test checkout");
 
@@ -333,7 +337,7 @@ namespace NMib::NTool::NTestHelpers
 			co_await f_GitIn(Work, {"push", "-q", Remote, "main"});
 		}
 
-		m_Repo.f_Write("Test.MBuildSystem", f_Configuration(_Repositories, _ExtraConfiguration));
+		m_Repo.f_Write("Test.MBuildSystem", f_Configuration(_Repositories, _ExtraConfiguration, _RepositoryProperties));
 		m_Repo.f_Write(".gitignore", "/BuildSystem/\n/Repos/\n/Repos.MRepoState\n");
 		co_await m_Repo.f_Commit();
 		co_await m_Repo.f_Git({"remote", "add", "origin", f_Remote("Root")});
