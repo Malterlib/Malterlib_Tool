@@ -278,6 +278,122 @@ namespace NMib::NTool::NTestHelpers
 		co_return pState->m_Result;
 	}
 
+	CCheckoutFixture::CCheckoutFixture(CRepositoryFixture &_Repo)
+		: m_Repo(_Repo)
+		, m_Remotes(_Repo.m_Root / "remotes")
+	{
+		// CI sets it, and it resets repositories instead of keeping their branches and changes
+		m_Repo.m_Environment.f_Remove("MalterlibRepositoryHardReset");
+	}
+
+	CStr CCheckoutFixture::f_Remote(CStr const &_Name) const
+	{
+		return m_Remotes / (_Name + ".git");
+	}
+
+	CStr CCheckoutFixture::f_Repository(CStr const &_Name) const
+	{
+		return m_Repo.m_Path / "Repos" / _Name;
+	}
+
+	CStr CCheckoutFixture::f_Configuration(TCVector<CStr> const &_Repositories, CStr const &_Extra) const
+	{
+		CStr Configuration = "%Repository \"Root\"\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n\t\tDefaultBranch \"main\"\n";
+		Configuration += "\t\tURL " + CEJsonSorted(f_Remote("Root")).f_ToString() + "\n";
+		Configuration += "\t\tLocation \".\"->MakeAbsolute()\n\t}\n}\n";
+		for (auto &Name : _Repositories)
+		{
+			Configuration += "%Repository \"" + Name + "\"\n{\n\tRepository\n\t{\n\t\tDefaultBranch \"main\"\n";
+			Configuration += "\t\tURL " + CEJsonSorted(f_Remote(Name)).f_ToString() + "\n";
+			Configuration += "\t\tLocation \"Repos/" + Name + "\"->MakeAbsolute()\n";
+			Configuration += "\t\tConfigFile \"Repos.MRepo\"->MakeAbsolute()\n";
+			Configuration += "\t\tStateFile \"Repos.MRepoState\"->MakeAbsolute()\n\t}\n}\n";
+		}
+
+		return Configuration + _Extra;
+	}
+
+	// Each sub-repository starts with one commit on main, and the root with the build system, both pushed
+	TCFuture<void> CCheckoutFixture::f_Init(TCVector<CStr> _Repositories, CStr _ExtraConfiguration)
+	{
+		auto Capture = co_await (g_CaptureExceptions % "Initializing test checkout");
+
+		CFile::fs_CreateDirectory(f_Remote("Root"));
+		co_await m_Repo.f_Run("git", {"init", "-q", "--bare", "-b", "main"}, f_Remote("Root"));
+
+		for (auto &Name : _Repositories)
+		{
+			CStr Remote = f_Remote(Name);
+			CStr Work = m_Repo.m_Root / "work" / Name;
+			CFile::fs_CreateDirectory(Remote);
+			CFile::fs_CreateDirectory(Work);
+			co_await m_Repo.f_Run("git", {"init", "-q", "--bare", "-b", "main"}, Remote);
+			co_await m_Repo.f_Run("git", {"init", "-q", "-b", "main"}, Work);
+			co_await f_CommitIn(Work, "Initial");
+			co_await f_GitIn(Work, {"push", "-q", Remote, "main"});
+		}
+
+		m_Repo.f_Write("Test.MBuildSystem", f_Configuration(_Repositories, _ExtraConfiguration));
+		m_Repo.f_Write(".gitignore", "/BuildSystem/\n/Repos/\n/Repos.MRepoState\n");
+		co_await m_Repo.f_Commit();
+		co_await m_Repo.f_Git({"remote", "add", "origin", f_Remote("Root")});
+		co_await m_Repo.f_Git({"push", "-q", "-u", "origin", "main"});
+
+		co_return {};
+	}
+
+	TCFuture<CProcessLaunchActor::CSimpleLaunchResult> CCheckoutFixture::f_Mib(TCVector<CStr> _Params)
+	{
+		CStr Command = _Params[0];
+		_Params.f_Remove(0);
+
+		TCVector<CStr> Params =
+			{
+				Command
+				, "--no-color"
+				, "--build-system"
+				, m_Repo.m_Path / "Test.MBuildSystem"
+				, "--output-directory"
+				, m_Repo.m_Path / "BuildSystem/Default"
+				, "--no-use-user-settings"
+				, "--no-use-cached-environment"
+			}
+		;
+		Params.f_Insert(fg_Move(_Params));
+
+		return m_Repo.f_Run(m_Repo.m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension), fg_Move(Params), m_Repo.m_Path, true);
+	}
+
+	// The combined output of an MTool command that has to succeed
+	TCFuture<CStr> CCheckoutFixture::f_MibSucceeds(TCVector<CStr> _Params)
+	{
+		CStr Command = CStr::fs_Join(_Params, " ");
+		auto Result = co_await f_Mib(fg_Move(_Params));
+		if (Result.m_ExitCode)
+			co_return DMibErrorInstance("'{}' failed: {}"_f << Command << Result.f_GetCombinedOut());
+
+		co_return Result.f_GetCombinedOut();
+	}
+
+	TCFuture<CStr> CCheckoutFixture::f_GitIn(CStr _Directory, TCVector<CStr> _Params)
+	{
+		auto Result = co_await m_Repo.f_Run("git", fg_Move(_Params), _Directory);
+		if (Result.m_ExitCode)
+			co_return DMibErrorInstance("Git failed in '{}': {}"_f << _Directory << Result.f_GetCombinedOut());
+
+		co_return Result.f_GetStdOut().f_Trim();
+	}
+
+	// Commits a new file named after the commit, and returns the commit
+	TCFuture<CStr> CCheckoutFixture::f_CommitIn(CStr _Directory, CStr _Name)
+	{
+		CFile::fs_WriteStringToFile(_Directory / (_Name + ".txt"), _Name + "\n", false);
+		co_await f_GitIn(_Directory, {"add", "-A"});
+		co_await f_GitIn(_Directory, {"-c", "core.hooksPath=" + (m_Repo.m_Root / "no-hooks"), "commit", "-qm", _Name});
+
+		co_return co_await f_GitIn(_Directory, {"rev-parse", "HEAD"});
+	}
+
 	bool CRepositoryFixture::f_HasTemporaryAttributes() const
 	{
 		// The fixture points MToolRootDirectory at m_Root / "mtool".

@@ -121,6 +121,14 @@ CGenerateOptions CTool_Malterlib::fs_ParseSharedOptions(NEncoding::CEJsonSorted 
 	if (_Params["WaitForLock"].f_Boolean() || GenerateOptions.m_LockSettings.m_Timeout >= 0.0)
 		GenerateOptions.m_LockSettings.m_Wait = EBuildSystemLockWait::mc_Wait;
 
+	if (auto *pBaseBranch = _Params.f_GetMember("BaseBranch"))
+	{
+		if (pBaseBranch->f_String().f_IsEmpty())
+			DMibError("--base-branch requires a nonempty branch name");
+
+		GenerateOptions.m_BaseBranch = pBaseBranch->f_String();
+	}
+
 	GenerateOptions.m_bStash = _Params["Stash"].f_Boolean();
 	GenerateOptions.m_bShowProgress = _Params["ShowRepoProgress"].f_Boolean();
 

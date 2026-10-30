@@ -45,4 +45,24 @@ namespace NMib::NTool::NTestHelpers
 		CStr m_ToolDirectory;
 		CSystemEnvironment m_Environment;
 	};
+
+	// A checkout whose root and sub-repositories, in Repos/<Name>, push to bare repositories of their own in remotes/<Name>.git.
+	// The sub-repositories are pinned in Repos.MRepo.
+	struct CCheckoutFixture : CAllowUnsafeThis
+	{
+		CCheckoutFixture(CRepositoryFixture &_Repo);
+
+		TCFuture<void> f_Init(TCVector<CStr> _Repositories, CStr _ExtraConfiguration = {});
+		CStr f_Remote(CStr const &_Name) const;
+		CStr f_Repository(CStr const &_Name) const;
+		CStr f_Configuration(TCVector<CStr> const &_Repositories, CStr const &_Extra) const;
+
+		TCFuture<CProcessLaunchActor::CSimpleLaunchResult> f_Mib(TCVector<CStr> _Params);
+		TCFuture<CStr> f_MibSucceeds(TCVector<CStr> _Params);
+		TCFuture<CStr> f_GitIn(CStr _Directory, TCVector<CStr> _Params);
+		TCFuture<CStr> f_CommitIn(CStr _Directory, CStr _Name);
+
+		CRepositoryFixture &m_Repo;
+		CStr m_Remotes;
+	};
 }

@@ -95,6 +95,15 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		}
 	;
 
+	auto Option_BaseBranch = "BaseBranch?"_o=
+		{
+			"Names"_o= _o["--base-branch"]
+			, "Type"_o= ""
+			, "Description"_o= "Compare with this branch instead of the base branch set with 'base' for the current branch.\n"
+			"Repositories that don't have the branch on origin compare with their default branch.\n"
+		}
+	;
+
 	auto Filter_Branch = "RepoBranch?"_o=
 		{
 			"Names"_o= _o["--repo-branch"]
@@ -241,6 +250,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_o= _o[]
 						, "Description"_o= "Hide these branchs. Supports wildcards.\n"
 					}
+					, Option_BaseBranch
 					, Filter_Name
 					, fFilter_Type("")
 					, Filter_Tags
@@ -382,6 +392,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_o= 20
 						, "Description"_o= "Maximum number of commits to show per section in the commit message.\n"
 					}
+					, Option_BaseBranch
 					, fs_CachedEnvironmentOption(true)
 				}
 			}
@@ -1112,6 +1123,12 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					{
 						Option_Pretend
 						, Option_Force
+						, "BaseBranch?"_o=
+						{
+							"Names"_o= _o["--base-branch"]
+							, "Type"_o= ""
+							, "Description"_o= "Set the base branch of the branch, as 'base' does.\n"
+						}
 						, Filter_Name
 						, fFilter_Type("")
 						, Filter_Tags
@@ -1204,6 +1221,59 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 							{
 								co_return co_await _pBuildSystem->f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
+							}
+							, _pCommandLine
+							, &GenerateOptions
+						)
+					;
+				}
+			)
+		;
+
+		o_ToolsSection.f_RegisterCommand
+			(
+				{
+					"Names"_o= _o["base"]
+					, "Description"_o= "Show or set the base branch of the root repository's current branch.\n"
+					"The base is the branch the current branch is stacked on. repo-commit, status and list-commits compare with it instead"
+					" of the default branch, in the repositories that have it on origin.\n"
+					"Each branch has a base of its own, kept in .malterlib-base in the root.\n"
+					, "Category"_o= "Repository management"
+					, "Options"_o=
+					{
+						"Clear?"_o=
+						{
+							"Names"_o= _o["--clear"]
+							, "Default"_o= false
+							, "Description"_o= "Remove the base branch of the current branch.\n"
+						}
+						, fs_CachedEnvironmentOption(true)
+					}
+					, "Parameters"_o=
+					{
+						"Branch?"_o=
+						{
+							"Type"_o= ""
+							, "Default"_o= ""
+							, "Description"_o= "The base branch to set. Without it, the current base branch is shown.\n"
+						}
+					}
+				}
+				, [=, this](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+				{
+					co_await ECoroutineFlag_CaptureExceptions;
+
+					bool bClear = _Params["Clear"].f_Boolean();
+					CStr BaseBranch = _Params["Branch"].f_String();
+					if (bClear && !BaseBranch.f_IsEmpty())
+						DMibError("A base branch can't be set and cleared at once");
+
+					auto GenerateOptions = fs_ParseSharedOptions(_Params);
+					co_return co_await f_RunBuildSystem
+						(
+							[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
+							{
+								co_return co_await _pBuildSystem->f_Action_Repository_Base(GenerateOptions, BaseBranch, bClear, _pCommandLine);
 							}
 							, _pCommandLine
 							, &GenerateOptions
@@ -1553,6 +1623,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_o= 60
 						, "Description"_o= "Max width of the message column.\n"
 					}
+					, Option_BaseBranch
 					, Filter_Name
 					, fFilter_Type("")
 					, Filter_Tags
@@ -1565,8 +1636,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				{
 					"FromReference?"_o=
 					{
-						"Default"_o= "origin/master"
-						, "Description"_o= "The commit to start showing commits from.\n"
+						"Default"_o= ""
+						, "Description"_o= "The commit to start showing commits from. Defaults to origin/ and the base branch of the current branch, or the root's"
+						" default branch when it has none.\n"
 						"For Perforce roots, use @changelist (e.g. @12345). Default auto-detects previous changelist.\n"
 					}
 					, "ToReference?"_o=
@@ -1584,8 +1656,6 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 
 				CStr FromRef = _Params["FromReference"].f_String();
-				if (FromRef.f_IsEmpty())
-					DMibError("FromReference must be specified");
 
 				CStr ToRef = _Params["ToReference"].f_String();
 				if (ToRef.f_IsEmpty())
