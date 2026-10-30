@@ -23,6 +23,7 @@ public:
 			NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem *_pBuildSystem)> _fCommand
 			, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine
 			, CGenerateOptions const *_pGenerateOptions
+			, bool _bOutputToStdErr = false
 		)
 	;
 

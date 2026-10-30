@@ -151,17 +151,19 @@ TCFuture<uint32> CTool_Malterlib::f_RunBuildSystem
 		NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem *_pBuildSystem)> _fCommand
 		, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine
 		, CGenerateOptions const *_pGenerateOptions
+		, bool _bOutputToStdErr
 	)
 {
 	CFile::CSetAttributeEmulationScope DisableAttributeEmulationScope(false);
 
+	// _bOutputToStdErr leaves stdout to what the command writes there itself, such as JSON
 	auto RetryResult = co_await CBuildSystem::fs_RunBuildSystem
 		(
 			fg_Move(_fCommand)
 			, _pCommandLine
-			, [_pCommandLine](NStr::CStr const &_Output, bool _bError)
+			, [_pCommandLine, _bOutputToStdErr](NStr::CStr const &_Output, bool _bError)
 			{
-				if (_bError)
+				if (_bError || _bOutputToStdErr)
 					*_pCommandLine %= _Output;
 				else
 					*_pCommandLine += _Output;

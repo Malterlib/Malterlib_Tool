@@ -310,6 +310,59 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		)
 	;
 
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["list-repos"]
+				, "Description"_o= "List the repositories that the build system defines, the root included, with where each is pinned.\n"
+				"It lists what the checkout defines and doesn't update any repository, so repositories that build files of repositories"
+				" not yet on disk define are missing until update-repos has cloned those.\n"
+				, "Category"_o= "Repository management"
+				, "Options"_o=
+				{
+					"Json?"_o=
+					{
+						"Names"_o= _o["--json"]
+						, "Default"_o= false
+						, "Description"_o= "Print the repositories as a JSON array, parents before their children. Each has Path, Url, DefaultBranch,"
+						" Binary, UpstreamUrl and DefaultUpstreamBranch when it has an upstream remote, UpdateSubmodules, Parent, ConfigFile and"
+						" ConfigKey, the .MRepo file and its key that pin it, and Pin, the commit pinned there or the HEAD of the root.\n"
+					}
+					, Filter_Name
+					, fFilter_Type("")
+					, Filter_Tags
+					, Filter_Branch
+					, fFilter_OnlyChanged(false)
+					, fFilter_IncludePull(false)
+					, fs_CachedEnvironmentOption(true)
+				}
+			}
+			, [=, this](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
+				bool bJson = _Params["Json"].f_Boolean();
+
+				auto GenerateOptions = fs_ParseSharedOptions(_Params);
+				GenerateOptions.m_bSkipUpdate = true;
+				if (bJson)
+					GenerateOptions.m_bShowProgress = false;
+				co_return co_await f_RunBuildSystem
+					(
+						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
+						{
+							co_return co_await _pBuildSystem->f_Action_Repository_List(GenerateOptions, RepoFilter, bJson, _pCommandLine);
+						}
+						, _pCommandLine
+						, &GenerateOptions
+						, bJson
+					)
+				;
+			}
+		)
+	;
+
 	{
 		o_ToolsSection.f_RegisterCommand
 			(
