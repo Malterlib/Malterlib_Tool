@@ -359,11 +359,17 @@ namespace NMib::NTool::NTestHelpers
 				, m_Repo.m_Path / "Test.MBuildSystem"
 				, "--output-directory"
 				, m_Repo.m_Path / "BuildSystem/Default"
-				, "--no-use-user-settings"
 				, "--no-use-cached-environment"
 			}
 		;
+		// Explicit both ways, as CI turns user settings off by default through Malterlib_UseUserSettings
+		Params.f_Insert(m_bUseUserSettings ? "--use-user-settings" : "--no-use-user-settings");
 		Params.f_Insert(fg_Move(_Params));
+
+		// The home directory on macOS doesn't come from HOME, so a run that reads user settings would read and write the real
+		// global file
+		if (m_bUseUserSettings)
+			m_Repo.m_Environment["MalterlibDisableGlobalUserSettings"] = "true";
 
 		return m_Repo.f_Run(m_Repo.m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension), fg_Move(Params), m_Repo.m_Path, true);
 	}

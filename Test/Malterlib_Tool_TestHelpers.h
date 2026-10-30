@@ -64,5 +64,6 @@ namespace NMib::NTool::NTestHelpers
 
 		CRepositoryFixture &m_Repo;
 		CStr m_Remotes;
+		bool m_bUseUserSettings = false; // Only with the global user settings file left out, which tests can't move from the real home
 	};
 }
