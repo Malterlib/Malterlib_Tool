@@ -271,6 +271,43 @@ namespace NMib::NTool
 					co_return {};
 				};
 
+				DMibTestCategory("PinsOfUnusedRepositories") -> TCFuture<void>
+				{
+					auto fPinned = [&]
+						{
+							CStr ConfigFile = Repo.m_Path / "Repos.MRepo";
+							auto Config = CEJsonSorted::fs_FromString(CFile::fs_ReadStringFromFile(ConfigFile, true), ConfigFile);
+							TCVector<CStr> Pinned;
+							for (auto &Entry : Config.f_Object())
+								Pinned.f_Insert(Entry.f_Name());
+							return Pinned;
+						}
+					;
+
+					auto Used = co_await fUpdate("Default", true, true, {});
+					DMibAssert(Used.m_ExitCode, ==, 0);
+					TCVector<CStr> AllPinned = {"Repos/A", "Repos/B", "Repos/C"};
+					DMibAssert(fPinned(), ==, AllPinned);
+
+					// A repository that a build system stops using keeps its pin, whichever way the removal is reconciled
+					umint nLost = 0;
+					for (umint i = 0; i < 10; ++i)
+					{
+						auto Unused = co_await fUpdate("Default", false, false, {"--reconcile-removed=*:leave"});
+						if (Unused.m_ExitCode != 0 || fPinned() != AllPinned)
+							++nLost;
+
+						auto UsedAgain = co_await fUpdate("Default", true, true, {});
+						if (UsedAgain.m_ExitCode != 0 || fPinned() != AllPinned)
+							++nLost;
+					}
+					DMibExpect(nLost, ==, umint(0));
+					auto PinnedAfter = fPinned();
+					DMibExpect(PinnedAfter, ==, AllPinned);
+
+					co_return {};
+				};
+
 				DMibTestCategory("CaseAlias") -> TCFuture<void>
 				{
 					if (!CFile::fs_FileExists(Repo.m_Path / "buildsystem/default", EFileAttrib_Directory))
