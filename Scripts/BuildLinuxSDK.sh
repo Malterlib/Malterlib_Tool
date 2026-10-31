@@ -992,7 +992,8 @@ nSkipped=0
 while IFS= read -r -d '' File; do
 	# Skip files that are not ELF binaries (e.g. GNU linker scripts)
 	if head -c4 "$File" | grep -q $'\x7fELF'; then
-		objcopy -j .dynamic -j .dynsym -j .dynstr -j .symtab -j .strtab -j .shstrtab -j .gnu.version -j .gnu.version_d -j .gnu.version_r "$File" 2>&1 | sed '/^objcopy: .*warning: empty loadable segment detected at/d'
+		objcopy -j .dynamic -j .dynsym -j .dynstr -j .symtab -j .strtab -j .shstrtab -j .gnu.version -j .gnu.version_d -j .gnu.version_r "$File" 2>&1 \
+			| sed '/^objcopy: .*warning: empty loadable segment detected at/d'
 		nStripped=$((nStripped + 1))
 	else
 		nSkipped=$((nSkipped + 1))
