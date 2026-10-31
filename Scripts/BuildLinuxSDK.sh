@@ -633,7 +633,9 @@ cat <<EndOfText > SDKSettings.plist
 		<key>KASAN_CFLAGS_CLASSIC</key>
 		<string>-DKASAN=1 -DKASAN_CLASSIC=1 -fsanitize=address -mllvm -asan-globals-live-support -mllvm -asan-force-dynamic-shadow</string>
 		<key>KASAN_CFLAGS_TBI</key>
+		<!-- malterlib-format off -->
 		<string>-DKASAN=1 -DKASAN_TBI=1 -fsanitize=kernel-hwaddress -mllvm -hwasan-recover=0 -mllvm -hwasan-instrument-atomics=0 -mllvm -hwasan-instrument-stack=1 -mllvm -hwasan-generate-tags-with-calls=1 -mllvm -hwasan-instrument-with-calls=1 -mllvm -hwasan-use-short-granules=0 -mllvm -hwasan-memory-access-callback-prefix=__asan_</string>
+		<!-- malterlib-format on -->
 		<key>KASAN_DEFAULT_CFLAGS</key>
 		<string>\$(KASAN_CFLAGS_CLASSIC)</string>
 		<key>KASAN_DEFAULT_CFLAGS[arch=arm64]</key>
