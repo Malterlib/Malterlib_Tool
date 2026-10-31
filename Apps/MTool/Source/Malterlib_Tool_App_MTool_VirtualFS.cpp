@@ -828,7 +828,12 @@ public:
 //					<< NTime::fg_GetFullTimeStr(NTime::CTime::fs_NowLocal())
 					<< lData.f_GetLen();
 
-			auto Formatter = CStr::CFormat("\t0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0},\n");
+			auto Formatter = CStr::CFormat
+				(
+					"\t0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, "
+					"0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0}, 0x{nfh,sz2,sf0},\n"
+				)
+			;
 			auto ByteFormatter = CStr::CFormat("0x{nfh,sz2,sf0}, ");
 
 			uint8 Input[16];
