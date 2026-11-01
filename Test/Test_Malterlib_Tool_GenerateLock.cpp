@@ -24,7 +24,9 @@ namespace NMib::NTool
 					(
 						"Test.MBuildSystem"
 						, "%Repository \"Root\"\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n\t\tDefaultBranch \"main\"\n"
-						"\t\tURL \"https://example.invalid/generate-lock-fixture.git\"\n\t\tLocation " + CEJsonSorted(Repo.m_Path).f_ToString() + "\n\t}\n}\n"
+						"\t\tURL \"https://example.invalid/generate-lock-fixture.git\"\n\t\tLocation "
+						+ CEJsonSorted(Repo.m_Path).f_ToString()
+						+ "\n\t}\n}\n"
 					)
 				;
 
@@ -56,8 +58,7 @@ namespace NMib::NTool
 				;
 
 				// The lock is released once the generation reports that it waits for it
-				auto fGenerateWaiting = [&](CStr _OutputDirectory, TCVector<CStr> _Extra, TCPromise<void> _Waiting)
-					-> TCFuture<CProcessLaunchActor::CSimpleLaunchResult>
+				auto fGenerateWaiting = [&](CStr _OutputDirectory, TCVector<CStr> _Extra, TCPromise<void> _Waiting) -> TCFuture<CProcessLaunchActor::CSimpleLaunchResult>
 					{
 						return Repo.f_ToolWatchingOutput(fGenerateParams(_OutputDirectory, _Extra), true, "Waiting for another generation", _Waiting);
 					}

@@ -146,13 +146,14 @@ CEJsonOrdered::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefa
 	;
 }
 
-TCFuture<uint32> CTool_Malterlib::f_RunBuildSystem
+auto CTool_Malterlib::f_RunBuildSystem
 	(
 		NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem *_pBuildSystem)> _fCommand
 		, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine
 		, CGenerateOptions const *_pGenerateOptions
 		, bool _bOutputToStdErr
 	)
+	-> TCFuture<uint32>
 {
 	CFile::CSetAttributeEmulationScope DisableAttributeEmulationScope(false);
 

@@ -25,9 +25,7 @@ namespace
 			if (Value.f_StartsWith("-") && LastOption != "--doxygen-options")
 			{
 				if (!LastOption.f_IsEmpty())
-				{
 					Registry.f_SetValueNoPath(LastOption, "");
-				}
 				LastOption = Value;
 			}
 			else
@@ -122,7 +120,6 @@ namespace
 class CTool_DoxygenCompile : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CRegistry Registry = fg_ExtractOptions(_Params);
@@ -131,7 +128,7 @@ public:
 		if (pFile)
 			Registry.f_CreateChild("Files")->f_CreateChildNoPath(pFile->f_GetThisValue(), true);
 
-//		DConOut("\n{}\n", Registry.f_GenerateStr());
+		// DConOut("\n{}\n", Registry.f_GenerateStr());
 		CStr DiagFile = Registry.f_GetValue("--serialize-diagnostics", "");
 
 		if (DiagFile)
@@ -210,7 +207,6 @@ public:
 				{
 					CDependencyFile DependencyFile;
 					DependencyFile.f_AddTool("libtool");
-
 
 					CRegistry Params;
 
@@ -291,7 +287,6 @@ DMibRuntimeClass(CTool, CTool_DoxygenLibTool);
 class CTool_DoxygenLD : public CTool
 {
 public:
-
 	CDependencyFile m_DependencyFile;
 
 	CStr m_DoxygenExecutable;
@@ -389,7 +384,9 @@ public:
 							&& Name != "-target"
 							&& !Name.f_StartsWith("-O")
 						)
+						{
 							Module.m_ClangOptions[Name] = iConfig->f_GetThisValue();
+						}
 					}
 					if (Name.f_StartsWith("-D"))
 					{
@@ -397,7 +394,6 @@ public:
 						Module.m_Predefines[Define];
 					}
 				}
-
 			}
 		}
 	}
@@ -520,9 +516,7 @@ public:
 							, [&, pState](CProcessLaunchStateChangeVariant const &_State, fp64 _TimeSinceStart)
 							{
 								if (_State.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
-								{
 									DConErrOut("Error launching doxygen: {}\n", _State.f_Get<EProcessLaunchState_LaunchFailed>());
-								}
 								else if (_State.f_GetTypeID() == EProcessLaunchState_Exited)
 								{
 									uint32 ThisExit = _State.f_Get<EProcessLaunchState_Exited>();
@@ -545,7 +539,6 @@ public:
 								DConOutRaw(_Output);
 							else
 								pState->m_StdErr += _Output;
-
 						}
 					;
 
@@ -554,7 +547,6 @@ public:
 
 					Handler.f_AddLaunch(Params, false);
 				}
-
 			}
 		;
 
@@ -616,9 +608,7 @@ public:
 				if (pFiles)
 				{
 					for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
-					{
 						iFile->f_ParseStr(CFile::fs_ReadStringFromFile(CStr(iFile->f_GetName())), iFile->f_GetName());
-					}
 				}
 			}
 			else if (Extension.f_CmpNoCase("o") == 0)
@@ -651,14 +641,13 @@ public:
 				m_DoxygenOptions.f_Insert(fg_GetStrSep(Options, ","));
 		}
 
-
-//		DConOut("\n{}\n", Registry.f_GenerateStr());
-/*
+		// DConOut("\n{}\n", Registry.f_GenerateStr());
+		/*
 		for (auto &Launch : m_Libraries)
 		{
 			DConOut("\n{}\n", Launch.f_GenerateStr());
 		}
-*/
+		*/
 		f_ExtractModules();
 
 		f_LaunchModules(true, m_DoxygenTagInclude);
@@ -674,6 +663,4 @@ public:
 };
 
 DMibRuntimeClass(CTool, CTool_DoxygenLD);
-
-
 

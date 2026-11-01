@@ -10,23 +10,20 @@
 
 struct CV_INFO_PDB70
 {
-	DWORD      CvSignature;
-	GUID       Signature;       // unique identifier
-	DWORD      Age;             // an always-incrementing value
-	ch8       PdbFileName[1];  // zero terminated string with the name of the PDB file
+	DWORD CvSignature;
+	GUID Signature;     // unique identifier
+	DWORD Age;          // an always-incrementing value
+	ch8 PdbFileName[1]; // zero terminated string with the name of the PDB file
 };
 
 class CTool_IncreaseTimeStamp : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "NotExist.file");
 		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
-		{
 			DError("File does not exist");
-		}
 
 		CByteVector Mem;
 		CFilePos FLen;
@@ -91,11 +88,9 @@ public:
 					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
 					File.f_Write(Mem.f_GetArray(), FLen);
 				}
-
 			}
 			else
 				DError("Unrecognized Machine");
-
 		}
 		else
 			DError("Could not find PE headers");
@@ -109,14 +104,11 @@ DMibRuntimeClass(CTool, CTool_IncreaseTimeStamp);
 class CTool_SetImageOsVersion : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "NotExist.file");
 		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
-		{
 			DError("File does not exist");
-		}
 
 		CStr VersionStr = _Params.f_GetValue("1", "NoVersion");
 
@@ -235,11 +227,9 @@ public:
 					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
 					File.f_Write(Mem.f_GetArray(), FLen);
 				}
-
 			}
 			else
 				DError("Unrecognized Machine");
-
 		}
 		else
 			DError("Could not find PE headers");

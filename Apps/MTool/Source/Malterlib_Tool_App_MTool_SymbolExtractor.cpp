@@ -18,7 +18,7 @@ namespace
 {
 	class CBinaryStreamMiniZipAdaptor
 	{
-		static voidpf ZCALLBACK fp_fopen_func (voidpf opaque, const char* filename, int mode)
+		static voidpf ZCALLBACK fp_fopen_func(voidpf opaque, char const *filename, int mode)
 		{
 			CFile *pFile = DNew CFile;
 			if (pFile == nullptr)
@@ -53,13 +53,12 @@ namespace
 			return pFile;
 		}
 
-		static voidpf ZCALLBACK fp_fopen64_func (voidpf opaque, const void* filename, int mode)
+		static voidpf ZCALLBACK fp_fopen64_func(voidpf opaque, void const *filename, int mode)
 		{
-			return fp_fopen_func(opaque, (const ch8 *)filename, mode);
+			return fp_fopen_func(opaque, (ch8 const *)filename, mode);
 		}
 
-
-		static uLong ZCALLBACK fp_fread_func (voidpf opaque, voidpf stream, void* buf, uLong size)
+		static uLong ZCALLBACK fp_fread_func(voidpf opaque, voidpf stream, void *buf, uLong size)
 		{
 			CFile *pFile = (CFile *)stream;
 
@@ -67,8 +66,7 @@ namespace
 			return size;
 		}
 
-
-		static uLong ZCALLBACK fp_fwrite_func (voidpf opaque, voidpf stream, const void* buf, uLong size)
+		static uLong ZCALLBACK fp_fwrite_func(voidpf opaque, voidpf stream, void const *buf, uLong size)
 		{
 			CFile *pFile = (CFile *)stream;
 
@@ -76,63 +74,51 @@ namespace
 			return size;
 		}
 
-		static long ZCALLBACK fp_ftell_func (voidpf opaque, voidpf stream)
+		static long ZCALLBACK fp_ftell_func(voidpf opaque, voidpf stream)
 		{
 			CFile *pFile = (CFile *)stream;
 
 			return pFile->f_GetPosition();
 		}
 
-		static ZPOS64_T ZCALLBACK fp_ftell64_func (voidpf opaque, voidpf stream)
+		static ZPOS64_T ZCALLBACK fp_ftell64_func(voidpf opaque, voidpf stream)
 		{
 			CFile *pFile = (CFile *)stream;
 
 			return pFile->f_GetPosition();
 		}
 
-		static long ZCALLBACK fp_fseek_func (voidpf opaque, voidpf stream, uLong offset, int origin)
+		static long ZCALLBACK fp_fseek_func(voidpf opaque, voidpf stream, uLong offset, int origin)
 		{
 			CFile *pFile = (CFile *)stream;
 
 			switch (origin)
 			{
-			case ZLIB_FILEFUNC_SEEK_CUR :
-				pFile->f_AddPosition(offset);
-				break;
-			case ZLIB_FILEFUNC_SEEK_END :
-				pFile->f_SetPositionFromEnd(offset);
-				break;
-			case ZLIB_FILEFUNC_SEEK_SET :
-				pFile->f_SetPosition(offset);
-				break;
+			case ZLIB_FILEFUNC_SEEK_CUR: pFile->f_AddPosition(offset); break;
+			case ZLIB_FILEFUNC_SEEK_END: pFile->f_SetPositionFromEnd(offset); break;
+			case ZLIB_FILEFUNC_SEEK_SET: pFile->f_SetPosition(offset); break;
 			default: return -1;
 			}
 
 			return 0;
 		}
 
-		static long ZCALLBACK fp_fseek64_func (voidpf opaque, voidpf stream, ZPOS64_T offset, int origin)
+		static long ZCALLBACK fp_fseek64_func(voidpf opaque, voidpf stream, ZPOS64_T offset, int origin)
 		{
 			CFile *pFile = (CFile *)stream;
 
 			switch (origin)
 			{
-			case ZLIB_FILEFUNC_SEEK_CUR :
-				pFile->f_AddPosition(offset);
-				break;
-			case ZLIB_FILEFUNC_SEEK_END :
-				pFile->f_SetPositionFromEnd(offset);
-				break;
-			case ZLIB_FILEFUNC_SEEK_SET :
-				pFile->f_SetPosition(offset);
-				break;
+			case ZLIB_FILEFUNC_SEEK_CUR: pFile->f_AddPosition(offset); break;
+			case ZLIB_FILEFUNC_SEEK_END: pFile->f_SetPositionFromEnd(offset); break;
+			case ZLIB_FILEFUNC_SEEK_SET: pFile->f_SetPosition(offset); break;
 			default: return -1;
 			}
 
 			return 0;
 		}
 
-		static int ZCALLBACK fp_fclose_func (voidpf opaque, voidpf stream)
+		static int ZCALLBACK fp_fclose_func(voidpf opaque, voidpf stream)
 		{
 			CFile *pFile = (CFile *)stream;
 
@@ -141,7 +127,7 @@ namespace
 			return 0;
 		}
 
-		static int ZCALLBACK fp_ferror_func (voidpf opaque, voidpf stream)
+		static int ZCALLBACK fp_ferror_func(voidpf opaque, voidpf stream)
 		{
 			/* We never return errors */
 			return 0;
@@ -181,7 +167,6 @@ namespace
 class CTool_SymbolExtractor : public CTool2
 {
 public:
-
 	struct CParams
 	{
 		CParams(TCMap<CStr, CStr> const &_Params)
@@ -189,8 +174,7 @@ public:
 		{
 		}
 
-
-		CStr const &operator [](CStr const &_Key) const
+		CStr const &operator [] (CStr const &_Key) const
 		{
 			if (auto *pParam = m_Params.f_FindEqual(_Key))
 				return *pParam;
@@ -254,23 +238,18 @@ public:
 		CByteVector ExtraField;
 		ExtraField.f_SetLen(65536);
 		CStr Comment;
-		fs_CheckUnzipError
-			(
-				unzGetCurrentFileInfo64(pZipFile, &FileInfo, FileName.f_GetStr(256), 256, ExtraField.f_GetArray(), ExtraField.f_GetLen(), Comment.f_GetStr(256), 256)
-				, _Path
-			)
-		;
+		fs_CheckUnzipError(unzGetCurrentFileInfo64(pZipFile, &FileInfo, FileName.f_GetStr(256), 256, ExtraField.f_GetArray(), ExtraField.f_GetLen(), Comment.f_GetStr(256), 256), _Path);
 
 		auto &Date = FileInfo.tmu_date;
 
 		if
-			(
-				fg_Clamp(Date.tm_mon, 0, 11) != Date.tm_mon
-				|| fg_Clamp(Date.tm_mday, 1, int32(CTimeConvert::fs_GetDaysInMonth(Date.tm_year, Date.tm_mon))) != Date.tm_mday
-				|| fg_Clamp(Date.tm_hour, 0, 23) != Date.tm_hour
-				|| fg_Clamp(Date.tm_min, 0, 59) != Date.tm_min
-				|| fg_Clamp(Date.tm_sec, 0, 59) != Date.tm_sec
-			)
+		(
+			fg_Clamp(Date.tm_mon, 0, 11) != Date.tm_mon
+			|| fg_Clamp(Date.tm_mday, 1, int32(CTimeConvert::fs_GetDaysInMonth(Date.tm_year, Date.tm_mon))) != Date.tm_mday
+			|| fg_Clamp(Date.tm_hour, 0, 23) != Date.tm_hour
+			|| fg_Clamp(Date.tm_min, 0, 59) != Date.tm_min
+			|| fg_Clamp(Date.tm_sec, 0, 59) != Date.tm_sec
+		)
 		{
 			DError(fg_Format("Invalid date in zip file: {}", _Path));
 		}
@@ -426,9 +405,7 @@ public:
 				auto &Timestamps = Database["PDBTimeStamps"] = EJsonType_Object;
 
 				for (auto &Time : m_PDBTimestamps)
-				{
 					Timestamps[m_PDBTimestamps.fs_GetKey(Time)] = Time;
-				}
 			}
 
 			{
@@ -444,7 +421,6 @@ public:
 					;
 				}
 			}
-
 
 			CFile::fs_WriteStringToFile(_FileName, Database.f_ToString(), false);
 		}

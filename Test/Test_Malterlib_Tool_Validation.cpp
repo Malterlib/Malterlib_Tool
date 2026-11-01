@@ -218,9 +218,29 @@ namespace NMib::NTool
 
 					TCVector<CStr> Included =
 						{
-							"file0.cpp", "file5.cpp", "file9.cpp", "letterb.cpp", "lettery.cpp", "negatedx.cpp", "negated-.cpp"
-							, "literala.cpp", "literal-.cpp", "literalc.cpp", "leading-.cpp", "trailing-.cpp", "closing].cpp", "excludedx.cpp"
-							, "namea.cpp", "name,.cpp", "other.cpp", "brace{.cpp", "brace}.cpp", "brace,.cpp", "nestedB.cpp", "file{a..b}.cpp", "file{1..3}.cpp"
+							"file0.cpp"
+							, "file5.cpp"
+							, "file9.cpp"
+							, "letterb.cpp"
+							, "lettery.cpp"
+							, "negatedx.cpp"
+							, "negated-.cpp"
+							, "literala.cpp"
+							, "literal-.cpp"
+							, "literalc.cpp"
+							, "leading-.cpp"
+							, "trailing-.cpp"
+							, "closing].cpp"
+							, "excludedx.cpp"
+							, "namea.cpp"
+							, "name,.cpp"
+							, "other.cpp"
+							, "brace{.cpp"
+							, "brace}.cpp"
+							, "brace,.cpp"
+							, "nestedB.cpp"
+							, "file{a..b}.cpp"
+							, "file{1..3}.cpp"
 						}
 					;
 					TCVector<CStr> Excluded = {"file-.cpp", "filex.cpp", "letterd.cpp", "negated5.cpp", "literalb.cpp", "leadingb.cpp", "trailingb.cpp", "excluded5.cpp"};
@@ -261,8 +281,11 @@ namespace NMib::NTool
 					Repo.f_Write
 						(
 							".editorconfig"
-							, "root = true\n[*]\nmax_line_length = off\n[" + fg_Repeat("a*", 16) + "b.cpp]\nmax_line_length = 190\n["
-							+ fg_Repeat("{c,c}", 24) + "d.cpp]\nmax_line_length = 190\n"
+							, "root = true\n[*]\nmax_line_length = off\n["
+							+ fg_Repeat("a*", 16)
+							+ "b.cpp]\nmax_line_length = 190\n["
+							+ fg_Repeat("{c,c}", 24)
+							+ "d.cpp]\nmax_line_length = 190\n"
 						)
 					;
 					co_await Repo.f_Commit();
@@ -306,7 +329,8 @@ namespace NMib::NTool
 					co_await Repo.f_Init();
 					Repo.f_Write
 						(
-							".editorconfig", "root = true\n[*]\nmax_line_length = off\n"
+							".editorconfig"
+							, "root = true\n[*]\nmax_line_length = off\n"
 							"[star/src/{*,x}*/file.cpp]\nmax_line_length = 190\n"
 							"[double/prefix**/file.cpp]\nmax_line_length = 190\n"
 							"[joined/{**,src}/join.cpp]\nmax_line_length = 190\n"
@@ -321,16 +345,34 @@ namespace NMib::NTool
 
 					TCVector<CStr> Included =
 						{
-							"star/src/dir/file.cpp", "double/prefix/file.cpp", "double/prefix/dir/file.cpp", "unié.cpp", "uni😀.cpp"
-							, "seté.cpp", "set😀.cpp", "greekλ.cpp", "negatedλ.cpp", "sub/slashb.cpp", "root.cpp"
+							"star/src/dir/file.cpp"
+							, "double/prefix/file.cpp"
+							, "double/prefix/dir/file.cpp"
+							, "unié.cpp"
+							, "uni😀.cpp"
+							, "seté.cpp"
+							, "set😀.cpp"
+							, "greekλ.cpp"
+							, "negatedλ.cpp"
+							, "sub/slashb.cpp"
+							, "root.cpp"
 							, "\xEF\xBB\xBF" "marker.cpp"
-							, "joined/join.cpp", "joined/src/join.cpp", "joined/deep/nested/join.cpp"
+							, "joined/join.cpp"
+							, "joined/src/join.cpp"
+							, "joined/deep/nested/join.cpp"
 						}
 					;
 					TCVector<CStr> Excluded =
 						{
-							"star/src/dir/nested/file.cpp", "double/prefixfile.cpp", "uniaa.cpp", "seta.cpp", "greekA.cpp"
-							, "negatedé.cpp", "sub/slasha.cpp", "sub/root.cpp", "marker.cpp"
+							"star/src/dir/nested/file.cpp"
+							, "double/prefixfile.cpp"
+							, "uniaa.cpp"
+							, "seta.cpp"
+							, "greekA.cpp"
+							, "negatedé.cpp"
+							, "sub/slasha.cpp"
+							, "sub/root.cpp"
+							, "marker.cpp"
 						}
 					;
 					for (auto const &Name : Included)
@@ -414,12 +456,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write
-						(
-							".editorconfig"
-							, "root = true\n[*]\nmax_line_length = 190\n[/sub/**/file.{cpp,h}]\nmax_line_length = off\n[sub/deep/file.?]\nmax_line_length = 20\n"
-						)
-					;
+					Repo.f_Write(".editorconfig", "root = true\n[*]\nmax_line_length = 190\n[/sub/**/file.{cpp,h}]\nmax_line_length = off\n[sub/deep/file.?]\nmax_line_length = 20\n");
 					Repo.f_Write("sub/file.cpp", fg_Repeat("x", 200));
 					Repo.f_Write("sub/deep/file.cpp", fg_Repeat("x", 200));
 					Repo.f_Write("sub/deep/file.h", fg_Repeat("x", 21));
@@ -1203,8 +1240,15 @@ namespace NMib::NTool
 						{
 							TCVector<CStr> Params =
 								{
-									"validate", "--skip-update", "--no-color", "--build-system", Repo.m_Root / "Test.MBuildSystem"
-									, "--output-directory", Repo.m_Root / "output", "--no-use-user-settings", "--no-use-cached-environment"
+									"validate"
+									, "--skip-update"
+									, "--no-color"
+									, "--build-system"
+									, Repo.m_Root / "Test.MBuildSystem"
+									, "--output-directory"
+									, Repo.m_Root / "output"
+									, "--no-use-user-settings"
+									, "--no-use-cached-environment"
 								}
 							;
 							Params.f_Insert(_Extra);

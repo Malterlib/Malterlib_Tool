@@ -16,7 +16,7 @@ Property
 			!!MalterlibPostCopyProject undefined
 		}
 		MalterlibDoExeFS true
-        ProductName "Malterlib Tool"
+		ProductName "Malterlib Tool"
 		MalterlibTargetNameType "Normal"
 		MalterlibExeFSExtraFiles =+ [
 			{Pattern: `@("../../../../External/CMake/Templates"->MakeAbsolute())/*`, Destination: "Templates", Recursive: true}

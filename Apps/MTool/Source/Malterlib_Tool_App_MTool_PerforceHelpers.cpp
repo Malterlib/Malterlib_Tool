@@ -56,7 +56,6 @@ struct CPerforceHelper
 	}
 };
 
-
 #include <iostream>
 #include <string>
 
@@ -90,7 +89,6 @@ CStr fg_AskUser(CBlockingStdInReader &_StdIn, CStr const &_Text)
 	return _StdIn.f_ReadLine().f_Trim(ToTrim);
 }
 
-
 class CTool_CreatePerforceClient : public CTool2
 {
 public:
@@ -107,7 +105,6 @@ public:
 };
 
 DMibRuntimeClass(CTool, CTool_CreatePerforceClient);
-
 
 class CTool_SyncPerforce : public CTool2
 {
@@ -153,12 +150,10 @@ DMibRuntimeClass(CTool, CTool_SyncPerforce);
 class CTool_PerforceRunScript : public CTool2
 {
 public:
-
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -222,8 +217,7 @@ public:
 			ToolPaths.f_Insert("x:/Dev/cygwin/bin");
 			ToolPaths.f_Insert("c:/cygwin/bin");
 
-			auto fl_GetTool
-				= [&](CStr const &_Tool) -> CStr
+			auto fl_GetTool = [&](CStr const &_Tool) -> CStr
 				{
 					for (auto &Path : ToolPaths)
 					{
@@ -239,7 +233,6 @@ public:
 					DError(fg_Format("Could not find tool {}", _Tool));
 				}
 			;
-
 
 			if (FirstLine.f_StartsWith("#!"))
 			{
@@ -273,7 +266,7 @@ public:
 
 		CEvent FinishedEvent;
 
-//		DConOut("Executing: {} {}\n", ClientPath, Params);
+		// DConOut("Executing: {} {}\n", ClientPath, Params);
 
 		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
 			(
@@ -307,12 +300,10 @@ public:
 		{
 			LaunchParams.m_Environment["PATH"] = Path;
 			LaunchParams.m_bMergeEnvironment = true;
-//			DConOut("Setting path to: {}\n", Path);
+			// DConOut("Setting path to: {}\n", Path);
 		}
 
-
-		LaunchParams.m_fOnOutput
-			= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+		LaunchParams.m_fOnOutput = [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				switch (_OutputType)
 				{
@@ -321,12 +312,8 @@ public:
 				case EProcessLaunchOutputType_TerminateMessage:
 					DConErrOutRaw(_Output);
 					break;
-				case EProcessLaunchOutputType_StdOut:
-					DConOutRaw(_Output);
-					break;
-				case EProcessLaunchOutputType_Max:
-					DMibNeverGetHere;
-					break;
+				case EProcessLaunchOutputType_StdOut: DConOutRaw(_Output); break;
+				case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
 				}
 			}
 		;
@@ -339,13 +326,9 @@ public:
 					[&](EStdInReaderOutputType _Type, NStr::CStr const &_Input)
 					{
 						if (_Type == EStdInReaderOutputType_StdIn)
-						{
 							Launch.f_SendStdIn(_Input);
-						}
 						else
-						{
 							DConErrOutRaw(_Input);
-						}
 					}
 				)
 			;

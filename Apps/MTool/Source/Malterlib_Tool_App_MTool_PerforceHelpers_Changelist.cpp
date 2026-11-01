@@ -8,15 +8,13 @@
 #include "Malterlib_Tool_App_MTool_PerforceHelpers.h"
 #include <Mib/Cryptography/UUID>
 
-
 class CTool_PerforceForceDeleteChangelist : public CTool2
 {
 public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -74,9 +72,7 @@ public:
 				if (!ChangeListNew.m_Files.f_IsEmpty())
 				{
 					if (fg_Confirm("There are changed checked out files in this changelist, are you really sure you want to revert them?"))
-					{
 						pClient->f_RevertChangelist(SourceChangelist, false);
-					}
 					else
 					{
 						DConOut("Aborted!{\n}", 0);
@@ -101,12 +97,10 @@ DMibRuntimeClass(CTool, CTool_PerforceForceDeleteChangelist);
 class CTool_PerforceTakeOwnership : public CTool2
 {
 public:
-
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -147,12 +141,10 @@ DMibRuntimeClass(CTool, CTool_PerforceTakeOwnership);
 class CTool_PerforceUnshelveRelatedStream : public CTool2
 {
 public:
-
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
-		auto ReportDone
-			= g_OnScopeExit / [&]
+		auto ReportDone = g_OnScopeExit / [&]
 			{
 				DConOut("{}{\n}", DoneMessage);
 			}
@@ -223,7 +215,6 @@ public:
 				Parent = Stream.m_Parent;
 				++iParent;
 			}
-
 		}
 
 		TCSet<CStr> DescribedStreams;
@@ -255,13 +246,11 @@ public:
 
 			if (!bFound)
 				DConOut("Warning: No common parent stream found for {}{\n}", Stream);
-
 		}
 
 		CPerforceClient::CBranchSpec Branch;
 
 		Branch.m_Owner = pClient->f_GetUser();
-
 
 		for (auto iStream = MappedStreams.f_GetIterator(); iStream; ++iStream)
 		{
@@ -276,8 +265,7 @@ public:
 		CStr MappingName = fg_Format("Temp_{}", NCryptography::fg_GetRandomUuidString());
 
 		pClient->f_CreateBranch(MappingName, Branch);
-		auto Cleanup
-			= fg_OnScopeExit
+		auto Cleanup = fg_OnScopeExit
 			(
 				[&]
 				{
@@ -299,7 +287,6 @@ public:
 
 		pClient->f_ResolveAutomatic(CStr(), DestinationChangelist);
 
-
 		return 0;
 	}
 };
@@ -309,7 +296,6 @@ DMibRuntimeClass(CTool, CTool_PerforceUnshelveRelatedStream);
 class CTool_PerforceConvertChangelistsToGit : public CTool2
 {
 public:
-
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr SearchPath = f_GetOption(_Params, "SearchPath", "").f_Trim();
@@ -326,7 +312,7 @@ public:
 
 		uint64 nChanges = f_GetOption(_Params, "MaxChanges", CStr::fs_ToStr(TCLimitsInt<uint64>::mc_Max)).f_Trim().f_ToInt(uint64(TCLimitsInt<uint64>::mc_Max));
 
-		for (auto const &Changelist: Changelists)
+		for (auto const &Changelist : Changelists)
 		{
 			if (--nChanges == 0)
 				break;
@@ -339,9 +325,7 @@ public:
 			CStr ExtendedMessage;
 
 			if (Changelist.m_Description.f_Find(" (integrated)") >= 0 && Changelist.m_Description.f_Find("[Integrate] ") < 0)
-			{
 				CommitLine = "[Integrate] Unknown -> Unknown";
-			}
 			else
 			{
 				if (*pParse == '[')
@@ -397,7 +381,6 @@ public:
 				DConOut("----------------------------------------------{\n}{}", CommitMessage);
 				pClient->f_SetChangelistDescription(Changelist.m_ChangeID, CommitMessage, true);
 			}
-
 		}
 
 		return 0;

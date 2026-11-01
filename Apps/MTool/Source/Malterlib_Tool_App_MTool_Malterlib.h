@@ -18,13 +18,14 @@ public:
 	static CGenerateOptions fs_ParseSharedOptions(CEJsonSorted const &_Params);
 	static CEJsonOrdered::CKeyValue fs_CachedEnvironmentOption(bool _bDefault);
 
-	TCFuture<uint32> f_RunBuildSystem
+	auto f_RunBuildSystem
 		(
 			NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem *_pBuildSystem)> _fCommand
 			, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine
 			, CGenerateOptions const *_pGenerateOptions
 			, bool _bOutputToStdErr = false
 		)
+		-> TCFuture<uint32>
 	;
 
 	void f_Register_SharedOptions(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
@@ -41,6 +42,7 @@ public:
 			, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
-		) override
+		)
+		override
 	;
 };

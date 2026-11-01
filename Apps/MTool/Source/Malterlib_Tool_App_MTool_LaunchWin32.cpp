@@ -14,21 +14,18 @@
 class CTool_LaunchNSIS : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
 		if (FileName == "012301231023Error")
-		{
 			DError("Wrong number of parameters");
-		}
 
 		NMib::NPlatform::CWin32_Registry Registry;
 		CStr MakeNSIS = Registry.f_Read_Str("SOFTWARE\\Classes\\NSIS.Script\\DefaultIcon", "");
 		MakeNSIS = NFile::CFile::fs_GetPath(MakeNSIS.f_Left(MakeNSIS.f_FindReverse(","))) + "/makensis.exe";
-//		MakeNSIS = MakeNSIS.f_Left(MakeNSIS.f_FindReverse(","));
+		// MakeNSIS = MakeNSIS.f_Left(MakeNSIS.f_FindReverse(","));
 
-//		DConOut("{}" DNewLine, MakeNSIS);
+		// DConOut("{}" DNewLine, MakeNSIS);
 
 		TCVector<CStr> Params;
 		int iParam = 1;
@@ -64,8 +61,7 @@ public:
 			)
 		;
 
-		LaunchParams.m_fOnOutput
-			= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+		LaunchParams.m_fOnOutput = [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				switch (_OutputType)
 				{
@@ -74,12 +70,8 @@ public:
 				case EProcessLaunchOutputType_TerminateMessage:
 					DConErrOutRaw(_Output);
 					break;
-				case EProcessLaunchOutputType_StdOut:
-					DConOutRaw(_Output);
-					break;
-				case EProcessLaunchOutputType_Max:
-					DNeverGetHere;
-					break;
+				case EProcessLaunchOutputType_StdOut: DConOutRaw(_Output); break;
+				case EProcessLaunchOutputType_Max: DNeverGetHere; break;
 				}
 			}
 		;
@@ -96,7 +88,6 @@ DMibRuntimeClass(CTool, CTool_LaunchNSIS);
 class CTool_LaunchWithNamedPipes : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		aint iParam = 4;
@@ -119,9 +110,7 @@ public:
 		Inheritable.bInheritHandle = TRUE;
 		HANDLE hStdOut = CreateFileA(StdOut, GENERIC_WRITE, 0, &Inheritable, OPEN_EXISTING, 0, nullptr);
 		if (hStdOut == INVALID_HANDLE_VALUE)
-		{
 			return 1;
-		}
 
 		HANDLE hStdErr = hStdOut;
 
@@ -139,9 +128,7 @@ public:
 		WaitNamedPipeA(StdIn, NMPWAIT_WAIT_FOREVER);
 		HANDLE hStdIn = CreateFileA(StdIn, GENERIC_READ, 0, &Inheritable, OPEN_EXISTING, 0, nullptr);
 		if (hStdIn == INVALID_HANDLE_VALUE)
-		{
 			return 1;
-		}
 
 		uint32 ProcessID = GetCurrentProcessId();
 		DWORD Written = 0;
@@ -155,7 +142,6 @@ public:
 		CStr Program = _Params.f_GetValue("3", "");
 
 		DWORD ExitCode = -2;
-
 
 		{
 			PROCESS_INFORMATION pi;
@@ -178,18 +164,28 @@ public:
 
 			CStr WorkingDir = NFile::CFile::fs_GetCurrentDirectory();
 
-			CWStr ParamsW = NStr::NPlatform::fg_StrToWindows(NFile::NPlatform::fg_ConvertToWindowsPath(Program, true).f_EscapeStr().f_Replace("\\\\", "\\") + " " + CProcessLaunchParams::fs_GetParams(Params));
+			CWStr ParamsW = NStr::NPlatform::fg_StrToWindows
+				(
+					NFile::NPlatform::fg_ConvertToWindowsPath(Program, true).f_EscapeStr().f_Replace("\\\\", "\\") + " " + CProcessLaunchParams::fs_GetParams(Params)
+				)
+			;
 			{
-				if (!::CreateProcessW(
-					NFile::NPlatform::fg_ConvertToWindowsPath(Program, true),
-					ParamsW.f_GetStrUniqueWritable(),
-					nullptr, nullptr,
-					TRUE,
-					CREATE_NEW_CONSOLE | CREATE_UNICODE_ENVIRONMENT,
-					nullptr,
-					NFile::NPlatform::fg_ConvertToWindowsPath(WorkingDir, true),
-					&si,
-					&pi))
+				if
+				(
+					!::CreateProcessW
+					(
+						NFile::NPlatform::fg_ConvertToWindowsPath(Program, true)
+						, ParamsW.f_GetStrUniqueWritable()
+						, nullptr
+						, nullptr
+						, TRUE
+						, CREATE_NEW_CONSOLE | CREATE_UNICODE_ENVIRONMENT
+						, nullptr
+						, NFile::NPlatform::fg_ConvertToWindowsPath(WorkingDir, true)
+						, &si
+						, &pi
+					)
+				)
 				{
 					DDTrace("Error: {}" DNewLine, NMib::NPlatform::fg_Win32_GetLastErrorStr(GetLastError()));
 					return -3;
@@ -219,7 +215,6 @@ public:
 };
 
 DMibRuntimeClass(CTool, CTool_LaunchWithNamedPipes);
-
 
 #endif
 

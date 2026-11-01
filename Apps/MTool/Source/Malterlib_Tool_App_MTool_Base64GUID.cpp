@@ -7,7 +7,6 @@
 class CTool_Base64ToGUID : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Base64 = _Params.f_GetValue("0", "");

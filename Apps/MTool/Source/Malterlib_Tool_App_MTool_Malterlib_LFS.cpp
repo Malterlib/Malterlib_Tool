@@ -6,7 +6,6 @@
 
 #include <Mib/Git/LfsReleaseStore>
 
-
 void CTool_Malterlib::f_Register_LfsReleaseStore(CDistributedAppCommandLineSpecification &o_CommandLine)
 {
 	auto Section = o_CommandLine.f_AddSection("LFS Release Store", "LFS release store utilities.", "Default");

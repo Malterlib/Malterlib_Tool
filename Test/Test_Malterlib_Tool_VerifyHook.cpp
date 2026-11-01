@@ -43,13 +43,7 @@ namespace NMib::NTool
 				co_await Repo.f_Init();
 
 				// The submodule of E is a local repository, which git only clones for a submodule when the user allows it
-				CFile::fs_WriteStringToFile
-					(
-						Repo.m_Root / "gitconfig"
-						, CFile::fs_ReadStringFromFile(Repo.m_Root / "gitconfig", true) + "[protocol \"file\"]\n\tallow = always\n"
-						, false
-					)
-				;
+				CFile::fs_WriteStringToFile(Repo.m_Root / "gitconfig", CFile::fs_ReadStringFromFile(Repo.m_Root / "gitconfig", true) + "[protocol \"file\"]\n\tallow = always\n", false);
 
 				CCheckoutFixture Checkout(Repo);
 
@@ -492,13 +486,7 @@ namespace NMib::NTool
 					// The post-checkout hook of the worktree's initial checkout runs once its files are there
 					CStr HooksMainA = Repo.m_Root / "hooks-main-A";
 					CFile::fs_CreateDirectory(HooksMainA);
-					CFile::fs_WriteStringToFile
-						(
-							HooksMainA / "post-checkout"
-							, "#!/bin/sh\ntest -e Initial.txt && echo \"$3\" > \"$HookTestDirectory/worktree-post-checkout\"\n"
-							, false
-						)
-					;
+					CFile::fs_WriteStringToFile(HooksMainA / "post-checkout", "#!/bin/sh\ntest -e Initial.txt && echo \"$3\" > \"$HookTestDirectory/worktree-post-checkout\"\n", false);
 					CFile::fs_SetAttributes(HooksMainA / "post-checkout", CFile::fs_GetAttributes(HooksMainA / "post-checkout") | EFileAttrib_Executable);
 					co_await Checkout.f_GitIn(Checkout.f_Repository("A"), {"config", "core.hooksPath", HooksMainA});
 
@@ -506,7 +494,8 @@ namespace NMib::NTool
 					auto Result = co_await Repo.f_Run
 						(
 							Repo.m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension)
-							, {
+							,
+							{
 								"update-repos"
 								, "--no-color"
 								, "--build-system"

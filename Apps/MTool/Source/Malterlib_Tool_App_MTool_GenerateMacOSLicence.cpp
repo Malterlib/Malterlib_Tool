@@ -3,11 +3,9 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-
 class CTool_GenerateMacOSLicence : public CTool
 {
 public:
-
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourcePath = _Params.f_GetValue("0", "");
@@ -44,11 +42,13 @@ public:
 			if (iSearchPos == -1)
 				DError("Failed to find search string in source file");
 
-			CAnsiStr FinalText = SourceFileContents.f_Extract(0, iSearchPos) + SourceFileContents.f_Extract(iSearchPos + SearchString.f_GetLen(), SourceFileContents.f_GetLen() - iSearchPos - SearchString.f_GetLen());
+			CAnsiStr FinalText
+				= SourceFileContents.f_Extract(0, iSearchPos)
+				+ SourceFileContents.f_Extract(iSearchPos + SearchString.f_GetLen(), SourceFileContents.f_GetLen() - iSearchPos - SearchString.f_GetLen())
+			;
 
 			CAnsiStr FormattedReplacementText;
 			{
-
 				umint nLength = ReplacementTextAnsi.f_GetLen();
 
 				for (umint iChar = 0; iChar < nLength; iChar += 16)
@@ -81,14 +81,13 @@ public:
 
 			NFile::CFile::fs_CopyFileDiff(Stream.f_GetVector(), (CStr)DestinationPath, NTime::CTime::fs_NowUTC());
 		}
-		catch (NFile::CExceptionFile const& _Exception)
+		catch (NFile::CExceptionFile const &_Exception)
 		{
 			DError(_Exception.f_GetErrorStr());
 		}
 
 		return 0;
 	}
-
 };
 
 DMibRuntimeClass(CTool, CTool_GenerateMacOSLicence);

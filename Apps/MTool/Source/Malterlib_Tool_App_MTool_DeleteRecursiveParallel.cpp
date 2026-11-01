@@ -73,13 +73,13 @@ namespace NDeleteRecursive
 			}
 
 			for
-				(
-					auto pStartArray = _Container.f_GetArray()
-					, pEndArray = pStartArray + _Container.f_GetLen()
-					, pValue = pStartArray
-					; pValue < pEndArray && pValue >= pStartArray
-					; pValue += nSplit
-				)
+			(
+				auto pStartArray = _Container.f_GetArray()
+				, pEndArray = pStartArray + _Container.f_GetLen()
+				, pValue = pStartArray
+				; pValue < pEndArray && pValue >= pStartArray
+				; pValue += nSplit
+			)
 			{
 				_fFunctor(*pValue) > Results;
 			}
@@ -166,7 +166,6 @@ namespace NDeleteRecursive
 				for (auto &Result : Results)
 					Return += fg_Move(Result);
 			}
-
 		}
 
 		co_return fg_Move(Return);
@@ -371,12 +370,12 @@ public:
 									TCVector<TCVector<CFileToDelete>> FilesChunks;
 
 									for
-										(
-											auto pFiles = Files.m_FilesOrLinks.f_GetArray()
-											, pFilesEnd = Files.m_FilesOrLinks.f_GetArray() + Files.m_FilesOrLinks.f_GetLen()
-											; pFiles < pFilesEnd
-											; pFiles += ItemChunkSize
-										)
+									(
+										auto pFiles = Files.m_FilesOrLinks.f_GetArray()
+										, pFilesEnd = Files.m_FilesOrLinks.f_GetArray() + Files.m_FilesOrLinks.f_GetLen()
+										; pFiles < pFilesEnd
+										; pFiles += ItemChunkSize
+									)
 									{
 										FilesChunks.f_Insert().f_InsertMove(pFiles, fg_Min(ItemChunkSize, umint(pFilesEnd - pFiles)));
 									}
@@ -570,7 +569,7 @@ public:
 
 												--nLeftToCreate;
 												CStr DirName = _Path / ("Dir{}"_f << iDirectory);
- 												CFile::fs_CreateDirectory(DirName);
+												CFile::fs_CreateDirectory(DirName);
 												Directories.f_Insert(fg_Move(DirName));
 											}
 

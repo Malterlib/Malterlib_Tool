@@ -50,8 +50,14 @@ namespace NMib::NTool
 				;
 				auto BySourcePath = co_await Repo.f_Tool
 					(
-						{"PostCopy", Repo.m_Root / "build/Debug/Deployed/RunAllTests", "Config=" + (Repo.m_Path / "PostCopy.MConfig"),
-						"Project=Tests", "OutFolder=tools", "PrintDestination=true"}
+						{
+							"PostCopy"
+							, Repo.m_Root / "build/Debug/Deployed/RunAllTests"
+							, "Config=" + (Repo.m_Path / "PostCopy.MConfig")
+							, "Project=Tests"
+							, "OutFolder=tools"
+							, "PrintDestination=true"
+						}
 					)
 				;
 				DMibExpect(BySourcePath.m_ExitCode, ==, 0);

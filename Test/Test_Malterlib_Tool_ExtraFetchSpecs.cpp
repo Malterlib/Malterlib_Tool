@@ -24,7 +24,8 @@ namespace NMib::NTool
 					(
 						{"A", "B"}
 						, "Property\n{\n\tFetchPullRequestHeads: bool = false\n}\n"
-						, {
+						,
+						{
 							{"A", "\t\tExtraFetchSpecs [\"" + PullRequestHeads + "\"]\n\t\t{\n\t\t\t!!FetchPullRequestHeads true\n\t\t}\n"}
 							, {"B", "\t\tExtraFetchSpecs [\"" + PullRequestHeads + "\"]\n"}
 						}

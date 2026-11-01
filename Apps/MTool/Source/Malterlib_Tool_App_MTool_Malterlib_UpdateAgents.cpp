@@ -10,7 +10,7 @@ namespace
 		return _Char == ' ' || _Char == '\t' || _Char == '\r' || _Char == '\n' || _Char == '\v' || _Char == '\f';
 	}
 
-	CStr fg_ReadInclude(ch8 const *&o_pParse)
+	CStr fg_ReadInclude(ch8 const * &o_pParse)
 	{
 		if (*o_pParse != '@')
 			return {};

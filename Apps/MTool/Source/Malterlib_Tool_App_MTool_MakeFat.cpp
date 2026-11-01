@@ -7,22 +7,17 @@
 class CTool_MakeFat : public CTool2
 {
 public:
-
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		if (!_Params.f_FindEqual("DestinationDir"))
-		{
 			DError("DestinationDir not specified");
-		}
 
 		CStr DestinationDir = _Params["DestinationDir"];
 		CStr Exclude = _Params["Exclude"];
 
 		TCVector<CStr> Excluded;
 		while (!Exclude.f_IsEmpty())
-		{
 			Excluded.f_Insert(fg_GetStrSep(Exclude, ";"));
-		}
 
 		if (CFile::fs_FileExists(DestinationDir))
 			CFile::fs_DeleteDirectoryRecursive(DestinationDir);
@@ -55,9 +50,7 @@ public:
 						// Shell script
 					}
 					else
-					{
 						bLipoFile = true;
-					}
 				}
 
 				if (bLipoFile)
@@ -93,9 +86,7 @@ public:
 			CStr RelativePath = iLipo.f_GetKey();
 			TCVector<CStr> Params;
 			for (auto iFile = iLipo->f_GetIterator(); iFile; ++iFile)
-			{
 				Params.f_Insert(*iFile);
-			}
 
 			CStr Output = CFile::fs_AppendPath(DestinationDir, RelativePath);
 			CFile::fs_CreateDirectory(CFile::fs_GetPath(Output));
@@ -118,17 +109,14 @@ public:
 							Ret = 255;
 						}
 						else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
-						{
 							Ret = _StateChange.f_Get<EProcessLaunchState_Exited>();
-						}
 					}
 				)
 			;
 
 			LaunchParams.m_bAllowExecutableLocate = true;
 
-			LaunchParams.m_fOnOutput
-				= [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+			LaunchParams.m_fOnOutput = [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 				{
 					switch (_OutputType)
 					{
@@ -137,12 +125,8 @@ public:
 					case EProcessLaunchOutputType_TerminateMessage:
 						DConErrOutRaw(_Output);
 						break;
-					case EProcessLaunchOutputType_StdOut:
-						DConOutRaw(_Output);
-						break;
-					case EProcessLaunchOutputType_Max:
-						DMibNeverGetHere;
-						break;
+					case EProcessLaunchOutputType_StdOut: DConOutRaw(_Output); break;
+					case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
 					}
 				}
 			;
@@ -152,8 +136,6 @@ public:
 
 			if (Ret)
 				DError("lipo launch failed");
-
-
 		}
 		return 0;
 	}

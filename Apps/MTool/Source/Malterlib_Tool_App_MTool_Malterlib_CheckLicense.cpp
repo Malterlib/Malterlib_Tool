@@ -52,8 +52,7 @@ void CTool_Malterlib::f_Register_CheckLicense(CDistributedAppCommandLineSpecific
 		(
 			{
 				"Names"_o= _o["check-license"]
-				, "Description"_o=
-				"Check and optionally fix SPDX license headers in repository files.\n"
+				, "Description"_o= "Check and optionally fix SPDX license headers in repository files.\n"
 				"\n"
 				"Verifies that tracked files have the correct SPDX license header, checks that\n"
 				"license files are in place, and validates REUSE.toml content. Repositories must\n"
