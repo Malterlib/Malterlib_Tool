@@ -467,7 +467,9 @@ namespace NMib::NTool::NFormat
 	// the worker's own destruction, and the run, do not end before them.
 	TCFuture<void> CFormatWorker::fp_Destroy()
 	{
-		for (auto &Configurations : mp_Configurations)
+		// A job still running can add to the resolvers during the awaits below.
+		auto ToDestroy = fg_Move(mp_Configurations);
+		for (auto &Configurations : ToDestroy)
 			co_await fg_Move(Configurations).f_Destroy();
 
 		co_return {};
@@ -1419,8 +1421,13 @@ namespace NMib::NTool::NFormat
 
 	TCFuture<void> CFormatWalk::fp_Destroy()
 	{
+		// Copies: a walk still running can call the resolvers until the actor aborts it, which happens after this returns
+		TCVector<TCActor<NDevelop::CEditorConfigResolver>> ToDestroy;
 		for (auto &Repository : mp_Repositories)
-			co_await fg_Move(Repository.m_Configurations).f_Destroy();
+			ToDestroy.f_Insert(Repository.m_Configurations);
+
+		for (auto &Configurations : ToDestroy)
+			co_await fg_Move(Configurations).f_Destroy();
 
 		co_return {};
 	}
@@ -1832,7 +1839,8 @@ namespace NMib::NTool::NFormat
 		while (!mp_Queue.f_IsEmpty())
 			mp_Queue.f_PopFirst().m_Promise.f_SetException(DMibErrorInstance("Formatting was stopped before this file was started"));
 
-		for (auto &Worker : mp_Workers)
+		auto ToDestroy = fg_Move(mp_Workers);
+		for (auto &Worker : ToDestroy)
 			co_await fg_Move(Worker).f_Destroy();
 
 		co_await fg_Move(mp_StyleResolver).f_Destroy();
