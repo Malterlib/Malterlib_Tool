@@ -18,6 +18,8 @@ public:
 	static CGenerateOptions fs_ParseSharedOptions(CEJsonSorted const &_Params);
 	static CEJsonOrdered::CKeyValue fs_CachedEnvironmentOption(bool _bDefault);
 
+	DMibRunsToCompletionEntry static TCFuture<void> fs_InstallBinaries(NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine);
+
 	auto f_RunBuildSystem
 		(
 			NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem *_pBuildSystem)> _fCommand

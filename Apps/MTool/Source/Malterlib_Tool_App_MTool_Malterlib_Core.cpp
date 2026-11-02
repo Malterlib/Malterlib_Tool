@@ -167,27 +167,37 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 			}
 			, [=](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
 			{
-				TCSharedPointer<TCAtomic<bool>> pCancelled = fg_Construct();
-				CBuildSystem BuildSystem
-					(
-						_pCommandLine->f_AnsiEncoding().f_Flags()
-						, _pCommandLine->m_CommandLineWidth
-						, [_pCommandLine](NStr::CStr const &_Output, bool _bError)
-						{
-							if (_bError)
-								*_pCommandLine %= _Output;
-							else
-								*_pCommandLine += _Output;
-						}
-						, pCancelled
-					)
-				;
-
-				co_await BuildSystem.f_SetupGlobalMTool();
-				co_await BuildSystem.f_SetupBootstrapMTool();
+				co_await fs_InstallBinaries(_pCommandLine);
 
 				co_return 0;
 			}
 		)
 	;
+}
+
+TCFuture<void> CTool_Malterlib::fs_InstallBinaries(NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine)
+{
+	// The build system runs to completion on a concurrent actor
+	co_await fg_ContinueRunningOnActor(fg_ConcurrentActorLowPrio());
+
+	TCSharedPointer<TCAtomic<bool>> pCancelled = fg_Construct();
+	CBuildSystem BuildSystem
+		(
+			_pCommandLine->f_AnsiEncoding().f_Flags()
+			, _pCommandLine->m_CommandLineWidth
+			, [_pCommandLine](NStr::CStr const &_Output, bool _bError)
+			{
+				if (_bError)
+					*_pCommandLine %= _Output;
+				else
+					*_pCommandLine += _Output;
+			}
+			, pCancelled
+		)
+	;
+
+	co_await BuildSystem.f_SetupGlobalMTool();
+	co_await BuildSystem.f_SetupBootstrapMTool();
+
+	co_return {};
 }
