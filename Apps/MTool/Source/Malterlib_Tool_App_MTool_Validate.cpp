@@ -493,10 +493,10 @@ namespace NMib::NTool::NValidate
 
 		TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct
 			(
-				g_ActorFunctorWeak / [&ConfigurationContents, &_Directory](CStr _Path) -> TCFuture<TCOptional<CStr>>
+				g_ActorFunctorWeak / [ConfigurationContents = fg_Move(ConfigurationContents), Directory = _Directory](CStr _Path) -> TCFuture<TCOptional<CStr>>
 				{
 					auto Capture = co_await (g_CaptureExceptions % "Loading EditorConfig snapshot contents");
-					if (auto pContents = ConfigurationContents.f_FindEqual(CFile::fs_MakePathRelative(_Path, _Directory)))
+					if (auto pContents = ConfigurationContents.f_FindEqual(CFile::fs_MakePathRelative(_Path, Directory)))
 						co_return *pContents;
 
 					co_return {};
