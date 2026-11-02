@@ -6,7 +6,7 @@
 class CTool_RemoveBrokenObj : public CTool
 {
 public:
-	void fr_RemoveBrokenObj(CStr _Path)
+	void fr_RemoveBrokenObj(CStr const &_Path)
 	{
 		// DConOut("Removing broken ojb files for dir: {}" DNewLine, _Path);
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*.obj", EFileAttrib_File, true);

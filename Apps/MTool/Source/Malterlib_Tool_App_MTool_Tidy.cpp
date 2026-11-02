@@ -1407,15 +1407,15 @@ namespace NMib::NTool::NTidy
 			}
 		}
 
-		auto fUnquote = [](CStr _Value) -> CStr
+		auto fUnquote = [](CStr const &_Value) -> CStr
 			{
-				_Value = _Value.f_Trim();
-				if (_Value.f_GetLen() >= 2 && _Value.f_StartsWith("'") && _Value.f_EndsWith("'"))
-					return _Value.f_Extract(1, _Value.f_GetLen() - 2).f_Replace("''", "'");
-				if (_Value.f_GetLen() >= 2 && _Value.f_StartsWith("\"") && _Value.f_EndsWith("\""))
-					return _Value.f_Extract(1, _Value.f_GetLen() - 2).f_Replace("\\\"", "\"").f_Replace("\\\\", "\\");
+				CStr Value = _Value.f_Trim();
+				if (Value.f_GetLen() >= 2 && Value.f_StartsWith("'") && Value.f_EndsWith("'"))
+					return Value.f_Extract(1, Value.f_GetLen() - 2).f_Replace("''", "'");
+				if (Value.f_GetLen() >= 2 && Value.f_StartsWith("\"") && Value.f_EndsWith("\""))
+					return Value.f_Extract(1, Value.f_GetLen() - 2).f_Replace("\\\"", "\"").f_Replace("\\\\", "\\");
 
-				return _Value;
+				return Value;
 			}
 		;
 

@@ -23,7 +23,7 @@ DMibRuntimeClass(CTool, CTool_Sleep);
 class CTool_Touch : public CTool
 {
 public:
-	void fr_Touch(CStr _Path, CStr _Pattern, NTime::CTime const &_Time, bool _bRecursive)
+	void fr_Touch(CStr const &_Path, CStr const &_Pattern, NTime::CTime const &_Time, bool _bRecursive)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/" + _Pattern, EFileAttrib_File, _bRecursive);
 		for (umint i = 0; i < Files.f_GetLen(); ++i)

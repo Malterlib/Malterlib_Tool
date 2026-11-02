@@ -30,7 +30,7 @@ namespace NMib::NTool
 					)
 				;
 
-				auto fGenerateParams = [&](CStr _OutputDirectory, TCVector<CStr> _Extra)
+				auto fGenerateParams = [&](CStr const &_OutputDirectory, TCVector<CStr> const &_Extra)
 					{
 						TCVector<CStr> Params =
 							{

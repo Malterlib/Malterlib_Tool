@@ -46,7 +46,7 @@ public:
 			return m_FileName == _Process;
 		}
 
-		void f_MapProcess(uint32 _ID, uint32 _ParentID, CWStr _FileName)
+		void f_MapProcess(uint32 _ID, uint32 _ParentID, CWStr const &_FileName)
 		{
 			CProcessEntry *pEntry = m_AllProcess.f_Find(_ID);
 

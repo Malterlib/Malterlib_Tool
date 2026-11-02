@@ -199,7 +199,7 @@ namespace NMib::NTool
 					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
 					Repo.f_Write("Example.cpp", gc_Unformatted);
 
-					auto fExpectUnchanged = [&](CStr _Case)
+					auto fExpectUnchanged = [&](CStr const &_Case)
 						{
 							DMibTestPath(_Case);
 							DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Example.cpp", true), ==, gc_Unformatted);
@@ -389,7 +389,7 @@ namespace NMib::NTool
 					// A file beside the one formatted that a user keeps is no staging file of the run.
 					Repo.f_Write("Example.cpp.mtool-format", "Kept\n");
 
-					auto fExpectFormatted = [&](CStr _Case)
+					auto fExpectFormatted = [&](CStr const &_Case)
 						{
 							DMibTestPath(_Case);
 							DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Example.cpp", true), ==, gc_Formatted);
