@@ -254,12 +254,20 @@ public:
 					if (bShowSummary)
 						*_pCommandLine %= "Deleting with concurrency {}: {vs}\n"_f << MaxConcurrency << Destinations;
 
-					NAtomic::TCAtomic<umint> nItemsDeleted = 0;
-					NAtomic::TCAtomic<int64> ClockStartTime = TotalStopwatch.f_GetStartTicks();
-					umint nTotalItems = 0;
+					// Shared with the deletion on the blocking actor, which can outlive this frame if the command is aborted
+					struct CProgress
+					{
+						NAtomic::TCAtomic<umint> m_nItemsDeleted = 0;
+						NAtomic::TCAtomic<int64> m_ClockStartTime;
+						NAtomic::TCAtomic<umint> m_nTotalItems = 0;
+					};
 
-					auto fLogProgress = [&](bool _bForce = false)
+					TCSharedPointer<CProgress> pProgress = fg_Construct();
+					pProgress->m_ClockStartTime = TotalStopwatch.f_GetStartTicks();
+
+					auto fLogProgress = [pProgress, TotalStopwatch, _pCommandLine](bool _bForce = false)
 						{
+							auto &ClockStartTime = pProgress->m_ClockStartTime;
 							if (!_bForce)
 							{
 								CStopwatch Stopwatch = CStopwatch::fs_CreateFromStartTicks(ClockStartTime.f_Load());
@@ -275,10 +283,10 @@ public:
 									return;
 							}
 
-							auto CurrentItems = nItemsDeleted.f_Load();
+							auto CurrentItems = pProgress->m_nItemsDeleted.f_Load();
 
 							auto EllapsedTime = fg_SecondsDurationToHumanReadable(TotalStopwatch.f_GetTime());
-							auto PercentDone = (fp64(CurrentItems) / fp64(nTotalItems)) * 100.0;
+							auto PercentDone = (fp64(CurrentItems) / fp64(pProgress->m_nTotalItems.f_Load())) * 100.0;
 
 							CUStr ToOutput = CStr("  {} items deleted. {fe0}% done in {}"_f << CurrentItems << PercentDone << EllapsedTime);
 							*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
@@ -290,20 +298,8 @@ public:
 						auto BlockingActorCheckout = fg_BlockingActor();
 						bSuccess = co_await
 							(
-								g_Dispatch(BlockingActorCheckout) /
-								[
-									Destinations
-									, MaxConcurrency
-									, ItemChunkSize
-									, pCommandLine = _pCommandLine
-									, bShowProgress
-									, bShowSummary
-									, bVerbose
-									, TotalStopwatch
-									, &nTotalItems
-									, &nItemsDeleted
-									, &fLogProgress
-								]
+								g_Dispatch(BlockingActorCheckout)
+								/ [Destinations, MaxConcurrency, ItemChunkSize, pCommandLine = _pCommandLine, bShowProgress, bShowSummary, bVerbose, TotalStopwatch, pProgress, fLogProgress]
 								() -> TCFuture<bool>
 								{
 									co_await ECoroutineFlag_CaptureExceptions;
@@ -347,7 +343,7 @@ public:
 
 									auto FindTime = TotalStopwatch.f_GetTime();
 
-									nTotalItems = Files.m_FilesOrLinks.f_GetLen() + Files.m_Directories.f_GetLen();
+									pProgress->m_nTotalItems = Files.m_FilesOrLinks.f_GetLen() + Files.m_Directories.f_GetLen();
 
 									if (bVerbose)
 										*pCommandLine %= "Deleting files: \n{}\n Deleting directories:\n{}\n"_f << Files.m_FilesOrLinks << Files.m_Directories;
@@ -393,7 +389,7 @@ public:
 															CFile::fs_MakeFileWritable(File.m_Path);
 														CFile::fs_DeleteFile(File.m_Path);
 
-														if (bShowProgress && ((++nItemsDeleted) % 1000) == 0)
+														if (bShowProgress && ((++pProgress->m_nItemsDeleted) % 1000) == 0)
 															fLogProgress();
 													}
 													catch (CExceptionFile const &_Exception)
@@ -442,7 +438,7 @@ public:
 														{
 															CFile::fs_DeleteDirectory(Directory);
 
-															if (bShowProgress && ((++nItemsDeleted) % 1000) == 0)
+															if (bShowProgress && ((++pProgress->m_nItemsDeleted) % 1000) == 0)
 																fLogProgress();
 														}
 														catch (CExceptionFile const &_Exception)
