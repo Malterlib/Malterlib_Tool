@@ -20,14 +20,13 @@ public:
 
 	DMibRunsToCompletionEntry static TCFuture<void> fs_InstallBinaries(NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine);
 
-	auto f_RunBuildSystem
+	DMibRunsToCompletionEntry TCFuture<uint32> f_RunBuildSystem
 		(
 			NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem *_pBuildSystem)> _fCommand
 			, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine
 			, CGenerateOptions _GenerateOptions
 			, bool _bOutputToStdErr = false
 		)
-		-> TCFuture<uint32>
 	;
 
 	void f_Register_SharedOptions(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);

@@ -146,6 +146,7 @@ CEJsonOrdered::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefa
 	;
 }
 
+// Runs the command on the build system, which runs to completion
 auto CTool_Malterlib::f_RunBuildSystem
 	(
 		NFunction::TCFunctionMovable<TCFuture<CBuildSystem::ERetry> (CBuildSystem *_pBuildSystem)> _fCommand
