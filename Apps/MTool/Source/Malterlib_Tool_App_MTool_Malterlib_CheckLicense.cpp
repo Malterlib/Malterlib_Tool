@@ -104,7 +104,7 @@ void CTool_Malterlib::f_Register_CheckLicense(CDistributedAppCommandLineSpecific
 							co_return co_await _pBuildSystem->f_Action_Repository_CheckLicense(GenerateOptions, RepoFilter, Flags, _pCommandLine);
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 			}

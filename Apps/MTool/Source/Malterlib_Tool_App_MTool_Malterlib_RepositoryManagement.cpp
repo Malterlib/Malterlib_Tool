@@ -90,7 +90,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return co_await _pBuildSystem->f_Action_Repository_Update(GenerateOptions);
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 			}
@@ -313,7 +313,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return co_await _pBuildSystem->f_Action_Repository_Status(GenerateOptions, RepoFilter, Flags, HideBranches, _pCommandLine);
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 			}
@@ -365,7 +365,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return co_await _pBuildSystem->f_Action_Repository_List(GenerateOptions, RepoFilter, bJson, _pCommandLine);
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 						, bJson
 					)
 				;
@@ -427,7 +427,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return co_await _pBuildSystem->f_Action_Repository_ForEachRepo(GenerateOptions, RepoFilter, bParallel, GitParameters);
 							}
 							, _pCommandLine
-							, &GenerateOptions
+							, GenerateOptions
 						)
 					;
 				}
@@ -477,7 +477,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return co_await _pBuildSystem->f_Action_Repository_CommitRepos(GenerateOptions, Flags, MaxCommitsPerSection);
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 			}
@@ -638,7 +638,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return CBuildSystem::ERetry_None;
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 
@@ -801,7 +801,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return CBuildSystem::ERetry_None;
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 
@@ -1034,7 +1034,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return CBuildSystem::ERetry_None;
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 
@@ -1145,7 +1145,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return co_await _pBuildSystem->f_Action_Repository_ForEachRepoDir(GenerateOptions, RepoFilter, Options);
 							}
 							, _pCommandLine
-							, &GenerateOptions
+							, GenerateOptions
 						)
 					;
 				}
@@ -1232,7 +1232,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return co_await _pBuildSystem->f_Action_Repository_Branch(GenerateOptions, RepoFilter, Branch, Flags);
 							}
 							, _pCommandLine
-							, &GenerateOptions
+							, GenerateOptions
 						)
 					;
 				}
@@ -1283,7 +1283,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return co_await _pBuildSystem->f_Action_Repository_Unbranch(GenerateOptions, RepoFilter, Flags);
 							}
 							, _pCommandLine
-							, &GenerateOptions
+							, GenerateOptions
 						)
 					;
 				}
@@ -1336,7 +1336,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return co_await _pBuildSystem->f_Action_Repository_Base(GenerateOptions, BaseBranch, bClear, _pCommandLine);
 							}
 							, _pCommandLine
-							, &GenerateOptions
+							, GenerateOptions
 						)
 					;
 				}
@@ -1431,7 +1431,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return co_await _pBuildSystem->f_Action_Repository_CleanupBranches(GenerateOptions, RepoFilter, Flags, Branches);
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 			}
@@ -1525,7 +1525,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return co_await _pBuildSystem->f_Action_Repository_CleanupTags(GenerateOptions, RepoFilter, Flags, Tags);
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 			}
@@ -1641,7 +1641,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return co_await _pBuildSystem->f_Action_Repository_Push(GenerateOptions, RepoFilter, Remotes, Flags, _pCommandLine);
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 						, (Flags & CBuildSystem::ERepoPushFlag_Json) != 0
 					)
 				;
@@ -1788,7 +1788,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							;
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 			}
@@ -1826,7 +1826,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							co_return co_await _pBuildSystem->f_Action_Repository_ReleasePackage(GenerateOptions, RepoFilter, _pCommandLine);
 						}
 						, _pCommandLine
-						, &GenerateOptions
+						, GenerateOptions
 					)
 				;
 			}
