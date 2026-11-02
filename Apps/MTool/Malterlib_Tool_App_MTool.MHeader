@@ -11,6 +11,7 @@ Property
 {
 	Property
 	{
+		MalterlibConcurrency_DistributedAppPrefixHeader true
 		MalterlibPostCopyProject "MTool"
 		{
 			!!MalterlibPostCopyProject undefined
