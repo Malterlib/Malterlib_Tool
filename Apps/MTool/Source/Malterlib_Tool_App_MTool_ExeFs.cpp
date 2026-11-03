@@ -122,7 +122,7 @@ struct CTool_ExeFS : public CTool
 
 		bool bExistingFS = false;
 
-		NStream::CBinaryStreamSubStream<> SubStream;
+		NStream::TCBinaryStreamSubStream<> SubStream;
 		NMib::NFile::CVirtualFS VirtualFS;
 
 		ch8 const *pSigReversed = "SFEXESDI";

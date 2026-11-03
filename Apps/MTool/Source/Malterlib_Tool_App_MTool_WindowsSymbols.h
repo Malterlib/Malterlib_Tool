@@ -62,10 +62,7 @@ namespace NMib::NTool
 		uint32 m_Size;
 	};
 
-	enum
-	{
-		EPEImageDirectoryEntries = 16
-	};
+	constexpr aint gc_PEImageDirectoryEntries = 16;
 
 	struct CPEOptionalHeaders32
 	{
@@ -100,7 +97,7 @@ namespace NMib::NTool
 		uint32 m_SizeOfHeapCommit;
 		uint32 m_LoaderFlags;
 		uint32 m_NumberOfRvaAndSizes;
-		CPEImageDataDirectory m_DataDirectory[EPEImageDirectoryEntries];
+		CPEImageDataDirectory m_DataDirectory[gc_PEImageDirectoryEntries];
 	};
 
 	struct CPEOptionalHeaders64
@@ -134,7 +131,7 @@ namespace NMib::NTool
 		uint64 m_SizeOfHeapCommit;
 		uint32 m_LoaderFlags;
 		uint32 m_NumberOfRvaAndSizes;
-		CPEImageDataDirectory m_DataDirectory[EPEImageDirectoryEntries];
+		CPEImageDataDirectory m_DataDirectory[gc_PEImageDirectoryEntries];
 	};
 
 	struct CNTImageHeaders

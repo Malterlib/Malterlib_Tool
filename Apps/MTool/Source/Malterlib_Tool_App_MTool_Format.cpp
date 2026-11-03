@@ -569,7 +569,7 @@ namespace NMib::NTool::NFormat
 									Data[bBigEndian ? iUnit + nUnit - 1 : iUnit] = ' ';
 							}
 
-							NStream::CBinaryStreamMemory<> Stream;
+							NStream::TCBinaryStreamMemory<> Stream;
 							Stream.f_Open(fg_Move(Data));
 							Read.m_Contents = fg_ReadTextStream(Stream);
 							Read.m_bDecoded = true;

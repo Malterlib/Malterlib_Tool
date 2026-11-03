@@ -257,7 +257,7 @@ struct CTool_SymbolExtractor : public CTool2
 
 		ExtraField.f_SetLen(FileInfo.size_file_extra);
 
-		CBinaryStreamMemoryConstRef<> ExtraStream(ExtraField);
+		TCBinaryStreamMemoryConstRef<> ExtraStream(ExtraField);
 
 		bool bFoundTimeHeader = false;
 

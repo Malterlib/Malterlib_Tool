@@ -63,7 +63,7 @@ namespace
 
 	struct CDependencyFile
 	{
-		CBinaryStreamMemory<> m_Stream;
+		TCBinaryStreamMemory<> m_Stream;
 
 		void f_AddDependencyInfoHelper(uint8 _Opcode, CStr const &_Path)
 		{

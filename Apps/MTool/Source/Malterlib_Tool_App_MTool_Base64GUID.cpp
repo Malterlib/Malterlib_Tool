@@ -19,7 +19,7 @@ struct CTool_Base64ToGUID : public CTool
 		uint16 Forth = 0;
 		uint64 Fifth = 0;
 
-		CBinaryStreamMemoryPtr<> Stream;
+		TCBinaryStreamMemoryPtr<> Stream;
 		Stream.f_OpenRead(Data);
 
 		Stream >> First;

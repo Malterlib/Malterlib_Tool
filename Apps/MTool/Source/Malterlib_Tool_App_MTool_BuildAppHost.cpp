@@ -65,7 +65,7 @@ namespace
 
 	// .NET BinaryWriter writes string length as a 7-bit-encoded varint then the
 	// UTF-8 bytes. Matches BinaryWriter.Write7BitEncodedInt byte-for-byte.
-	void fg_FeedVarLenString(CBinaryStreamMemory<> &_Stream, CStr const &_Str)
+	void fg_FeedVarLenString(TCBinaryStreamMemory<> &_Stream, CStr const &_Str)
 	{
 		uint32 nValue = uint32(_Str.f_GetLen());
 		uint8 Header[5];
@@ -83,7 +83,7 @@ namespace
 	// Search the stream buffer for a byte pattern. Returns umint(-1) if not
 	// found. Read-only — the stream's contents must not be modified during
 	// the search.
-	umint fg_FindPatternInStream(CBinaryStreamMemory<> const &_Stream, uint8 const *_pNeedle, umint _NeedleLen, umint _Start = 0)
+	umint fg_FindPatternInStream(TCBinaryStreamMemory<> const &_Stream, uint8 const *_pNeedle, umint _NeedleLen, umint _Start = 0)
 	{
 		uint8 const *pData = (uint8 const *)_Stream.f_GetBufferConst();
 		umint nDataLen = umint(_Stream.f_GetLength());
@@ -110,10 +110,10 @@ namespace
 	// so random-access patches don't disturb the caller's append cursor.
 	struct CStreamPositionGuard
 	{
-		CBinaryStreamMemory<> &m_Stream;
+		TCBinaryStreamMemory<> &m_Stream;
 		NStream::CFilePos m_SavedPos;
 
-		CStreamPositionGuard(CBinaryStreamMemory<> &_Stream)
+		CStreamPositionGuard(TCBinaryStreamMemory<> &_Stream)
 			: m_Stream(_Stream)
 			, m_SavedPos(_Stream.f_GetPosition())
 		{
@@ -127,7 +127,7 @@ namespace
 
 	// Search 64-byte AppBinaryPath placeholder. Replaces it with the managed-dll
 	// name (UTF-8, null-terminated) and zeros the remainder of the 64-byte slot.
-	void fg_PatchAppBinaryPath(CBinaryStreamMemory<> &_AppHost, CStr const &_ManagedDllName, CStr const &_TemplatePath)
+	void fg_PatchAppBinaryPath(TCBinaryStreamMemory<> &_AppHost, CStr const &_ManagedDllName, CStr const &_TemplatePath)
 	{
 		static char const c_pPlaceholder[] = "c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2";
 		constexpr umint c_PlaceholderLen = sizeof(c_pPlaceholder) - 1;
@@ -155,7 +155,7 @@ namespace
 		}
 	}
 
-	void fg_PatchSubsystemWindowsGUI(CBinaryStreamMemory<> &_AppHost, CStr const &_TemplatePath)
+	void fg_PatchSubsystemWindowsGUI(TCBinaryStreamMemory<> &_AppHost, CStr const &_TemplatePath)
 	{
 		umint nDataLen = umint(_AppHost.f_GetLength());
 		if (nDataLen < 0x40)
@@ -192,7 +192,7 @@ namespace
 		}
 	;
 
-	void fg_PatchBundleHeaderOffset(CBinaryStreamMemory<> &_AppHost, uint64 _ManifestOffset, CStr const &_TemplatePath)
+	void fg_PatchBundleHeaderOffset(TCBinaryStreamMemory<> &_AppHost, uint64 _ManifestOffset, CStr const &_TemplatePath)
 	{
 		// Start search at offset 8 — we patch the 8 bytes preceding the
 		// signature, so the signature can't legally be at offset 0..7.
@@ -313,7 +313,7 @@ struct CTool_BuildAppHost : public CDistributedTool, public CAllowUnsafeThis
 					if (TemplateBytes.f_IsEmpty())
 						DMibError("Failed to read apphost template: '{}'"_f << Template);
 
-					CBinaryStreamMemory<> AppHost;
+					TCBinaryStreamMemory<> AppHost;
 					AppHost.f_Open(fg_Move(TemplateBytes));
 					AppHost.f_SetPosition(AppHost.f_GetLength());
 

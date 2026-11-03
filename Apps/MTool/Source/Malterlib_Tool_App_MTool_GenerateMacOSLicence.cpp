@@ -75,7 +75,7 @@ struct CTool_GenerateMacOSLicence : public CTool
 
 			NFile::CFile::fs_CreateDirectory(NFile::CFile::fs_GetPath(DestinationPath));
 
-			CBinaryStreamMemory<> Stream;
+			TCBinaryStreamMemory<> Stream;
 			Stream.f_FeedBytes(FinalText.f_GetStr(), FinalText.f_GetLen());
 
 			NFile::CFile::fs_CopyFileDiff(Stream.f_GetVector(), (CStr)DestinationPath, NTime::CTime::fs_NowUTC());

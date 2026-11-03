@@ -8,9 +8,9 @@
 
 struct CCOFFObject
 {
-	struct IMAGE_FILE_HEADER
+	struct CImageFileHeader
 	{
-		IMAGE_FILE_HEADER()
+		CImageFileHeader()
 		{
 			fg_MemClear(*this);
 		}
@@ -36,9 +36,9 @@ struct CCOFFObject
 		}
 	};
 
-	struct IMAGE_SECTION_HEADER
+	struct CImageSectionHeader
 	{
-		IMAGE_SECTION_HEADER()
+		CImageSectionHeader()
 		{
 			fg_MemClear(*this);
 		}
@@ -70,9 +70,9 @@ struct CCOFFObject
 		}
 	};
 
-	struct IMAGE_SYMBOL
+	struct CImageSymbol
 	{
-		IMAGE_SYMBOL()
+		CImageSymbol()
 		{
 			fg_MemClear(*this);
 		}
@@ -105,9 +105,9 @@ struct CCOFFObject
 		}
 	};
 
-	struct STRING_TABLE
+	struct CStringTable
 	{
-		STRING_TABLE()
+		CStringTable()
 			: m_Size(sizeof(uint32))
 		{
 		}
@@ -137,22 +137,22 @@ struct CCOFFObject
 	struct CSection
 	{
 		TCVector<umint> m_Symbols;
-		IMAGE_SECTION_HEADER m_Header;
+		CImageSectionHeader m_Header;
 	};
 
 	struct CSymbol
 	{
 		umint m_iDataMember;
-		IMAGE_SYMBOL m_Header;
+		CImageSymbol m_Header;
 	};
 
 	struct CFile
 	{
-		IMAGE_FILE_HEADER m_Header;
+		CImageFileHeader m_Header;
 		TCVector<CSection> m_Sections;
 		TCVector<CSymbol> m_Symbols;
 		TCVector<CDataMember> m_DataMembers;
-		STRING_TABLE m_StringTable;
+		CStringTable m_StringTable;
 		void f_AddSymbol(CStr const &_Name, CByteVector const &_Data, CSection *_pSection)
 		{
 			umint iSymbol = m_Symbols.f_GetLen();
@@ -228,7 +228,7 @@ struct CCOFFObject
 			Stream << File;
 		}
 
-		CBinaryStreamMemory<> Stream;
+		TCBinaryStreamMemory<> Stream;
 		Stream << File;
 
 		return Stream.f_MoveVector();
@@ -486,7 +486,7 @@ struct CTool_VirtualFS : public CTool
 
 		NStream::CBinaryStream *pActiveTargetStream = nullptr;
 		NFile::TCBinaryStreamFile<> TargetFileStream;
-		CBinaryStreamMemory<> TargetMemoryStream;
+		TCBinaryStreamMemory<> TargetMemoryStream;
 		NMib::NFile::CVirtualFS VirtualFS;
 
 		if (TargetFormat == ETargetFormat_Binary)
