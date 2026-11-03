@@ -408,42 +408,42 @@ private:
 	umint fp_DisplayStatsGetMaxLen(NMib::NProcess::CProcessStatistics const &_Stats)
 	{
 		umint Len = 0;
-		for (auto Iter = _Stats.m_Statistics.f_GetIterator(); Iter; ++Iter)
-			Len = fg_Max(Len, umint(Iter.f_GetKey().f_GetLen()));
+		for (auto iStatistic = _Stats.m_Statistics.f_GetIterator(); iStatistic; ++iStatistic)
+			Len = fg_Max(Len, umint(iStatistic.f_GetKey().f_GetLen()));
 
 		return Len;
 	}
 
 	void fp_DisplayStats(NMib::NProcess::CProcessStatistics const &_Stats, umint _NameLen)
 	{
-		for (auto Iter = _Stats.m_Statistics.f_GetIterator(); Iter; ++Iter)
+		for (auto iStatistic = _Stats.m_Statistics.f_GetIterator(); iStatistic; ++iStatistic)
 		{
-			fp64 Value = Iter->m_Value;
-			NMib::NStr::CStr Name = Iter.f_GetKey();
+			fp64 Value = iStatistic->m_Value;
+			NMib::NStr::CStr Name = iStatistic.f_GetKey();
 			CStr Unit;
-			switch (Iter->m_Unit)
+			switch (iStatistic->m_Unit)
 			{
 			case NMib::NProcess::EProcessStatUnit_GeneralNumber:
 				{
-					if (!Iter->m_CustomUnit.f_IsEmpty())
-						Unit = Iter->m_CustomUnit;
+					if (!iStatistic->m_CustomUnit.f_IsEmpty())
+						Unit = iStatistic->m_CustomUnit;
 				}
 				break;
 			case NMib::NProcess::EProcessStatUnit_Bytes:
 				{
-					if (Iter->m_IdealScale == fp64(1024 * 1024 * 1024))
+					if (iStatistic->m_IdealScale == fp64(1024 * 1024 * 1024))
 					{
-						Value /= Iter->m_IdealScale;
+						Value /= iStatistic->m_IdealScale;
 						Unit = "GiB";
 					}
-					else if (Iter->m_IdealScale == fp64(1024 * 1024))
+					else if (iStatistic->m_IdealScale == fp64(1024 * 1024))
 					{
-						Value /= Iter->m_IdealScale;
+						Value /= iStatistic->m_IdealScale;
 						Unit = "MiB";
 					}
-					else if (Iter->m_IdealScale == fp64(1024))
+					else if (iStatistic->m_IdealScale == fp64(1024))
 					{
-						Value /= Iter->m_IdealScale;
+						Value /= iStatistic->m_IdealScale;
 						Unit = "KiB";
 					}
 					else
@@ -457,19 +457,19 @@ private:
 				break;
 			case NMib::NProcess::EProcessStatUnit_Seconds:
 				{
-					if (Iter->m_IdealScale == fp64(0.000000001))
+					if (iStatistic->m_IdealScale == fp64(0.000000001))
 					{
-						Value /= Iter->m_IdealScale;
+						Value /= iStatistic->m_IdealScale;
 						Unit = "ns";
 					}
-					else if (Iter->m_IdealScale == fp64(0.000001))
+					else if (iStatistic->m_IdealScale == fp64(0.000001))
 					{
-						Value /= Iter->m_IdealScale;
+						Value /= iStatistic->m_IdealScale;
 						Unit = "µs";
 					}
-					else if (Iter->m_IdealScale == fp64(0.001))
+					else if (iStatistic->m_IdealScale == fp64(0.001))
 					{
-						Value /= Iter->m_IdealScale;
+						Value /= iStatistic->m_IdealScale;
 						Unit = "ms";
 					}
 					else
@@ -482,7 +482,7 @@ private:
 					Unit = "%";
 				}
 				break;
-			default: DMibNeverGetHere(Iter->m_Unit); break;
+			default: DMibNeverGetHere(iStatistic->m_Unit); break;
 			}
 			DConOut("{a-,sj*} = {fe2} {}{\n}", Name, _NameLen, Value, Unit);
 		}
@@ -649,13 +649,13 @@ private:
 			bool bInTarget = false;
 			int iLaunch = 0;
 
-			for (auto AIter = _Args.f_GetIterator(); AIter; ++AIter)
+			for (auto iArg = _Args.f_GetIterator(); iArg; ++iArg)
 			{
 				bool bSubmitCurTarget = false;
 
 				if (bInTarget)
 				{
-					CStr Value = *AIter;
+					CStr Value = *iArg;
 
 					umint nChars = Value.f_GetLen();
 					if (Value.f_GetAt(nChars - 1) == ')')
@@ -674,7 +674,7 @@ private:
 				}
 				else
 				{
-					CStr Arg = *AIter;
+					CStr Arg = *iArg;
 
 					if (!fp_ProcessArg(Arg, CurLaunch, GlobalOptions, bInTarget))
 						DError(CStr::CFormat("Unknown argument: \"{}\"" DNewLine) << Arg);
@@ -709,8 +709,8 @@ private:
 
 		// Apply Defaults
 		{
-			for (auto LIter = LaunchOptions.f_GetIterator(); LIter; ++LIter)
-				LIter->f_ApplyDefaults(GlobalOptions.m_Defaults);
+			for (auto iLaunchOption = LaunchOptions.f_GetIterator(); iLaunchOption; ++iLaunchOption)
+				iLaunchOption->f_ApplyDefaults(GlobalOptions.m_Defaults);
 		}
 
 		bool bOneHasStats = GlobalOptions.m_Defaults.m_bStats;
@@ -734,9 +734,9 @@ private:
 					DConOut("\tTarget: {}" DNewLine, _CurLaunch.m_Target);
 
 					int iParam = 0;
-					for (auto PIter = _CurLaunch.m_Params.f_GetIterator(); PIter; ++PIter)
+					for (auto iLaunchParam = _CurLaunch.m_Params.f_GetIterator(); iLaunchParam; ++iLaunchParam)
 					{
-						DConOut("\tParam {}: {}" DNewLine, iParam, *PIter);
+						DConOut("\tParam {}: {}" DNewLine, iParam, *iLaunchParam);
 						++iParam;
 					}
 
@@ -752,17 +752,17 @@ private:
 					if (_CurLaunch.m_bSandbox)
 					{
 						DConOut("\t\tCopyRoot? {}" DNewLine, (_CurLaunch.m_bSandboxCopyRoot ? "Yes" : "No"));
-						for (auto RIter = _CurLaunch.m_SandboxRoots.f_GetIterator(); RIter; ++RIter)
-							DConOut("\t\tRoot {} = {}" DNewLine, RIter.f_GetKey(), *RIter);
+						for (auto iSandboxRoot = _CurLaunch.m_SandboxRoots.f_GetIterator(); iSandboxRoot; ++iSandboxRoot)
+							DConOut("\t\tRoot {} = {}" DNewLine, iSandboxRoot.f_GetKey(), *iSandboxRoot);
 					}
 					DConOut("\tCPUUsage: {}" DNewLine, _CurLaunch.m_CPUUsage);
 				}
 			;
 
 			int iLaunch = 0;
-			for (auto LIter = LaunchOptions.f_GetIterator(); LIter; ++LIter)
+			for (auto iLaunchOption = LaunchOptions.f_GetIterator(); iLaunchOption; ++iLaunchOption)
 			{
-				CLaunchOptions const &CurLaunch = *LIter;
+				CLaunchOptions const &CurLaunch = *iLaunchOption;
 
 				DConOut("Launch {}:" DNewLine, iLaunch);
 				fDumpOptions(CurLaunch);
@@ -799,9 +799,9 @@ private:
 			TCLinkedList<TCFunction<void ()>> ToLaunchQueue;
 
 			int iLaunch = 0;
-			for (auto LIter = LaunchOptions.f_GetIterator(); LIter; ++LIter)
+			for (auto iLaunchOption = LaunchOptions.f_GetIterator(); iLaunchOption; ++iLaunchOption)
 			{
-				auto pLaunchOptions = &*LIter;
+				auto pLaunchOptions = &*iLaunchOption;
 				ToLaunchQueue.f_Insert
 					(
 						[&, iLaunch, pLaunchOptions]
@@ -859,8 +859,8 @@ private:
 		// Return
 		uint32 ReturnValue = 0;
 		{
-			for (auto PIter = ProcessInfos.f_GetIterator(); PIter; ++PIter)
-				ReturnValue = fg_Max(ReturnValue, (*PIter)->m_ReturnValue);
+			for (auto iProcessInfo = ProcessInfos.f_GetIterator(); iProcessInfo; ++iProcessInfo)
+				ReturnValue = fg_Max(ReturnValue, (*iProcessInfo)->m_ReturnValue);
 		}
 		return ReturnValue;
 	}

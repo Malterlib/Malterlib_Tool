@@ -462,11 +462,11 @@ struct CTool_VirtualFS : public CTool
 		};
 
 		TCVector<CInclude> Includes;
-		for (auto IncludeIter = Source.f_GetChildIterator(); IncludeIter; ++IncludeIter)
+		for (auto iInclude = Source.f_GetChildIterator(); iInclude; ++iInclude)
 		{
-			if (IncludeIter->f_GetName().f_CmpNoCase("Include") == 0)
+			if (iInclude->f_GetName().f_CmpNoCase("Include") == 0)
 			{
-				CRegistryPreserveAllFull *pIncludeReg = IncludeIter;
+				CRegistryPreserveAllFull *pIncludeReg = iInclude;
 
 				CInclude Inc;
 				Inc.m_Pattern = pIncludeReg->f_GetValue("Pattern", "");
@@ -531,30 +531,30 @@ struct CTool_VirtualFS : public CTool
 		CFileSystemInterface_Disk DiskSystem;
 
 		umint nFilesAdded = 0;
-		for (auto CurInclude = Includes.f_GetIterator(); CurInclude; ++CurInclude)
+		for (auto iInclude = Includes.f_GetIterator(); iInclude; ++iInclude)
 		{
 			if (bVerbose)
-				DConOut("{}{}\n", CurInclude->m_Pattern, (CurInclude->m_bRecurse ? " (Recursive)" : ""));
+				DConOut("{}{}\n", iInclude->m_Pattern, (iInclude->m_bRecurse ? " (Recursive)" : ""));
 
-			TCVector<CStr> SourceFiles = NFile::CFile::fs_FindFiles(CurInclude->m_Pattern, EFileAttrib_File | EFileAttrib_Link, CurInclude->m_bRecurse, false);
+			TCVector<CStr> SourceFiles = NFile::CFile::fs_FindFiles(iInclude->m_Pattern, EFileAttrib_File | EFileAttrib_Link, iInclude->m_bRecurse, false);
 
-			if (SourceFiles.f_IsEmpty() && !CurInclude->m_bRecurse && CurInclude->m_Pattern.f_FindChars("*?") < 0)
+			if (SourceFiles.f_IsEmpty() && !iInclude->m_bRecurse && iInclude->m_Pattern.f_FindChars("*?") < 0)
 			{
 				DConOut
 					(
 						DMibPFileLineColumnFormat " error: No files found for pattern '{}'{\n}"
-						, CurInclude->m_Location.m_File
-						, CurInclude->m_Location.m_Line
-						, CurInclude->m_Location.m_Column
-						, CurInclude->m_Pattern
+						, iInclude->m_Location.m_File
+						, iInclude->m_Location.m_Line
+						, iInclude->m_Location.m_Column
+						, iInclude->m_Pattern
 					)
 				;
 				return 1;
 			}
 
-			CStr BasePath = NFile::CFile::fs_GetPath(CurInclude->m_Pattern);
+			CStr BasePath = NFile::CFile::fs_GetPath(iInclude->m_Pattern);
 
-			MalterlibDependencyTracker.f_AddFind(CurInclude->m_Pattern, CurInclude->m_bRecurse, false, EFileAttrib_File | EFileAttrib_Link, SourceFiles);
+			MalterlibDependencyTracker.f_AddFind(iInclude->m_Pattern, iInclude->m_bRecurse, false, EFileAttrib_File | EFileAttrib_Link, SourceFiles);
 
 			{
 				CStr BaseDepend = BasePath;
@@ -564,7 +564,7 @@ struct CTool_VirtualFS : public CTool
 					DependentDirectories[BaseDepend];
 			}
 
-			if (CurInclude->m_bRecurse)
+			if (iInclude->m_bRecurse)
 			{
 				TCVector<CStr> DependDirs = NFile::CFile::fs_FindFiles(BasePath + "/*", EFileAttrib_Directory, true, false);
 
@@ -594,7 +594,7 @@ struct CTool_VirtualFS : public CTool
 				if (CFile::fs_GetFile(SourceName) == ".DS_Store")
 					continue;
 
-				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(CurInclude->m_Destination, SourceName);
+				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(iInclude->m_Destination, SourceName);
 
 				if (bVerbose)
 					DConOut("Adding '{}' as '{}'\n", SourceFile, AddPath);
@@ -849,14 +849,14 @@ struct CTool_VirtualFS : public CTool
 			ByteFormatter << Input[0];
 
 			umint nBytesLeft = FileData.f_GetLen();
-			auto DataIter = FileData.f_GetIterator();
+			auto iData = FileData.f_GetIterator();
 
 			while (nBytesLeft >= 16)
 			{
-				fg_MemCopy(Input, &*DataIter, 16);
+				fg_MemCopy(Input, &*iData, 16);
 				CppOutput += Formatter;
 
-				DataIter += 16;
+				iData += 16;
 				nBytesLeft -= 16;
 			}
 
@@ -865,9 +865,9 @@ struct CTool_VirtualFS : public CTool
 				CppOutput += "\t";
 				for (; nBytesLeft; --nBytesLeft)
 				{
-					Input[0] = *DataIter;
+					Input[0] = *iData;
 					CppOutput += ByteFormatter;
-					++DataIter;
+					++iData;
 				}
 				CppOutput += "\n";
 			}

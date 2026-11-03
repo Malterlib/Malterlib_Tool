@@ -173,7 +173,7 @@ struct CTool_CheckDependencies : public CTool2
 		if (Files.f_IsEmpty())
 			return 0;
 
-		TCAtomic<bool> UsesDigest;
+		TCAtomic<bool> bAnyUsesDigest;
 
 		CThreadPool ThreadPool(fg_Max(fg_Min(aint(NSys::fg_Thread_GetVirtualCores()) - 3, Files.f_GetLen() / 10), 0));
 
@@ -182,7 +182,7 @@ struct CTool_CheckDependencies : public CTool2
 		fg_ParallellForEach
 			(
 				Files
-				, [&Dependencies, &DependenciesLock, &UsesDigest, &ParamsDesc](CStr const &_File)
+				, [&Dependencies, &DependenciesLock, &bAnyUsesDigest, &ParamsDesc](CStr const &_File)
 				{
 					CStr const &File = _File;
 
@@ -284,7 +284,7 @@ struct CTool_CheckDependencies : public CTool2
 									File.m_Timestamp.f_SetFractionInt(Fraction);
 									File.m_Digest = CHashDigest_MD5::fs_FromString(Digest);
 									File.m_bDigest = true;
-									UsesDigest.f_Exchange(true);
+									bAnyUsesDigest.f_Exchange(true);
 								}
 								else if (Line.f_StartsWith("File "))
 								{
@@ -324,7 +324,7 @@ struct CTool_CheckDependencies : public CTool2
 			)
 		;
 
-		bool bUsesDigest = UsesDigest.f_Load();
+		bool bUsesDigest = bAnyUsesDigest.f_Load();
 		TCAtomic<bool> bAnyNeedsUpdating(false);
 
 		fg_ParallellForEach

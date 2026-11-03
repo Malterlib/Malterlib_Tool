@@ -17,9 +17,9 @@ namespace NMib::NTool
 				co_await Repo.f_Init();
 
 				CStr Remotes = Repo.m_Root / "remotes";
-				for (auto &Name : {"Root", "A"})
+				for (auto &pName : {"Root", "A"})
 				{
-					CStr Remote = Remotes / (CStr(Name) + ".git");
+					CStr Remote = Remotes / (CStr(pName) + ".git");
 					CFile::fs_CreateDirectory(Remote);
 					co_await Repo.f_Run("git", {"init", "-q", "--bare", "-b", "main"}, Remote);
 				}

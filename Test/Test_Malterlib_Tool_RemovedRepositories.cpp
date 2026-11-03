@@ -21,19 +21,19 @@ namespace NMib::NTool
 
 				// The checkout and its repositories A, B and C push to bare repositories of their own
 				CStr Remotes = Repo.m_Root / "remotes";
-				for (auto &Name : {"Root", "A", "B", "C"})
+				for (auto &pName : {"Root", "A", "B", "C"})
 				{
-					CStr Remote = Remotes / (CStr(Name) + ".git");
-					CStr Work = Repo.m_Root / "work" / Name;
+					CStr Remote = Remotes / (CStr(pName) + ".git");
+					CStr Work = Repo.m_Root / "work" / pName;
 					CFile::fs_CreateDirectory(Remote);
 					CFile::fs_CreateDirectory(Work);
 					co_await Repo.f_Run("git", {"init", "-q", "--bare", "-b", "main"}, Remote);
 
-					if (CStr(Name) == "Root")
+					if (CStr(pName) == "Root")
 						continue;
 
 					co_await Repo.f_Run("git", {"init", "-q", "-b", "main"}, Work);
-					CFile::fs_WriteStringToFile(Work / "File.txt", CStr(Name) + "\n", false);
+					CFile::fs_WriteStringToFile(Work / "File.txt", CStr(pName) + "\n", false);
 					co_await Repo.f_Run("git", {"add", "File.txt"}, Work);
 					co_await Repo.f_Run("git", {"commit", "-qm", "Initial"}, Work);
 					co_await Repo.f_Run("git", {"push", "-q", Remote, "main"}, Work);

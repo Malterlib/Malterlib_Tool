@@ -93,8 +93,8 @@ namespace NMib::NTool
 				f_Write("Test.MBuildSystem", Configuration);
 				co_await f_Check("CreateFiles", 0, true);
 
-				for (auto Name : {"LICENSE", "BUNDLE", "REUSE.toml"})
-					m_Canonical[Name] = CFile::fs_ReadStringFromFile(m_Path / Name, true);
+				for (auto pName : {"LICENSE", "BUNDLE", "REUSE.toml"})
+					m_Canonical[pName] = CFile::fs_ReadStringFromFile(m_Path / pName, true);
 
 				DMibExpect(m_Canonical["LICENSE"], ==, CStr("License text\nSecond line\n"));
 				DMibExpect(m_Canonical["BUNDLE"], ==, CStr("First license\n\n--- Dependency ---\n\nSecond license\n"));
@@ -121,11 +121,11 @@ namespace NMib::NTool
 					CLicenseFixture Repo;
 					co_await Repo.f_InitLicense();
 
-					for (auto Ending : {"\r\n", "\r"})
+					for (auto pEnding : {"\r\n", "\r"})
 					{
-						DMibTestPath(CStr(Ending) == "\r\n" ? "CRLF" : "CR");
+						DMibTestPath(CStr(pEnding) == "\r\n" ? "CRLF" : "CR");
 						for (auto const &Entry : Repo.m_Canonical.f_Entries())
-							Repo.f_Write(Entry.f_Key(), Entry.f_Value().f_Replace("\n", Ending));
+							Repo.f_Write(Entry.f_Key(), Entry.f_Value().f_Replace("\n", pEnding));
 
 						co_await Repo.f_Check("Compare");
 					}

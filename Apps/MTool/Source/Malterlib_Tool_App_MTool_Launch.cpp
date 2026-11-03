@@ -226,9 +226,9 @@ struct CTool_LaunchParallell : public CTool
 			}
 
 			CProcessLaunchHandler LaunchHandler;
-			for (auto Iter = Programs.f_GetIterator(); Iter; ++Iter)
+			for (auto iProgram = Programs.f_GetIterator(); iProgram; ++iProgram)
 			{
-				CProgram const &Program = *Iter;
+				CProgram const &Program = *iProgram;
 				umint nParams = Program.m_Params.f_GetLen();
 				if (nParams > 0)
 				{
@@ -347,14 +347,14 @@ struct CTool_LaunchSandboxed : public CTool2
 		CStr FileName, Params;
 
 		{
-			auto FIter = _Files.f_GetIterator();
-			if (!FIter)
+			auto iFile = _Files.f_GetIterator();
+			if (!iFile)
 				DError("Wrong number of parameters");
-			FileName = *FIter;
-			++FIter;
+			FileName = *iFile;
+			++iFile;
 
-			for (; FIter; ++FIter)
-				Params += CStr(" ") + *FIter;
+			for (; iFile; ++iFile)
+				Params += CStr(" ") + *iFile;
 		}
 
 		int Ret = 0;
@@ -386,9 +386,9 @@ struct CTool_LaunchSandboxed : public CTool2
 		{
 			int iRoot = 0;
 
-			for (auto RIter = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)); RIter; RIter = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)))
+			for (auto pRootParam = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)); pRootParam; pRootParam = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)))
 			{
-				CStr CurRootStr = *RIter;
+				CStr CurRootStr = *pRootParam;
 
 				CStr Root = fg_GetStrSep(CurRootStr, "=");
 				LaunchParams.m_SandboxRoots[Root] = fg_GetStrSep(CurRootStr, "=");

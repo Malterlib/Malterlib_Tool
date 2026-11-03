@@ -27,14 +27,14 @@ namespace NMib::NTool::NTestHelpers
 		fg_TestAddCleanupPath(m_Root);
 
 		CFile::fs_CreateDirectory(m_Path);
-		for (auto Name : {"GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_PREFIX", "GIT_ATTR_SOURCE"})
-			m_Environment.f_Remove(Name);
+		for (auto pName : {"GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_PREFIX", "GIT_ATTR_SOURCE"})
+			m_Environment.f_Remove(pName);
 
 		m_Environment["MToolIsMalterlib"] = "false";
 		m_Environment["MToolRootDirectory"] = m_Root / "mtool";
 		CFile::fs_CreateDirectory(m_Root / "tmp");
-		for (auto Name : {"TMPDIR", "TMP", "TEMP", "TEMPDIR"})
-			m_Environment[Name] = m_Root / "tmp";
+		for (auto pName : {"TMPDIR", "TMP", "TEMP", "TEMPDIR"})
+			m_Environment[pName] = m_Root / "tmp";
 
 		m_Environment["GIT_CONFIG_GLOBAL"] = m_Root / "gitconfig";
 		CFile::fs_WriteStringToFile

@@ -9,8 +9,8 @@ namespace NDeleteRecursive
 {
 	constinit NAtomic::TCAtomic<umint> g_nBlockingActors{0};
 
-	template <typename tf_CResult, typename tf_CContainer, typename tf_CFunctor>
-	auto DMibWorkaroundUBSanSectionErrorsDisable fg_ParallelForEachBlocking(tf_CContainer &&_Container, tf_CFunctor &&_fFunctor, umint _MaxConcurrency)
+	template <typename tf_CResult, typename tf_CContainer, typename tf_FFunctor>
+	auto DMibWorkaroundUBSanSectionErrorsDisable fg_ParallelForEachBlocking(tf_CContainer &&_Container, tf_FFunctor &&_fFunctor, umint _MaxConcurrency)
 		-> TCUnsafeFuture<TCConditional<NTraits::cIsVoid<tf_CResult>, tf_CResult, TCVector<tf_CResult>>>
 	{
 		co_await ECoroutineFlag_CaptureMalterlibExceptions;

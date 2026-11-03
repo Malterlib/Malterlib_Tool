@@ -62,13 +62,13 @@ namespace NMib::NTool
 					Repo.f_Write("file.cpp", "\t\t\n");
 					co_await Repo.f_Stage();
 
-					for (auto Mode : {"Staged", "Audit", "Base"})
+					for (auto pMode : {"Staged", "Audit", "Base"})
 					{
-						DMibTestPath(Mode);
-						bool bBase = CStr(Mode) == "Base";
+						DMibTestPath(pMode);
+						bool bBase = CStr(pMode) == "Base";
 						if (bBase)
 							co_await Repo.f_Commit();
-						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(Mode) == "Staged", bBase ? "origin/master" : "");
+						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(pMode) == "Staged", bBase ? "origin/master" : "");
 
 						DMibExpect(Output.f_Find("file.cpp:1: line length overflows"), >=, 0);
 					}
@@ -250,13 +250,13 @@ namespace NMib::NTool
 						Repo.f_Write(Name, fg_Repeat("x", 191));
 					co_await Repo.f_Stage();
 
-					for (auto Mode : {"Staged", "Audit", "Base"})
+					for (auto pMode : {"Staged", "Audit", "Base"})
 					{
-						DMibTestPath(Mode);
-						bool bBase = CStr(Mode) == "Base";
+						DMibTestPath(pMode);
+						bool bBase = CStr(pMode) == "Base";
 						if (bBase)
 							co_await Repo.f_Commit();
-						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(Mode) == "Staged", bBase ? "origin/master" : "");
+						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(pMode) == "Staged", bBase ? "origin/master" : "");
 
 						for (auto const &Name : Included)
 						{
@@ -299,13 +299,13 @@ namespace NMib::NTool
 						Repo.f_Write(Name, fg_Repeat("x", 191));
 					co_await Repo.f_Stage();
 
-					for (auto Mode : {"Staged", "Audit", "Base"})
+					for (auto pMode : {"Staged", "Audit", "Base"})
 					{
-						DMibTestPath(Mode);
-						bool bBase = CStr(Mode) == "Base";
+						DMibTestPath(pMode);
+						bool bBase = CStr(pMode) == "Base";
 						if (bBase)
 							co_await Repo.f_Commit();
-						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(Mode) == "Staged", bBase ? "origin/master" : "");
+						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(pMode) == "Staged", bBase ? "origin/master" : "");
 
 						for (auto const &Name : Included)
 						{
@@ -381,13 +381,13 @@ namespace NMib::NTool
 						Repo.f_Write(Name, fg_Repeat("x", 191));
 					co_await Repo.f_Stage();
 
-					for (auto Mode : {"Staged", "Audit", "Base"})
+					for (auto pMode : {"Staged", "Audit", "Base"})
 					{
-						DMibTestPath(Mode);
-						bool bBase = CStr(Mode) == "Base";
+						DMibTestPath(pMode);
+						bool bBase = CStr(pMode) == "Base";
 						if (bBase)
 							co_await Repo.f_Commit();
-						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(Mode) == "Staged", bBase ? "origin/master" : "");
+						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(pMode) == "Staged", bBase ? "origin/master" : "");
 
 						for (auto const &Name : Included)
 						{
@@ -708,13 +708,13 @@ namespace NMib::NTool
 					Repo.f_Write("malformed.cpp", CStr("\x80") + fg_Repeat("\t", 48) + "\n");
 					co_await Repo.f_Stage();
 
-					for (auto Mode : {"Staged", "Audit", "Base"})
+					for (auto pMode : {"Staged", "Audit", "Base"})
 					{
-						DMibTestPath(Mode);
-						bool bBase = CStr(Mode) == "Base";
+						DMibTestPath(pMode);
+						bool bBase = CStr(pMode) == "Base";
 						if (bBase)
 							co_await Repo.f_Commit();
-						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(Mode) == "Staged", bBase ? "origin/master" : "");
+						auto Output = co_await Repo.f_Validate("Validate", 1, CStr(pMode) == "Staged", bBase ? "origin/master" : "");
 
 						DMibExpect(Output.f_Find("file.cpp:1: line length 191"), >=, 0);
 						DMibExpect(Output.f_Find("leading.cpp:1: line length 191"), >=, 0);
@@ -1104,12 +1104,12 @@ namespace NMib::NTool
 					co_await Repo.f_Init();
 					Repo.f_Write(".gitattributes", "binary.cpp -diff\n*.dat diff\n");
 					Repo.f_Write("nested/.gitattributes", "file.cpp -diff\n");
-					for (auto Name : {"text.dat", "binary.cpp", "nested/file.cpp"})
-						Repo.f_Write(Name, "short\n");
+					for (auto pName : {"text.dat", "binary.cpp", "nested/file.cpp"})
+						Repo.f_Write(pName, "short\n");
 					co_await Repo.f_Commit();
 					co_await Repo.f_Git({"update-ref", "refs/remotes/origin/master", "HEAD"});
-					for (auto Name : {"text.dat", "binary.cpp", "nested/file.cpp"})
-						Repo.f_Write(Name, fg_Repeat("x", 191));
+					for (auto pName : {"text.dat", "binary.cpp", "nested/file.cpp"})
+						Repo.f_Write(pName, fg_Repeat("x", 191));
 					Repo.f_WriteBinary("binary.bin");
 					co_await Repo.f_Commit();
 					Repo.f_Write(".gitattributes", "text.dat -diff\nbinary.cpp diff\n");

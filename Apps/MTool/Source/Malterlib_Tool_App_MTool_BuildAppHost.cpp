@@ -129,11 +129,11 @@ namespace
 	// name (UTF-8, null-terminated) and zeros the remainder of the 64-byte slot.
 	void fg_PatchAppBinaryPath(TCBinaryStreamMemory<> &_AppHost, CStr const &_ManagedDllName, CStr const &_TemplatePath)
 	{
-		static constexpr char const c_pPlaceholder[] = "c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2";
-		constexpr umint c_PlaceholderLen = sizeof(c_pPlaceholder) - 1;
+		static constexpr char const c_Placeholder[] = "c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2";
+		constexpr umint c_PlaceholderLen = sizeof(c_Placeholder) - 1;
 		constexpr umint c_MaxPathLen = 1024;
 
-		umint nFound = fg_FindPatternInStream(_AppHost, (uint8 const *)c_pPlaceholder, c_PlaceholderLen);
+		umint nFound = fg_FindPatternInStream(_AppHost, (uint8 const *)c_Placeholder, c_PlaceholderLen);
 		if (nFound == umint(-1))
 			DMibError("Could not find apphost path placeholder in template: '{}'"_f << _TemplatePath);
 

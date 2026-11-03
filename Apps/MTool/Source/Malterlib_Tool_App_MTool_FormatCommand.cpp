@@ -40,6 +40,7 @@ namespace NMib::NTool::NFormat
 
 		TCSharedPointer<CState> pState = fg_Construct();
 		auto Done = pState->m_Done.f_Future();
+		// NOLINTNEXTLINE(malterlib-conceptual-prefix): a subscription handle like CActorSubscription, which the check misses because it is derived from it
 		auto Subscription = co_await _pCommandLine->f_RegisterForStdInBinary
 			(
 				g_ActorFunctor / [pState](NProcess::EStdInReaderOutputType _Type, CIOByteVector _Input, CStr _Error) -> TCFuture<void>

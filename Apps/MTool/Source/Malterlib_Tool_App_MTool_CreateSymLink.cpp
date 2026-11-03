@@ -17,29 +17,29 @@ struct CTool_CreateSymLink : public CTool2
 		ESymbolicLinkFlag Flags = ESymbolicLinkFlag_None;
 
 		{
-			auto DPIter = _Params.f_FindEqual("UseDevicePath");
-			if (DPIter)
+			auto pParam = _Params.f_FindEqual("UseDevicePath");
+			if (pParam)
 			{
-				if ((*DPIter).f_ToInt(1))
+				if ((*pParam).f_ToInt(1))
 					Flags |= ESymbolicLinkFlag_ConvertToDevicePath;
 			}
 		}
 
 		{
-			auto DPIter = _Params.f_FindEqual("Relative");
-			if (DPIter)
+			auto pParam = _Params.f_FindEqual("Relative");
+			if (pParam)
 			{
-				if ((*DPIter).f_ToInt(1))
+				if ((*pParam).f_ToInt(1))
 					Flags |= ESymbolicLinkFlag_Relative;
 			}
 		}
 
 		bool bElevate = false;
 		{
-			auto DPIter = _Params.f_FindEqual("Elevate");
-			if (DPIter)
+			auto pParam = _Params.f_FindEqual("Elevate");
+			if (pParam)
 			{
-				if ((*DPIter).f_ToInt(1))
+				if ((*pParam).f_ToInt(1))
 					bElevate = true;
 			}
 		}
