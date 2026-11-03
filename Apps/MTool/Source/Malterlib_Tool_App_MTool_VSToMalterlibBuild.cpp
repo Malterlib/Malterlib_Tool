@@ -24,8 +24,8 @@ struct CTool_VSToMalterlibBuild : public CTool
 			if (CFile::fs_FileExists(*iFile + ".filters"))
 				XMLFiltersFile.f_ParseFile(*iFile + ".filters");
 
-			auto pProject = XMLFile.f_GetChildNode(XMLFile.f_GetRootNode(), "Project");
-			auto pFiltersProject = XMLFiltersFile.f_GetChildNode(XMLFiltersFile.f_GetRootNode(), "Project");
+			auto pProject = XMLFile.fs_GetChildNode(XMLFile.f_GetRootNode(), "Project");
+			auto pFiltersProject = XMLFiltersFile.fs_GetChildNode(XMLFiltersFile.f_GetRootNode(), "Project");
 
 			CRegistryPreserveAll OutRegistry;
 			auto pTarget = OutRegistry.f_SetValue("%Target", ProjectName);
@@ -35,20 +35,20 @@ struct CTool_VSToMalterlibBuild : public CTool
 
 			{
 				CXMLNode const *pChild = nullptr;
-				while ((pChild = XMLFile.f_Iterate(pProject, pChild)))
+				while ((pChild = XMLFile.fs_Iterate(pProject, pChild)))
 				{
 					if (auto pElement = pChild->ToElement())
 					{
-						CStr Text = XMLFile.f_GetValue(pChild);
-						CStr Label = XMLFile.f_GetAttribute(pElement, "Label");
+						CStr Text = XMLFile.fs_GetValue(pChild);
+						CStr Label = XMLFile.fs_GetAttribute(pElement, "Label");
 						if (Text == "ItemGroup" && Label.f_IsEmpty())
 						{
 							CXMLNode const *pFile = nullptr;
-							while ((pFile = XMLFile.f_Iterate(pChild, pFile)))
+							while ((pFile = XMLFile.fs_Iterate(pChild, pFile)))
 							{
 								if (auto pFileElement = pFile->ToElement())
 								{
-									CStr FileName = XMLFile.f_GetAttribute(pFileElement, "Include");
+									CStr FileName = XMLFile.fs_GetAttribute(pFileElement, "Include");
 
 									if (!FileName.f_IsEmpty())
 										Files[FileName];
@@ -61,21 +61,21 @@ struct CTool_VSToMalterlibBuild : public CTool
 			if (pFiltersProject)
 			{
 				CXMLNode const *pChild = nullptr;
-				while ((pChild = XMLFiltersFile.f_Iterate(pFiltersProject, pChild)))
+				while ((pChild = XMLFiltersFile.fs_Iterate(pFiltersProject, pChild)))
 				{
 					if (auto pElement = pChild->ToElement())
 					{
-						CStr Text = XMLFiltersFile.f_GetValue(pChild);
-						CStr Label = XMLFiltersFile.f_GetAttribute(pElement, "Label");
+						CStr Text = XMLFiltersFile.fs_GetValue(pChild);
+						CStr Label = XMLFiltersFile.fs_GetAttribute(pElement, "Label");
 						if (Text == "ItemGroup" && Label.f_IsEmpty())
 						{
 							CXMLNode const *pFile = nullptr;
-							while ((pFile = XMLFiltersFile.f_Iterate(pChild, pFile)))
+							while ((pFile = XMLFiltersFile.fs_Iterate(pChild, pFile)))
 							{
-								CStr NodeName = XMLFiltersFile.f_GetValue(pFile);
+								CStr NodeName = XMLFiltersFile.fs_GetValue(pFile);
 								if (auto pFileElement = pFile->ToElement())
 								{
-									CStr FileName = XMLFiltersFile.f_GetAttribute(pFileElement, "Include");
+									CStr FileName = XMLFiltersFile.fs_GetAttribute(pFileElement, "Include");
 
 									if (!FileName.f_IsEmpty())
 									{
@@ -110,10 +110,10 @@ struct CTool_VSToMalterlibBuild : public CTool
 										}
 										else
 										{
-											auto pNode = XMLFiltersFile.f_GetChildNode(pFile, "Filter");
+											auto pNode = XMLFiltersFile.fs_GetChildNode(pFile, "Filter");
 											if (pNode)
 											{
-												CStr Group = XMLFiltersFile.f_GetNodeText(pNode);
+												CStr Group = XMLFiltersFile.fs_GetNodeText(pNode);
 												Files[FileName] = Group;
 											}
 										}

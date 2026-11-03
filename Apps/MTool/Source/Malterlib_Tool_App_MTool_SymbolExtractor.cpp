@@ -24,30 +24,30 @@ namespace
 
 		void f_SetFunctions(zlib_filefunc_def *_pFileFunc)
 		{
-			_pFileFunc->zopen_file = fp_fopen_func;
-			_pFileFunc->zread_file = fp_fread_func;
-			_pFileFunc->zwrite_file = fp_fwrite_func;
-			_pFileFunc->ztell_file = fp_ftell_func;
-			_pFileFunc->zseek_file = fp_fseek_func;
-			_pFileFunc->zclose_file = fp_fclose_func;
-			_pFileFunc->zerror_file = fp_ferror_func;
+			_pFileFunc->zopen_file = fsp_FOpenFunc;
+			_pFileFunc->zread_file = fsp_FReadFunc;
+			_pFileFunc->zwrite_file = fsp_FWriteFunc;
+			_pFileFunc->ztell_file = fsp_FTellFunc;
+			_pFileFunc->zseek_file = fsp_FSeekFunc;
+			_pFileFunc->zclose_file = fsp_FCloseFunc;
+			_pFileFunc->zerror_file = fsp_FErrorFunc;
 			_pFileFunc->opaque = this;
 		}
 
 		void f_SetFunctions(zlib_filefunc64_def *_pFileFunc)
 		{
-			_pFileFunc->zopen64_file = fp_fopen64_func;
-			_pFileFunc->zread_file = fp_fread_func;
-			_pFileFunc->zwrite_file = fp_fwrite_func;
-			_pFileFunc->ztell64_file = fp_ftell64_func;
-			_pFileFunc->zseek64_file = fp_fseek64_func;
-			_pFileFunc->zclose_file = fp_fclose_func;
-			_pFileFunc->zerror_file = fp_ferror_func;
+			_pFileFunc->zopen64_file = fsp_FOpen64Func;
+			_pFileFunc->zread_file = fsp_FReadFunc;
+			_pFileFunc->zwrite_file = fsp_FWriteFunc;
+			_pFileFunc->ztell64_file = fsp_FTell64Func;
+			_pFileFunc->zseek64_file = fsp_FSeek64Func;
+			_pFileFunc->zclose_file = fsp_FCloseFunc;
+			_pFileFunc->zerror_file = fsp_FErrorFunc;
 			_pFileFunc->opaque = this;
 		}
 
 	private:
-		static voidpf ZCALLBACK fp_fopen_func(voidpf opaque, char const *filename, int mode)
+		static voidpf ZCALLBACK fsp_FOpenFunc(voidpf opaque, char const *filename, int mode)
 		{
 			CFile *pFile = DNew CFile;
 			if (pFile == nullptr)
@@ -82,12 +82,12 @@ namespace
 			return pFile;
 		}
 
-		static voidpf ZCALLBACK fp_fopen64_func(voidpf opaque, void const *filename, int mode)
+		static voidpf ZCALLBACK fsp_FOpen64Func(voidpf opaque, void const *filename, int mode)
 		{
-			return fp_fopen_func(opaque, (ch8 const *)filename, mode);
+			return fsp_FOpenFunc(opaque, (ch8 const *)filename, mode);
 		}
 
-		static uLong ZCALLBACK fp_fread_func(voidpf opaque, voidpf stream, void *buf, uLong size)
+		static uLong ZCALLBACK fsp_FReadFunc(voidpf opaque, voidpf stream, void *buf, uLong size)
 		{
 			CFile *pFile = (CFile *)stream;
 
@@ -95,7 +95,7 @@ namespace
 			return size;
 		}
 
-		static uLong ZCALLBACK fp_fwrite_func(voidpf opaque, voidpf stream, void const *buf, uLong size)
+		static uLong ZCALLBACK fsp_FWriteFunc(voidpf opaque, voidpf stream, void const *buf, uLong size)
 		{
 			CFile *pFile = (CFile *)stream;
 
@@ -103,21 +103,21 @@ namespace
 			return size;
 		}
 
-		static long ZCALLBACK fp_ftell_func(voidpf opaque, voidpf stream)
+		static long ZCALLBACK fsp_FTellFunc(voidpf opaque, voidpf stream)
 		{
 			CFile *pFile = (CFile *)stream;
 
 			return pFile->f_GetPosition();
 		}
 
-		static ZPOS64_T ZCALLBACK fp_ftell64_func(voidpf opaque, voidpf stream)
+		static ZPOS64_T ZCALLBACK fsp_FTell64Func(voidpf opaque, voidpf stream)
 		{
 			CFile *pFile = (CFile *)stream;
 
 			return pFile->f_GetPosition();
 		}
 
-		static long ZCALLBACK fp_fseek_func(voidpf opaque, voidpf stream, uLong offset, int origin)
+		static long ZCALLBACK fsp_FSeekFunc(voidpf opaque, voidpf stream, uLong offset, int origin)
 		{
 			CFile *pFile = (CFile *)stream;
 
@@ -132,7 +132,7 @@ namespace
 			return 0;
 		}
 
-		static long ZCALLBACK fp_fseek64_func(voidpf opaque, voidpf stream, ZPOS64_T offset, int origin)
+		static long ZCALLBACK fsp_FSeek64Func(voidpf opaque, voidpf stream, ZPOS64_T offset, int origin)
 		{
 			CFile *pFile = (CFile *)stream;
 
@@ -147,7 +147,7 @@ namespace
 			return 0;
 		}
 
-		static int ZCALLBACK fp_fclose_func(voidpf opaque, voidpf stream)
+		static int ZCALLBACK fsp_FCloseFunc(voidpf opaque, voidpf stream)
 		{
 			CFile *pFile = (CFile *)stream;
 
@@ -156,7 +156,7 @@ namespace
 			return 0;
 		}
 
-		static int ZCALLBACK fp_ferror_func(voidpf opaque, voidpf stream)
+		static int ZCALLBACK fsp_FErrorFunc(voidpf opaque, voidpf stream)
 		{
 			/* We never return errors */
 			return 0;

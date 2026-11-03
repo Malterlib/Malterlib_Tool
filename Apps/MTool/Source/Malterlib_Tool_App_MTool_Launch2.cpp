@@ -488,7 +488,7 @@ private:
 		}
 	}
 
-	void fg_UpdateSampledStats(CProcessInfo &_ProcessInfo)
+	void fp_UpdateSampledStats(CProcessInfo &_ProcessInfo)
 	{
 		auto ThisStat = _ProcessInfo.m_pProcessLaunchInfo->f_GetProcessLaunch()->f_GetMemoryStatistics();
 		for (auto iStat = ThisStat.m_Statistics.f_GetIterator(); iStat; ++iStat)
@@ -843,7 +843,7 @@ private:
 						}
 
 						if (ProcessInfo.m_Options.m_bStats)
-							fg_UpdateSampledStats(*(*iProcessInfo));
+							fp_UpdateSampledStats(*(*iProcessInfo));
 					}
 					fl_LaunchOutstanding();
 					LaunchHandler.f_WaitForChange(0.010f);

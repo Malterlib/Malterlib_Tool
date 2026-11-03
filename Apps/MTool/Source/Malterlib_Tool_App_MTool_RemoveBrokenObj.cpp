@@ -5,7 +5,7 @@
 
 struct CTool_RemoveBrokenObj : public CTool
 {
-	void fr_RemoveBrokenObj(CStr const &_Path)
+	void f_RemoveBrokenObj(CStr const &_Path)
 	{
 		// DConOut("Removing broken ojb files for dir: {}" DNewLine, _Path);
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*.obj", EFileAttrib_File, true);
@@ -57,7 +57,7 @@ struct CTool_RemoveBrokenObj : public CTool
 		CStr Dir2 = _Params.f_GetValue("1", "NotExist");
 		if (NFile::CFile::fs_FileExists(Dir, EFileAttrib_Directory))
 		{
-			fr_RemoveBrokenObj(Dir);
+			f_RemoveBrokenObj(Dir);
 			DConOut("Done removing broken obj files" DNewLine, 0);
 			return 0;
 		}
@@ -65,7 +65,7 @@ struct CTool_RemoveBrokenObj : public CTool
 		if (!NFile::CFile::fs_FileExists(Dir2, EFileAttrib_Directory))
 			DError((CStr::CFormat("Directory {} does not exist") << Dir).f_GetStr());
 
-		fr_RemoveBrokenObj(Dir2);
+		f_RemoveBrokenObj(Dir2);
 		DConOut("Done removing broken obj files" DNewLine, 0);
 		return 0;
 	}

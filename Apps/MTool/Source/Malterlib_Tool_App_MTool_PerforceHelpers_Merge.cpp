@@ -18,7 +18,7 @@ struct CTool_PerforceMerge : public CTool2
 		zbool m_bTask;
 	};
 
-	void fr_GetIntegrationPairs(CPerforceFunctions &_Functions, CStr const &_From, CStr const &_To, TCVector<CIntegrationPair> &_oPairs, bool _bParentChildren, bool _bToParent)
+	void f_GetIntegrationPairs(CPerforceFunctions &_Functions, CStr const &_From, CStr const &_To, TCVector<CIntegrationPair> &_oPairs, bool _bParentChildren, bool _bToParent)
 	{
 		if (_bToParent)
 		{
@@ -252,7 +252,7 @@ struct CTool_PerforceMerge : public CTool2
 			Pair.m_To = ToStream;
 
 			if (ChangeList.f_IsEmpty()) // Changelist can only integrate in one stream at a time
-				fr_GetIntegrationPairs(Functions, IntegrateFromStream, ToStream, IntegrationPairs, bParentChildren, bToParent);
+				f_GetIntegrationPairs(Functions, IntegrateFromStream, ToStream, IntegrationPairs, bParentChildren, bToParent);
 		}
 
 		for (auto iPair = IntegrationPairs.f_GetIterator(); iPair; ++iPair)

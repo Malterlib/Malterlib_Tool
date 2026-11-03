@@ -12,12 +12,12 @@
 
 struct CTool_PostCopy : public CTool
 {
-	void fr_DeleteEmptyDirs(CStr const &_Path)
+	void f_DeleteEmptyDirs(CStr const &_Path)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
 
 		for (umint i = 0; i < Files.f_GetLen(); ++i)
-			fr_DeleteEmptyDirs(Files[i]);
+			f_DeleteEmptyDirs(Files[i]);
 
 		Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory | EFileAttrib_File, false);
 		if (Files.f_GetLen() == 0)

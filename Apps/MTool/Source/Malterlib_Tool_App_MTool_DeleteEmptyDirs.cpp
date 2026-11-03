@@ -5,12 +5,12 @@
 
 struct CTool_DeleteEmptyDirs : public CTool
 {
-	void fr_DeleteEmptyDirs(CStr const &_Path)
+	void f_DeleteEmptyDirs(CStr const &_Path)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
 
 		for (umint i = 0; i < Files.f_GetLen(); ++i)
-			fr_DeleteEmptyDirs(Files[i]);
+			f_DeleteEmptyDirs(Files[i]);
 
 		Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory | EFileAttrib_File, false);
 		if (Files.f_GetLen() == 0)
@@ -27,7 +27,7 @@ struct CTool_DeleteEmptyDirs : public CTool
 		if (!NFile::CFile::fs_FileExists(Dir, EFileAttrib_Directory))
 			DError("Directory does not exist");
 
-		fr_DeleteEmptyDirs(Dir);
+		f_DeleteEmptyDirs(Dir);
 
 		return 0;
 	}

@@ -21,7 +21,7 @@ DMibRuntimeClass(CTool, CTool_Sleep);
 
 struct CTool_Touch : public CTool
 {
-	void fr_Touch(CStr const &_Path, CStr const &_Pattern, NTime::CTime const &_Time, bool _bRecursive)
+	void f_Touch(CStr const &_Path, CStr const &_Pattern, NTime::CTime const &_Time, bool _bRecursive)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/" + _Pattern, EFileAttrib_File, _bRecursive);
 		for (umint i = 0; i < Files.f_GetLen(); ++i)
@@ -51,7 +51,7 @@ struct CTool_Touch : public CTool
 
 		NTime::CTime Now = NTime::CTime::fs_NowUTC();
 
-		fr_Touch(Dir, Pattern, Now, bRecursive);
+		f_Touch(Dir, Pattern, Now, bRecursive);
 		return 0;
 	}
 };

@@ -21,12 +21,12 @@ struct CTool_PerforceCreateStream : public CTool2
 		}
 	};
 
-	void fr_GetIsolatedPaths(CPerforceClientThrow &_Client, CStr const &_StreamName, TCVector<CStr> &_Ret)
+	void f_GetIsolatedPaths(CPerforceClientThrow &_Client, CStr const &_StreamName, TCVector<CStr> &_Ret)
 	{
 		CPerforceClient::CStream Stream = _Client.f_GetStream(_StreamName);
 
 		if (!Stream.m_Parent.f_IsEmpty() && Stream.m_Parent != "none")
-			fr_GetIsolatedPaths(_Client, Stream.m_Parent, _Ret);
+			f_GetIsolatedPaths(_Client, Stream.m_Parent, _Ret);
 
 		for (auto iPath = Stream.m_Paths.f_GetIterator(); iPath; ++iPath)
 		{
@@ -40,7 +40,7 @@ struct CTool_PerforceCreateStream : public CTool2
 		}
 	}
 
-	auto fr_CreateStreams
+	auto f_CreateStreams
 		(
 			CPerforceFunctions *_pFunctions
 			, CPerforce_TemporaryStreamSwitcher &_StreamSwitcher
@@ -327,7 +327,7 @@ struct CTool_PerforceCreateStream : public CTool2
 						}
 					}
 
-					CStr Ret = fr_CreateStreams
+					CStr Ret = f_CreateStreams
 						(
 							_pFunctions
 							, _StreamSwitcher
@@ -501,7 +501,7 @@ struct CTool_PerforceCreateStream : public CTool2
 
 			// Task streams import isolated folders (for example builds of Qt and OpenSSL)
 			TCVector<CStr> Isolated;
-			fr_GetIsolatedPaths(_pFunctions->f_GetClient(), ImportFromStream, Isolated);
+			f_GetIsolatedPaths(_pFunctions->f_GetClient(), ImportFromStream, Isolated);
 			if (!Isolated.f_IsEmpty())
 			{
 				bHasIsolated = true;
@@ -555,7 +555,7 @@ struct CTool_PerforceCreateStream : public CTool2
 
 					// Task streams import isolated folders (for example builds of Qt and OpenSSL)
 					TCVector<CStr> Isolated;
-					fr_GetIsolatedPaths(_pFunctions->f_GetClient(), _bJustUpdate ? ImportFromStream : ParentImportFromStream, Isolated);
+					f_GetIsolatedPaths(_pFunctions->f_GetClient(), _bJustUpdate ? ImportFromStream : ParentImportFromStream, Isolated);
 					for (auto iIsolate = Isolated.f_GetIterator(); iIsolate; ++iIsolate)
 					{
 						CStr Type;
@@ -717,7 +717,7 @@ struct CTool_PerforceCreateStream : public CTool2
 
 		CCreateStreamState State;
 		CPerforceFunctions::COwnedStreams OwnedStreams;
-		fr_CreateStreams
+		f_CreateStreams
 			(
 				&Functions
 				, StreamSwitcher
@@ -743,7 +743,7 @@ DMibRuntimeClass(CTool, CTool_PerforceCreateStream);
 
 struct CTool_PerforceDeleteStream : public CTool2
 {
-	void fr_DeleteStreams(CPerforceClientThrow &_Client, CBlockingStdInReader &_Reader, CStr const &_StreamName, bool _bTaskStream, bool _bForceObliterate)
+	void f_DeleteStreams(CPerforceClientThrow &_Client, CBlockingStdInReader &_Reader, CStr const &_StreamName, bool _bTaskStream, bool _bForceObliterate)
 	{
 		CPerforceClient::CStream Stream = _Client.f_GetStream(_StreamName);
 
@@ -761,7 +761,7 @@ struct CTool_PerforceDeleteStream : public CTool2
 			for (auto iOwned = pOwned->f_GetChildIterator(); iOwned; ++iOwned)
 			{
 				if (_Client.f_StreamExists(iOwned->f_GetThisValue()))
-					fr_DeleteStreams(_Client, _Reader, iOwned->f_GetThisValue(), _bTaskStream, _bForceObliterate);
+					f_DeleteStreams(_Client, _Reader, iOwned->f_GetThisValue(), _bTaskStream, _bForceObliterate);
 			}
 		}
 
@@ -967,7 +967,7 @@ struct CTool_PerforceDeleteStream : public CTool2
 
 		f_DetectPendingMerges(StreamSwitcher, pClient, StreamName);
 
-		fr_DeleteStreams(*pClient, StdInReader, StreamName, false, bForceObliterate);
+		f_DeleteStreams(*pClient, StdInReader, StreamName, false, bForceObliterate);
 
 		return 0;
 	}

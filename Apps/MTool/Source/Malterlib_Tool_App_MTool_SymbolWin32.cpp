@@ -10,7 +10,7 @@
 
 struct CTool_Symbol : public CTool
 {
-	void fs_CompressOrCopy(CStr const &_Source, CStr const &_Destination)
+	static void fs_CompressOrCopy(CStr const &_Source, CStr const &_Destination)
 	{
 		try
 		{
