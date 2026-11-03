@@ -14,7 +14,6 @@
 
 struct CTool_XcodeBuildFilter : public CDistributedTool, public CAllowUnsafeThis
 {
-public:
 	struct CConfig
 	{
 		TCSharedPointer<CCommandLineControl> m_pCommandLine;

@@ -9,9 +9,8 @@
 #include <Mib/Encoding/EJson>
 #include <Mib/CommandLine/AnsiEncoding>
 
-class CTool_Malterlib : public CDistributedTool, public CAllowUnsafeThis
+struct CTool_Malterlib : public CDistributedTool, public CAllowUnsafeThis
 {
-public:
 	static CStr fs_GetLogicalCurrentDirectory();
 	static CStr fs_GetFileNameOrEmpty(CEJsonSorted const &_Param, CStr const &_CurrentDirectory);
 	static CStr fs_DefaultVisualStudioVersion(CStr const &_RootPath);

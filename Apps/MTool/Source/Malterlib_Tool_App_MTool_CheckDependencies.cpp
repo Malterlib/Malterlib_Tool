@@ -28,9 +28,8 @@ namespace NMib
 	}
 }
 
-class CTool_CheckDependencies : public CTool2
+struct CTool_CheckDependencies : public CTool2
 {
-public:
 	struct CDirectory
 	{
 		CStr m_Path;

@@ -3,9 +3,8 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-class CTool_SymbolBreakpad : public CTool
+struct CTool_SymbolBreakpad : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SymbolDir = _Params.f_GetValue("0", "NotExist:/");

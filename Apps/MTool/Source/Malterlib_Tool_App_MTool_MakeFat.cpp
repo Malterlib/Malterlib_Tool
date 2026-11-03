@@ -4,9 +4,8 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include <Mib/Process/ProcessLaunch>
 
-class CTool_MakeFat : public CTool2
+struct CTool_MakeFat : public CTool2
 {
-public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		if (!_Params.f_FindEqual("DestinationDir"))

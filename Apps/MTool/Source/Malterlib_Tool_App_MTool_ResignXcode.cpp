@@ -7,7 +7,6 @@
 
 struct CTool_ResignXcode : public CDistributedTool, public CAllowUnsafeThis
 {
-public:
 	void f_Register
 		(
 			TCActor<CDistributedToolAppActor> const &_ToolActor

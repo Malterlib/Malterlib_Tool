@@ -4,9 +4,8 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include <Mib/File/MalterlibFS>
 
-class CTool_ExeFS : public CTool
+struct CTool_ExeFS : public CTool
 {
-public:
 	enum ETarget
 	{
 		ETarget_File  // Operates on a vfs file

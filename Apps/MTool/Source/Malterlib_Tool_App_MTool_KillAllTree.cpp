@@ -8,12 +8,10 @@
 #include <Windows.h>
 #include <Tlhelp32.h>
 
-class CTool_KillAllTree : public CTool
+struct CTool_KillAllTree : public CTool
 {
-public:
-	class CProcessEntry
+	struct CProcessEntry
 	{
-	public:
 		~CProcessEntry()
 		{
 			m_AllProcess.f_DeleteAllDefiniteType();

@@ -10,9 +10,8 @@
 #include <Mib/Container/Convert>
 #include <Mib/Encoding/JsonShortcuts>
 
-class CTool_PostCopy : public CTool
+struct CTool_PostCopy : public CTool
 {
-public:
 	void fr_DeleteEmptyDirs(CStr const &_Path)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);

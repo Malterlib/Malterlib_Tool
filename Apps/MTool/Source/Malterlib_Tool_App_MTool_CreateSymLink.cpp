@@ -4,9 +4,8 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include <Mib/Process/ProcessLaunch>
 
-class CTool_CreateSymLink : public CTool2
+struct CTool_CreateSymLink : public CTool2
 {
-public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		if (_Files.f_GetLen() != 2)

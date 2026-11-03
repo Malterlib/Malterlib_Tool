@@ -16,8 +16,37 @@
 
 namespace
 {
-	class CBinaryStreamMiniZipAdaptor
+	struct CBinaryStreamMiniZipAdaptor
 	{
+		CBinaryStreamMiniZipAdaptor()
+		{
+		}
+
+		void f_SetFunctions(zlib_filefunc_def *_pFileFunc)
+		{
+			_pFileFunc->zopen_file = fp_fopen_func;
+			_pFileFunc->zread_file = fp_fread_func;
+			_pFileFunc->zwrite_file = fp_fwrite_func;
+			_pFileFunc->ztell_file = fp_ftell_func;
+			_pFileFunc->zseek_file = fp_fseek_func;
+			_pFileFunc->zclose_file = fp_fclose_func;
+			_pFileFunc->zerror_file = fp_ferror_func;
+			_pFileFunc->opaque = this;
+		}
+
+		void f_SetFunctions(zlib_filefunc64_def *_pFileFunc)
+		{
+			_pFileFunc->zopen64_file = fp_fopen64_func;
+			_pFileFunc->zread_file = fp_fread_func;
+			_pFileFunc->zwrite_file = fp_fwrite_func;
+			_pFileFunc->ztell64_file = fp_ftell64_func;
+			_pFileFunc->zseek64_file = fp_fseek64_func;
+			_pFileFunc->zclose_file = fp_fclose_func;
+			_pFileFunc->zerror_file = fp_ferror_func;
+			_pFileFunc->opaque = this;
+		}
+
+	private:
 		static voidpf ZCALLBACK fp_fopen_func(voidpf opaque, char const *filename, int mode)
 		{
 			CFile *pFile = DNew CFile;
@@ -132,41 +161,11 @@ namespace
 			/* We never return errors */
 			return 0;
 		}
-
-	public:
-		CBinaryStreamMiniZipAdaptor()
-		{
-		}
-
-		void f_SetFunctions(zlib_filefunc_def *_pFileFunc)
-		{
-			_pFileFunc->zopen_file = fp_fopen_func;
-			_pFileFunc->zread_file = fp_fread_func;
-			_pFileFunc->zwrite_file = fp_fwrite_func;
-			_pFileFunc->ztell_file = fp_ftell_func;
-			_pFileFunc->zseek_file = fp_fseek_func;
-			_pFileFunc->zclose_file = fp_fclose_func;
-			_pFileFunc->zerror_file = fp_ferror_func;
-			_pFileFunc->opaque = this;
-		}
-
-		void f_SetFunctions(zlib_filefunc64_def *_pFileFunc)
-		{
-			_pFileFunc->zopen64_file = fp_fopen64_func;
-			_pFileFunc->zread_file = fp_fread_func;
-			_pFileFunc->zwrite_file = fp_fwrite_func;
-			_pFileFunc->ztell64_file = fp_ftell64_func;
-			_pFileFunc->zseek64_file = fp_fseek64_func;
-			_pFileFunc->zclose_file = fp_fclose_func;
-			_pFileFunc->zerror_file = fp_ferror_func;
-			_pFileFunc->opaque = this;
-		}
 	};
 }
 
-class CTool_SymbolExtractor : public CTool2
+struct CTool_SymbolExtractor : public CTool2
 {
-public:
 	struct CParams
 	{
 		CParams(TCMap<CStr, CStr> const &_Params)

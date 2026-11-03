@@ -231,7 +231,6 @@ namespace
 
 struct CTool_BuildAppHost : public CDistributedTool, public CAllowUnsafeThis
 {
-public:
 	void f_Register
 		(
 			TCActor<CDistributedToolAppActor> const &_ToolActor

@@ -89,9 +89,8 @@ CStr fg_AskUser(CBlockingStdInReader &_StdIn, CStr const &_Text)
 	return _StdIn.f_ReadLine().f_Trim(ToTrim);
 }
 
-class CTool_CreatePerforceClient : public CTool2
+struct CTool_CreatePerforceClient : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CPerforceHelper PerforceHelper(*this);
@@ -106,9 +105,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_CreatePerforceClient);
 
-class CTool_SyncPerforce : public CTool2
+struct CTool_SyncPerforce : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CPerforceHelper PerforceHelper(*this);
@@ -147,9 +145,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_SyncPerforce);
 
-class CTool_PerforceRunScript : public CTool2
+struct CTool_PerforceRunScript : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";

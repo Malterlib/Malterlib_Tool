@@ -7,9 +7,8 @@
 #include <Mib/Concurrency/ConcurrencyManager>
 #include <Mib/Web/HttpClient>
 
-class CTool_ReadJson : public CTool2
+struct CTool_ReadJson : public CTool2
 {
-public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		TCVector<CStr> Params = _Files;

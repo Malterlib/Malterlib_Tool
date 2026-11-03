@@ -7,9 +7,8 @@
 #include <Mib/Perforce/Functions>
 #include "Malterlib_Tool_App_MTool_PerforceHelpers.h"
 
-class CTool_PerforceSubmitInStream : public CTool2
+struct CTool_PerforceSubmitInStream : public CTool2
 {
-public:
 	static CStr fs_GetStream(CStr const &_DepotPath)
 	{
 		ch8 const *pParse = _DepotPath.f_GetStr();

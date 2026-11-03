@@ -124,9 +124,8 @@ aint CTool2::f_Run(NContainer::CRegistry &_Params)
 	return f_Run(Files, Params);
 }
 
-class CToolApp : public NMib::CApplication
+struct CToolApp : public NMib::CApplication
 {
-public:
 	aint f_Main()
 	{
 		// The low priority work of a short lived interactive tool is the build actions the user is waiting for

@@ -3,9 +3,8 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-class CTool_LockFile : public CTool
+struct CTool_LockFile : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
@@ -28,9 +27,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_LockFile);
 
-class CTool_PreventDelete : public CTool
+struct CTool_PreventDelete : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
@@ -49,9 +47,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PreventDelete);
 
-class CTool_FillDrive : public CTool
+struct CTool_FillDrive : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr CurrentDir = NFile::CFile::fs_GetCurrentDirectory();

@@ -3,9 +3,8 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-class CTool_AddPortSource : public CTool2
+struct CTool_AddPortSource : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr Source = f_GetOption(_Params, "Source").f_Trim();

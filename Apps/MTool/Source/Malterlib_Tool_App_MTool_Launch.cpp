@@ -5,9 +5,8 @@
 #include <Mib/Process/VirtualProcessLaunch>
 #include <Mib/Time/TimeMeasure>
 
-class CTool_LaunchTimed : public CTool
+struct CTool_LaunchTimed : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
@@ -129,9 +128,8 @@ void fg_OutputWholeLines(CStr &_Buffer, EProcessLaunchOutputType _Type, bool _bF
 	}
 }
 
-class CTool_LaunchParallell : public CTool
+struct CTool_LaunchParallell : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimeMeasure("LaunchParallell");
@@ -319,9 +317,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_LaunchParallell);
 
-class CTool_TestStdOut : public CTool
+struct CTool_TestStdOut : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		fp64 Sleep = fg_GetRandomFloat();
@@ -343,9 +340,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_TestStdOut);
 
-class CTool_LaunchSandboxed : public CTool2
+struct CTool_LaunchSandboxed : public CTool2
 {
-public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		CStr FileName, Params;

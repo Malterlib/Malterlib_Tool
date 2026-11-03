@@ -5,9 +5,8 @@
 
 #include <Mib/BuildSystem/BuildSystemDependency>
 
-class CTool_BuildDependencies : public CTool2
+struct CTool_BuildDependencies : public CTool2
 {
-public:
 	~CTool_BuildDependencies()
 	{
 	}

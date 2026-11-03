@@ -8,9 +8,8 @@
 #include "Malterlib_Tool_App_MTool_PerforceHelpers.h"
 #include <Mib/Cryptography/UUID>
 
-class CTool_PerforceInitializeStream : public CTool2
+struct CTool_PerforceInitializeStream : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
@@ -70,9 +69,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceInitializeStream);
 
-class CTool_PerforceSwitchWorkspaceTaskStream : public CTool2
+struct CTool_PerforceSwitchWorkspaceTaskStream : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
@@ -123,9 +121,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceSwitchWorkspaceTaskStream);
 
-class CTool_PerforceCreateStreamBranches : public CTool2
+struct CTool_PerforceCreateStreamBranches : public CTool2
 {
-public:
 	static void fs_CreateStreamBranchForStreams(CPerforceFunctions &_Functions, CStr const &_BranchName, CStr const &_From, CStr const &_To)
 	{
 		auto fl_GetRelated = [&](CStr const &_Stream) -> TCVector<CStr>
@@ -333,9 +330,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceCreateStreamBranches);
 
-class CTool_PerforceCreatePatchesForStream : public CTool2
+struct CTool_PerforceCreatePatchesForStream : public CTool2
 {
-public:
 	static void fs_CreatePatchesForStream(CPerforceFunctions &_Functions, CStr const &_From, CStr const &_To)
 	{
 		auto fl_GetRelated = [&](CStr const &_Stream) -> TCVector<CStr>
@@ -576,9 +572,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceCreatePatchesForStream);
 
-class CTool_PerforceSetBuildServer : public CTool2
+struct CTool_PerforceSetBuildServer : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";

@@ -8,9 +8,8 @@
 #include "Malterlib_Tool_App_MTool_PerforceHelpers.h"
 #include <Mib/Cryptography/UUID>
 
-class CTool_PerforceForceDeleteChangelist : public CTool2
+struct CTool_PerforceForceDeleteChangelist : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
@@ -94,9 +93,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceForceDeleteChangelist);
 
-class CTool_PerforceTakeOwnership : public CTool2
+struct CTool_PerforceTakeOwnership : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
@@ -138,9 +136,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceTakeOwnership);
 
-class CTool_PerforceUnshelveRelatedStream : public CTool2
+struct CTool_PerforceUnshelveRelatedStream : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr DoneMessage = "Done!";
@@ -293,9 +290,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceUnshelveRelatedStream);
 
-class CTool_PerforceConvertChangelistsToGit : public CTool2
+struct CTool_PerforceConvertChangelistsToGit : public CTool2
 {
-public:
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
 	{
 		CStr SearchPath = f_GetOption(_Params, "SearchPath", "").f_Trim();

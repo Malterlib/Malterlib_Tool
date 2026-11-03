@@ -8,9 +8,8 @@
 #include "Malterlib_Tool_App_MTool_PerforceHelpers.h"
 #include <Mib/Cryptography/UUID>
 
-class CTool_PerforceCreateStream : public CTool2
+struct CTool_PerforceCreateStream : public CTool2
 {
-public:
 	struct CCreateStreamState
 	{
 		CStr m_UniqueCleanName;
@@ -742,9 +741,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_PerforceCreateStream);
 
-class CTool_PerforceDeleteStream : public CTool2
+struct CTool_PerforceDeleteStream : public CTool2
 {
-public:
 	void fr_DeleteStreams(CPerforceClientThrow &_Client, CBlockingStdInReader &_Reader, CStr const &_StreamName, bool _bTaskStream, bool _bForceObliterate)
 	{
 		CPerforceClient::CStream Stream = _Client.f_GetStream(_StreamName);

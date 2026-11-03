@@ -3,9 +3,8 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-class CTool_DeleteEmptyDirs : public CTool
+struct CTool_DeleteEmptyDirs : public CTool
 {
-public:
 	void fr_DeleteEmptyDirs(CStr const &_Path)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);

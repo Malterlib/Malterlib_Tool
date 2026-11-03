@@ -117,9 +117,8 @@ namespace
 	;
 }
 
-class CTool_DoxygenCompile : public CTool
+struct CTool_DoxygenCompile : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CRegistry Registry = fg_ExtractOptions(_Params);
@@ -155,9 +154,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_DoxygenCompile);
 
-class CTool_DoxygenLibTool : public CDistributedTool
+struct CTool_DoxygenLibTool : public CDistributedTool
 {
-public:
 	void f_Register
 		(
 			TCActor<CDistributedToolAppActor> const &_ToolActor
@@ -284,9 +282,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_DoxygenLibTool);
 
-class CTool_DoxygenLD : public CTool
+struct CTool_DoxygenLD : public CTool
 {
-public:
 	CDependencyFile m_DependencyFile;
 
 	CStr m_DoxygenExecutable;

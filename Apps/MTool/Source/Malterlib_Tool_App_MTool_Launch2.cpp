@@ -5,9 +5,8 @@
 
 #include <Mib/Process/VirtualProcessLaunch>
 
-class CTool_Launch : public CTool
+struct CTool_Launch : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		TCVector<CStr> lArgs;
@@ -26,27 +25,6 @@ public:
 private:
 	struct CLaunchOptions
 	{
-	private:
-		enum EField
-		{
-			EField_None               = 0
-			, EField_Time             = DMibBit(0)
-			, EField_PerforceParsing  = DMibBit(1)
-			, EField_SeparateStdErr   = DMibBit(2)
-			, EField_DelayOutput      = DMibBit(3)
-			, EField_Sandbox          = DMibBit(4)
-			, EField_SandboxCopyRoot  = DMibBit(5)
-			, EField_CPUUsage         = DMibBit(7)
-			, EField_AttributeOutput  = DMibBit(8)
-			, EField_RedirectStdOut   = DMibBit(9)
-			, EField_EchoCommand      = DMibBit(10)
-			, EField_Stats            = DMibBit(11)
-			, EField_LimitConcurrency = DMibBit(12)
-		};
-
-		EField m_Fields;
-
-	public:
 		int m_iLaunch;
 
 		bool m_bTime;
@@ -228,6 +206,26 @@ private:
 
 #undef DApplyField
 		}
+
+	private:
+		enum EField
+		{
+			EField_None               = 0
+			, EField_Time             = DMibBit(0)
+			, EField_PerforceParsing  = DMibBit(1)
+			, EField_SeparateStdErr   = DMibBit(2)
+			, EField_DelayOutput      = DMibBit(3)
+			, EField_Sandbox          = DMibBit(4)
+			, EField_SandboxCopyRoot  = DMibBit(5)
+			, EField_CPUUsage         = DMibBit(7)
+			, EField_AttributeOutput  = DMibBit(8)
+			, EField_RedirectStdOut   = DMibBit(9)
+			, EField_EchoCommand      = DMibBit(10)
+			, EField_Stats            = DMibBit(11)
+			, EField_LimitConcurrency = DMibBit(12)
+		};
+
+		EField m_Fields;
 	};
 
 	struct CGlobalOptions

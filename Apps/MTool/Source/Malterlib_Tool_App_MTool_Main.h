@@ -13,9 +13,8 @@ bool fg_IsLibTool();
 bool fg_IsMalterlib();
 NStr::CStr fg_GetToolRootDirectory();
 
-class CTool : public CDistributedTool
+struct CTool : public CDistributedTool
 {
-public:
 	virtual ~CTool()
 	{
 	}
@@ -36,9 +35,8 @@ public:
 	};
 };
 
-class CTool2 : public CTool
+struct CTool2 : public CTool
 {
-public:
 	virtual ~CTool2()
 	{
 	}

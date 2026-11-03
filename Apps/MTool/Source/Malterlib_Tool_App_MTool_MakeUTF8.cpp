@@ -3,9 +3,8 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-class CTool_MakeUTF8 : public CTool
+struct CTool_MakeUTF8 : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourcePath = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"), true);

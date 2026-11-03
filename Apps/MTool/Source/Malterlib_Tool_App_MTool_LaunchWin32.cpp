@@ -11,9 +11,8 @@
 #include <Mib/Core/PlatformSpecific/WindowsError>
 #include <Mib/Process/ProcessLaunch>
 
-class CTool_LaunchNSIS : public CTool
+struct CTool_LaunchNSIS : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
@@ -85,9 +84,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_LaunchNSIS);
 
-class CTool_LaunchWithNamedPipes : public CTool
+struct CTool_LaunchWithNamedPipes : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		aint iParam = 4;

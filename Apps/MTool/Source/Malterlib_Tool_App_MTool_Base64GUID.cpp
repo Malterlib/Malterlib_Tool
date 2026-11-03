@@ -4,9 +4,8 @@
 #include "Malterlib_Tool_App_MTool_Main.h"
 #include <Mib/Encoding/Base64>
 
-class CTool_Base64ToGUID : public CTool
+struct CTool_Base64ToGUID : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Base64 = _Params.f_GetValue("0", "");

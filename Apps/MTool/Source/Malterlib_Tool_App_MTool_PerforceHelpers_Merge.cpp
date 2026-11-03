@@ -8,9 +8,8 @@
 #include "Malterlib_Tool_App_MTool_PerforceHelpers.h"
 #include <Mib/Concurrency/ParallellForEach>
 
-class CTool_PerforceMerge : public CTool2
+struct CTool_PerforceMerge : public CTool2
 {
-public:
 	struct CIntegrationPair
 	{
 		CStr m_From;

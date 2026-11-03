@@ -3,9 +3,8 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-class CTool_DetectVM : public CTool
+struct CTool_DetectVM : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		bool bSilent = false;

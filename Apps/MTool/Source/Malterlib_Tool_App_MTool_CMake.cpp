@@ -9,9 +9,8 @@
 
 int cmake_main(int ac, char const * const *av);
 
-class CTool_CMake : public CDistributedTool
+struct CTool_CMake : public CDistributedTool
 {
-public:
 	void f_Register
 		(
 			TCActor<CDistributedToolAppActor> const &_ToolActor

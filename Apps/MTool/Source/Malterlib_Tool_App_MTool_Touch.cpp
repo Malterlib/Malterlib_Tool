@@ -5,9 +5,8 @@
 #include <Mib/Cryptography/UUID>
 #include <Mib/Time/TimeMeasure>
 
-class CTool_Sleep : public CTool
+struct CTool_Sleep : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SleepTime = _Params.f_GetValue("0", "NotExist");
@@ -20,9 +19,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_Sleep);
 
-class CTool_Touch : public CTool
+struct CTool_Touch : public CTool
 {
-public:
 	void fr_Touch(CStr const &_Path, CStr const &_Pattern, NTime::CTime const &_Time, bool _bRecursive)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/" + _Pattern, EFileAttrib_File, _bRecursive);
@@ -60,9 +58,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_Touch);
 
-class CTool_TouchOrCreate : public CTool
+struct CTool_TouchOrCreate : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr File = _Params.f_GetValue("0", "NotExist");
@@ -80,9 +77,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_TouchOrCreate);
 
-class CTool_CreateFile : public CTool
+struct CTool_CreateFile : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr File = _Params.f_GetValue("0", "NotExist");
@@ -103,9 +99,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_CreateFile);
 
-class CTool_CopyWriteTime : public CTool
+struct CTool_CopyWriteTime : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
@@ -160,9 +155,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_CopyWriteTime);
 
-class CTool_CopyWriteTimeIfNewer : public CTool
+struct CTool_CopyWriteTimeIfNewer : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
@@ -232,9 +226,8 @@ void fg_LogVerbose(CFile::EDiffCopyChange _Change, CStr const &_Source, CStr con
 	}
 }
 
-class CTool_DiffCopy : public CTool
+struct CTool_DiffCopy : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimeMeasure("DiffCopy");
@@ -344,9 +337,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_DiffCopy);
 
-class CTool_DiffReplace : public CTool
+struct CTool_DiffReplace : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimeMeasure("DiffReplace");
@@ -419,16 +411,14 @@ public:
 
 DMibRuntimeClass(CTool, CTool_DiffReplace);
 
-class CTool_DiffTouchCopy : public CTool_DiffCopy
+struct CTool_DiffTouchCopy : public CTool_DiffCopy
 {
-public:
 };
 
 DMibRuntimeClass(CTool, CTool_DiffTouchCopy);
 
-class CTool_DeleteDirectoryRecursive : public CTool
+struct CTool_DeleteDirectoryRecursive : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimeMeasure("DeleteDirectoryRecursive");
@@ -446,9 +436,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_DeleteDirectoryRecursive);
 
-class CTool_DeleteRecursive : public CTool
+struct CTool_DeleteRecursive : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		DScopeConOutTimeMeasure("DeleteRecursive");
@@ -476,9 +465,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_DeleteRecursive);
 
-class CTool_TestOutput : public CTool
+struct CTool_TestOutput : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Test = NMib::NCryptography::fg_GetRandomUuidString();

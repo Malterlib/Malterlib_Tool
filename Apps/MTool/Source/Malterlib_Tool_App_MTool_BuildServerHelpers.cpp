@@ -134,9 +134,8 @@ namespace
 
 void fg_LogVerbose(CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link);
 
-class CTool_BuildServerPut : public CTool2
+struct CTool_BuildServerPut : public CTool2
 {
-public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		if (fg_GetSys()->f_GetEnvironmentVariable("BUILDSERVER") == "")
@@ -204,9 +203,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_BuildServerPut);
 
-class CTool_BuildServerGet : public CTool2
+struct CTool_BuildServerGet : public CTool2
 {
-public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		if (fg_GetSys()->f_GetEnvironmentVariable("BUILDSERVER") == "")
@@ -240,9 +238,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_BuildServerGet);
 
-class CTool_BuildServerTool : public CTool2
+struct CTool_BuildServerTool : public CTool2
 {
-public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		if (!_Params.f_FindEqual("Tool"))
@@ -482,9 +479,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_BuildServerTool);
 
-class CTool_ChangeDirectory : public CTool2
+struct CTool_ChangeDirectory : public CTool2
 {
-public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		CStr Directory = _Files[0];
@@ -506,9 +502,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_ChangeDirectory);
 
-class CTool_AppendFile : public CTool2
+struct CTool_AppendFile : public CTool2
 {
-public:
 	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
 	{
 		CStr FileName = _Files[0];

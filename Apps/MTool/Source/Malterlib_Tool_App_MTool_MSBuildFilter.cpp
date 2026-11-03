@@ -14,7 +14,6 @@
 
 struct CTool_MSBuildFilter : public CDistributedTool, public CAllowUnsafeThis
 {
-public:
 	struct CAnsiProperties
 	{
 		auto operator <=> (CAnsiProperties const &_Right) const noexcept = default;

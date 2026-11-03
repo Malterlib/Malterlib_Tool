@@ -235,9 +235,8 @@ struct CCOFFObject
 	}
 };
 
-class CTool_VirtualFS : public CTool
+struct CTool_VirtualFS : public CTool
 {
-public:
 	enum ETargetFormat
 	{
 		ETargetFormat_Binary

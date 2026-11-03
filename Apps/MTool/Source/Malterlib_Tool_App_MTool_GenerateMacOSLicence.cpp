@@ -3,9 +3,8 @@
 
 #include "Malterlib_Tool_App_MTool_Main.h"
 
-class CTool_GenerateMacOSLicence : public CTool
+struct CTool_GenerateMacOSLicence : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr SourcePath = _Params.f_GetValue("0", "");

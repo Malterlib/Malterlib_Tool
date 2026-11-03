@@ -16,9 +16,8 @@ struct CV_INFO_PDB70
 	ch8 PdbFileName[1]; // zero terminated string with the name of the PDB file
 };
 
-class CTool_IncreaseTimeStamp : public CTool
+struct CTool_IncreaseTimeStamp : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "NotExist.file");
@@ -101,9 +100,8 @@ public:
 
 DMibRuntimeClass(CTool, CTool_IncreaseTimeStamp);
 
-class CTool_SetImageOsVersion : public CTool
+struct CTool_SetImageOsVersion : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr FileName = _Params.f_GetValue("0", "NotExist.file");

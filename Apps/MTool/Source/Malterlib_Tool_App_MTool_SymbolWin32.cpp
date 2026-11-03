@@ -8,9 +8,8 @@
 #include <Mib/Process/ProcessLaunch>
 #include <Mib/Cryptography/RandomID>
 
-class CTool_Symbol : public CTool
+struct CTool_Symbol : public CTool
 {
-public:
 	void fs_CompressOrCopy(CStr const &_Source, CStr const &_Destination)
 	{
 		try

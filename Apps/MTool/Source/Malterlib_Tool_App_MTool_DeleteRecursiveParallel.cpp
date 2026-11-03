@@ -176,7 +176,6 @@ using namespace NDeleteRecursive;
 
 struct CTool_DeleteRecursiveParallel : public CDistributedTool, public CAllowUnsafeThis
 {
-public:
 	void f_Register
 		(
 			TCActor<CDistributedToolAppActor> const &_ToolActor

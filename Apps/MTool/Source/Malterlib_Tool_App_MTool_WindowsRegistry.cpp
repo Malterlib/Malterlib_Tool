@@ -7,9 +7,8 @@
 
 #include <Mib/Core/PlatformSpecific/WindowsRegistry>
 
-class CTool_ReadWindowsRegistry : public CTool
+struct CTool_ReadWindowsRegistry : public CTool
 {
-public:
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
 		CStr Root = _Params.f_GetValue("0", "012301231023Error");
