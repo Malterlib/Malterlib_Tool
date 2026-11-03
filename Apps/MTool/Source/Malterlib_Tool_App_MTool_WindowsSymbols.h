@@ -27,33 +27,8 @@ namespace NMib::NTool
 		uint16 m_SizeOfOptionalHeader;
 		uint16 m_Characteristics;
 
-		bool f_Is64Bit()
-		{
-			switch (m_Machine)
-			{
-			case EPEImageFileMachine_IA64:
-			case EPEImageFileMachine_AMD64:
-			case EPEImageFileMachine_ARM64:
-				return true;
-			default: return false;
-			}
-			return false;
-		}
-
-		bool f_Is32Bit()
-		{
-			switch (m_Machine)
-			{
-			case EPEImageFileMachine_I386:
-			case EPEImageFileMachine_ARM:
-			case EPEImageFileMachine_THUMB:
-			case EPEImageFileMachine_ARMNT:
-			case EPEImageFileMachine_POWERPC:
-				return true;
-			default: return false;
-			}
-			return false;
-		}
+		bool f_Is64Bit();
+		bool f_Is32Bit();
 	};
 
 	struct CPEImageDataDirectory
@@ -211,4 +186,3 @@ namespace NMib::NTool
 
 	CWindowsExecutableInfo fg_GetWindowsExecutableInfo(CStr const &_Path);
 }
-

@@ -15,9 +15,7 @@ NStr::CStr fg_GetToolRootDirectory();
 
 struct CTool : public CDistributedTool
 {
-	virtual ~CTool()
-	{
-	}
+	virtual ~CTool();
 
 	virtual void f_Register
 		(
@@ -30,16 +28,12 @@ struct CTool : public CDistributedTool
 	;
 
 	virtual aint f_Run(NContainer::CRegistry &_Params) = 0;
-	virtual void f_RequestStop()
-	{
-	};
+	virtual void f_RequestStop();
 };
 
 struct CTool2 : public CTool
 {
-	virtual ~CTool2()
-	{
-	}
+	virtual ~CTool2();
 
 	virtual aint f_Run(NContainer::CRegistry &_Params) override;
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) = 0;

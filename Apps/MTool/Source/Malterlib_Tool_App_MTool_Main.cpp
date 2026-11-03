@@ -32,6 +32,10 @@ NStr::CStr fg_GetToolRootDirectory()
 	return NFile::CFile::fs_GetExpandedPath(RootDirectory);
 }
 
+CTool::~CTool()
+{
+}
+
 void CTool::f_Register
 	(
 		TCActor<CDistributedToolAppActor> const &_ToolActor
@@ -82,6 +86,14 @@ void CTool::f_Register
 			}
 		)
 	;
+}
+
+void CTool::f_RequestStop()
+{
+}
+
+CTool2::~CTool2()
+{
 }
 
 CStr CTool2::f_GetOption(TCMap<CStr, CStr> const &_Params, CStr const &_Option, CStr const &_Default) const
