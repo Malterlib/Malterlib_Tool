@@ -18,14 +18,14 @@ struct CTool_PerforceMerge : public CTool2
 		zbool m_bTask;
 	};
 
-	void f_GetIntegrationPairs(CPerforceFunctions &_Functions, CStr const &_From, CStr const &_To, TCVector<CIntegrationPair> &_oPairs, bool _bParentChildren, bool _bToParent)
+	void f_GetIntegrationPairs(CPerforceFunctions &_Functions, CStr const &_From, CStr const &_To, TCVector<CIntegrationPair> &o_Pairs, bool _bParentChildren, bool _bToParent)
 	{
 		if (_bToParent)
 		{
 			CPerforceFunctions::COwnedStreams OwnedFrom = _Functions.f_GetStreamOwned(_From, true);
 			for (auto iStream = OwnedFrom.m_Streams.f_GetIterator(); iStream; ++iStream)
 			{
-				auto &Pair = _oPairs.f_Insert();
+				auto &Pair = o_Pairs.f_Insert();
 				Pair.m_From = fg_Get<0>(*iStream);
 				Pair.m_To = fg_Get<1>(*iStream);
 			}
@@ -53,7 +53,7 @@ struct CTool_PerforceMerge : public CTool2
 				auto pTo = OwnedTo.f_FindEqual(iStream.f_GetKey());
 				if (pTo)
 				{
-					auto &Pair = _oPairs.f_Insert();
+					auto &Pair = o_Pairs.f_Insert();
 					Pair.m_From = *iStream;
 					Pair.m_To = *pTo;
 				}
@@ -352,11 +352,11 @@ struct CTool_PerforceMerge : public CTool2
 					CPerforceClient::CStream FromStream = Functions.f_GetStreamCached(Pair.m_From);
 
 					CPerforceClient::CStream ToStream = Functions.f_GetStreamCached(Pair.m_To);
-					auto fl_RealError = [&](CStr const &_Error, CStr &_oRetryChangelist)
+					auto fl_RealError = [&](CStr const &_Error, CStr &o_RetryChangelist)
 						{
 							if (_Error.f_Find("- resolve move to") >= 0 && _Error.f_Find("before integrating from"))
 								return false;
-							if (_Error.f_StartsWith("Some files couldn't be opened for move.") && _oRetryChangelist.f_IsEmpty())
+							if (_Error.f_StartsWith("Some files couldn't be opened for move.") && o_RetryChangelist.f_IsEmpty())
 							{
 								aint nParsed = 0;
 								int64 RetryChangelist = 0;
@@ -365,7 +365,7 @@ struct CTool_PerforceMerge : public CTool2
 								{
 									if (SplitChangelist < 0 || RetryChangelist < SplitChangelist)
 										SplitChangelist = RetryChangelist;
-									_oRetryChangelist = fg_Format("@{}", RetryChangelist);
+									o_RetryChangelist = fg_Format("@{}", RetryChangelist);
 									return false;
 								}
 							}

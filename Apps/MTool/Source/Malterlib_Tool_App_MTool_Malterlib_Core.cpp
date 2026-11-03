@@ -82,7 +82,7 @@ void CTool_Malterlib::f_Register_Core(CDistributedAppCommandLineSpecification::C
 					}
 				;
 
-				TCMap<int, void (*)(int)> OldSignals;
+				TCMap<int, void (*)(int _Signal)> OldSignals;
 
 				bool bRunningFromXcode = fg_GetSys()->f_GetEnvironmentVariable("XCODE_APP_SUPPORT_DIR") && fg_GetSys()->f_GetEnvironmentVariable("ACTION");
 				if (bRunningFromXcode)
