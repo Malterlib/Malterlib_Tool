@@ -9,8 +9,8 @@ struct CTool_DeleteEmptyDirs : public CTool
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
 
-		for (umint i = 0; i < Files.f_GetLen(); ++i)
-			f_DeleteEmptyDirs(Files[i]);
+		for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
+			f_DeleteEmptyDirs(Files[iFile]);
 
 		Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory | EFileAttrib_File, false);
 		if (Files.f_GetLen() == 0)

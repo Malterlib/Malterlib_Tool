@@ -214,7 +214,7 @@ struct CTool_PerforceRunScript : public CTool2
 			ToolPaths.f_Insert("x:/Dev/cygwin/bin");
 			ToolPaths.f_Insert("c:/cygwin/bin");
 
-			auto fl_GetTool = [&](CStr const &_Tool) -> CStr
+			auto fGetTool = [&](CStr const &_Tool) -> CStr
 				{
 					for (auto &Path : ToolPaths)
 					{
@@ -242,7 +242,7 @@ struct CTool_PerforceRunScript : public CTool2
 				if (ToolName.f_IsEmpty())
 					DError(fg_Format("Could not find tool for {}", FirstLine));
 
-				CStr Tool = fl_GetTool(ToolName);
+				CStr Tool = fGetTool(ToolName);
 				Params.f_Insert("--login");
 				Params.f_Insert("-c");
 				TCVector<CStr> RunParams;

@@ -16,8 +16,8 @@ struct CTool_PostCopy : public CTool
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
 
-		for (umint i = 0; i < Files.f_GetLen(); ++i)
-			f_DeleteEmptyDirs(Files[i]);
+		for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
+			f_DeleteEmptyDirs(Files[iFile]);
 
 		Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory | EFileAttrib_File, false);
 		if (Files.f_GetLen() == 0)
@@ -55,9 +55,9 @@ struct CTool_PostCopy : public CTool
 		bool bPrintDestination = false;
 		bool bPrintedDestination = false;
 
-		for (umint i = 0; true; ++i)
+		for (umint iParam = 0; true; ++iParam)
 		{
-			CStr Value = _Params.f_GetValue(CStr::fs_ToStr(i), "");
+			CStr Value = _Params.f_GetValue(CStr::fs_ToStr(iParam), "");
 			if (Value.f_IsEmpty())
 				break;
 			if (Value.f_Find("=") < 0)

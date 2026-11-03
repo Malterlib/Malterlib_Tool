@@ -10,13 +10,13 @@ struct CTool_RemoveBrokenObj : public CTool
 		// DConOut("Removing broken ojb files for dir: {}" DNewLine, _Path);
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*.obj", EFileAttrib_File, true);
 
-		for (umint i = 0; i < Files.f_GetLen(); ++i)
+		for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
 		{
-			CFilePos Len = NFile::CFile::fs_GetFileSize(Files[i]);
+			CFilePos Len = NFile::CFile::fs_GetFileSize(Files[iFile]);
 			if (Len == 0)
 			{
-				DConOut("Delete: {}" DNewLine, Files[i]);
-				NFile::CFile::fs_DeleteFile(Files[i]);
+				DConOut("Delete: {}" DNewLine, Files[iFile]);
+				NFile::CFile::fs_DeleteFile(Files[iFile]);
 			}
 			else if (Len >= 16)
 			{
@@ -24,7 +24,7 @@ struct CTool_RemoveBrokenObj : public CTool
 				{
 					CByteVector Test;
 					CFile File;
-					File.f_Open(Files[i], EFileOpen_Read | EFileOpen_ShareAll);
+					File.f_Open(Files[iFile], EFileOpen_Read | EFileOpen_ShareAll);
 					umint ToRead = fg_Min(File.f_GetLength(), 16);
 					Test.f_SetLen(ToRead);
 					File.f_Read(Test.f_GetArray(), Test.f_GetLen());
@@ -32,16 +32,16 @@ struct CTool_RemoveBrokenObj : public CTool
 					umint Len = Test.f_GetLen();
 					bool bOnly0 = true;
 					{
-						for (umint i = 0; i < Len; ++i)
+						for (umint iByte = 0; iByte < Len; ++iByte)
 						{
-							if (Test[i] != 0)
+							if (Test[iByte] != 0)
 								bOnly0 = false;
 						}
 					}
 					if (bOnly0)
 					{
-						DConOut("Delete: {}" DNewLine, Files[i]);
-						NFile::CFile::fs_DeleteFile(Files[i]);
+						DConOut("Delete: {}" DNewLine, Files[iFile]);
+						NFile::CFile::fs_DeleteFile(Files[iFile]);
 					}
 				}
 				catch (CExceptionFile const &)

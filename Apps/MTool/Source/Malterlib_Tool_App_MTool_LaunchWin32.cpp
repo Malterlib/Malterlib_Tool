@@ -106,35 +106,35 @@ struct CTool_LaunchWithNamedPipes : public CTool
 		Inheritable.nLength = sizeof(SECURITY_ATTRIBUTES);
 		Inheritable.lpSecurityDescriptor = nullptr;
 		Inheritable.bInheritHandle = TRUE;
-		HANDLE hStdOut = CreateFileA(StdOut, GENERIC_WRITE, 0, &Inheritable, OPEN_EXISTING, 0, nullptr);
-		if (hStdOut == INVALID_HANDLE_VALUE)
+		HANDLE StdOutFile = CreateFileA(StdOut, GENERIC_WRITE, 0, &Inheritable, OPEN_EXISTING, 0, nullptr);
+		if (StdOutFile == INVALID_HANDLE_VALUE)
 			return 1;
 
-		HANDLE hStdErr = hStdOut;
+		HANDLE StdErrFile = StdOutFile;
 
 		if (StdErr != StdOut)
 		{
 			WaitNamedPipeA(StdErr, NMPWAIT_WAIT_FOREVER);
-			hStdErr = CreateFileA(StdErr, GENERIC_WRITE, 0, &Inheritable, OPEN_EXISTING, 0, nullptr);
-			if (hStdErr == INVALID_HANDLE_VALUE)
+			StdErrFile = CreateFileA(StdErr, GENERIC_WRITE, 0, &Inheritable, OPEN_EXISTING, 0, nullptr);
+			if (StdErrFile == INVALID_HANDLE_VALUE)
 			{
-				CloseHandle(hStdOut);
+				CloseHandle(StdOutFile);
 				return 1;
 			}
 		}
 
 		WaitNamedPipeA(StdIn, NMPWAIT_WAIT_FOREVER);
-		HANDLE hStdIn = CreateFileA(StdIn, GENERIC_READ, 0, &Inheritable, OPEN_EXISTING, 0, nullptr);
-		if (hStdIn == INVALID_HANDLE_VALUE)
+		HANDLE StdInFile = CreateFileA(StdIn, GENERIC_READ, 0, &Inheritable, OPEN_EXISTING, 0, nullptr);
+		if (StdInFile == INVALID_HANDLE_VALUE)
 			return 1;
 
 		uint32 ProcessID = GetCurrentProcessId();
 		DWORD Written = 0;
-		if (!WriteFile(hStdOut, &ProcessID, sizeof(ProcessID), &Written, nullptr))
+		if (!WriteFile(StdOutFile, &ProcessID, sizeof(ProcessID), &Written, nullptr))
 			DDTrace("{}" DNewLine, NMib::NPlatform::fg_Win32_GetLastErrorStr(0));
 
 		uint32 Finished = 1;
-		if (!ReadFile(hStdIn, &Finished, sizeof(Finished), &Written, nullptr))
+		if (!ReadFile(StdInFile, &Finished, sizeof(Finished), &Written, nullptr))
 			DDTrace("{}" DNewLine, NMib::NPlatform::fg_Win32_GetLastErrorStr(0));
 
 		CStr Program = _Params.f_GetValue("3", "");
@@ -142,17 +142,17 @@ struct CTool_LaunchWithNamedPipes : public CTool
 		DWORD ExitCode = -2;
 
 		{
-			PROCESS_INFORMATION pi;
-			STARTUPINFOW si;
+			PROCESS_INFORMATION ProcessInfo;
+			STARTUPINFOW StartupInfo;
 
 			// Set up the start up info struct.
-			fg_MemClear(si);
-			si.cb = sizeof(STARTUPINFOW);
-			si.hStdOutput = hStdOut;
-			si.hStdInput = hStdIn;
-			si.hStdError = hStdErr;
-			si.wShowWindow = SW_HIDE;
-			si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+			fg_MemClear(StartupInfo);
+			StartupInfo.cb = sizeof(STARTUPINFOW);
+			StartupInfo.hStdOutput = StdOutFile;
+			StartupInfo.hStdInput = StdInFile;
+			StartupInfo.hStdError = StdErrFile;
+			StartupInfo.wShowWindow = SW_HIDE;
+			StartupInfo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
 
 			// Note that dwFlags must include STARTF_USESHOWWINDOW if we
 			// use the wShowWindow flags. This also assumes that the
@@ -180,8 +180,8 @@ struct CTool_LaunchWithNamedPipes : public CTool
 						, CREATE_NEW_CONSOLE | CREATE_UNICODE_ENVIRONMENT
 						, nullptr
 						, NFile::NPlatform::fg_ConvertToWindowsPath(WorkingDir, true)
-						, &si
-						, &pi
+						, &StartupInfo
+						, &ProcessInfo
 					)
 				)
 				{
@@ -190,22 +190,22 @@ struct CTool_LaunchWithNamedPipes : public CTool
 				}
 			}
 			// Close any unuseful handles
-			::CloseHandle(pi.hThread);
+			::CloseHandle(ProcessInfo.hThread);
 
-			WaitForSingleObject(pi.hProcess, INFINITE);
+			WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
 			/*
-			if (!FlushFileBuffers(hStdOut))
+			if (!FlushFileBuffers(StdOutFile))
 			{
 				DDTrace("Error: {}" DNewLine, NMib::NPlatform::fg_Win32_GetLastErrorStr(GetLastError()));
 			}
-			if (!FlushFileBuffers(hStdErr))
+			if (!FlushFileBuffers(StdErrFile))
 			{
 				DDTrace("Error: {}" DNewLine, NMib::NPlatform::fg_Win32_GetLastErrorStr(GetLastError()));
 			}*/
 
-			GetExitCodeProcess(pi.hProcess, &ExitCode);
+			GetExitCodeProcess(ProcessInfo.hProcess, &ExitCode);
 
-			CloseHandle(pi.hProcess);
+			CloseHandle(ProcessInfo.hProcess);
 		}
 
 		return ExitCode;

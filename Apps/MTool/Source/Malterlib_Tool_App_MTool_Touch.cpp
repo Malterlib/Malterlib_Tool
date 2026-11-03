@@ -24,11 +24,11 @@ struct CTool_Touch : public CTool
 	void f_Touch(CStr const &_Path, CStr const &_Pattern, NTime::CTime const &_Time, bool _bRecursive)
 	{
 		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/" + _Pattern, EFileAttrib_File, _bRecursive);
-		for (umint i = 0; i < Files.f_GetLen(); ++i)
+		for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
 		{
 			try
 			{
-				CStr File = Files[i];
+				CStr File = Files[iFile];
 				DConOut("Touching: {}" DNewLine, File);
 				NFile::CFile Temp;
 				Temp.f_Open(File, EFileOpen_ShareAll | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs);
@@ -112,10 +112,10 @@ struct CTool_CopyWriteTime : public CTool
 			CStr NewestSourceFile = SourceFile;
 
 			// Check additional source files (params 2, 3, 4, ...)
-			for (umint i = 2;; ++i)
+			for (umint iParam = 2;; ++iParam)
 			{
 				using namespace NMib::NStr;
-				CStr ExtraSource = _Params.f_GetValue("{}"_f << i, "");
+				CStr ExtraSource = _Params.f_GetValue("{}"_f << iParam, "");
 				if (ExtraSource.f_IsEmpty())
 					break;
 				ExtraSource = CFile::fs_GetExpandedPath(ExtraSource);
@@ -168,10 +168,10 @@ struct CTool_CopyWriteTimeIfNewer : public CTool
 			CStr NewestSourceFile = SourceFile;
 
 			// Check additional source files (params 2, 3, 4, ...)
-			for (umint i = 2;; ++i)
+			for (umint iParam = 2;; ++iParam)
 			{
 				using namespace NMib::NStr;
-				CStr ExtraSource = _Params.f_GetValue("{}"_f << i, "");
+				CStr ExtraSource = _Params.f_GetValue("{}"_f << iParam, "");
 				if (ExtraSource.f_IsEmpty())
 					break;
 				ExtraSource = CFile::fs_GetExpandedPath(ExtraSource);
@@ -471,7 +471,7 @@ struct CTool_TestOutput : public CTool
 	{
 		CStr Test = NMib::NCryptography::fg_GetRandomUuidString();
 		DConOut("*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯{\n}");
-		for (int i = 0; i < 16; ++i)
+		for (int iOutput = 0; iOutput < 16; ++iOutput)
 		{
 			NMib::NSys::fg_Thread_Sleep(0.001f);
 			DConOut("Out: {}{\n}", Test);

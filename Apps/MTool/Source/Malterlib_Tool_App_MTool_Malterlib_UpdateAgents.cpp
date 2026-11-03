@@ -27,7 +27,7 @@ namespace
 		auto pParse = _Line.f_GetStr();
 		while (fg_IsIncludeSpace(*pParse))
 			++pParse;
-		for (umint i = 0; i < 3 && *pParse == '`'; ++i)
+		for (umint iBacktick = 0; iBacktick < 3 && *pParse == '`'; ++iBacktick)
 			++pParse;
 		while (fg_IsIncludeSpace(*pParse))
 			++pParse;
@@ -38,7 +38,7 @@ namespace
 
 		while (fg_IsIncludeSpace(*pParse))
 			++pParse;
-		for (umint i = 0; i < 3 && *pParse == '`'; ++i)
+		for (umint iBacktick = 0; iBacktick < 3 && *pParse == '`'; ++iBacktick)
 			++pParse;
 		while (fg_IsIncludeSpace(*pParse))
 			++pParse;
@@ -135,9 +135,9 @@ namespace
 			m_Stack.f_Insert(_Path);
 			m_Output += "<!-- Begin include: " + Relative + " -->\n";
 
-			for (umint i = 0; i < Lines.f_GetLen(); ++i)
+			for (umint iLine = 0; iLine < Lines.f_GetLen(); ++iLine)
 			{
-				auto const &Line = Lines[i];
+				auto const &Line = Lines[iLine];
 				auto Include = fg_WholeLineInclude(Line);
 				if (Include)
 				{
@@ -148,7 +148,7 @@ namespace
 
 				auto Annotated = fg_AnnotateInline(Line, Parent, Inline, true);
 				m_Output += fg_AnnotateInline(Annotated, Parent, Inline, false);
-				if (i + 1 < Lines.f_GetLen())
+				if (iLine + 1 < Lines.f_GetLen())
 					m_Output += "\n";
 			}
 

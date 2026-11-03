@@ -583,8 +583,8 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					for (umint i = 0; i < 256; ++i)
-						Repo.f_Write(CStr("listing/{}_"_f << i) + fg_Repeat("é", 50) + ".cpp", "short\n");
+					for (umint iFile = 0; iFile < 256; ++iFile)
+						Repo.f_Write(CStr("listing/{}_"_f << iFile) + fg_Repeat("é", 50) + ".cpp", "short\n");
 					co_await Repo.f_Commit();
 					co_await Repo.f_Validate("InitialAudit", 0, false);
 					Repo.f_Write("space [x] é.cpp", fg_Repeat("x", 191));
@@ -984,7 +984,7 @@ namespace NMib::NTool
 					NContainer::CByteVector Data;
 					for (uint8 Byte : {0xFF, 0xFE, 0xFF, 0xFE})
 						Data.f_Insert(Byte);
-					for (umint i = 0; i < 190; ++i)
+					for (umint iChar = 0; iChar < 190; ++iChar)
 					{
 						Data.f_Insert(uint8('x'));
 						Data.f_Insert(uint8(0));
@@ -995,7 +995,7 @@ namespace NMib::NTool
 					NContainer::CByteVector Nul;
 					for (uint8 Byte : {0xFE, 0xFF, 0x00, 0x00})
 						Nul.f_Insert(Byte);
-					for (umint i = 0; i < 190; ++i)
+					for (umint iChar = 0; iChar < 190; ++iChar)
 					{
 						Nul.f_Insert(uint8(0));
 						Nul.f_Insert(uint8('x'));
@@ -1154,15 +1154,15 @@ namespace NMib::NTool
 					auto Unrelated = (co_await Repo.f_Git({"commit-tree", "HEAD^{tree}", "-m", "unrelated"})).f_Trim();
 					TCVector<TCVector<CStr>> Cases = {{"--base", "missing-reference"}, {"--base", Unrelated}, {"--base", "HEAD", "--staged"}, {"--base", ""}};
 					TCVector<CStr> Messages = {"Cannot resolve validation reference", "no common ancestor", "cannot be combined", "nonempty commit reference"};
-					for (umint i = 0; i < Cases.f_GetLen(); ++i)
+					for (umint iCase = 0; iCase < Cases.f_GetLen(); ++iCase)
 					{
-						DMibTestPath(Messages[i]);
+						DMibTestPath(Messages[iCase]);
 						TCVector<CStr> Params = {"Validate", "-C", Repo.m_Path, "--no-color"};
-						Params.f_Insert(Cases[i]);
+						Params.f_Insert(Cases[iCase]);
 						auto Result = co_await Repo.f_Tool(fg_Move(Params));
 
 						DMibExpect(Result.m_ExitCode, !=, 0);
-						DMibExpect(Result.f_GetCombinedOut().f_Find(Messages[i]), >=, 0);
+						DMibExpect(Result.f_GetCombinedOut().f_Find(Messages[iCase]), >=, 0);
 					}
 
 					Repo.f_Write(".editorconfig", "[*]\nmax_line_length = broken\n");

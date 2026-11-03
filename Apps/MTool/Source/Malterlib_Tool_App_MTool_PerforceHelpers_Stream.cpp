@@ -125,7 +125,7 @@ struct CTool_PerforceCreateStreamBranches : public CTool2
 {
 	static void fs_CreateStreamBranchForStreams(CPerforceFunctions &_Functions, CStr const &_BranchName, CStr const &_From, CStr const &_To)
 	{
-		auto fl_GetRelated = [&](CStr const &_Stream) -> TCVector<CStr>
+		auto fGetRelated = [&](CStr const &_Stream) -> TCVector<CStr>
 			{
 				TCSet<CStr> RelatedStreamsSet;
 				TCVector<CStr> RelatedStreams;
@@ -152,7 +152,7 @@ struct CTool_PerforceCreateStreamBranches : public CTool2
 				return RelatedStreams;
 			}
 		;
-		TCVector<CStr> ToStreams = fl_GetRelated(_To);
+		TCVector<CStr> ToStreams = fGetRelated(_To);
 
 		TCMap<CStr, TCMap<uint32, CStr>> ParentMap;
 
@@ -173,7 +173,7 @@ struct CTool_PerforceCreateStreamBranches : public CTool2
 			}
 		}
 
-		TCVector<CStr> FromStreams = fl_GetRelated(_From);
+		TCVector<CStr> FromStreams = fGetRelated(_From);
 
 		TCMap<CStr, CStr> MappedStreams;
 		for (auto &Stream : FromStreams)
@@ -206,7 +206,7 @@ struct CTool_PerforceCreateStreamBranches : public CTool2
 
 		CPerforceClient::CStream Stream = _Functions.f_GetStreamCached(_From);
 
-		auto fl_AddBranchMapping = [&](CStr const &_From, CStr const &_To)
+		auto fAddBranchMapping = [&](CStr const &_From, CStr const &_To)
 			{
 				if (_From == _To)
 					return;
@@ -236,7 +236,7 @@ struct CTool_PerforceCreateStreamBranches : public CTool2
 				if (pStream)
 				{
 					UsedMappings[_From] = *pStream;
-					fl_AddBranchMapping(CFile::fs_AppendPath(_From, Path), CFile::fs_AppendPath(*pStream, Path));
+					fAddBranchMapping(CFile::fs_AppendPath(_From, Path), CFile::fs_AppendPath(*pStream, Path));
 				}
 			}
 			else if (Type == "import" || Type == "import+")
@@ -251,7 +251,7 @@ struct CTool_PerforceCreateStreamBranches : public CTool2
 				if (pStream)
 				{
 					UsedMappings[FromStream] = *pStream;
-					fl_AddBranchMapping(CFile::fs_AppendPath(FromStream, FullPath), CFile::fs_AppendPath(*pStream, FullPath));
+					fAddBranchMapping(CFile::fs_AppendPath(FromStream, FullPath), CFile::fs_AppendPath(*pStream, FullPath));
 				}
 			}
 		}
@@ -334,7 +334,7 @@ struct CTool_PerforceCreatePatchesForStream : public CTool2
 {
 	static void fs_CreatePatchesForStream(CPerforceFunctions &_Functions, CStr const &_From, CStr const &_To)
 	{
-		auto fl_GetRelated = [&](CStr const &_Stream) -> TCVector<CStr>
+		auto fGetRelated = [&](CStr const &_Stream) -> TCVector<CStr>
 			{
 				TCSet<CStr> RelatedStreamsSet;
 				TCVector<CStr> RelatedStreams;
@@ -361,7 +361,7 @@ struct CTool_PerforceCreatePatchesForStream : public CTool2
 				return RelatedStreams;
 			}
 		;
-		TCVector<CStr> ToStreams = fl_GetRelated(_To);
+		TCVector<CStr> ToStreams = fGetRelated(_To);
 
 		TCMap<CStr, TCMap<uint32, CStr>> ParentMap;
 
@@ -382,7 +382,7 @@ struct CTool_PerforceCreatePatchesForStream : public CTool2
 			}
 		}
 
-		TCVector<CStr> FromStreams = fl_GetRelated(_From);
+		TCVector<CStr> FromStreams = fGetRelated(_From);
 
 		TCMap<CStr, CStr> MappedStreams;
 		for (auto &Stream : FromStreams)
@@ -481,7 +481,7 @@ struct CTool_PerforceCreatePatchesForStream : public CTool2
 				)
 			;
 
-			auto fl_GeneratePatch = [&](bool _bFullContext)
+			auto fGeneratePatch = [&](bool _bFullContext)
 				{
 					CStr Patch;
 					if (!_Functions.f_GetClient().f_NoThrow().f_CreatePatch(BranchName, _bFullContext, Patch))
@@ -512,8 +512,8 @@ struct CTool_PerforceCreatePatchesForStream : public CTool2
 				}
 			;
 
-			fl_GeneratePatch(false);
-			fl_GeneratePatch(true);
+			fGeneratePatch(false);
+			fGeneratePatch(true);
 		}
 	}
 
@@ -639,12 +639,12 @@ struct CTool_PerforceSetBuildServer : public CTool2
 
 				TCVector<CPerforceClient::CIntegrationResult> IntegrateResult;
 				TCVector<CPerforceClient::CMergeError> Errors;
-				for (auto i = 0; i < 2; ++i)
+				for (auto iPass = 0; iPass < 2; ++iPass)
 				{
 					TCVector<CStr> MustSync;
 					IntegrateResult.f_Clear();
 					Errors.f_Clear();
-					if (!pClient->f_NoThrow().f_IntegrateFiles(ReadFile, DestinationFile, i == 0, true, IntegrateResult, MustSync, Errors))
+					if (!pClient->f_NoThrow().f_IntegrateFiles(ReadFile, DestinationFile, iPass == 0, true, IntegrateResult, MustSync, Errors))
 					{
 						if (pClient->f_NoThrow().f_GetLastError().f_Find("- all revision(s) already integrated.") >= 0)
 						{

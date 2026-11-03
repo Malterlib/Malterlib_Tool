@@ -34,7 +34,7 @@ namespace
 				// Backslashes before a quote are doubled, and the quote escaped
 				if (*pIn == L'"')
 				{
-					for (size_t i = 0; i < nBackslashes + 1; ++i)
+					for (size_t iBackslash = 0; iBackslash < nBackslashes + 1; ++iBackslash)
 						*pOut++ = L'\\';
 				}
 				nBackslashes = 0;
@@ -43,7 +43,7 @@ namespace
 		}
 
 		// Backslashes before the closing quote are doubled
-		for (size_t i = 0; i < nBackslashes; ++i)
+		for (size_t iBackslash = 0; iBackslash < nBackslashes; ++iBackslash)
 			*pOut++ = L'\\';
 		*pOut++ = L'"';
 		*pOut = 0;
@@ -68,22 +68,22 @@ int wmain(int _nArguments, wchar_t **_pArguments)
 	if (pExtension && (!pSeparator || pExtension > pSeparator))
 		*pExtension = 0;
 
-	wchar_t const **ppArguments = (wchar_t const **)malloc(sizeof(wchar_t *) * (_nArguments + 2));
-	if (!ppArguments)
+	wchar_t const **pArguments = (wchar_t const **)malloc(sizeof(wchar_t *) * (_nArguments + 2));
+	if (!pArguments)
 		return 127;
 
-	ppArguments[0] = fg_QuoteArgument(pShell);
-	ppArguments[1] = fg_QuoteArgument(Script);
-	for (int i = 1; i < _nArguments; ++i)
-		ppArguments[i + 1] = fg_QuoteArgument(_pArguments[i]);
-	ppArguments[_nArguments + 1] = nullptr;
+	pArguments[0] = fg_QuoteArgument(pShell);
+	pArguments[1] = fg_QuoteArgument(Script);
+	for (int iArgument = 1; iArgument < _nArguments; ++iArgument)
+		pArguments[iArgument + 1] = fg_QuoteArgument(_pArguments[iArgument]);
+	pArguments[_nArguments + 1] = nullptr;
 
-	for (int i = 0; i < _nArguments + 1; ++i)
+	for (int iArgument = 0; iArgument < _nArguments + 1; ++iArgument)
 	{
-		if (!ppArguments[i])
+		if (!pArguments[iArgument])
 			return 127;
 	}
 
-	intptr_t ExitCode = _wspawnv(_P_WAIT, pShell, ppArguments);
+	intptr_t ExitCode = _wspawnv(_P_WAIT, pShell, pArguments);
 	return ExitCode < 0 ? 127 : (int)ExitCode;
 }

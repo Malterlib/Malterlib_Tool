@@ -11,7 +11,7 @@ namespace NMib::NTool
 	{
 		// Stands in for clang-tidy: logs its arguments, one run per line, and reports a diagnostic in the source,
 		// one in a header every source includes, and one in a header of the repository in Lib, when there is one.
-		CStr const gc_FakeClangTidy =
+		CStr const g_FakeClangTidy =
 			"#!/bin/sh\n"
 			"if [ \"$1\" = --verify-config ]; then echo 'No config errors detected.'; exit 0; fi\n"
 			"for Last; do :; done\n"
@@ -32,7 +32,7 @@ namespace NMib::NTool
 				, m_Script(_Repo.m_Root / "bin/clang-tidy")
 			{
 				CFile::fs_CreateDirectoryForFile(m_Script);
-				CFile::fs_WriteStringToFile(m_Script, gc_FakeClangTidy, false);
+				CFile::fs_WriteStringToFile(m_Script, g_FakeClangTidy, false);
 				m_Tool = _Repo.f_ShellScriptTool(m_Script);
 			}
 
@@ -199,12 +199,12 @@ namespace NMib::NTool
 						DMibExpect(Output.f_Find("Checked 2 files with 2 commands: 3 warnings, 0 errors"), >=, 0);
 
 						// The header both sources report is written once, and with --sorted, in path order.
-						aint iA = Output.f_Find(Repo.m_Path / "A.cpp:1:2: warning: in source [fake-check]");
-						aint iB = Output.f_Find(Repo.m_Path / "B.cpp:1:2: warning: in source [fake-check]");
+						aint iSourceA = Output.f_Find(Repo.m_Path / "A.cpp:1:2: warning: in source [fake-check]");
+						aint iSourceB = Output.f_Find(Repo.m_Path / "B.cpp:1:2: warning: in source [fake-check]");
 						aint iShared = Output.f_Find(Repo.m_Path / "Shared.h:3:4: warning: in header [fake-check]");
-						DMibExpect(iA, >=, 0);
-						DMibExpect(iB, >, iA);
-						DMibExpect(iShared, >, iB);
+						DMibExpect(iSourceA, >=, 0);
+						DMibExpect(iSourceB, >, iSourceA);
+						DMibExpect(iShared, >, iSourceB);
 						DMibExpect(Output.f_Find("in header", iShared + 1), <, 0);
 					}
 

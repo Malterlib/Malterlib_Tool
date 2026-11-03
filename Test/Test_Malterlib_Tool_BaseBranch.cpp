@@ -26,10 +26,10 @@ namespace NMib::NTool
 					Header = Columns;
 				else if (Columns[1] == _Repo)
 				{
-					for (umint i = 0; i < Header.f_GetLen() && i < Columns.f_GetLen(); ++i)
+					for (umint iColumn = 0; iColumn < Header.f_GetLen() && iColumn < Columns.f_GetLen(); ++iColumn)
 					{
-						if (Header[i] == _Column)
-							return Columns[i];
+						if (Header[iColumn] == _Column)
+							return Columns[iColumn];
 					}
 
 					return {};
@@ -59,7 +59,7 @@ namespace NMib::NTool
 				CCheckoutFixture Checkout(Repo);
 				co_await Checkout.f_Init({"A", "B"});
 
-				CStr A = Checkout.f_Repository("A");
+				CStr RepoA = Checkout.f_Repository("A");
 
 				co_await Checkout.f_MibSucceeds({"update-repos"});
 				co_await Checkout.f_MibSucceeds({"repo-commit"});
@@ -67,9 +67,9 @@ namespace NMib::NTool
 
 				// The base branch changes A, and every repository has the branch on origin, except B
 				co_await Checkout.f_MibSucceeds({"branch", "base1"});
-				co_await Checkout.f_CommitIn(A, "OnBase1");
+				co_await Checkout.f_CommitIn(RepoA, "OnBase1");
 				co_await Checkout.f_MibSucceeds({"repo-commit"});
-				for (auto &Directory : {Repo.m_Path, A})
+				for (auto &Directory : {Repo.m_Path, RepoA})
 					co_await Checkout.f_GitIn(Directory, {"push", "-q", "-u", "origin", "base1"});
 
 				CStr BaseCommit = co_await Checkout.f_GitIn(Repo.m_Path, {"rev-parse", "HEAD"});
@@ -120,7 +120,7 @@ namespace NMib::NTool
 
 				DMibTestCategory("RepoCommit") -> TCFuture<void>
 				{
-					co_await Checkout.f_CommitIn(A, "OnStacked");
+					co_await Checkout.f_CommitIn(RepoA, "OnStacked");
 					co_await Checkout.f_MibSucceeds({"repo-commit"});
 
 					// The commits of the base branch stay as they are, below the stacked branch's own commit
@@ -134,7 +134,7 @@ namespace NMib::NTool
 					DMibExpect(Message.f_Find("OnBase1"), <, 0);
 
 					// A second run folds into the stacked branch's commit
-					co_await Checkout.f_CommitIn(A, "OnStackedAgain");
+					co_await Checkout.f_CommitIn(RepoA, "OnStackedAgain");
 					co_await Checkout.f_MibSucceeds({"repo-commit"});
 					CStr nAboveBaseAgain = co_await Checkout.f_GitIn(Repo.m_Path, {"rev-list", "--count", "origin/base1..HEAD"});
 					DMibExpect(nAboveBaseAgain, ==, "1");
@@ -160,10 +160,10 @@ namespace NMib::NTool
 					DMibExpect(fg_StatusColumn(Overridden, "Repos/A", "Others"), ==, "origin/main Push 3");
 
 					// A repository on another branch than the root still compares with the base of the root's branch
-					co_await Checkout.f_GitIn(A, {"checkout", "-q", "-b", "status-other"});
+					co_await Checkout.f_GitIn(RepoA, {"checkout", "-q", "-b", "status-other"});
 					CStr OtherBranch = co_await Checkout.f_MibSucceeds({"status", "--show-unchanged", "--skip-update"});
-					co_await Checkout.f_GitIn(A, {"checkout", "-q", "stacked"});
-					co_await Checkout.f_GitIn(A, {"branch", "-q", "-D", "status-other"});
+					co_await Checkout.f_GitIn(RepoA, {"checkout", "-q", "stacked"});
+					co_await Checkout.f_GitIn(RepoA, {"branch", "-q", "-D", "status-other"});
 					DMibExpect(fg_StatusColumn(OtherBranch, "Repos/A", "Others").f_Find("origin/base1"), >=, 0);
 
 					co_return {};
@@ -200,13 +200,13 @@ namespace NMib::NTool
 					DMibExpect(ChildOnly.f_Find("OnBase1"), <, 0);
 
 					// B doesn't have the base on origin, so it starts from its own default branch, which landed a commit after the base
-					CStr B = Checkout.f_Repository("B");
+					CStr RepoB = Checkout.f_Repository("B");
 					CStr WorkB = Repo.m_Root / "work/B";
 					co_await Checkout.f_GitIn(WorkB, {"pull", "-q", "--ff-only", Checkout.f_Remote("B"), "main"});
 					co_await Checkout.f_CommitIn(WorkB, "LandedOnB");
 					co_await Checkout.f_GitIn(WorkB, {"push", "-q", Checkout.f_Remote("B"), "main"});
-					co_await Checkout.f_GitIn(B, {"fetch", "-q", "origin"});
-					co_await Checkout.f_GitIn(B, {"reset", "-q", "--hard", "origin/main"});
+					co_await Checkout.f_GitIn(RepoB, {"fetch", "-q", "origin"});
+					co_await Checkout.f_GitIn(RepoB, {"reset", "-q", "--hard", "origin/main"});
 					co_await Checkout.f_MibSucceeds({"repo-commit"});
 					CStr Landed = co_await Checkout.f_MibSucceeds({"list-commits", "--local"});
 					DMibExpect(Landed.f_Find("LandedOnB"), <, 0);
@@ -233,8 +233,8 @@ namespace NMib::NTool
 				DMibTestCategory("DeletedBase") -> TCFuture<void>
 				{
 					// ChildBase already deleted the base branch of the root on origin
-					co_await Checkout.f_GitIn(A, {"push", "-q", "origin", "--delete", "base1"});
-					co_await Checkout.f_GitIn(A, {"fetch", "-q", "--prune", "origin"});
+					co_await Checkout.f_GitIn(RepoA, {"push", "-q", "origin", "--delete", "base1"});
+					co_await Checkout.f_GitIn(RepoA, {"fetch", "-q", "--prune", "origin"});
 
 					CStr Status = co_await Checkout.f_MibSucceeds({"status", "--show-unchanged"});
 					DMibExpect(Status.f_Find("Base branch base1 no longer exists on origin"), >=, 0);

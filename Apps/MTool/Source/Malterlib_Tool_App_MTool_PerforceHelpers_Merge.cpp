@@ -172,12 +172,12 @@ struct CTool_PerforceMerge : public CTool2
 						bParentChildren = true;
 						Streams = pClient->f_FindStreams(fg_Format("Parent={} & ^(Type=task)", Stream.m_Parent));
 
-						for (umint i = 0; i < Streams.f_GetLen();)
+						for (umint iStream = 0; iStream < Streams.f_GetLen();)
 						{
-							if (Streams[i] == StreamName)
-								Streams.f_Remove(i);
+							if (Streams[iStream] == StreamName)
+								Streams.f_Remove(iStream);
 							else
-								++i;
+								++iStream;
 						}
 
 						if (Streams.f_IsEmpty())
@@ -188,15 +188,15 @@ struct CTool_PerforceMerge : public CTool2
 				}
 			}
 
-			for (umint i = 0; i < Streams.f_GetLen();)
+			for (umint iStream = 0; iStream < Streams.f_GetLen();)
 			{
-				auto &StreamName = Streams[i];
+				auto &StreamName = Streams[iStream];
 				CPerforceClient::CStream Stream = Functions.f_GetStreamCached(StreamName);
 
 				if (Stream.m_Options.f_Contains("fromparent") < 0)
-					Streams.f_Remove(i);
+					Streams.f_Remove(iStream);
 				else
-					++i;
+					++iStream;
 			}
 
 			if (Streams.f_IsEmpty())
@@ -299,7 +299,7 @@ struct CTool_PerforceMerge : public CTool2
 		umint nThreads = 16;
 		g_ThreadPool.f_Construct(nThreads);
 
-		auto fl_Integrate = [&](bool _bPretend, bool _bNoSubmit) -> bool
+		auto fIntegrate = [&](bool _bPretend, bool _bNoSubmit) -> bool
 			{
 				bool bDoSomething = false;
 				TCVector<CIntegrationPair> NewIntegrationPairs;
@@ -335,7 +335,7 @@ struct CTool_PerforceMerge : public CTool2
 					pClient->f_Login(CStr());
 
 					TCThreadSafeQueue<TCUniquePointer<CPerforceClientThrow>> ClientCache;
-					for (umint i = 0; i < nThreads; ++i)
+					for (umint iClient = 0; iClient < nThreads; ++iClient)
 					{
 						TCUniquePointer<CPerforceClientThrow> pClient;
 						pClient = fg_Construct(ConnectionInfo);
@@ -352,7 +352,7 @@ struct CTool_PerforceMerge : public CTool2
 					CPerforceClient::CStream FromStream = Functions.f_GetStreamCached(Pair.m_From);
 
 					CPerforceClient::CStream ToStream = Functions.f_GetStreamCached(Pair.m_To);
-					auto fl_RealError = [&](CStr const &_Error, CStr &o_RetryChangelist)
+					auto fRealError = [&](CStr const &_Error, CStr &o_RetryChangelist)
 						{
 							if (_Error.f_Find("- resolve move to") >= 0 && _Error.f_Find("before integrating from"))
 								return false;
@@ -388,9 +388,9 @@ struct CTool_PerforceMerge : public CTool2
 						}
 					;
 
-					for (int i = 0; i < 2; ++i)
+					for (int iPass = 0; iPass < 2; ++iPass)
 					{
-						bool bPretend = i == 0 || _bPretend;
+						bool bPretend = iPass == 0 || _bPretend;
 						TCVector<CStr> MustSync;
 						TCVector<CPerforceClient::CIntegrationResult> Result;
 						TCVector<CPerforceClient::CMergeError> Errors;
@@ -404,7 +404,7 @@ struct CTool_PerforceMerge : public CTool2
 									CStr Error = pClient->f_NoThrow().f_GetLastError();
 
 									CStr RetryChangelist;
-									if (fl_RealError(Error, RetryChangelist))
+									if (fRealError(Error, RetryChangelist))
 										pClient->f_ThrowLastError();
 
 									if (RetryChangelist.f_IsEmpty() || bRetried)
@@ -421,7 +421,7 @@ struct CTool_PerforceMerge : public CTool2
 								{
 									CStr Error = pClient->f_NoThrow().f_GetLastError();
 									CStr RetryChangelist;
-									if (fl_RealError(Error, RetryChangelist))
+									if (fRealError(Error, RetryChangelist))
 										pClient->f_ThrowLastError();
 									if (RetryChangelist.f_IsEmpty() || bRetried)
 										break;
@@ -436,7 +436,7 @@ struct CTool_PerforceMerge : public CTool2
 								{
 									CStr Error = pClient->f_NoThrow().f_GetLastError();
 									CStr RetryChangelist;
-									if (fl_RealError(Error, RetryChangelist))
+									if (fRealError(Error, RetryChangelist))
 										pClient->f_ThrowLastError();
 									if (RetryChangelist.f_IsEmpty() || bRetried)
 										break;
@@ -458,7 +458,7 @@ struct CTool_PerforceMerge : public CTool2
 							{
 								CStr Error = pClient->f_NoThrow().f_GetLastError();
 								CStr RetryChangelist;
-								if (fl_RealError(Error, RetryChangelist))
+								if (fRealError(Error, RetryChangelist))
 									pClient->f_ThrowLastError();
 
 								if (RetryChangelist.f_IsEmpty() || !ChangeList.f_IsEmpty() || bRetried)
@@ -477,7 +477,7 @@ struct CTool_PerforceMerge : public CTool2
 								{
 									CStr Error = pClient->f_NoThrow().f_GetLastError();
 									CStr RetryChangelist;
-									if (fl_RealError(Error, RetryChangelist))
+									if (fRealError(Error, RetryChangelist))
 										pClient->f_ThrowLastError();
 									if (RetryChangelist.f_IsEmpty() || bRetried)
 										break;
@@ -492,7 +492,7 @@ struct CTool_PerforceMerge : public CTool2
 								{
 									CStr Error = pClient->f_NoThrow().f_GetLastError();
 									CStr RetryChangelist;
-									if (fl_RealError(Error, RetryChangelist))
+									if (fRealError(Error, RetryChangelist))
 										pClient->f_ThrowLastError();
 									if (RetryChangelist.f_IsEmpty() || bRetried)
 										break;
@@ -507,7 +507,7 @@ struct CTool_PerforceMerge : public CTool2
 								{
 									CStr Error = pClient->f_NoThrow().f_GetLastError();
 									CStr RetryChangelist;
-									if (fl_RealError(Error, RetryChangelist))
+									if (fRealError(Error, RetryChangelist))
 										pClient->f_ThrowLastError();
 									if (RetryChangelist.f_IsEmpty() || bRetried)
 										break;
@@ -521,7 +521,7 @@ struct CTool_PerforceMerge : public CTool2
 						if (!Result.f_IsEmpty())
 							bAlreadyIntegrated = false;
 
-						if (i == 0)
+						if (iPass == 0)
 						{
 							for (auto iResult = Result.f_GetIterator(); iResult; ++iResult)
 							{
@@ -906,7 +906,7 @@ struct CTool_PerforceMerge : public CTool2
 		CStopwatch Stopwatch;
 		Stopwatch.f_Start();
 		fp64 StartTime = Stopwatch.f_GetTime();
-		bool bNeedMerge = fl_Integrate(true, false);
+		bool bNeedMerge = fIntegrate(true, false);
 		fp64 EndTime = Stopwatch.f_GetTime();
 		if (bNeedMerge)
 		{
@@ -917,7 +917,7 @@ struct CTool_PerforceMerge : public CTool2
 			{
 				DConOut("Doing real merge{\n}{\n}", 0);
 				StartTime = Stopwatch.f_GetTime();
-				fl_Integrate(false, Result == "NoSubmit");
+				fIntegrate(false, Result == "NoSubmit");
 				EndTime = Stopwatch.f_GetTime();
 
 				DConOut("Real merge took {} seconds{\n}{\n}", (EndTime - StartTime));

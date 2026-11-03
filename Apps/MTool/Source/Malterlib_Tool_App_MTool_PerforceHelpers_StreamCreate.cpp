@@ -235,7 +235,7 @@ struct CTool_PerforceCreateStream : public CTool2
 		bool bAutoCreateOwned = StreamConfig.f_GetValue("AutoCreateOwned", "false") == "true" || _bAutoCreateOwned;
 		bool bAutoImportSDK = StreamConfig.f_GetValue("AutoImportSDK", "false") == "true" || _bAutoImportSDK;
 
-		auto fl_CreateImported = [&](CStr const &_Stream, CStr const &_Source) -> CStr
+		auto fCreateImported = [&](CStr const &_Stream, CStr const &_Source) -> CStr
 			{
 				// Already owned, so we shouldn't try to import this
 				if (OwnedStreams.m_StreamMap.f_FindEqual(_Stream))
@@ -358,7 +358,7 @@ struct CTool_PerforceCreateStream : public CTool2
 				// Create owned streams that are not imported
 				auto Mapped = _State.m_StreamMap(fg_Get<1>(Stream));
 				if (Mapped.f_WasCreated())
-					*Mapped = fl_CreateImported(fg_Get<1>(Stream), fg_Get<1>(Stream));
+					*Mapped = fCreateImported(fg_Get<1>(Stream), fg_Get<1>(Stream));
 			}
 		}
 
@@ -367,7 +367,7 @@ struct CTool_PerforceCreateStream : public CTool2
 		{
 			TCMap<CStr, CStr> TranslatedStreamCache;
 
-			auto fl_GetTranslatedStream = [&](CStr const &_StreamToTranslate) -> CStr
+			auto fGetTranslatedStream = [&](CStr const &_StreamToTranslate) -> CStr
 				{
 					auto *pCached = TranslatedStreamCache.f_FindEqual(_StreamToTranslate);
 					if (pCached)
@@ -418,7 +418,7 @@ struct CTool_PerforceCreateStream : public CTool2
 					(CStr::CParse("{{{}}{}") >> Stream >> Import).f_Parse(RawDepotPath, nParsed);
 					if (nParsed == 2)
 					{
-						CStr TranslatedStream = fl_GetTranslatedStream(Stream);
+						CStr TranslatedStream = fGetTranslatedStream(Stream);
 						if (TranslatedStream.f_IsEmpty())
 							DError(fg_Format("'{}' stream not found as a parent of any of the owned streams", Stream));
 						DepotPath = fg_Format("{}{}", TranslatedStream, Import);
@@ -433,7 +433,7 @@ struct CTool_PerforceCreateStream : public CTool2
 					CStr ImportFromStream = CPerforceFunctions::fs_GetStream(DepotPath);
 					auto Mapped = _State.m_StreamMap(ImportFromStream);
 					if (Mapped.f_WasCreated())
-						*Mapped = fl_CreateImported(ImportFromStream, DepotPath);
+						*Mapped = fCreateImported(ImportFromStream, DepotPath);
 
 					if (!AlreadyImported.f_FindEqual(Path))
 					{
@@ -464,7 +464,7 @@ struct CTool_PerforceCreateStream : public CTool2
 					CStr ImportFromStream = CPerforceFunctions::fs_GetStream(DepotPath);
 					auto Mapped = _State.m_StreamMap(ImportFromStream);
 					if (Mapped.f_WasCreated())
-						*Mapped = fl_CreateImported(ImportFromStream, DepotPath);
+						*Mapped = fCreateImported(ImportFromStream, DepotPath);
 
 					if (!AlreadyImported.f_FindEqual(Path))
 					{
@@ -845,7 +845,7 @@ struct CTool_PerforceDeleteStream : public CTool2
 			TCVector<CStr> MustSync;
 			TCVector<CPerforceClient::CMergeError> Errors;
 			TCSet<CPerforceClient::CIntegrationResult> UniqueResults;
-			for (int i = 0; i < 2; ++i)
+			for (int iPass = 0; iPass < 2; ++iPass)
 			{
 				pClient->f_NoThrow().f_IntegrateStream(Stream, StreamInfo.m_Parent, true, Integrated, MustSync, Errors);
 
@@ -856,7 +856,7 @@ struct CTool_PerforceDeleteStream : public CTool2
 				for (auto &Error : Errors)
 					DConOut("{}: {}\n", Error.m_Path, Error.m_Error);
 
-				if (i == 0)
+				if (iPass == 0)
 				{
 					for (auto iResult = Integrated.f_GetIterator(); iResult; ++iResult)
 					{

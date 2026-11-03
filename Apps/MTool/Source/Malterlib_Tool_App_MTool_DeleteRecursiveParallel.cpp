@@ -47,7 +47,7 @@ namespace NDeleteRecursive
 
 			TCVector<CBlockingActorCheckout> Checkouts;
 			Checkouts.f_Reserve(nSplit - 1);
-			for (umint i = 1; i < nSplit; ++i)
+			for (umint iActor = 1; iActor < nSplit; ++iActor)
 				Checkouts.f_Insert(fg_BlockingActor());
 
 			umint iSplit = 0;

@@ -22,7 +22,7 @@ namespace NMib::NTool::NFormat
 
 	// File I/O of a run: directory listings, configuration loads, reads, and writes take
 	// turns on this many blocking actors, however many workers and walks are in flight.
-	umint const gc_nFormatBlockingActors = 8;
+	constexpr umint gc_nFormatBlockingActors = 8;
 
 	// Counts the lines a reader sees: the synthetic empty line after a final terminator
 	// is a position, not content.
@@ -144,8 +144,8 @@ namespace NMib::NTool::NFormat
 			umint iFirst = 0;
 			umint iLast = 0;
 			fEditLines(Edit, iFirst, iLast);
-			for (umint i = iFirst; i <= iLast; ++i)
-				TouchedLines[i] = 1;
+			for (umint iLine = iFirst; iLine <= iLast; ++iLine)
+				TouchedLines[iLine] = 1;
 		}
 
 		struct CHunk
@@ -288,11 +288,11 @@ namespace NMib::NTool::NFormat
 			auto nSource = umint(_Source.f_GetLen());
 			auto pSource = _Source.f_GetStr();
 			auto iEnd = fg_Min(Diagnostic.m_iOffset + Diagnostic.m_nLength, nSource);
-			for (auto i = Diagnostic.m_iOffset; i < iEnd && !bReported; ++i)
+			for (auto iChar = Diagnostic.m_iOffset; iChar < iEnd && !bReported; ++iChar)
 			{
 				// Lines end in LF, CRLF or a lone CR alike. A line the span only ends in front of is no line of it.
-				bool bLineEnd = pSource[i] == '\n' || (pSource[i] == '\r' && (i + 1 >= nSource || pSource[i + 1] != '\n'));
-				if (bLineEnd && i + 1 < iEnd)
+				bool bLineEnd = pSource[iChar] == '\n' || (pSource[iChar] == '\r' && (iChar + 1 >= nSource || pSource[iChar + 1] != '\n'));
+				if (bLineEnd && iChar + 1 < iEnd)
 					bReported = fg_IsReportedLine(_Job.m_ReportedLines, ++iLine);
 			}
 
@@ -544,8 +544,8 @@ namespace NMib::NTool::NFormat
 						CFormatRead Read;
 						Read.m_bEmpty = Data.f_IsEmpty();
 						auto nCheck = fg_Min(umint(Data.f_GetLen()), umint(8000));
-						for (umint i = 0; i < nCheck && !Read.m_bNul; ++i)
-							Read.m_bNul = !Data[i];
+						for (umint iByte = 0; iByte < nCheck && !Read.m_bNul; ++iByte)
+							Read.m_bNul = !Data[iByte];
 
 						// A UTF-16 or UTF-32 signature names an encoding whose NULs are halves of characters: the text is decoded
 						// at the file boundary as any read of a text file decodes it.
@@ -708,9 +708,9 @@ namespace NMib::NTool::NFormat
 			auto fHasLoneCR = [](CStr const &_Text)
 				{
 					auto pText = _Text.f_GetStr();
-					for (umint i = 0; i < _Text.f_GetLen(); ++i)
+					for (umint iChar = 0; iChar < _Text.f_GetLen(); ++iChar)
 					{
-						if (pText[i] == '\r' && (i + 1 == _Text.f_GetLen() || pText[i + 1] != '\n'))
+						if (pText[iChar] == '\r' && (iChar + 1 == _Text.f_GetLen() || pText[iChar + 1] != '\n'))
 							return true;
 					}
 
@@ -1512,9 +1512,9 @@ namespace NMib::NTool::NFormat
 				break;
 		}
 
-		for (umint i = Directories.f_GetLen(); i; --i)
+		for (umint iDirectory = Directories.f_GetLen(); iDirectory; --iDirectory)
 		{
-			auto Listing = co_await fp_List(_iRepository, Directories[i - 1]);
+			auto Listing = co_await fp_List(_iRepository, Directories[iDirectory - 1]);
 			fp_AddRepositoryExcludes(_iRepository, Listing);
 			fp_AddDirectoryRules(_iRepository, Listing);
 		}
@@ -1825,7 +1825,7 @@ namespace NMib::NTool::NFormat
 		mp_StyleResolver = fg_ConstructActor<CFormatStyleResolver>(_pBlockingActors);
 		mp_Analyzers = fg_ConstructActor<CFormatAnalyzers>(fg_Max(_nWorkers, umint(1)));
 
-		for (umint i = 0; i < fg_Max(_nWorkers, umint(1)); ++i)
+		for (umint iWorker = 0; iWorker < fg_Max(_nWorkers, umint(1)); ++iWorker)
 		{
 			mp_Workers.f_InsertLast(fg_ConstructActor<CFormatWorker>(_pBlockingActors, mp_StyleResolver, mp_Analyzers));
 			mp_RunningJobs.f_Insert(umint(0));
@@ -1853,7 +1853,7 @@ namespace NMib::NTool::NFormat
 	CFormatAnalyzers::CFormatAnalyzers(umint _nMaxConcurrent)
 	{
 		auto nQueues = fg_ConcurrencyManager().f_GetNumQueues(EPriority_NormalHighCPU);
-		for (umint i = 0; i < nQueues && mp_Actors.f_GetLen() < _nMaxConcurrent; ++i)
+		for (umint iQueue = 0; iQueue < nQueues && mp_Actors.f_GetLen() < _nMaxConcurrent; ++iQueue)
 		{
 			auto const &Actor = fg_ConcurrentActorHighCPU();
 			bool bKnown = false;

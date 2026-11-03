@@ -150,16 +150,16 @@ namespace NMib::NTool
 					DMibExpect(Batch1["Batch"].f_Integer(), ==, 1);
 					DMibExpect(Batch1["Repositories"].f_Array().f_GetLen(), ==, 3);
 
-					auto A = fEntry(Batch1, "Repos/A");
-					DMibAssertTrue(A.f_IsObject());
-					DMibExpect(A["Url"].f_String(), ==, Checkout.f_Remote("A"));
-					DMibExpect(A["From"].f_String(), ==, "");
-					DMibExpect(A["To"].f_String(), ==, PinA);
-					DMibExpect(A["New"].f_Boolean(), ==, true);
-					DMibExpect(A["Submodule"].f_Boolean(), ==, false);
-					DMibExpect(A["Parent"].f_String(), ==, ".");
-					DMibExpect(A["ConfigFile"].f_String(), ==, "Repos.MRepo");
-					DMibExpect(A["ConfigKey"].f_String(), ==, "Repos/A");
+					auto EntryA = fEntry(Batch1, "Repos/A");
+					DMibAssertTrue(EntryA.f_IsObject());
+					DMibExpect(EntryA["Url"].f_String(), ==, Checkout.f_Remote("A"));
+					DMibExpect(EntryA["From"].f_String(), ==, "");
+					DMibExpect(EntryA["To"].f_String(), ==, PinA);
+					DMibExpect(EntryA["New"].f_Boolean(), ==, true);
+					DMibExpect(EntryA["Submodule"].f_Boolean(), ==, false);
+					DMibExpect(EntryA["Parent"].f_String(), ==, ".");
+					DMibExpect(EntryA["ConfigFile"].f_String(), ==, "Repos.MRepo");
+					DMibExpect(EntryA["ConfigKey"].f_String(), ==, "Repos/A");
 
 					auto Files1 = fFilesDuringBatch(1);
 					DMibExpectTrue(Files1.f_Contains("Repos/A/.git") >= 0);
@@ -185,12 +185,12 @@ namespace NMib::NTool
 					// The next level is pinned in a config file of A
 					auto Batch3 = fBatch(3);
 					DMibExpect(Batch3["Batch"].f_Integer(), ==, 3);
-					auto C = fEntry(Batch3, "Repos/C");
-					DMibAssertTrue(C.f_IsObject());
-					DMibExpect(C["Parent"].f_String(), ==, "Repos/A");
-					DMibExpect(C["ConfigFile"].f_String(), ==, "Repos/A/Sub/Nested.MRepo");
-					DMibExpect(C["ConfigKey"].f_String(), ==, "../../C");
-					DMibExpect(C["To"].f_String(), ==, PinC);
+					auto EntryC = fEntry(Batch3, "Repos/C");
+					DMibAssertTrue(EntryC.f_IsObject());
+					DMibExpect(EntryC["Parent"].f_String(), ==, "Repos/A");
+					DMibExpect(EntryC["ConfigFile"].f_String(), ==, "Repos/A/Sub/Nested.MRepo");
+					DMibExpect(EntryC["ConfigKey"].f_String(), ==, "../../C");
+					DMibExpect(EntryC["To"].f_String(), ==, PinC);
 
 					DMibExpectTrue(CFile::fs_FileExists(Checkout.f_Repository("C") / "Initial.txt"));
 					DMibExpectTrue(CFile::fs_FileExists(Checkout.f_Repository("E") / "Sub/Initial.txt"));
@@ -231,10 +231,10 @@ namespace NMib::NTool
 					auto Batch4 = fBatch(4);
 					DMibExpect(Batch4["Batch"].f_Integer(), ==, 1);
 					DMibExpect(Batch4["Repositories"].f_Array().f_GetLen(), ==, 1);
-					auto B = fEntry(Batch4, "Repos/B");
-					DMibExpect(B["From"].f_String(), ==, PinB);
-					DMibExpect(B["To"].f_String(), ==, NewB);
-					DMibExpect(B["New"].f_Boolean(), ==, false);
+					auto EntryB = fEntry(Batch4, "Repos/B");
+					DMibExpect(EntryB["From"].f_String(), ==, PinB);
+					DMibExpect(EntryB["To"].f_String(), ==, NewB);
+					DMibExpect(EntryB["New"].f_Boolean(), ==, false);
 
 					CFile::fs_DeleteFile(HookDirectory / "refuse");
 					co_await Checkout.f_MibSucceeds({"update-repos", "--verify-hook", Hook, "--reconcile=*:reset"});
@@ -269,8 +269,8 @@ namespace NMib::NTool
 					co_await Checkout.f_MibSucceeds({"update-repos", "--verify-hook", Hook, "--reconcile=*:reset", "--reconcile-force"});
 					Repo.m_Environment.f_Remove("MalterlibRepositoryHardReset");
 
-					auto A = fEntry(fBatch(nBefore), "Repos/A");
-					DMibExpect(A["To"].f_String(), ==, NewA);
+					auto EntryA = fEntry(fBatch(nBefore), "Repos/A");
+					DMibExpect(EntryA["To"].f_String(), ==, NewA);
 					DMibExpect(co_await Checkout.f_GitIn(Checkout.f_Repository("A"), {"rev-parse", "HEAD"}), ==, NewA);
 
 					co_return {};
@@ -279,8 +279,8 @@ namespace NMib::NTool
 				DMibTestCategory("SubmoduleRecurse") -> TCFuture<void>
 				{
 					// A recursive checkout of E would write the new commit of its submodule along with E
-					CStr E = Checkout.f_Repository("E");
-					co_await Checkout.f_GitIn(E, {"config", "submodule.recurse", "true"});
+					CStr RepoE = Checkout.f_Repository("E");
+					co_await Checkout.f_GitIn(RepoE, {"config", "submodule.recurse", "true"});
 
 					CStr NewS = co_await Checkout.f_CommitIn(Repo.m_Root / "work/S", "SecondS");
 					co_await Checkout.f_GitIn(Repo.m_Root / "work/S", {"push", "-q", Checkout.f_Remote("S"), "main"});
@@ -289,7 +289,7 @@ namespace NMib::NTool
 					CStr NewE = co_await Checkout.f_CommitIn(WorkE, "SecondE");
 					co_await Checkout.f_GitIn(WorkE, {"push", "-q", Checkout.f_Remote("E"), "main"});
 
-					CStr OldS = co_await Checkout.f_GitIn(E / "Sub", {"rev-parse", "HEAD"});
+					CStr OldS = co_await Checkout.f_GitIn(RepoE / "Sub", {"rev-parse", "HEAD"});
 					{
 						CEJsonSorted Pins = CEJsonSorted::fs_FromString(CFile::fs_ReadStringFromFile(Repo.m_Path / "Repos.MRepo", true));
 						Pins["Repos/E"]["Hash"] = NewE;
@@ -301,40 +301,40 @@ namespace NMib::NTool
 					CFile::fs_DeleteFile(HookDirectory / "refuse-submodules");
 					DMibExpect(Result.m_ExitCode, !=, 0);
 					DMibExpect(Result.f_GetCombinedOut().f_Find("Refused submodules by the test"), >=, 0);
-					DMibExpect(co_await Checkout.f_GitIn(E, {"rev-parse", "HEAD"}), ==, NewE);
-					DMibExpect(co_await Checkout.f_GitIn(E / "Sub", {"rev-parse", "HEAD"}), ==, OldS);
+					DMibExpect(co_await Checkout.f_GitIn(RepoE, {"rev-parse", "HEAD"}), ==, NewE);
+					DMibExpect(co_await Checkout.f_GitIn(RepoE / "Sub", {"rev-parse", "HEAD"}), ==, OldS);
 
 					co_await Checkout.f_MibSucceeds({"update-repos", "--verify-hook", Hook, "--reconcile=*:reset"});
-					DMibExpect(co_await Checkout.f_GitIn(E / "Sub", {"rev-parse", "HEAD"}), ==, NewS);
+					DMibExpect(co_await Checkout.f_GitIn(RepoE / "Sub", {"rev-parse", "HEAD"}), ==, NewS);
 
 					// A submodule commit staged in E's index is what a submodule update would check out, so it is the one verified
-					co_await Checkout.f_GitIn(E, {"update-index", "--cacheinfo", "160000,{},Sub"_f << OldS});
+					co_await Checkout.f_GitIn(RepoE, {"update-index", "--cacheinfo", "160000,{},Sub"_f << OldS});
 					CFile::fs_WriteStringToFile(HookDirectory / "refuse-submodules", "", false);
 					auto Staged = co_await Checkout.f_Mib({"update-repos", "--verify-hook", Hook});
 					CFile::fs_DeleteFile(HookDirectory / "refuse-submodules");
 					DMibExpect(Staged.f_GetCombinedOut().f_Find("Refused submodules by the test"), >=, 0);
-					CStr StagedRefusedS = co_await Checkout.f_GitIn(E / "Sub", {"rev-parse", "HEAD"});
+					CStr StagedRefusedS = co_await Checkout.f_GitIn(RepoE / "Sub", {"rev-parse", "HEAD"});
 					DMibExpect(StagedRefusedS, ==, NewS);
 
 					// An inactive submodule is left as it is, as git submodule update leaves it, so it isn't in a batch. Without a
 					// submodule.active that leaves it out, git submodule init would activate it again.
-					co_await Checkout.f_GitIn(E, {"config", "submodule.active", "Other"});
-					co_await Checkout.f_GitIn(E, {"config", "submodule.Third Party.active", "false"});
+					co_await Checkout.f_GitIn(RepoE, {"config", "submodule.active", "Other"});
+					co_await Checkout.f_GitIn(RepoE, {"config", "submodule.Third Party.active", "false"});
 					CFile::fs_WriteStringToFile(HookDirectory / "refuse-submodules", "", false);
 					auto Inactive = co_await Checkout.f_Mib({"update-repos", "--verify-hook", Hook});
 					CFile::fs_DeleteFile(HookDirectory / "refuse-submodules");
 					DMibExpect(Inactive.m_ExitCode, ==, 0);
-					CStr InactiveS = co_await Checkout.f_GitIn(E / "Sub", {"rev-parse", "HEAD"});
+					CStr InactiveS = co_await Checkout.f_GitIn(RepoE / "Sub", {"rev-parse", "HEAD"});
 					DMibExpect(InactiveS, ==, NewS);
-					co_await Checkout.f_GitIn(E, {"config", "--unset", "submodule.Third Party.active"});
+					co_await Checkout.f_GitIn(RepoE, {"config", "--unset", "submodule.Third Party.active"});
 
 					// A submodule.active pathspec that matches it makes it active, so its staged commit is in a batch
-					co_await Checkout.f_GitIn(E, {"config", "submodule.active", "S*"});
+					co_await Checkout.f_GitIn(RepoE, {"config", "submodule.active", "S*"});
 					CFile::fs_WriteStringToFile(HookDirectory / "refuse-submodules", "", false);
 					auto ActiveByPathspec = co_await Checkout.f_Mib({"update-repos", "--verify-hook", Hook});
 					CFile::fs_DeleteFile(HookDirectory / "refuse-submodules");
 					DMibExpect(ActiveByPathspec.f_GetCombinedOut().f_Find("Refused submodules by the test"), >=, 0);
-					co_await Checkout.f_GitIn(E, {"config", "--unset", "submodule.active"});
+					co_await Checkout.f_GitIn(RepoE, {"config", "--unset", "submodule.active"});
 
 					// A refused batch stops the level, also the batch of submodules that E's staged commit would make
 					CStr NewA = co_await Checkout.f_CommitIn(WorkA, "RefusedA");
@@ -345,7 +345,7 @@ namespace NMib::NTool
 						Pins["Repos/A"]["Hash"] = NewA;
 						Repo.f_Write("Repos.MRepo", Pins.f_ToString());
 					}
-					CStr SubBeforeRefusal = co_await Checkout.f_GitIn(E / "Sub", {"rev-parse", "HEAD"});
+					CStr SubBeforeRefusal = co_await Checkout.f_GitIn(RepoE / "Sub", {"rev-parse", "HEAD"});
 					CFile::fs_WriteStringToFile(HookDirectory / "refuse-repositories", "", false);
 					umint nBeforeRefusal = fBatchCount();
 					auto RefusedLevel = co_await Checkout.f_Mib({"update-repos", "--verify-hook", Hook, "--reconcile=Repos/A:reset"});
@@ -353,37 +353,37 @@ namespace NMib::NTool
 					Repo.f_Write("Repos.MRepo", PinsBeforeRefusal);
 					DMibExpect(RefusedLevel.f_GetCombinedOut().f_Find("Refused repositories by the test"), >=, 0);
 					DMibExpect(fBatchCount(), ==, nBeforeRefusal + 1);
-					CStr RefusedLevelS = co_await Checkout.f_GitIn(E / "Sub", {"rev-parse", "HEAD"});
+					CStr RefusedLevelS = co_await Checkout.f_GitIn(RepoE / "Sub", {"rev-parse", "HEAD"});
 					DMibExpect(RefusedLevelS, ==, NewS);
 
 					// A sparse checkout that leaves .gitmodules out of the working tree has its submodules from the index
-					co_await Checkout.f_GitIn(E, {"update-index", "--skip-worktree", ".gitmodules"});
-					CFile::fs_DeleteFile(E / ".gitmodules");
+					co_await Checkout.f_GitIn(RepoE, {"update-index", "--skip-worktree", ".gitmodules"});
+					CFile::fs_DeleteFile(RepoE / ".gitmodules");
 					CFile::fs_WriteStringToFile(HookDirectory / "refuse-submodules", "", false);
 					auto Sparse = co_await Checkout.f_Mib({"update-repos", "--verify-hook", Hook});
 					CFile::fs_DeleteFile(HookDirectory / "refuse-submodules");
-					co_await Checkout.f_GitIn(E, {"update-index", "--no-skip-worktree", ".gitmodules"});
-					co_await Checkout.f_GitIn(E, {"checkout", "-q", "--", ".gitmodules"});
+					co_await Checkout.f_GitIn(RepoE, {"update-index", "--no-skip-worktree", ".gitmodules"});
+					co_await Checkout.f_GitIn(RepoE, {"checkout", "-q", "--", ".gitmodules"});
 					DMibExpect(Sparse.f_GetCombinedOut().f_Find("Refused submodules by the test"), >=, 0);
 
-					co_await Checkout.f_GitIn(E, {"reset", "-q", "--", "Sub"});
+					co_await Checkout.f_GitIn(RepoE, {"reset", "-q", "--", "Sub"});
 
 					// A submodule path that leads elsewhere through a symbolic link isn't checked out
 					{
 						DMibTestPath("SymbolicLink");
-						co_await Checkout.f_GitIn(E, {"update-index", "--cacheinfo", "160000,{},Sub"_f << OldS});
-						CFile::fs_RenameFile(E / "Sub", E / "Elsewhere");
-						CFile::fs_CreateSymbolicLink(E / "Elsewhere", E / "Sub", EFileAttrib_Directory, ESymbolicLinkFlag_None);
+						co_await Checkout.f_GitIn(RepoE, {"update-index", "--cacheinfo", "160000,{},Sub"_f << OldS});
+						CFile::fs_RenameFile(RepoE / "Sub", RepoE / "Elsewhere");
+						CFile::fs_CreateSymbolicLink(RepoE / "Elsewhere", RepoE / "Sub", EFileAttrib_Directory, ESymbolicLinkFlag_None);
 
 						auto Linked = co_await Checkout.f_Mib({"update-repos", "--verify-hook", Hook});
 
-						CFile::fs_DeleteFile(E / "Sub");
-						CFile::fs_RenameFile(E / "Elsewhere", E / "Sub");
-						co_await Checkout.f_GitIn(E, {"reset", "-q", "--", "Sub"});
+						CFile::fs_DeleteFile(RepoE / "Sub");
+						CFile::fs_RenameFile(RepoE / "Elsewhere", RepoE / "Sub");
+						co_await Checkout.f_GitIn(RepoE, {"reset", "-q", "--", "Sub"});
 
 						DMibExpect(Linked.m_ExitCode, !=, 0);
 						DMibExpect(Linked.f_GetCombinedOut().f_Find("goes through the symbolic link"), >=, 0);
-						DMibExpect(co_await Checkout.f_GitIn(E / "Sub", {"rev-parse", "HEAD"}), ==, NewS);
+						DMibExpect(co_await Checkout.f_GitIn(RepoE / "Sub", {"rev-parse", "HEAD"}), ==, NewS);
 					}
 
 					co_return {};
@@ -403,11 +403,11 @@ namespace NMib::NTool
 						Repo.f_Write("Repos.MRepo", Pins.f_ToString());
 					}
 
-					CStr F = Checkout.f_Repository("F");
+					CStr RepoF = Checkout.f_Repository("F");
 					CFile::fs_WriteStringToFile(HookDirectory / "refuse", "", false);
 					auto Refused = co_await Checkout.f_Mib({"update-repos", "--verify-hook", Hook});
 					DMibExpect(Refused.m_ExitCode, !=, 0);
-					bool bRefusedHasFiles = CFile::fs_FileExists(F / "Initial.txt");
+					bool bRefusedHasFiles = CFile::fs_FileExists(RepoF / "Initial.txt");
 					DMibExpectFalse(bRefusedHasFiles);
 
 					Repo.m_Environment["MalterlibRepositoryHardReset"] = "true";
@@ -415,16 +415,16 @@ namespace NMib::NTool
 					Repo.m_Environment.f_Remove("MalterlibRepositoryHardReset");
 					DMibExpect(Retried.m_ExitCode, !=, 0);
 					DMibExpect(Retried.f_GetCombinedOut().f_Find("Refused by the test"), >=, 0);
-					bool bRetriedHasFiles = CFile::fs_FileExists(F / "Initial.txt");
+					bool bRetriedHasFiles = CFile::fs_FileExists(RepoF / "Initial.txt");
 					DMibExpectFalse(bRetriedHasFiles);
 
 					// An untracked file, as Finder leaves, doesn't make the clone checked out
 					CFile::fs_DeleteFile(HookDirectory / "refuse");
-					CFile::fs_WriteStringToFile(F / ".DS_Store", "", false);
+					CFile::fs_WriteStringToFile(RepoF / ".DS_Store", "", false);
 					umint nBefore = fBatchCount();
 					co_await Checkout.f_MibSucceeds({"update-repos", "--verify-hook", Hook});
-					DMibExpectTrue(CFile::fs_FileExists(F / "Initial.txt"));
-					DMibExpect(co_await Checkout.f_GitIn(F, {"rev-parse", "HEAD"}), ==, PinF);
+					DMibExpectTrue(CFile::fs_FileExists(RepoF / "Initial.txt"));
+					DMibExpect(co_await Checkout.f_GitIn(RepoF, {"rev-parse", "HEAD"}), ==, PinF);
 
 					auto Entry = fEntry(fBatch(nBefore + 1), "Repos/F");
 					DMibExpect(Entry["From"].f_String(), ==, "");
@@ -518,10 +518,10 @@ namespace NMib::NTool
 
 					CStr CurrentPinA = co_await Checkout.f_GitIn(Checkout.f_Repository("A"), {"rev-parse", "HEAD"});
 					auto Batch = fBatch(nBefore + 1);
-					auto A = fEntry(Batch, "Repos/A");
-					DMibAssertTrue(A.f_IsObject());
-					DMibExpect(A["New"].f_Boolean(), ==, true);
-					DMibExpect(A["To"].f_String(), ==, CurrentPinA);
+					auto EntryA = fEntry(Batch, "Repos/A");
+					DMibAssertTrue(EntryA.f_IsObject());
+					DMibExpect(EntryA["New"].f_Boolean(), ==, true);
+					DMibExpect(EntryA["To"].f_String(), ==, CurrentPinA);
 
 					// The worktree has its git file, and no files of A, while the hook runs
 					auto Files = fFilesDuringBatch(nBefore + 1);
@@ -540,15 +540,15 @@ namespace NMib::NTool
 				DMibTestCategory("MissingIndex") -> TCFuture<void>
 				{
 					// A checkout that lost its index keeps its files, unlike a clone that was never checked out
-					CStr A = Checkout.f_Repository("A");
-					CFile::fs_DeleteFile(A / ".git/index");
-					CFile::fs_WriteStringToFile(A / "Initial.txt", "Local edit", false);
+					CStr RepoA = Checkout.f_Repository("A");
+					CFile::fs_DeleteFile(RepoA / ".git/index");
+					CFile::fs_WriteStringToFile(RepoA / "Initial.txt", "Local edit", false);
 
 					co_await Checkout.f_MibSucceeds({"update-repos"});
-					DMibExpect(CFile::fs_ReadStringFromFile(A / "Initial.txt", true), ==, "Local edit");
+					DMibExpect(CFile::fs_ReadStringFromFile(RepoA / "Initial.txt", true), ==, "Local edit");
 
-					co_await Checkout.f_GitIn(A, {"reset", "-q"});
-					co_await Checkout.f_GitIn(A, {"checkout", "-q", "--", "Initial.txt"});
+					co_await Checkout.f_GitIn(RepoA, {"reset", "-q"});
+					co_await Checkout.f_GitIn(RepoA, {"checkout", "-q", "--", "Initial.txt"});
 
 					co_return {};
 				};
@@ -556,11 +556,11 @@ namespace NMib::NTool
 				DMibTestCategory("BranchSwitch") -> TCFuture<void>
 				{
 					// On the root's branch feature, A switches to its own branch feature, at the commit the hook allowed
-					CStr A = Checkout.f_Repository("A");
-					CStr OldA = co_await Checkout.f_GitIn(A, {"rev-parse", "HEAD"});
-					CStr FeatureA = co_await Checkout.f_CommitIn(A, "FeatureA");
-					co_await Checkout.f_GitIn(A, {"branch", "feature"});
-					co_await Checkout.f_GitIn(A, {"reset", "-q", "--hard", OldA});
+					CStr RepoA = Checkout.f_Repository("A");
+					CStr OldA = co_await Checkout.f_GitIn(RepoA, {"rev-parse", "HEAD"});
+					CStr FeatureA = co_await Checkout.f_CommitIn(RepoA, "FeatureA");
+					co_await Checkout.f_GitIn(RepoA, {"branch", "feature"});
+					co_await Checkout.f_GitIn(RepoA, {"reset", "-q", "--hard", OldA});
 
 					co_await Checkout.f_GitIn(Repo.m_Path, {"checkout", "-q", "-b", "feature"});
 					{
@@ -571,12 +571,12 @@ namespace NMib::NTool
 
 					// As git checkout, it refuses a branch that another worktree has checked out
 					CStr OtherWorktree = Repo.m_Root / "AFeature";
-					co_await Checkout.f_GitIn(A, {"worktree", "add", "-q", OtherWorktree, "feature"});
+					co_await Checkout.f_GitIn(RepoA, {"worktree", "add", "-q", OtherWorktree, "feature"});
 					auto Occupied = co_await Checkout.f_Mib({"update-repos", "--verify-hook", Hook});
-					co_await Checkout.f_GitIn(A, {"worktree", "remove", OtherWorktree});
+					co_await Checkout.f_GitIn(RepoA, {"worktree", "remove", OtherWorktree});
 					DMibExpect(Occupied.m_ExitCode, !=, 0);
 					DMibExpect(Occupied.f_GetCombinedOut().f_Find("is already checked out in the worktree"), >=, 0);
-					CStr OccupiedHead = co_await Checkout.f_GitIn(A, {"rev-parse", "HEAD"});
+					CStr OccupiedHead = co_await Checkout.f_GitIn(RepoA, {"rev-parse", "HEAD"});
 					DMibExpect(OccupiedHead, ==, OldA);
 
 					// A post-checkout hook sees the branch, as for a checkout of it
@@ -584,19 +584,19 @@ namespace NMib::NTool
 					CFile::fs_CreateDirectory(HooksA);
 					CFile::fs_WriteStringToFile(HooksA / "post-checkout", "#!/bin/sh\ngit symbolic-ref --short HEAD > \"$HookTestDirectory/post-checkout-branch\"\n", false);
 					CFile::fs_SetAttributes(HooksA / "post-checkout", CFile::fs_GetAttributes(HooksA / "post-checkout") | EFileAttrib_Executable);
-					co_await Checkout.f_GitIn(A, {"config", "core.hooksPath", HooksA});
+					co_await Checkout.f_GitIn(RepoA, {"config", "core.hooksPath", HooksA});
 
 					umint nBefore = fBatchCount();
 					co_await Checkout.f_MibSucceeds({"update-repos", "--verify-hook", Hook});
-					co_await Checkout.f_GitIn(A, {"config", "--unset", "core.hooksPath"});
+					co_await Checkout.f_GitIn(RepoA, {"config", "--unset", "core.hooksPath"});
 					DMibExpect(CFile::fs_ReadStringFromFile(HookDirectory / "post-checkout-branch", true).f_Trim(), ==, "feature");
 
 					auto Entry = fEntry(fBatch(nBefore + 1), "Repos/A");
 					DMibExpect(Entry["From"].f_String(), ==, OldA);
 					DMibExpect(Entry["To"].f_String(), ==, FeatureA);
-					DMibExpect(co_await Checkout.f_GitIn(A, {"symbolic-ref", "--short", "HEAD"}), ==, "feature");
-					DMibExpect(co_await Checkout.f_GitIn(A, {"rev-parse", "HEAD"}), ==, FeatureA);
-					DMibExpect(co_await Checkout.f_GitIn(A, {"status", "--porcelain", "--untracked-files=no"}), ==, "");
+					DMibExpect(co_await Checkout.f_GitIn(RepoA, {"symbolic-ref", "--short", "HEAD"}), ==, "feature");
+					DMibExpect(co_await Checkout.f_GitIn(RepoA, {"rev-parse", "HEAD"}), ==, FeatureA);
+					DMibExpect(co_await Checkout.f_GitIn(RepoA, {"status", "--porcelain", "--untracked-files=no"}), ==, "");
 
 					co_return {};
 				};

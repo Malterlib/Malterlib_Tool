@@ -59,12 +59,12 @@ struct CTool_GenerateMacOSLicence : public CTool
 					else
 						FormattedReplacementText += "\t$\"";
 
-					for (umint j = 0; j < nChars; ++j)
+					for (umint iInChunk = 0; iInChunk < nChars; ++iInChunk)
 					{
-						if (j > 0 && (j & 1) == 0)
+						if (iInChunk > 0 && (iInChunk & 1) == 0)
 							FormattedReplacementText += " ";
 
-						FormattedReplacementText += CAnsiStr::CFormat("{nfh,sj2,sf0,nc}") << (uint8)ReplacementTextAnsi.f_GetAt(iChar + j);
+						FormattedReplacementText += CAnsiStr::CFormat("{nfh,sj2,sf0,nc}") << (uint8)ReplacementTextAnsi.f_GetAt(iChar + iInChunk);
 					}
 
 					FormattedReplacementText += "\"\n";

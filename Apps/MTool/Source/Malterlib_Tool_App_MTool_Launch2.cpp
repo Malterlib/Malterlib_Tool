@@ -9,17 +9,17 @@ struct CTool_Launch : public CTool
 {
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		TCVector<CStr> lArgs;
+		TCVector<CStr> Args;
 
 		int iArg = 0;
 		CStr Arg;
 		while ((Arg = _Params.f_GetValue(CStr::fs_ToStr(iArg), "012301231023Error")) != "012301231023Error")
 		{
-			lArgs.f_Insert(Arg);
+			Args.f_Insert(Arg);
 			++iArg;
 		}
 
-		return fp_Run(lArgs);
+		return fp_Run(Args);
 	}
 
 private:
@@ -45,10 +45,10 @@ private:
 		CStr m_RedirectStdOut;
 
 		CStr m_Target;
-		TCVector<CStr> m_lParams;
+		TCVector<CStr> m_Params;
 
 		CLaunchOptions()
-			: m_Fields(EField_None)
+			: mp_Fields(EField_None)
 			, m_iLaunch(0)
 			, m_bTime(false)
 			, m_bStats(false)
@@ -65,7 +65,7 @@ private:
 		}
 
 		CLaunchOptions(CLaunchOptions &&_ToMove)
-			: m_Fields(_ToMove.m_Fields)
+			: mp_Fields(_ToMove.mp_Fields)
 			, m_iLaunch(_ToMove.m_iLaunch)
 			, m_bTime(_ToMove.m_bTime)
 			, m_bStats(_ToMove.m_bStats)
@@ -81,14 +81,14 @@ private:
 			, m_CPUUsage(_ToMove.m_CPUUsage)
 			, m_RedirectStdOut(fg_Move(_ToMove.m_RedirectStdOut))
 			, m_Target(fg_Move(_ToMove.m_Target))
-			, m_lParams(fg_Move(_ToMove.m_lParams))
+			, m_Params(fg_Move(_ToMove.m_Params))
 		{
 			_ToMove = CLaunchOptions();
 		}
 
 		CLaunchOptions &operator = (CLaunchOptions &&_ToMove)
 		{
-			m_Fields = _ToMove.m_Fields;
+			mp_Fields = _ToMove.mp_Fields;
 			m_iLaunch = _ToMove.m_iLaunch;
 			m_bTime = _ToMove.m_bTime;
 			m_bStats = _ToMove.m_bStats;
@@ -104,88 +104,88 @@ private:
 			m_CPUUsage = _ToMove.m_CPUUsage;
 			m_RedirectStdOut = fg_Move(_ToMove.m_RedirectStdOut);
 			m_Target = fg_Move(_ToMove.m_Target);
-			m_lParams = fg_Move(_ToMove.m_lParams);
+			m_Params = fg_Move(_ToMove.m_Params);
 			return *this;
 		}
 
 		void f_SetTime(bool _bValue)
 		{
-			m_Fields |= EField_Time;
+			mp_Fields |= EField_Time;
 			m_bTime = _bValue;
 		}
 
 		void f_SetStats(bool _bValue)
 		{
-			m_Fields |= EField_Stats;
+			mp_Fields |= EField_Stats;
 			m_bStats = _bValue;
 		}
 
 		void f_SetLimitConcurrency(umint _Value)
 		{
-			m_Fields |= EField_LimitConcurrency;
+			mp_Fields |= EField_LimitConcurrency;
 			m_LimitConcurrency = _Value;
 		}
 
 		void f_SetPerforceParsing(bool _bValue)
 		{
-			m_Fields |= EField_PerforceParsing;
+			mp_Fields |= EField_PerforceParsing;
 			m_bPerforceParsing = _bValue;
 		}
 
 		void f_SetSeparateStdErr(bool _bValue)
 		{
-			m_Fields |= EField_SeparateStdErr;
+			mp_Fields |= EField_SeparateStdErr;
 			m_bSeparateStdErr = _bValue;
 		}
 
 		void f_SetEchoCommand(bool _bValue)
 		{
-			m_Fields |= EField_EchoCommand;
+			mp_Fields |= EField_EchoCommand;
 			m_bEchoCommand = _bValue;
 		}
 
 		void f_SetDelayOutput(bool _bValue)
 		{
-			m_Fields |= EField_DelayOutput;
+			mp_Fields |= EField_DelayOutput;
 			m_bDelayOutput = _bValue;
 		}
 
 		void f_SetSandbox(bool _bValue)
 		{
-			m_Fields |= EField_Sandbox;
+			mp_Fields |= EField_Sandbox;
 			m_bSandbox = _bValue;
 		}
 
 		void f_SetSandboxCopyRoot(bool _bValue)
 		{
-			m_Fields |= EField_SandboxCopyRoot;
+			mp_Fields |= EField_SandboxCopyRoot;
 			m_bSandboxCopyRoot = _bValue;
 		}
 
 		void f_SetCPUUsage(fp32 _Value)
 		{
-			m_Fields |= EField_CPUUsage;
+			mp_Fields |= EField_CPUUsage;
 			m_CPUUsage = _Value;
 		}
 
 		void f_SetRedirectStdOut(CStr const &_Value)
 		{
-			m_Fields |= EField_RedirectStdOut;
+			mp_Fields |= EField_RedirectStdOut;
 			m_RedirectStdOut = _Value;
 		}
 
 		void f_SetAttributeOutput(bool _bValue)
 		{
-			m_Fields |= EField_AttributeOutput;
+			mp_Fields |= EField_AttributeOutput;
 			m_bAttributeOutput = _bValue;
 		}
 
 		void f_ApplyDefaults(CLaunchOptions const &_Defaults)
 		{
-			EField DefFields = _Defaults.m_Fields;
+			EField DefFields = _Defaults.mp_Fields;
 
 #define DApplyField(d_FieldName, d_VarName) \
-	if (!(m_Fields & EField_##d_FieldName) && (DefFields & EField_##d_FieldName)) \
+	if (!(mp_Fields & EField_##d_FieldName) && (DefFields & EField_##d_FieldName)) \
 		d_VarName = _Defaults. d_VarName;
 
 			DApplyField(Time, m_bTime);
@@ -225,7 +225,7 @@ private:
 			, EField_LimitConcurrency = DMibBit(12)
 		};
 
-		EField m_Fields;
+		EField mp_Fields;
 	};
 
 	struct CGlobalOptions
@@ -259,7 +259,7 @@ private:
 		}
 	};
 
-	CMutual m_ConOutLock;
+	CMutual mp_ConOutLock;
 
 private:
 	bool fp_ParseBool(CStr const &_Value)
@@ -509,9 +509,9 @@ private:
 		if (!_Options.m_RedirectStdOut.f_IsEmpty())
 			pProc->m_StdOutRedir.f_Open(_Options.m_RedirectStdOut, EFileOpen_Write | EFileOpen_ShareAll);
 
-		CStr Params = CProcessLaunchParams::fs_GetParams(_Options.m_lParams);
+		CStr Params = CProcessLaunchParams::fs_GetParams(_Options.m_Params);
 
-		auto fl_EchoCommand = [pProc, Params]
+		auto fEchoCommand = [pProc, Params]
 			{
 				CLaunchOptions const &Options = pProc->m_Options;
 				if (Options.m_bEchoCommand && !pProc->m_bEchoedCommand)
@@ -527,21 +527,21 @@ private:
 				_Options.m_Target
 				, Params
 				, CFile::fs_GetCurrentDirectory()
-				, [this, pProc, fl_EchoCommand](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
+				, [this, pProc, fEchoCommand](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
 				{
 					CLaunchOptions const &Options = pProc->m_Options;
 
 					if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
 					{
-						DLock(m_ConOutLock);
+						DLock(mp_ConOutLock);
 						DConOut("error: Failed to launch #{} {}: {}", Options.m_iLaunch, Options.m_Target, _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
 						pProc->m_ReturnValue = 255u;
 					}
 					else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
 					{
-						DLock(m_ConOutLock);
+						DLock(mp_ConOutLock);
 
-						fl_EchoCommand();
+						fEchoCommand();
 						fp_OutputWholeLines(pProc->m_StdOutBuffer, EProcessLaunchOutputType_StdOut, Options, true);
 						fp_OutputWholeLines(pProc->m_StdErrBuffer, EProcessLaunchOutputType_StdErr, Options, true);
 
@@ -577,7 +577,7 @@ private:
 			)
 		;
 
-		LaunchParams.m_fOnOutput = [this, pProc, fl_EchoCommand](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+		LaunchParams.m_fOnOutput = [this, pProc, fEchoCommand](EProcessLaunchOutputType _OutputType, CStr const &_Output)
 			{
 				CLaunchOptions const &Options = pProc->m_Options;
 
@@ -588,7 +588,7 @@ private:
 				case EProcessLaunchOutputType_TerminateMessage:
 					{
 						pProc->m_StdErrBuffer += _Output;
-						DLock(m_ConOutLock);
+						DLock(mp_ConOutLock);
 						fp_OutputWholeLines(pProc->m_StdErrBuffer, EProcessLaunchOutputType_StdErr, Options, false);
 					}
 					break;
@@ -611,8 +611,8 @@ private:
 						else
 						{
 							pProc->m_StdOutBuffer += _Output;
-							DLock(m_ConOutLock);
-							fl_EchoCommand();
+							DLock(mp_ConOutLock);
+							fEchoCommand();
 							fp_OutputWholeLines(pProc->m_StdOutBuffer, EProcessLaunchOutputType_StdOut, Options, false);
 						}
 					}
@@ -640,7 +640,7 @@ private:
 	aint fp_Run(TCVector<CStr> const &_Args)
 	{
 		CGlobalOptions GlobalOptions;
-		TCVector<CLaunchOptions> lLaunchOptions;
+		TCVector<CLaunchOptions> LaunchOptions;
 
 		// Parse Args
 		{
@@ -669,7 +669,7 @@ private:
 						if (CurLaunch.m_Target.f_IsEmpty())
 							CurLaunch.m_Target = Value;
 						else
-							CurLaunch.m_lParams.f_Insert(Value);
+							CurLaunch.m_Params.f_Insert(Value);
 					}
 				}
 				else
@@ -698,7 +698,7 @@ private:
 				{
 					CurLaunch.m_iLaunch = iLaunch;
 					++iLaunch;
-					lLaunchOptions.f_Insert(fg_Move(CurLaunch));
+					LaunchOptions.f_Insert(fg_Move(CurLaunch));
 
 					CurLaunch = CLaunchOptions();
 					bSubmitCurTarget = false;
@@ -709,13 +709,13 @@ private:
 
 		// Apply Defaults
 		{
-			for (auto LIter = lLaunchOptions.f_GetIterator(); LIter; ++LIter)
+			for (auto LIter = LaunchOptions.f_GetIterator(); LIter; ++LIter)
 				LIter->f_ApplyDefaults(GlobalOptions.m_Defaults);
 		}
 
 		bool bOneHasStats = GlobalOptions.m_Defaults.m_bStats;
 		{
-			for (auto iLaunchOption = lLaunchOptions.f_GetIterator(); !bOneHasStats && iLaunchOption; ++iLaunchOption)
+			for (auto iLaunchOption = LaunchOptions.f_GetIterator(); !bOneHasStats && iLaunchOption; ++iLaunchOption)
 			{
 				if (iLaunchOption->m_bStats)
 					bOneHasStats = true;
@@ -729,12 +729,12 @@ private:
 			DConOut("\tVerbose: {}" DNewLine, (GlobalOptions.m_bVerbose ? "Yes" : "No"));
 			DConOut("\tLockFile: {}" DNewLine, GlobalOptions.m_LockFile);
 
-			auto fl_DumpOptions = [](CLaunchOptions const &_CurLaunch)
+			auto fDumpOptions = [](CLaunchOptions const &_CurLaunch)
 				{
 					DConOut("\tTarget: {}" DNewLine, _CurLaunch.m_Target);
 
 					int iParam = 0;
-					for (auto PIter = _CurLaunch.m_lParams.f_GetIterator(); PIter; ++PIter)
+					for (auto PIter = _CurLaunch.m_Params.f_GetIterator(); PIter; ++PIter)
 					{
 						DConOut("\tParam {}: {}" DNewLine, iParam, *PIter);
 						++iParam;
@@ -760,19 +760,19 @@ private:
 			;
 
 			int iLaunch = 0;
-			for (auto LIter = lLaunchOptions.f_GetIterator(); LIter; ++LIter)
+			for (auto LIter = LaunchOptions.f_GetIterator(); LIter; ++LIter)
 			{
 				CLaunchOptions const &CurLaunch = *LIter;
 
 				DConOut("Launch {}:" DNewLine, iLaunch);
-				fl_DumpOptions(CurLaunch);
+				fDumpOptions(CurLaunch);
 
 				++iLaunch;
 			}
 		}
 
 		// Launch
-		TCVector<TCSharedPointer<CProcessInfo>> lProcessInfo; // Does not really need to be shared any more.
+		TCVector<TCSharedPointer<CProcessInfo>> ProcessInfos; // Does not really need to be shared any more.
 		{
 			NFile::CLockFile LockFile(GlobalOptions.m_LockFile);
 
@@ -789,7 +789,7 @@ private:
 
 			CProcessLaunchHandler LaunchHandler;
 
-			lProcessInfo.f_SetLen(lLaunchOptions.f_GetLen());
+			ProcessInfos.f_SetLen(LaunchOptions.f_GetLen());
 
 			umint nLaunchProcesses = 0;
 			umint nMaxLaunchProcesses = TCLimitsInt<umint>::mc_Max;
@@ -799,21 +799,21 @@ private:
 			TCLinkedList<TCFunction<void ()>> ToLaunchQueue;
 
 			int iLaunch = 0;
-			for (auto LIter = lLaunchOptions.f_GetIterator(); LIter; ++LIter)
+			for (auto LIter = LaunchOptions.f_GetIterator(); LIter; ++LIter)
 			{
 				auto pLaunchOptions = &*LIter;
 				ToLaunchQueue.f_Insert
 					(
 						[&, iLaunch, pLaunchOptions]
 						{
-							lProcessInfo[iLaunch] = fp_CreateProcess(*pLaunchOptions, LaunchHandler);
+							ProcessInfos[iLaunch] = fp_CreateProcess(*pLaunchOptions, LaunchHandler);
 						}
 					)
 				;
 				++iLaunch;
 			}
 
-			auto fl_LaunchOutstanding = [&]
+			auto fLaunchOutstanding = [&]
 				{
 					while (nLaunchProcesses < nMaxLaunchProcesses && !ToLaunchQueue.f_IsEmpty())
 					{
@@ -823,13 +823,13 @@ private:
 				}
 			;
 
-			fl_LaunchOutstanding();
+			fLaunchOutstanding();
 
 			if (bOneHasStats || GlobalOptions.m_Defaults.m_LimitConcurrency)
 			{
 				while (!ToLaunchQueue.f_IsEmpty() || LaunchHandler.f_GetFirstNotDone())
 				{
-					for (auto iProcessInfo = lProcessInfo.f_GetIterator(); iProcessInfo; ++iProcessInfo)
+					for (auto iProcessInfo = ProcessInfos.f_GetIterator(); iProcessInfo; ++iProcessInfo)
 					{
 						if (!*iProcessInfo)
 							continue; // Not launched yet
@@ -845,7 +845,7 @@ private:
 						if (ProcessInfo.m_Options.m_bStats)
 							fp_UpdateSampledStats(*(*iProcessInfo));
 					}
-					fl_LaunchOutstanding();
+					fLaunchOutstanding();
 					LaunchHandler.f_WaitForChange(0.010f);
 				}
 			}
@@ -859,7 +859,7 @@ private:
 		// Return
 		uint32 ReturnValue = 0;
 		{
-			for (auto PIter = lProcessInfo.f_GetIterator(); PIter; ++PIter)
+			for (auto PIter = ProcessInfos.f_GetIterator(); PIter; ++PIter)
 				ReturnValue = fg_Max(ReturnValue, (*PIter)->m_ReturnValue);
 		}
 		return ReturnValue;

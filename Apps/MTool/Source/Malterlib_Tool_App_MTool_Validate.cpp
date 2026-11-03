@@ -34,7 +34,7 @@ namespace NMib::NTool::NValidate
 				if (Char >= '0' && Char <= '7')
 				{
 					uint32 Value = Char - '0';
-					for (umint i = 1; i < 3; ++i)
+					for (umint iDigit = 1; iDigit < 3; ++iDigit)
 					{
 						if (*pParse < '0' || *pParse > '7')
 							DError("Invalid octal escape in Git path");
@@ -87,8 +87,8 @@ namespace NMib::NTool::NValidate
 				DError("Invalid raw Git diff record");
 
 			Records.f_Insert(Fields[0]);
-			for (umint i = 1; i < Fields.f_GetLen(); ++i)
-				Records.f_Insert(fg_UnquoteGitPath(Fields[i]));
+			for (umint iField = 1; iField < Fields.f_GetLen(); ++iField)
+				Records.f_Insert(fg_UnquoteGitPath(Fields[iField]));
 		}
 
 		return Records;
@@ -512,18 +512,18 @@ namespace NMib::NTool::NValidate
 
 		CValidationCounts Counts;
 		TCVector<CFormatJob> FormatJobs;
-		for (umint i = 0; i < Changes.f_GetLen(); ++i)
+		for (umint iChange = 0; iChange < Changes.f_GetLen(); ++iChange)
 		{
-			auto Header = Changes[i];
+			auto Header = Changes[iChange];
 			fg_GetStrSep(Header, " "); // Old mode.
 			auto Mode = fg_GetStrSep(Header, " ");
 			fg_GetStrSep(Header, " "); // Old hash.
 			fg_GetStrSep(Header, " "); // New hash.
-			auto OldPath = Changes[++i];
+			auto OldPath = Changes[++iChange];
 			auto Path = OldPath;
 			bool bRenamed = Header.f_StartsWith("R") || Header.f_StartsWith("C");
 			if (bRenamed)
-				Path = Changes[++i];
+				Path = Changes[++iChange];
 
 			if (Mode != "100644" && Mode != "100755")
 				continue;

@@ -36,8 +36,8 @@ namespace NMib::NTool
 					{
 						CByteVector Data;
 						Data.f_SetLen(4096);
-						for (umint i = 0; i < Data.f_GetLen(); ++i)
-							Data[i] = uint8(i * 7 + _Name.f_GetLen());
+						for (umint iByte = 0; iByte < Data.f_GetLen(); ++iByte)
+							Data[iByte] = uint8(iByte * 7 + _Name.f_GetLen());
 						CFile::fs_WriteFile(WorkA / (_Name + ".bin"), Data);
 
 						return Checkout.f_CommitIn(WorkA, _Name);
@@ -87,18 +87,18 @@ namespace NMib::NTool
 					}
 				;
 
-				CStr A = Checkout.f_Repository("A");
+				CStr RepoA = Checkout.f_Repository("A");
 
 				DMibTestCategory("Clone") -> TCFuture<void>
 				{
 					CStr Output = co_await fUpdate({});
 					umint nDedups = fDedups();
 
-					auto Supported = co_await Repo.f_Run("git", {"lfs", "dedup", "--test"}, A);
+					auto Supported = co_await Repo.f_Run("git", {"lfs", "dedup", "--test"}, RepoA);
 					DMibExpect(nDedups, ==, Supported.m_ExitCode == 0 ? 1u : 0u);
 
 					// The index is refreshed, and a filesystem without reflinks gives no message
-					DMibExpect(co_await Checkout.f_GitIn(A, {"status", "--porcelain"}), ==, "");
+					DMibExpect(co_await Checkout.f_GitIn(RepoA, {"status", "--porcelain"}), ==, "");
 					DMibExpect(Output.f_Find("LFS files keep their own copies"), <, 0);
 
 					co_return {};
@@ -125,7 +125,7 @@ namespace NMib::NTool
 					co_await fUpdate({"--reconcile=*:reset"});
 					Repo.m_Environment.f_Remove("MalterlibRepositoryLfsDedup");
 
-					DMibExpect(co_await Checkout.f_GitIn(A, {"rev-parse", "HEAD"}), ==, Second);
+					DMibExpect(co_await Checkout.f_GitIn(RepoA, {"rev-parse", "HEAD"}), ==, Second);
 					DMibExpect(fDedups(), ==, 0);
 
 					co_return {};

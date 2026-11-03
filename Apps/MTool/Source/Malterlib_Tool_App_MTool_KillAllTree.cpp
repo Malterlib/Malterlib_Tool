@@ -94,14 +94,14 @@ struct CTool_KillAllTree : public CTool
 
 		void f_KillTree(int32 _Depth, TCVector<CStr> &_ProcessNames)
 		{
-			HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, false, m_Process);
-			if (hProcess)
+			HANDLE Process = OpenProcess(PROCESS_TERMINATE, false, m_Process);
+			if (Process)
 			{
 				umint nProcesses = _ProcessNames.f_GetLen();
 				bool bFound = false;
-				for (umint i = 0; i < nProcesses; ++i)
+				for (umint iName = 0; iName < nProcesses; ++iName)
 				{
-					if (m_FileName.f_CmpNoCase(_ProcessNames[i]) == 0)
+					if (m_FileName.f_CmpNoCase(_ProcessNames[iName]) == 0)
 					{
 						bFound = true;
 						break;
@@ -110,12 +110,12 @@ struct CTool_KillAllTree : public CTool
 
 				if (bFound)
 				{
-					TerminateProcess(hProcess, 44);
+					TerminateProcess(Process, 44);
 					DConOut("{sf ,sj*}Killed process id {}: {} Parent: {}" DNewLine, "", _Depth * 4, m_Process, m_FileName, m_ParentID);
 				}
 				else
 					DConOut("{sf ,sj*}Did NOT kill process id {}: {} Parent: {}" DNewLine, "", _Depth * 4, m_Process, m_FileName, m_ParentID);
-				CloseHandle(hProcess);
+				CloseHandle(Process);
 			}
 			CProcessEntry *pEntry = m_Children.f_Pop();
 			while (pEntry)
@@ -143,25 +143,25 @@ struct CTool_KillAllTree : public CTool
 	{
 		{
 			CProcessEntry RootProcess;
-			HANDLE hProcessSnap;
-			PROCESSENTRY32 pe32;
+			HANDLE ProcessSnapshot;
+			PROCESSENTRY32 ProcessEntry;
 
 			// Take a snapshot of all processes in the system.
-			hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-			if (hProcessSnap != INVALID_HANDLE_VALUE)
+			ProcessSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+			if (ProcessSnapshot != INVALID_HANDLE_VALUE)
 			{
-				pe32.dwSize = sizeof(PROCESSENTRY32);
+				ProcessEntry.dwSize = sizeof(PROCESSENTRY32);
 
-				if (Process32First(hProcessSnap, &pe32))
+				if (Process32First(ProcessSnapshot, &ProcessEntry))
 				{
 					do
 					{
-						RootProcess.f_MapProcess(pe32.th32ProcessID, pe32.th32ParentProcessID, pe32.szExeFile);
+						RootProcess.f_MapProcess(ProcessEntry.th32ProcessID, ProcessEntry.th32ParentProcessID, ProcessEntry.szExeFile);
 					}
-					while (Process32Next(hProcessSnap, &pe32));
+					while (Process32Next(ProcessSnapshot, &ProcessEntry));
 				}
 
-				CloseHandle(hProcessSnap);
+				CloseHandle(ProcessSnapshot);
 			}
 
 		RestartSearch:
@@ -173,9 +173,9 @@ struct CTool_KillAllTree : public CTool
 
 					umint nProces = _ProcessNames.f_GetLen();
 
-					for (umint i = 0; i < nProces; ++i)
+					for (umint iName = 0; iName < nProces; ++iName)
 					{
-						if (Iter->m_FileName == _ProcessNames[i])
+						if (Iter->m_FileName == _ProcessNames[iName])
 						{
 							bFound = true;
 							break;

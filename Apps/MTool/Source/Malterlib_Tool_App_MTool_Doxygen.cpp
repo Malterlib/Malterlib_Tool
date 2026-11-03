@@ -12,9 +12,9 @@ namespace
 
 		CStr LastOption;
 
-		for (umint i = 0; true; ++i)
+		for (umint iParam = 0; true; ++iParam)
 		{
-			auto pChild = _Params.f_GetChildNoPath(CStr::fs_ToStr(i));
+			auto pChild = _Params.f_GetChildNoPath(CStr::fs_ToStr(iParam));
 			if (!pChild)
 				break;
 			CStr Value = pChild->f_GetThisValue();

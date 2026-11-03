@@ -30,7 +30,7 @@ struct CTool_SymbolBreakpad : public CTool
 			CStr GUID;
 			CStr Name;
 
-			auto fl_FindModule = [&]() -> bool
+			auto fFindModule = [&]() -> bool
 				{
 					CStrPtr Temp;
 					Temp.f_SetConstPtr(Buffer.f_GetStr() + FindPos, Buffer.f_GetLen() - FindPos);
@@ -64,7 +64,7 @@ struct CTool_SymbolBreakpad : public CTool
 
 				Buffer.f_AddStr(Temp, ThisTime);
 
-				if (fl_FindModule())
+				if (fFindModule())
 					break;
 			}
 

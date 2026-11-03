@@ -10,7 +10,7 @@ namespace NMib::NTool::NTestHelpers
 	CStr fg_Repeat(CStr const &_Text, umint _Count)
 	{
 		CStr Result;
-		for (umint i = 0; i < _Count; ++i)
+		for (umint iRepeat = 0; iRepeat < _Count; ++iRepeat)
 			Result += _Text;
 
 		return Result;

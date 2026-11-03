@@ -254,7 +254,7 @@ struct CTool_VirtualFS : public CTool
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		static char const *sc_pHelpText =
+		static char const *s_pHelpText =
 			"Usage:\n"
 			"MTool VirtualFS <Flags> <SourceFile>\n"
 			"\n"
@@ -291,7 +291,7 @@ struct CTool_VirtualFS : public CTool
 		CStr Platform = "macOS";
 		NBuildSystem::CMalterlibDependencyTracker MalterlibDependencyTracker;
 
-		auto f_IntToStr = [](int _Val) -> CStr
+		auto fIntToStr = [](int _Val) -> CStr
 			{
 				return CStr::CFormat("{}") << _Val;
 			}
@@ -300,13 +300,13 @@ struct CTool_VirtualFS : public CTool
 		int iCurArg = 0;
 		CStr CurArg;
 		CStr SymbolName = "gc_VFS_Bytes";
-		for (; !(CurArg = _Params.f_GetValue(f_IntToStr(iCurArg), "")).f_IsEmpty(); ++iCurArg)
+		for (; !(CurArg = _Params.f_GetValue(fIntToStr(iCurArg), "")).f_IsEmpty(); ++iCurArg)
 		{
 			if (CurArg[0] == '-')
 			{
 				if (CurArg.f_CmpNoCase("-help") == 0)
 				{
-					DConOutRaw(sc_pHelpText);
+					DConOutRaw(s_pHelpText);
 					return 0;
 				}
 				else if (CurArg.f_CmpNoCase("-verbose") == 0)
@@ -322,77 +322,77 @@ struct CTool_VirtualFS : public CTool
 				else if ((CurArg.f_CmpNoCase("-o") == 0) || (CurArg.f_CmpNoCase("-output") == 0))
 				{
 					++iCurArg;
-					TargetFilename = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+					TargetFilename = _Params.f_GetValue(fIntToStr(iCurArg), "");
 					if (TargetFilename.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No out file specified after -o[utput] flag\n");
-						DConOutRaw(sc_pHelpText);
+						DConOutRaw(s_pHelpText);
 						return -1;
 					}
 				}
 				else if (CurArg.f_CmpNoCase("-oidsdepend") == 0)
 				{
 					++iCurArg;
-					MalterlibDependencyFile = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+					MalterlibDependencyFile = _Params.f_GetValue(fIntToStr(iCurArg), "");
 					if (MalterlibDependencyFile.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No out file specified after -oidsdepend flag\n");
-						DConOutRaw(sc_pHelpText);
+						DConOutRaw(s_pHelpText);
 						return -1;
 					}
 				}
 				else if (CurArg.f_CmpNoCase("-odepfile") == 0)
 				{
 					++iCurArg;
-					DepFile = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+					DepFile = _Params.f_GetValue(fIntToStr(iCurArg), "");
 					if (DepFile.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No out file specified after -odepfile flag\n");
-						DConOutRaw(sc_pHelpText);
+						DConOutRaw(s_pHelpText);
 						return -1;
 					}
 				}
 				else if (CurArg.f_CmpNoCase("-ocpp") == 0)
 				{
 					++iCurArg;
-					TargetFilenameCpp = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+					TargetFilenameCpp = _Params.f_GetValue(fIntToStr(iCurArg), "");
 					if (TargetFilenameCpp.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No out file specified after -ocpp flag\n");
-						DConOutRaw(sc_pHelpText);
+						DConOutRaw(s_pHelpText);
 						return -1;
 					}
 				}
 				else if (CurArg.f_CmpNoCase("-dest") == 0)
 				{
 					++iCurArg;
-					DestPath = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+					DestPath = _Params.f_GetValue(fIntToStr(iCurArg), "");
 					if (DestPath.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No dest path specified after -dest path\n");
-						DConOutRaw(sc_pHelpText);
+						DConOutRaw(s_pHelpText);
 						return -1;
 					}
 				}
 				else if (CurArg.f_CmpNoCase("-symbol") == 0)
 				{
 					++iCurArg;
-					SymbolName = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+					SymbolName = _Params.f_GetValue(fIntToStr(iCurArg), "");
 					if (SymbolName.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No symbol name specified after -symbol name\n");
-						DConOutRaw(sc_pHelpText);
+						DConOutRaw(s_pHelpText);
 						return -1;
 					}
 				}
 				else if (CurArg.f_CmpNoCase("-platform") == 0)
 				{
 					++iCurArg;
-					Platform = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+					Platform = _Params.f_GetValue(fIntToStr(iCurArg), "");
 					if (Platform.f_IsEmpty())
 					{
 						DConOutRaw("VirtualFS: No platform specified after -platform\n");
-						DConOutRaw(sc_pHelpText);
+						DConOutRaw(s_pHelpText);
 						return -1;
 					}
 				}
@@ -400,7 +400,7 @@ struct CTool_VirtualFS : public CTool
 				else
 				{
 					DConOut("VirtualFS: Unrecognised flag: {}\n", CurArg);
-					DConOutRaw(sc_pHelpText);
+					DConOutRaw(s_pHelpText);
 					return -1;
 				}
 			}
@@ -411,18 +411,18 @@ struct CTool_VirtualFS : public CTool
 		if (TargetFilename.f_IsEmpty())
 		{
 			DConOutRaw("No target file specified.\n");
-			DConOutRaw(sc_pHelpText);
+			DConOutRaw(s_pHelpText);
 			return -1;
 		}
 
 		if (TargetFilenameCpp.f_IsEmpty() && (TargetFormat == ETargetFormat_COFF || TargetFormat == ETargetFormat_ASM || TargetFormat == ETargetFormat_CPP))
 		{
 			DConOutRaw("No cpp target file specified.\n");
-			DConOutRaw(sc_pHelpText);
+			DConOutRaw(s_pHelpText);
 			return -1;
 		}
 
-		SourceFilename = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+		SourceFilename = _Params.f_GetValue(fIntToStr(iCurArg), "");
 		++iCurArg;
 
 		TargetFilename = TargetFilename.f_ReplaceChar('\\', '/');
@@ -461,7 +461,7 @@ struct CTool_VirtualFS : public CTool
 			CParseLocation m_Location;
 		};
 
-		TCVector<CInclude> lIncludes;
+		TCVector<CInclude> Includes;
 		for (auto IncludeIter = Source.f_GetChildIterator(); IncludeIter; ++IncludeIter)
 		{
 			if (IncludeIter->f_GetName().f_CmpNoCase("Include") == 0)
@@ -480,7 +480,7 @@ struct CTool_VirtualFS : public CTool
 					return 1;
 				}
 
-				lIncludes.f_Insert(Inc);
+				Includes.f_Insert(Inc);
 			}
 		}
 
@@ -531,14 +531,14 @@ struct CTool_VirtualFS : public CTool
 		CFileSystemInterface_Disk DiskSystem;
 
 		umint nFilesAdded = 0;
-		for (auto CurInclude = lIncludes.f_GetIterator(); CurInclude; ++CurInclude)
+		for (auto CurInclude = Includes.f_GetIterator(); CurInclude; ++CurInclude)
 		{
 			if (bVerbose)
 				DConOut("{}{}\n", CurInclude->m_Pattern, (CurInclude->m_bRecurse ? " (Recursive)" : ""));
 
-			TCVector<CStr> lSourceFiles = NFile::CFile::fs_FindFiles(CurInclude->m_Pattern, EFileAttrib_File | EFileAttrib_Link, CurInclude->m_bRecurse, false);
+			TCVector<CStr> SourceFiles = NFile::CFile::fs_FindFiles(CurInclude->m_Pattern, EFileAttrib_File | EFileAttrib_Link, CurInclude->m_bRecurse, false);
 
-			if (lSourceFiles.f_IsEmpty() && !CurInclude->m_bRecurse && CurInclude->m_Pattern.f_FindChars("*?") < 0)
+			if (SourceFiles.f_IsEmpty() && !CurInclude->m_bRecurse && CurInclude->m_Pattern.f_FindChars("*?") < 0)
 			{
 				DConOut
 					(
@@ -554,7 +554,7 @@ struct CTool_VirtualFS : public CTool
 
 			CStr BasePath = NFile::CFile::fs_GetPath(CurInclude->m_Pattern);
 
-			MalterlibDependencyTracker.f_AddFind(CurInclude->m_Pattern, CurInclude->m_bRecurse, false, EFileAttrib_File | EFileAttrib_Link, lSourceFiles);
+			MalterlibDependencyTracker.f_AddFind(CurInclude->m_Pattern, CurInclude->m_bRecurse, false, EFileAttrib_File | EFileAttrib_Link, SourceFiles);
 
 			{
 				CStr BaseDepend = BasePath;
@@ -580,9 +580,9 @@ struct CTool_VirtualFS : public CTool
 
 			umint Len = BasePath.f_GetLen();
 
-			for (umint i = 0; i < lSourceFiles.f_GetLen(); ++i)
+			for (umint iFile = 0; iFile < SourceFiles.f_GetLen(); ++iFile)
 			{
-				auto &SourceFile = lSourceFiles[i];
+				auto &SourceFile = SourceFiles[iFile];
 				{
 					while (!BasePath.f_IsEmpty() && !CFile::fs_FileExists(BasePath, EFileAttrib_Directory))
 						BasePath = NFile::CFile::fs_GetPath(BasePath);
@@ -642,9 +642,9 @@ struct CTool_VirtualFS : public CTool
 			TargetFileStream.f_Close(); // Can this throw?
 		else if (TargetFormat == ETargetFormat_COFF)
 		{
-			CByteVector lData = TargetMemoryStream.f_MoveVector();
+			CByteVector FileData = TargetMemoryStream.f_MoveVector();
 
-			auto Hash = CHash_MD5::fs_DigestFromData(lData);
+			auto Hash = CHash_MD5::fs_DigestFromData(FileData);
 
 			CStr UniqueName = Hash.f_GetString();
 
@@ -661,7 +661,7 @@ struct CTool_VirtualFS : public CTool
 				)
 				<< SourceFilename
 				<< UniqueName
-				<< lData.f_GetLen()
+				<< FileData.f_GetLen()
 			;
 
 			CppOutput += CStr::CFormat
@@ -690,7 +690,7 @@ struct CTool_VirtualFS : public CTool
 
 			try
 			{
-				auto Data = CCOFFObject::fs_GenerateData(SymbolName, lData);
+				auto Data = CCOFFObject::fs_GenerateData(SymbolName, FileData);
 
 				NFile::CFile::fs_WriteFile(CStr(TargetFilename), Data);
 			}
@@ -702,9 +702,9 @@ struct CTool_VirtualFS : public CTool
 		}
 		else if (TargetFormat == ETargetFormat_ASM)
 		{
-			CByteVector lData = TargetMemoryStream.f_MoveVector();
+			CByteVector FileData = TargetMemoryStream.f_MoveVector();
 
-			auto Hash = CHash_MD5::fs_DigestFromData(lData);
+			auto Hash = CHash_MD5::fs_DigestFromData(FileData);
 
 			CStr UniqueName = Hash.f_GetString();
 
@@ -721,7 +721,7 @@ struct CTool_VirtualFS : public CTool
 				)
 				<< SourceFilename
 				<< UniqueName
-				<< lData.f_GetLen()
+				<< FileData.f_GetLen()
 			;
 
 			CppOutput += CStr::CFormat
@@ -752,7 +752,7 @@ struct CTool_VirtualFS : public CTool
 			try
 			{
 				MalterlibDependencyTracker.f_AddOutputFile(BinFileName);
-				NFile::CFile::fs_WriteFile(BinFileName, lData);
+				NFile::CFile::fs_WriteFile(BinFileName, FileData);
 			}
 			catch (NFile::CExceptionFile &_Ex)
 			{
@@ -801,7 +801,7 @@ struct CTool_VirtualFS : public CTool
 		}
 		else if (TargetFormat == ETargetFormat_CPP)
 		{
-			CByteVector lData = TargetMemoryStream.f_MoveVector();
+			CByteVector FileData = TargetMemoryStream.f_MoveVector();
 
 			CStr CppOutput = CStr::CFormat
 				(
@@ -816,7 +816,7 @@ struct CTool_VirtualFS : public CTool
 				)
 				<< SourceFilename
 				// << NTime::fg_GetFullTimeStr(NTime::CTime::fs_NowLocal())
-				<< lData.f_GetLen()
+				<< FileData.f_GetLen()
 			;
 
 			auto Formatter = CStr::CFormat
@@ -848,8 +848,8 @@ struct CTool_VirtualFS : public CTool
 			;
 			ByteFormatter << Input[0];
 
-			umint nBytesLeft = lData.f_GetLen();
-			auto DataIter = lData.f_GetIterator();
+			umint nBytesLeft = FileData.f_GetLen();
+			auto DataIter = FileData.f_GetIterator();
 
 			while (nBytesLeft >= 16)
 			{

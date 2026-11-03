@@ -9,12 +9,12 @@ namespace NMib::NTool
 
 	namespace
 	{
-		CStr const gc_FormatConfiguration =
+		CStr const g_FormatConfiguration =
 			"root = true\n\n[*]\nindent_style = tab\nindent_size = 4\ntab_width = 4\nmax_line_length = 190\n\n"
 			"[*.{c,cpp,h,hpp}]\nmalterlib_format = malterlib\n"
 		;
-		CStr const gc_Unformatted = "void fg_Test()\n{\n\n    int a;   \n\tif(a==2)\n\t\tfg_Other(a,1);\n}\n";
-		CStr const gc_Formatted = "void fg_Test()\n{\n\tint a;\n\tif (a == 2)\n\t\tfg_Other(a, 1);\n}\n";
+		constexpr CStr gc_Unformatted = gc_Str<"void fg_Test()\n{\n\n    int a;   \n\tif(a==2)\n\t\tfg_Other(a,1);\n}\n">;
+		constexpr CStr gc_Formatted = gc_Str<"void fg_Test()\n{\n\tint a;\n\tif (a == 2)\n\t\tfg_Other(a, 1);\n}\n">;
 
 		struct CRejectedCase
 		{
@@ -83,7 +83,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Source.cpp", gc_Formatted);
 					Repo.f_Write("Generated/Bad.cpp", gc_Unformatted);
 					Repo.f_Write("Local/Bad.cpp", gc_Unformatted);
@@ -118,12 +118,12 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Source.cpp", gc_Formatted);
 					Repo.f_Write("Plain/Bad.cpp", gc_Unformatted);
 					Repo.f_Write(".gitignore", "/Nested/\n/Plain/\n");
 					co_await Repo.f_Git({"init", "-q", "Nested"});
-					Repo.f_Write("Nested/.editorconfig", gc_FormatConfiguration);
+					Repo.f_Write("Nested/.editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Nested/.gitignore", "/Ignored/\n");
 					Repo.f_Write("Nested/Bad.cpp", gc_Unformatted);
 					Repo.f_Write("Nested/Ignored/Bad.cpp", gc_Unformatted);
@@ -158,7 +158,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Source/Deep/Example.cpp", gc_Unformatted);
 
 					auto Result = co_await Repo.f_Tool
@@ -196,7 +196,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", gc_Unformatted);
 
 					auto fExpectUnchanged = [&](CStr const &_Case)
@@ -233,7 +233,7 @@ namespace NMib::NTool
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
 					CFile::fs_CreateDirectory(Repo.m_Root / "Plain");
-					CFile::fs_WriteStringToFile(Repo.m_Root / "Plain/.editorconfig", gc_FormatConfiguration, false);
+					CFile::fs_WriteStringToFile(Repo.m_Root / "Plain/.editorconfig", g_FormatConfiguration, false);
 					CFile::fs_WriteStringToFile(Repo.m_Root / "Plain/Example.cpp", gc_Unformatted, false);
 					CFile::fs_CreateSymbolicLink(Repo.m_Root / "Plain", Repo.m_Root / "PlainLink", EFileAttrib_Directory, ESymbolicLinkFlag_None);
 
@@ -243,7 +243,7 @@ namespace NMib::NTool
 					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Root / "Plain/Example.cpp", true), ==, gc_Unformatted);
 
 					CFile::fs_CreateDirectory(Repo.m_Path / "Sub");
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Sub/Example.cpp", gc_Unformatted);
 					CFile::fs_CreateSymbolicLink(Repo.m_Path, Repo.m_Root / "RepoLink", EFileAttrib_Directory, ESymbolicLinkFlag_None);
 					auto Below = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Root, "--pattern", "RepoLink/Sub/*.cpp"});
@@ -263,7 +263,7 @@ namespace NMib::NTool
 
 					// Only the Unix permission bits can take a directory's listing away here.
 #ifndef DPlatformFamily_Windows
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Locked/Example.cpp", gc_Unformatted);
 					auto LockedAttributes = CFile::fs_GetAttributes(Repo.m_Path / "Locked");
 					CFile::fs_SetAttributes(Repo.m_Path / "Locked", EFileAttrib_UnixAttributesValid | EFileAttrib_UserWrite);
@@ -283,10 +283,10 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", gc_Unformatted);
 					co_await Repo.f_Git({"-C", Repo.m_Root, "init", "-q", "Other"});
-					CFile::fs_WriteStringToFile(Repo.m_Root / "Other/.editorconfig", gc_FormatConfiguration, false);
+					CFile::fs_WriteStringToFile(Repo.m_Root / "Other/.editorconfig", g_FormatConfiguration, false);
 					CFile::fs_WriteStringToFile(Repo.m_Root / "Other/Example.cpp", gc_Unformatted, false);
 
 					auto RepoName = CFile::fs_GetFile(Repo.m_Path);
@@ -314,12 +314,12 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					CStr Files;
-					for (umint i = 0; i < 100; ++i)
+					for (umint iFile = 0; iFile < 100; ++iFile)
 					{
-						Repo.f_Write("File{}.cpp"_f << i, gc_Unformatted);
-						Files += "File{}.cpp,"_f << i;
+						Repo.f_Write("File{}.cpp"_f << iFile, gc_Unformatted);
+						Files += "File{}.cpp,"_f << iFile;
 					}
 
 					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "--check", "--jobs", "1", "-C", Repo.m_Path, "--file", Files + "Missing.cpp"});
@@ -328,13 +328,13 @@ namespace NMib::NTool
 
 					auto Written = co_await Repo.f_Tool({"Format", "--no-color", "--jobs", "1", "-C", Repo.m_Path, "--file", Files + "Missing.cpp"});
 					DMibExpect(Written.m_ExitCode, ==, 2u);
-					for (umint i = 0; i < 100; ++i)
+					for (umint iFile = 0; iFile < 100; ++iFile)
 					{
-						if (CFile::fs_ReadStringFromFile(Repo.m_Path / ("File{}.cpp"_f << i), true) == gc_Unformatted)
+						if (CFile::fs_ReadStringFromFile(Repo.m_Path / ("File{}.cpp"_f << iFile), true) == gc_Unformatted)
 							continue;
 
-						DMibTestPath("File{}"_f << i);
-						DMibExpect(Written.f_GetCombinedOut().f_Find(CStr("/File{}.cpp' was changed before the selection failed"_f << i)), >=, 0);
+						DMibTestPath("File{}"_f << iFile);
+						DMibExpect(Written.f_GetCombinedOut().f_Find(CStr("/File{}.cpp' was changed before the selection failed"_f << iFile)), >=, 0);
 					}
 
 					co_return {};
@@ -347,7 +347,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					CStr Text = "/*\n@*/    \n";
 					NContainer::CByteVector Bytes;
 					Bytes.f_Insert((uint8 const *)Text.f_GetStr(), Text.f_GetLen());
@@ -368,7 +368,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", "int X =\n1;\nint Y;\n");
 
 					auto Diff = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Example.cpp", "--diff"});
@@ -384,7 +384,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", gc_Unformatted);
 					// A file beside the one formatted that a user keeps is no staging file of the run.
 					Repo.f_Write("Example.cpp.mtool-format", "Kept\n");
@@ -416,7 +416,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", "auto g_Text = \"" + fg_Repeat("x", 200) + "\";\n");
 
 					// An indivisible overlong literal cannot be fixed, so it stays reported.
@@ -433,7 +433,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", "/* unterminated comment\n");
 
 					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Example.cpp"});
@@ -450,9 +450,9 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					for (umint i = 0; i < 12; ++i)
-						Repo.f_Write("Source/Example{}.cpp"_f << i, gc_Unformatted);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
+					for (umint iFile = 0; iFile < 12; ++iFile)
+						Repo.f_Write("Source/Example{}.cpp"_f << iFile, gc_Unformatted);
 
 					auto Single = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "Source/*.cpp", "--recursive", "--check", "--jobs", "1"});
 					auto Parallel = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "Source/*.cpp", "--recursive", "--check", "--jobs", "8"});
@@ -476,9 +476,9 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					for (umint i = 0; i < 3; ++i)
-						Repo.f_Write("Source/Example{}.cpp"_f << i, gc_Unformatted);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
+					for (umint iFile = 0; iFile < 3; ++iFile)
+						Repo.f_Write("Source/Example{}.cpp"_f << iFile, gc_Unformatted);
 
 					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "Source/*.cpp", "--recursive", "--check", "--slowest", "2"});
 					auto Output = Result.f_GetCombinedOut();
@@ -486,9 +486,9 @@ namespace NMib::NTool
 					DMibExpect(iList, >=, 0);
 
 					umint nListed = 0;
-					for (umint i = 0; i < 3; ++i)
+					for (umint iFile = 0; iFile < 3; ++iFile)
 					{
-						CStr Line = " s  {}"_f << CFile::fs_AppendPath(Repo.m_Path, CStr("Source/Example{}.cpp"_f << i));
+						CStr Line = " s  {}"_f << CFile::fs_AppendPath(Repo.m_Path, CStr("Source/Example{}.cpp"_f << iFile));
 						nListed += Output.f_Find(Line) >= 0;
 					}
 
@@ -513,7 +513,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n    int b;\n}\n");
 
 					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Example.cpp", "--lines", "3:3"});
@@ -529,7 +529,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					CStr Source = "void fg_Test()\n{\n    int a;\n    int b;\n}\n";
 					Repo.f_Write("Example.cpp", Source);
 
@@ -569,7 +569,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", gc_Unformatted);
 					Repo.f_Write("Other.cpp", gc_Unformatted);
 
@@ -609,7 +609,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n}\n");
 					co_await Repo.f_Commit();
 
@@ -632,7 +632,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", "void fg_Test()\r{\r\tif (a)\r\t{\r\t\tg();\r\t}\r}\r");
 					co_await Repo.f_Commit();
 
@@ -651,7 +651,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n    int b;\n}\n");
 					co_await Repo.f_Commit();
 
@@ -668,7 +668,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Example.cpp", "void fg_Test()\n{\n    int a;\n    int b;\n}\n");
 					co_await Repo.f_Commit();
 
@@ -745,9 +745,9 @@ namespace NMib::NTool
 				auto Capture = co_await (g_CaptureExceptions % "Testing MTool Format naming");
 
 				// Only a naming that lists 'inline_small' as a specifier moves 'static' in front of it.
-				CStr const c_Source = "constexpr inline_small static int gc_Value = 1;\n";
-				CStr const c_Reordered = "static constexpr inline_small int gc_Value = 1;\n";
-				CStr const c_Style = "Version: 1\nSpecifierMacros: ['inline_small']\n";
+				CStr const Source = "constexpr inline_small static int gc_Value = 1;\n";
+				CStr const Reordered = "static constexpr inline_small int gc_Value = 1;\n";
+				CStr const Style = "Version: 1\nSpecifierMacros: ['inline_small']\n";
 
 				DMibTestCategory("NoNamingReadsOnlyCpp") -> TCFuture<void>
 				{
@@ -755,12 +755,12 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					Repo.f_Write("Source.cpp", c_Source);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
+					Repo.f_Write("Source.cpp", Source);
 
 					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Source.cpp"});
 					DMibExpect(Result.m_ExitCode, ==, 0u);
-					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, c_Source);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, Source);
 
 					co_return {};
 				};
@@ -771,20 +771,20 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					Repo.f_Write(".malterlib-format", c_Style);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
+					Repo.f_Write(".malterlib-format", Style);
 					Repo.f_Write("Module/.malterlib-format", "Version: 1\n");
-					Repo.f_Write("Source/Deep/Source.cpp", c_Source);
-					Repo.f_Write("Module/Source.cpp", c_Source);
+					Repo.f_Write("Source/Deep/Source.cpp", Source);
+					Repo.f_Write("Module/Source.cpp", Source);
 
 					auto Named = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Source/Deep/Source.cpp"});
 					DMibExpect(Named.m_ExitCode, ==, 0u);
-					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source/Deep/Source.cpp", true), ==, c_Reordered);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source/Deep/Source.cpp", true), ==, Reordered);
 
 					// The nearest document wins, even one that names nothing.
 					auto Empty = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Module/Source.cpp"});
 					DMibExpect(Empty.m_ExitCode, ==, 0u);
-					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Module/Source.cpp", true), ==, c_Source);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Module/Source.cpp", true), ==, Source);
 
 					co_return {};
 				};
@@ -795,26 +795,20 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
-					Repo.f_Write("Malterlib/Core/.malterlib-format", c_Style);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
+					Repo.f_Write("Malterlib/Core/.malterlib-format", Style);
 					Repo.f_Write("Malterlib/Module/.malterlib-format", "Version: 1\nExtends: ../Core/.malterlib-format\nSpecifierMacros: {Append: ['inline_medium']}\n");
-					Repo.f_Write("Malterlib/Module/Source/Source.cpp", c_Source + "constexpr inline_medium static int gc_Other = 2;\n");
-					Repo.f_Write("Other/Source.cpp", c_Source);
+					Repo.f_Write("Malterlib/Module/Source/Source.cpp", Source + "constexpr inline_medium static int gc_Other = 2;\n");
+					Repo.f_Write("Other/Source.cpp", Source);
 
 					auto Extended = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Malterlib/Module/Source/Source.cpp"});
 					DMibExpect(Extended.m_ExitCode, ==, 0u);
-					DMibExpect
-						(
-							CFile::fs_ReadStringFromFile(Repo.m_Path / "Malterlib/Module/Source/Source.cpp", true)
-							, ==
-							, c_Reordered + "static constexpr inline_medium int gc_Other = 2;\n"
-						)
-					;
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Malterlib/Module/Source/Source.cpp", true), ==, Reordered + "static constexpr inline_medium int gc_Other = 2;\n");
 
 					// Without a document of its own, a file reads Malterlib/Core's.
 					auto Fallback = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Other/Source.cpp"});
 					DMibExpect(Fallback.m_ExitCode, ==, 0u);
-					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Other/Source.cpp", true), ==, c_Reordered);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Other/Source.cpp", true), ==, Reordered);
 
 					co_return {};
 				};
@@ -825,16 +819,16 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Unknown/.malterlib-format", "Version: 1\nFunctionName: ['f_.*']\n");
-					Repo.f_Write("Unknown/Source.cpp", c_Source);
+					Repo.f_Write("Unknown/Source.cpp", Source);
 					Repo.f_Write("Missing/.malterlib-format", "Version: 1\nExtends: Absent/.malterlib-format\n");
-					Repo.f_Write("Missing/Source.cpp", c_Source);
+					Repo.f_Write("Missing/Source.cpp", Source);
 
 					auto Unknown = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Unknown/Source.cpp"});
 					DMibExpect(Unknown.m_ExitCode, !=, 0u);
 					DMibExpect(Unknown.f_GetCombinedOut().f_Find("Unknown key 'FunctionName'"), >=, 0);
-					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Unknown/Source.cpp", true), ==, c_Source);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Unknown/Source.cpp", true), ==, Source);
 
 					auto Missing = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--file", "Missing/Source.cpp"});
 					DMibExpect(Missing.m_ExitCode, !=, 0u);
@@ -849,11 +843,11 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("A/.malterlib-format", "Version: 1\nExtends: ../B/.malterlib-format\n");
 					Repo.f_Write("B/.malterlib-format", "Version: 1\nExtends: ../A/.malterlib-format\n");
-					Repo.f_Write("A/Source.cpp", c_Source);
-					Repo.f_Write("B/Source.cpp", c_Source);
+					Repo.f_Write("A/Source.cpp", Source);
+					Repo.f_Write("B/Source.cpp", Source);
 
 					// Both files resolve at once, from the two ends of the cycle.
 					auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "*.cpp", "--recursive"});
@@ -876,7 +870,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Source.cpp", gc_Formatted);
 
 					// The buffer is formatted as the file would be, which is neither read nor written.
@@ -905,10 +899,10 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 
 					CStr Long = "char const *g_p = \"";
-					for (umint i = 0; i < 200; ++i)
+					for (umint iChar = 0; iChar < 200; ++iChar)
 						Long += "x";
 
 					Long += "\";\n";
@@ -966,7 +960,7 @@ namespace NMib::NTool
 
 					CRepositoryFixture Repo;
 					co_await Repo.f_Init();
-					Repo.f_Write(".editorconfig", gc_FormatConfiguration);
+					Repo.f_Write(".editorconfig", g_FormatConfiguration);
 					Repo.f_Write("Source.cpp", gc_Unformatted);
 					auto fConfigure = [&](bool _bFormat)
 						{

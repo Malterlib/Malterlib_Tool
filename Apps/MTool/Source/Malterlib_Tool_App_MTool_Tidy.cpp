@@ -113,9 +113,9 @@ namespace NMib::NTool::NTidy
 	{
 		CStr Escaped;
 
-		for (umint i = 0; i < _Path.f_GetLen(); ++i)
+		for (umint iChar = 0; iChar < _Path.f_GetLen(); ++iChar)
 		{
-			ch8 Char = _Path[i];
+			ch8 Char = _Path[iChar];
 			switch (Char)
 			{
 			case '\\':
@@ -375,14 +375,14 @@ namespace NMib::NTool::NTidy
 		if (_Output.f_EndsWith(".pch") || _Output.f_EndsWith(".gch"))
 			return true;
 
-		for (umint i = 0; i < _Arguments.f_GetLen(); ++i)
+		for (umint iArgument = 0; iArgument < _Arguments.f_GetLen(); ++iArgument)
 		{
-			auto &Argument = _Arguments[i];
+			auto &Argument = _Arguments[iArgument];
 			CStr Language;
 			if (Argument.f_StartsWith("-x") && Argument.f_GetLen() > 2)
 				Language = Argument.f_Extract(2);
-			else if (Argument == "-x" && i + 1 < _Arguments.f_GetLen())
-				Language = _Arguments[i + 1];
+			else if (Argument == "-x" && iArgument + 1 < _Arguments.f_GetLen())
+				Language = _Arguments[iArgument + 1];
 
 			if (Language.f_EndsWith("-header"))
 				return true;
@@ -393,12 +393,12 @@ namespace NMib::NTool::NTidy
 
 	CStr fg_GetTidyDependencyFile(TCVector<CStr> const &_Arguments, CStr const &_Directory)
 	{
-		for (umint i = 0; i < _Arguments.f_GetLen(); ++i)
+		for (umint iArgument = 0; iArgument < _Arguments.f_GetLen(); ++iArgument)
 		{
-			auto const &Argument = _Arguments[i];
+			auto const &Argument = _Arguments[iArgument];
 			CStr File;
-			if (Argument == "-MF" && i + 1 < _Arguments.f_GetLen())
-				File = _Arguments[i + 1];
+			if (Argument == "-MF" && iArgument + 1 < _Arguments.f_GetLen())
+				File = _Arguments[iArgument + 1];
 			else if (Argument.f_StartsWith("-MF") && Argument.f_GetLen() > 3)
 				File = Argument.f_Extract(3);
 
@@ -434,31 +434,31 @@ namespace NMib::NTool::NTidy
 			}
 		;
 
-		for (umint i = 0; i < Contents.f_GetLen(); ++i)
+		for (umint iChar = 0; iChar < Contents.f_GetLen(); ++iChar)
 		{
-			ch8 Char = Contents[i];
-			if (Char == '\\' && i + 1 < Contents.f_GetLen())
+			ch8 Char = Contents[iChar];
+			if (Char == '\\' && iChar + 1 < Contents.f_GetLen())
 			{
-				ch8 Next = Contents[i + 1];
+				ch8 Next = Contents[iChar + 1];
 				if (Next == '\n' || Next == '\r')
 				{
 					fFlush();
-					++i;
+					++iChar;
 					continue;
 				}
 
 				if (Next == ' ' || Next == '#' || Next == '\\')
 				{
 					Current.f_AddChar(Next);
-					++i;
+					++iChar;
 					continue;
 				}
 			}
 
-			if (Char == '$' && i + 1 < Contents.f_GetLen() && Contents[i + 1] == '$')
+			if (Char == '$' && iChar + 1 < Contents.f_GetLen() && Contents[iChar + 1] == '$')
 			{
 				Current.f_AddChar('$');
-				++i;
+				++iChar;
 				continue;
 			}
 
@@ -602,10 +602,10 @@ namespace NMib::NTool::NTidy
 					for (auto iDatabase : Selected)
 					{
 						auto &Database = Databases[iDatabase];
-						auto *piBest = BestForTarget.f_FindEqual(Database.m_Target);
-						if (piBest)
+						auto *pBest = BestForTarget.f_FindEqual(Database.m_Target);
+						if (pBest)
 						{
-							auto &Best = Databases[*piBest];
+							auto &Best = Databases[*pBest];
 							if (Best.m_WorkspacePriority > Database.m_WorkspacePriority)
 								continue;
 							if (Best.m_WorkspacePriority == Database.m_WorkspacePriority && Best.m_Workspace <= Database.m_Workspace)
@@ -792,9 +792,9 @@ namespace NMib::NTool::NTidy
 
 			for (auto &Command : PassCommands)
 			{
-				if (auto *piCommand = SeenKeys.f_FindEqual(Command.m_Key))
+				if (auto *pCommand = SeenKeys.f_FindEqual(Command.m_Key))
 				{
-					auto &Kept = Inventory.m_Commands[*piCommand];
+					auto &Kept = Inventory.m_Commands[*pCommand];
 					Kept.m_EquivalentOutputs.f_Insert(Command.m_Output);
 					Kept.m_EquivalentDependencyFiles.f_Insert(Command.m_DependencyFile);
 					Kept.m_EquivalentBuildDirectories.f_Insert(Command.m_BuildDirectory);
@@ -878,8 +878,8 @@ namespace NMib::NTool::NTidy
 			;
 
 			fAddDependencies(Command.m_DependencyFile, Command.m_Output);
-			for (umint i = 0; i < Command.m_EquivalentOutputs.f_GetLen(); ++i)
-				fAddDependencies(Command.m_EquivalentDependencyFiles[i], Command.m_EquivalentOutputs[i]);
+			for (umint iOutput = 0; iOutput < Command.m_EquivalentOutputs.f_GetLen(); ++iOutput)
+				fAddDependencies(Command.m_EquivalentDependencyFiles[iOutput], Command.m_EquivalentOutputs[iOutput]);
 
 			if (Dependencies.f_IsEmpty())
 				++o_Inventory.m_nWithoutDependencies;
@@ -1037,7 +1037,7 @@ namespace NMib::NTool::NTidy
 
 	TCVector<CStr> fg_GetTidyArguments(CTidyState const &_State, CTidyCommand const &_Command, CStr const &_DatabaseDirectory, CStr const &_FixesFile)
 	{
-		auto &_Options = _State.m_Options;
+		auto &Options = _State.m_Options;
 
 		// The output is parsed, so no colors, whatever a .clang-tidy file asks for.
 		TCVector<CStr> Arguments =
@@ -1046,12 +1046,12 @@ namespace NMib::NTool::NTidy
 				, _DatabaseDirectory
 				, "--quiet"
 				, "--use-color=false"
-				, "--header-filter={}"_f << fg_GetTidyHeaderFilter(_Options.m_CheckedRepositories)
+				, "--header-filter={}"_f << fg_GetTidyHeaderFilter(Options.m_CheckedRepositories)
 			}
 		;
 
-		if (_Options.m_Checks)
-			Arguments.f_Insert("--checks={}"_f << _Options.m_Checks);
+		if (Options.m_Checks)
+			Arguments.f_Insert("--checks={}"_f << Options.m_Checks);
 
 		// The changed files are reported, and fixed, by the resolved names of what is reported, not by
 		// clang-tidy's line filter, which matches the names as they were spelled.
@@ -1809,13 +1809,13 @@ namespace NMib::NTool::NTidy
 					fg_LaunchTidyProcess(_Options.m_pCancelled, Ninja, {"-C", Directory, "-t", "deps"}, Directory) > Pending;
 
 				auto Results = co_await fg_AllDoneWrapped(Pending);
-				for (umint i = 0; i < Results.f_GetLen(); ++i)
+				for (umint iResult = 0; iResult < Results.f_GetLen(); ++iResult)
 				{
-					auto const &Result = Results[i];
+					auto const &Result = Results[iResult];
 					if (Result && !Result->m_ExitCode)
-						fg_ParseTidyNinjaDependencies(Result->f_GetStdOut(), (*Directories)[i], NinjaDependencies);
+						fg_ParseTidyNinjaDependencies(Result->f_GetStdOut(), (*Directories)[iResult], NinjaDependencies);
 					else
-						_Sink.m_fReport("Cannot read the dependencies Ninja keeps in '{}', so sources that include a changed header may not be checked\n"_f << (*Directories)[i]);
+						_Sink.m_fReport("Cannot read the dependencies Ninja keeps in '{}', so sources that include a changed header may not be checked\n"_f << (*Directories)[iResult]);
 				}
 			}
 
@@ -1933,20 +1933,20 @@ namespace NMib::NTool::NTidy
 				if (_Options.m_Checks)
 					VerifyArguments.f_Insert("--checks={}"_f << _Options.m_Checks);
 
-				for (umint i = iFirst; i < iEnd; ++i)
-					fg_LaunchTidyProcess(_Options.m_pCancelled, _Options.m_ClangTidy, VerifyArguments, Pending[i]) > Verifications;
+				for (umint iPending = iFirst; iPending < iEnd; ++iPending)
+					fg_LaunchTidyProcess(_Options.m_pCancelled, _Options.m_ClangTidy, VerifyArguments, Pending[iPending]) > Verifications;
 
 				auto Results = co_await fg_AllDoneWrapped(Verifications);
 				if (fg_IsTidyCancelled(_Options))
 					co_return DMibErrorInstance("Aborted");
 
-				for (umint i = iFirst; i < iEnd; ++i)
+				for (umint iPending = iFirst; iPending < iEnd; ++iPending)
 				{
-					auto &Result = Results[i - iFirst];
+					auto &Result = Results[iPending - iFirst];
 					if (!Result)
-						pState->m_InvalidConfigurations[Pending[i]] = Result.f_GetExceptionStr();
+						pState->m_InvalidConfigurations[Pending[iPending]] = Result.f_GetExceptionStr();
 					else if (CStr Problems = fg_GetTidyConfigurationProblems(*Result))
-						pState->m_InvalidConfigurations[Pending[i]] = Problems;
+						pState->m_InvalidConfigurations[Pending[iPending]] = Problems;
 				}
 			}
 		}

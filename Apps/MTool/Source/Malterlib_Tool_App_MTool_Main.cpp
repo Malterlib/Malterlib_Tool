@@ -9,8 +9,8 @@ DMibRuntimeClass(NMib::NConcurrency::CDistributedTool, CTool);
 
 bool fg_IsCMake()
 {
-	static bool bIsCmake = CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "MToolCMake";
-	return bIsCmake;
+	static bool s_bIsCMake = CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "MToolCMake";
+	return s_bIsCMake;
 }
 
 bool fg_IsLibTool()
@@ -20,8 +20,8 @@ bool fg_IsLibTool()
 
 bool fg_IsMalterlib()
 {
-	static bool bIsMalterlb = fg_GetSys()->f_GetProtectedEnvironmentVariable("MToolIsMalterlib", "false") == "true" || CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "mib";
-	return bIsMalterlb;
+	static bool s_bIsMalterlib = fg_GetSys()->f_GetProtectedEnvironmentVariable("MToolIsMalterlib", "false") == "true" || CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "mib";
+	return s_bIsMalterlib;
 }
 
 // The per-user state directory, ~/.Malterlib/MTool unless MToolRootDirectory overrides it.
@@ -107,9 +107,9 @@ aint CTool2::f_Run(NContainer::CRegistry &_Params)
 
 	TCVector<CStr> Files;
 
-	for (umint i = 0; true; ++i)
+	for (umint iParam = 0; true; ++iParam)
 	{
-		CStr Value = _Params.f_GetValue(CStr::fs_ToStr(i), "");
+		CStr Value = _Params.f_GetValue(CStr::fs_ToStr(iParam), "");
 		if (Value.f_IsEmpty())
 			break;
 		if (Value.f_FindChar('=') >= 0)

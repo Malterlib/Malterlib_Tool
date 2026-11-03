@@ -32,12 +32,12 @@ namespace NMib::NTool
 		uint32 *pData = (uint32 *)Mem.f_GetArray();
 		umint HeadersStart = 0;
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
-		for (int i = 0; i < FLen; i += 4, pData += 1)
+		for (int iOffset = 0; iOffset < FLen; iOffset += 4, pData += 1)
 		{
 			if (*pData == Find)
 			{
 				pGeneralHeaders = (CNTImageHeaders *)pData;
-				HeadersStart = i;
+				HeadersStart = iOffset;
 				break;
 			}
 		}
@@ -117,8 +117,8 @@ namespace NMib::NTool
 		else
 			DError("Unrecognized Machine");
 
-		static CTime s_Epoch = CTimeConvert::fs_CreateTime(1970, 1, 1);
-		ReturnInfo.m_Timestamp = s_Epoch + CTimeSpanConvert::fs_CreateSecondSpan(pGeneralHeaders->m_FileHeader.m_TimeDateStamp);
+		static constexpr CTime c_Epoch = CTimeConvert::fs_CreateTimeConstExpr(1970, 1, 1);
+		ReturnInfo.m_Timestamp = c_Epoch + CTimeSpanConvert::fs_CreateSecondSpan(pGeneralHeaders->m_FileHeader.m_TimeDateStamp);
 
 		return ReturnInfo;
 	}

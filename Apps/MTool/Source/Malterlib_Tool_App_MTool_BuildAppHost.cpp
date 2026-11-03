@@ -89,19 +89,19 @@ namespace
 		umint nDataLen = umint(_Stream.f_GetLength());
 		if (nDataLen < _NeedleLen || _Start > nDataLen - _NeedleLen)
 			return umint(-1);
-		for (umint i = _Start; i + _NeedleLen <= nDataLen; ++i)
+		for (umint iStart = _Start; iStart + _NeedleLen <= nDataLen; ++iStart)
 		{
 			bool bMatch = true;
-			for (umint j = 0; j < _NeedleLen; ++j)
+			for (umint iNeedle = 0; iNeedle < _NeedleLen; ++iNeedle)
 			{
-				if (pData[i + j] != _pNeedle[j])
+				if (pData[iStart + iNeedle] != _pNeedle[iNeedle])
 				{
 					bMatch = false;
 					break;
 				}
 			}
 			if (bMatch)
-				return i;
+				return iStart;
 		}
 		return umint(-1);
 	}
@@ -129,7 +129,7 @@ namespace
 	// name (UTF-8, null-terminated) and zeros the remainder of the 64-byte slot.
 	void fg_PatchAppBinaryPath(TCBinaryStreamMemory<> &_AppHost, CStr const &_ManagedDllName, CStr const &_TemplatePath)
 	{
-		static char const c_pPlaceholder[] = "c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2";
+		static constexpr char const c_pPlaceholder[] = "c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2";
 		constexpr umint c_PlaceholderLen = sizeof(c_pPlaceholder) - 1;
 		constexpr umint c_MaxPathLen = 1024;
 
@@ -182,7 +182,7 @@ namespace
 	// verbatim in every apphost.exe shipped by the .NET SDK. The 8 bytes
 	// immediately before this signature hold the bundle_header_offset (int64
 	// little-endian), zero in the template, written here when bundling.
-	uint8 const gc_BundleSignature[32] =
+	constexpr uint8 const gc_BundleSignature[32] =
 		{
 			// malterlib-format columns: 8
 			  0x8B, 0x12, 0x02, 0xB9, 0x6A, 0x61, 0x20, 0x38
@@ -351,7 +351,7 @@ struct CTool_BuildAppHost : public CDistributedTool, public CAllowUnsafeThis
 						// Ninja .NET pipeline runs on Windows hosts only — the
 						// apphost pack we patch is per-target-arch, but every
 						// Windows variant uses the same 4096-byte alignment.
-						uint64 const c_AssemblyAlignment = 4096;
+						constexpr uint64 c_AssemblyAlignment = 4096;
 
 						for (auto &File : Files)
 						{

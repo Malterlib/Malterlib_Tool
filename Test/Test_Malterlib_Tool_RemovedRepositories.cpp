@@ -278,7 +278,7 @@ namespace NMib::NTool
 
 					// A repository that a build system stops using keeps its pin, whichever way the removal is reconciled
 					umint nLost = 0;
-					for (umint i = 0; i < 10; ++i)
+					for (umint iRound = 0; iRound < 10; ++iRound)
 					{
 						auto Unused = co_await fUpdate("Default", false, false, {"--reconcile-removed=*:leave"});
 						if (Unused.m_ExitCode != 0 || fPinned() != AllPinned)

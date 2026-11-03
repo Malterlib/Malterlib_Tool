@@ -20,33 +20,33 @@ namespace NMib::NTool
 				co_await Checkout.f_Init({"A"});
 				co_await Checkout.f_MibSucceeds({"update-repos"});
 
-				CStr A = Checkout.f_Repository("A");
+				CStr RepoA = Checkout.f_Repository("A");
 
 				// The default branch of A is rewritten locally after the remote got a commit, so pushing it overwrites that commit
 				auto fDiverge = [&](CStr _Name) -> TCFuture<CStr>
 					{
-						return Checkout.f_CommitIn(A, _Name);
+						return Checkout.f_CommitIn(RepoA, _Name);
 					}
 				;
 
 				CStr Overwritten = co_await fDiverge("Overwritten");
-				co_await Checkout.f_GitIn(A, {"push", "-q", "origin", "main"});
-				co_await Checkout.f_GitIn(A, {"reset", "-q", "--hard", "HEAD~1"});
+				co_await Checkout.f_GitIn(RepoA, {"push", "-q", "origin", "main"});
+				co_await Checkout.f_GitIn(RepoA, {"reset", "-q", "--hard", "HEAD~1"});
 				CStr Rewritten = co_await fDiverge("Rewritten");
 
-				CStr ShortOverwritten = co_await Checkout.f_GitIn(A, {"rev-parse", "--short", Overwritten});
+				CStr ShortOverwritten = co_await Checkout.f_GitIn(RepoA, {"rev-parse", "--short", Overwritten});
 				CStr TagName = "main_" + ShortOverwritten;
 
 				auto fRemoteRef = [&](CStr const &_Ref) -> TCFuture<CStr>
 					{
-						return Checkout.f_GitIn(A, {"ls-remote", "origin", _Ref});
+						return Checkout.f_GitIn(RepoA, {"ls-remote", "origin", _Ref});
 					}
 				;
 
 				DMibTestCategory("TagAtOtherCommit") -> TCFuture<void>
 				{
 					// A tag of that name that keeps another commit is never published in its place
-					co_await Checkout.f_GitIn(A, {"tag", TagName, Rewritten});
+					co_await Checkout.f_GitIn(RepoA, {"tag", TagName, Rewritten});
 
 					auto Result = co_await Checkout.f_Mib({"push", "--force"});
 					DMibExpect(Result.m_ExitCode, !=, 0);
@@ -57,7 +57,7 @@ namespace NMib::NTool
 					CStr RemoteMain = co_await fRemoteRef("refs/heads/main");
 					DMibExpect(RemoteMain.f_StartsWith(Overwritten), ==, true);
 
-					co_await Checkout.f_GitIn(A, {"tag", "-d", TagName});
+					co_await Checkout.f_GitIn(RepoA, {"tag", "-d", TagName});
 
 					co_return {};
 				};
@@ -65,7 +65,7 @@ namespace NMib::NTool
 				DMibTestCategory("RerunPublishesTag") -> TCFuture<void>
 				{
 					// An earlier run created the tag and stopped before publishing it
-					co_await Checkout.f_GitIn(A, {"tag", TagName, Overwritten});
+					co_await Checkout.f_GitIn(RepoA, {"tag", TagName, Overwritten});
 
 					co_await Checkout.f_MibSucceeds({"push", "--force"});
 

@@ -758,26 +758,26 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								TCVector<CStr> Reports;
 								Reports.f_SetLen(Locations.f_GetLen());
 								TCFutureVector<NMib::NTool::NValidate::CValidationResult> Pending;
-								for (umint i = 0; i < Locations.f_GetLen(); ++i)
+								for (umint iLocation = 0; iLocation < Locations.f_GetLen(); ++iLocation)
 								{
 									NMib::NTool::NFormat::CFormatSink Sink;
-									Sink.m_fReport = [pReport = &Reports[i]](CStr const &_Text)
+									Sink.m_fReport = [pReport = &Reports[iLocation]](CStr const &_Text)
 										{
 											*pReport += _Text;
 										}
 									;
-									NMib::NTool::NValidate::fg_ValidateChanges(Locations[i], Base, Workers, fg_Move(Sink)) > Pending;
+									NMib::NTool::NValidate::fg_ValidateChanges(Locations[iLocation], Base, Workers, fg_Move(Sink)) > Pending;
 								}
 
 								auto Outcomes = co_await fg_AllDoneWrapped(Pending);
-								for (umint i = 0; i < Locations.f_GetLen(); ++i)
+								for (umint iLocation = 0; iLocation < Locations.f_GetLen(); ++iLocation)
 								{
-									*_pCommandLine %= Reports[i];
-									if (Outcomes[i])
-										Counts += Outcomes[i]->m_Counts;
+									*_pCommandLine %= Reports[iLocation];
+									if (Outcomes[iLocation])
+										Counts += Outcomes[iLocation]->m_Counts;
 									else
 									{
-										*_pCommandLine %= "{}: {}\n"_f << Locations[i] << Outcomes[i].f_GetExceptionStr();
+										*_pCommandLine %= "{}: {}\n"_f << Locations[iLocation] << Outcomes[iLocation].f_GetExceptionStr();
 										++nFailed;
 									}
 								}

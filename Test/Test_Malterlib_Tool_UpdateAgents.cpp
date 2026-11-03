@@ -9,7 +9,7 @@ namespace NMib::NTool
 
 	namespace
 	{
-		CStr const gc_GeneratedHeader = "<!-- GENERATED FILE: Do not edit manually. Run ./mib update-agents to regenerate. -->\n\n";
+		constexpr CStr gc_GeneratedHeader = gc_Str<"<!-- GENERATED FILE: Do not edit manually. Run ./mib update-agents to regenerate. -->\n\n">;
 
 		struct CAgentFixture : CRepositoryFixture
 		{

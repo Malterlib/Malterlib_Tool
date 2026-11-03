@@ -22,7 +22,7 @@ struct CTool_ExeFS : public CTool
 
 	aint f_Run(NContainer::CRegistry &_Params)
 	{
-		static char const *sc_pHelpText =
+		static char const *s_pHelpText =
 			"Usage:" DNewLine
 			"MTool <Flags> TargetFile [ SourcePattern [DestPath] ]" DNewLine
 			DNewLine
@@ -45,7 +45,7 @@ struct CTool_ExeFS : public CTool
 		ETarget TargetType = ETarget_Exe;
 		EAction Action = EAction_Add;
 
-		auto f_IntToStr = [](int _Val) -> CStr
+		auto fIntToStr = [](int _Val) -> CStr
 			{
 				return CStr::CFormat("{}") << _Val;
 			}
@@ -53,13 +53,13 @@ struct CTool_ExeFS : public CTool
 
 		int iCurArg = 0;
 		CStr CurArg;
-		for (; (CurArg = _Params.f_GetValue(f_IntToStr(iCurArg), "")); ++iCurArg)
+		for (; (CurArg = _Params.f_GetValue(fIntToStr(iCurArg), "")); ++iCurArg)
 		{
 			if (CurArg[0] == '-')
 			{
 				if (CurArg.f_CmpNoCase("-help") == 0)
 				{
-					DConOutRaw(sc_pHelpText);
+					DConOutRaw(s_pHelpText);
 					return 0;
 				}
 				else if (CurArg.f_CmpNoCase("-verbose") == 0)
@@ -86,13 +86,13 @@ struct CTool_ExeFS : public CTool
 				break;
 		}
 
-		CStr TargetFilename = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+		CStr TargetFilename = _Params.f_GetValue(fIntToStr(iCurArg), "");
 		++iCurArg;
 
-		CStr SourcePattern = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+		CStr SourcePattern = _Params.f_GetValue(fIntToStr(iCurArg), "");
 		++iCurArg;
 
-		CStr DestPath = _Params.f_GetValue(f_IntToStr(iCurArg), "");
+		CStr DestPath = _Params.f_GetValue(fIntToStr(iCurArg), "");
 		++iCurArg;
 
 		TargetFilename = TargetFilename.f_ReplaceChar('\\', '/');
@@ -197,7 +197,7 @@ struct CTool_ExeFS : public CTool
 
 		if (Action == EAction_Add || Action == EAction_Create)
 		{
-			TCVector<CStr> lSourceFiles = NFile::CFile::fs_FindFiles(SourcePattern, EFileAttrib_File, true);
+			TCVector<CStr> SourceFiles = NFile::CFile::fs_FindFiles(SourcePattern, EFileAttrib_File, true);
 
 			CStr BasePath = NFile::CFile::fs_GetPath(SourcePattern);
 			{
@@ -209,16 +209,16 @@ struct CTool_ExeFS : public CTool
 			umint Len = BasePath.f_GetLen();
 
 			umint nFileAdded = 0;
-			for (umint i = 0; i < lSourceFiles.f_GetLen(); ++i)
+			for (umint iFile = 0; iFile < SourceFiles.f_GetLen(); ++iFile)
 			{
-				CStr SourceName = lSourceFiles[i].f_Extract(Len + 1);
+				CStr SourceName = SourceFiles[iFile].f_Extract(Len + 1);
 				if (SourceName[0] == '.')
 					continue;
 
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(DestPath, SourceName);
 
 				if (bVerbose)
-					DConOut("Adding '{}' as '{}'" DNewLine, lSourceFiles[i], AddPath);
+					DConOut("Adding '{}' as '{}'" DNewLine, SourceFiles[iFile], AddPath);
 
 				++nFileAdded;
 
@@ -226,7 +226,7 @@ struct CTool_ExeFS : public CTool
 				if (!Dir.f_IsEmpty())
 					VirtualFS.f_CreateDirectory(Dir);
 
-				VirtualFS.f_CopyFileToFS(lSourceFiles[i], AddPath);
+				VirtualFS.f_CopyFileToFS(SourceFiles[iFile], AddPath);
 			}
 			if (bExistingFS)
 				DConOut("{} files added to existing ExeFS" DNewLine, nFileAdded);
@@ -249,13 +249,13 @@ struct CTool_ExeFS : public CTool
 			CStr BasePath = NFile::CFile::fs_GetPath(SourcePattern);
 			umint Len = BasePath.f_GetLen();
 
-			for (umint i = 0; i < Files.f_GetLen(); ++i)
+			for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
 			{
 				CStr SourceName;
 				if (Len == 0)
-					SourceName = Files[i];
+					SourceName = Files[iFile];
 				else
-					SourceName = Files[i].f_Extract(Len + 1);
+					SourceName = Files[iFile].f_Extract(Len + 1);
 
 				DConOut("\t{}" DNewLine, SourceName);
 			}
@@ -268,22 +268,22 @@ struct CTool_ExeFS : public CTool
 			CStr BasePath = NFile::CFile::fs_GetPath(SourcePattern);
 			umint Len = BasePath.f_GetLen();
 
-			for (umint i = 0; i < Files.f_GetLen(); ++i)
+			for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
 			{
 				CStr SourceName;
 				if (Len == 0)
-					SourceName = Files[i];
+					SourceName = Files[iFile];
 				else
-					SourceName = Files[i].f_Extract(Len + 1);
+					SourceName = Files[iFile].f_Extract(Len + 1);
 
 				CStr AddPath = NFile::CFile::fs_AppendPath<CStr>(DestPath, SourceName);
 
-				DConOut("File '{}' Extracted as '{}'" DNewLine, Files[i], AddPath);
+				DConOut("File '{}' Extracted as '{}'" DNewLine, Files[iFile], AddPath);
 
 				CStr Dir = NFile::CFile::fs_GetPath(AddPath);
 				if (!Dir.f_IsEmpty())
 					NFile::CFile::fs_CreateDirectory(Dir);
-				VirtualFS.f_CopyFileFromFS(Files[i], AddPath);
+				VirtualFS.f_CopyFileFromFS(Files[iFile], AddPath);
 			}
 			// Close
 			VirtualFS.f_Close();

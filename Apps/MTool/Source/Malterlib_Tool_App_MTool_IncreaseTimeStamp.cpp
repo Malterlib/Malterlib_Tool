@@ -8,6 +8,7 @@
 #include "windows.h"
 #include "winnt.h"
 
+// NOLINTBEGIN(malterlib-variable-naming): the declarations of the Windows SDK, with their names
 struct CV_INFO_PDB70
 {
 	DWORD CvSignature;
@@ -15,6 +16,8 @@ struct CV_INFO_PDB70
 	DWORD Age;          // an always-incrementing value
 	ch8 PdbFileName[1]; // zero terminated string with the name of the PDB file
 };
+
+// NOLINTEND(malterlib-variable-naming)
 
 struct CTool_IncreaseTimeStamp : public CTool
 {
@@ -40,7 +43,7 @@ struct CTool_IncreaseTimeStamp : public CTool
 		IMAGE_NT_HEADERS *pHeader = nullptr;
 		uint32 *pData = (uint32 *)Mem.f_GetArray();
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
-		for (int i = 0; i < FLen; i += 4, pData += 1)
+		for (int iOffset = 0; iOffset < FLen; iOffset += 4, pData += 1)
 		{
 			if (*pData == Find)
 			{
@@ -135,7 +138,7 @@ struct CTool_SetImageOsVersion : public CTool
 		IMAGE_NT_HEADERS *pHeader = nullptr;
 		uint32 *pData = (uint32 *)Mem.f_GetArray();
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
-		for (int i = 0; i < FLen; i += 4, pData += 1)
+		for (int iOffset = 0; iOffset < FLen; iOffset += 4, pData += 1)
 		{
 			if (*pData == Find)
 			{

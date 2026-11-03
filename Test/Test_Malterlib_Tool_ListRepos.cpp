@@ -76,27 +76,27 @@ namespace NMib::NTool
 				DMibExpect(Root["ConfigFile"].f_String(), ==, "");
 				DMibExpect(Root["Url"].f_String(), ==, Checkout.f_Remote("Root"));
 
-				auto &A = ByPath["Repos/A"];
-				DMibExpect(A["Url"].f_String(), ==, Checkout.f_Remote("A"));
-				DMibExpect(A["DefaultBranch"].f_String(), ==, "main");
-				DMibExpect(A["Binary"].f_Boolean(), ==, false);
-				DMibExpect(A["UpdateSubmodules"].f_Boolean(), ==, false);
-				DMibExpect(A["Parent"].f_String(), ==, ".");
-				DMibExpect(A["ConfigFile"].f_String(), ==, "Repos.MRepo");
-				DMibExpect(A["ConfigKey"].f_String(), ==, "Repos/A");
-				DMibExpect(A["Pin"].f_String(), ==, PinA);
+				auto &RepoA = ByPath["Repos/A"];
+				DMibExpect(RepoA["Url"].f_String(), ==, Checkout.f_Remote("A"));
+				DMibExpect(RepoA["DefaultBranch"].f_String(), ==, "main");
+				DMibExpect(RepoA["Binary"].f_Boolean(), ==, false);
+				DMibExpect(RepoA["UpdateSubmodules"].f_Boolean(), ==, false);
+				DMibExpect(RepoA["Parent"].f_String(), ==, ".");
+				DMibExpect(RepoA["ConfigFile"].f_String(), ==, "Repos.MRepo");
+				DMibExpect(RepoA["ConfigKey"].f_String(), ==, "Repos/A");
+				DMibExpect(RepoA["Pin"].f_String(), ==, PinA);
 
-				auto &B = ByPath["Repos/B"];
-				DMibExpect(B["ConfigKey"].f_String(), ==, "./Repos/B");
-				DMibExpect(B["Pin"].f_String(), ==, PinB);
-				DMibExpectFalse(B.f_GetMember("UpstreamUrl"));
+				auto &RepoB = ByPath["Repos/B"];
+				DMibExpect(RepoB["ConfigKey"].f_String(), ==, "./Repos/B");
+				DMibExpect(RepoB["Pin"].f_String(), ==, PinB);
+				DMibExpectFalse(RepoB.f_GetMember("UpstreamUrl"));
 
 				CStr PinC = co_await Checkout.f_GitIn(Checkout.f_Repository("C"), {"rev-parse", "HEAD"});
-				auto &C = ByPath["Repos/C"];
-				DMibExpect(C["Parent"].f_String(), ==, "Repos/A");
-				DMibExpect(C["ConfigFile"].f_String(), ==, "Repos/A/Sub/Nested.MRepo");
-				DMibExpect(C["ConfigKey"].f_String(), ==, "../../C");
-				DMibExpect(C["Pin"].f_String(), ==, PinC);
+				auto &RepoC = ByPath["Repos/C"];
+				DMibExpect(RepoC["Parent"].f_String(), ==, "Repos/A");
+				DMibExpect(RepoC["ConfigFile"].f_String(), ==, "Repos/A/Sub/Nested.MRepo");
+				DMibExpect(RepoC["ConfigKey"].f_String(), ==, "../../C");
+				DMibExpect(RepoC["Pin"].f_String(), ==, PinC);
 
 				auto fListPaths = [](CStr const &_Output) -> TCVector<CStr>
 					{
