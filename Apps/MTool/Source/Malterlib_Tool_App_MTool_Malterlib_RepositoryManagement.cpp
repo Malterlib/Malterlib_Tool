@@ -828,8 +828,9 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						, "Default"_o= "file"
 						, "Description"_o= "Which compile commands are checked:\n"
 						"@Indent=11\r"
-						"   file:    Each source once, with the command of the best target and configuration: the targets of --target first, then "
-						"those of --workspace, then any other; the configuration by name first, then by base name, then any.\r"
+						"   file:    Each source with the command of the best target and configuration: the targets of --target first, then "
+						"those of --workspace, then any other; the configuration by name first, then by base name, then any. Other targets of "
+						"that workspace and configuration that compile the source differently are checked with their commands too.\r"
 						"   target:  Every source of the targets of --target, each with its database in --workspace, or else in its highest "
 						"priority workspace.\r"
 						"   all:     Every source of every target, once per distinct command, so each source is checked with every set of defines it "
@@ -977,14 +978,27 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
 							auto RunOptions = Options;
+							if
+							(
+								auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations(GenerateOptions, RepoFilter, RunOptions.m_CheckedRepositories)
+								; Retry != CBuildSystem::ERetry_None
+							)
+							{
+								co_return Retry;
+							}
+
+							// The filters select the sources compiled. What a compile reports is by the rules of every repository that
+							// checks its files, as the checks plugin reports in a build.
+							CBuildSystem::CRepoFilter ReportedFilter;
+							ReportedFilter.m_bTidy = true;
 							TCMap<CStr, CBuildSystem::CRepoTidyFiles> TidyFiles;
 							if
 							(
 								auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations
 								(
 									GenerateOptions
-									, RepoFilter
-									, RunOptions.m_CheckedRepositories
+									, ReportedFilter
+									, RunOptions.m_ReportedRepositories
 									, &RunOptions.m_AllRepositories
 									, &TidyFiles
 								)

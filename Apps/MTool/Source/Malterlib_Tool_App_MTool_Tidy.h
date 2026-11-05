@@ -10,7 +10,7 @@ namespace NMib::NTool::NTidy
 	// Which compile commands of the per-target databases are checked.
 	enum class ETidyMode
 	{
-		mc_File         // Each source once, with the command of the best target and configuration.
+		mc_File         // Each source with the best target's command, and the other commands of its workspace and configuration.
 		, mc_Target     // Every source of the selected targets.
 		, mc_AllTargets // Every source of every target, once per distinct command.
 	};
@@ -37,7 +37,8 @@ namespace NMib::NTool::NTidy
 		bool m_bStaged = false;                                                // Only check files changed in the index.
 		bool m_bFix = false;                                                   // Apply the fixes the checks offer.
 		umint m_nJobs = 1;
-		NContainer::TCVector<NStr::CStr> m_CheckedRepositories;                // The locations of the repositories checked.
+		NContainer::TCVector<NStr::CStr> m_CheckedRepositories;                // The locations of the repositories whose sources are compiled
+		NContainer::TCVector<NStr::CStr> m_ReportedRepositories;               // The locations of every repository that checks its files
 		NContainer::TCVector<NStr::CStr> m_AllRepositories;                    // Every repository location, which tells what nests in them.
 		NContainer::TCMap<NStr::CStr, CTidyRepositoryFiles> m_RepositoryFiles; // By location: the files checked repositories check.
 		NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> m_pCancelled;       // Set when the user aborts: no command starts and the running ones stop.
@@ -82,4 +83,5 @@ namespace NMib::NTool::NTidy
 	// Whether a file is checked: the deepest repository it is in is checked, and the path relative to it matches
 	// an include, when there are any, and no exclude.
 	bool fg_IsTidyChecked(NStr::CStr const &_Path, CTidyOptions const &_Options);
+	bool fg_IsTidyCompiled(NStr::CStr const &_Path, CTidyOptions const &_Options);
 }

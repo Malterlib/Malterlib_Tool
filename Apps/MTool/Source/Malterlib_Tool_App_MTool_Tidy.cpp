@@ -156,10 +156,12 @@ namespace NMib::NTool::NTidy
 		return Repository;
 	}
 
+	// Reported as the checks plugin reports: by the rules of every repository that checks its files, whichever the repository
+	// filters select.
 	bool fg_IsTidyChecked(CStr const &_Path, CTidyOptions const &_Options)
 	{
 		CStr Repository = fg_GetTidyRepository(_Path, _Options.m_AllRepositories);
-		if (!Repository || _Options.m_CheckedRepositories.f_Contains(Repository) < 0)
+		if (!Repository || _Options.m_ReportedRepositories.f_Contains(Repository) < 0)
 			return false;
 
 		auto *pFiles = _Options.m_RepositoryFiles.f_FindEqual(Repository);
@@ -181,6 +183,12 @@ namespace NMib::NTool::NTidy
 		;
 
 		return (pFiles->m_IncludeFiles.f_IsEmpty() || fMatches(pFiles->m_IncludeFiles)) && !fMatches(pFiles->m_ExcludeFiles);
+	}
+
+	// A checked source of a repository the repository filters select.
+	bool fg_IsTidyCompiled(CStr const &_Path, CTidyOptions const &_Options)
+	{
+		return fg_IsTidyChecked(_Path, _Options) && _Options.m_CheckedRepositories.f_Contains(fg_GetTidyRepository(_Path, _Options.m_AllRepositories)) >= 0;
 	}
 
 	// The name of a configuration without the variant in parentheses, as "Release Testing (Tests)" is a
@@ -581,6 +589,21 @@ namespace NMib::NTool::NTidy
 			{
 				for (umint iDatabase = 0; iDatabase < Databases.f_GetLen(); ++iDatabase)
 					Selected.f_Insert(iDatabase);
+
+				// The fallback is for the sources a configuration doesn't build. One that no database has, like another
+				// platform's, would only check the commands of others.
+				if (Requested)
+				{
+					bool bHasConfiguration = false;
+					for (auto &Database : Databases)
+						bHasConfiguration = bHasConfiguration || !!fg_RankTidyConfiguration(Database, Requested, false);
+
+					if (!bHasConfiguration)
+					{
+						Inventory.m_Error = "No compile database has the configuration '{}'"_f << Requested;
+						return Inventory;
+					}
+				}
 			}
 			else
 			{
@@ -659,7 +682,7 @@ namespace NMib::NTool::NTidy
 			};
 
 			TCMap<CStr, CCandidate> BestForFile;
-			TCMap<CStr, TCVector<CTidyCommand>> OtherForFile; // The candidates that lost, whose dependencies count when equivalent.
+			TCMap<CStr, TCVector<CCandidate>> OtherForFile; // The candidates that lost, whose dependencies count when equivalent
 			TCVector<CTidyCommand> PassCommands;
 
 			auto fRank = [&](CCandidate const &_Candidate)
@@ -701,7 +724,7 @@ namespace NMib::NTool::NTidy
 					// The wildcards select the sources compiled, whose headers are checked with them. Wildcards naming only headers
 					// select no source, and no compile, by decision: finding the sources that include a header needs a build first.
 					CStr File = CFile::fs_CondensePath(CFile::fs_GetFullPath(pFile->f_String(), Directory));
-					if (!fg_IsTidyChecked(File, _Options))
+					if (!fg_IsTidyCompiled(File, _Options))
 						continue;
 
 					CStr Repository = fg_GetTidyRepository(File, _Options.m_AllRepositories);
@@ -762,32 +785,61 @@ namespace NMib::NTool::NTidy
 						BestForFile[File] = fg_Move(Candidate);
 					else if (fRank(Candidate) < fRank(*pBest))
 					{
-						OtherForFile[File].f_Insert(fg_Move(pBest->m_Command));
+						OtherForFile[File].f_Insert(fg_Move(*pBest));
 						*pBest = fg_Move(Candidate);
 					}
 					else
-						OtherForFile[File].f_Insert(fg_Move(Candidate.m_Command));
+						OtherForFile[File].f_Insert(fg_Move(Candidate));
 				}
 			}
 
 			// An equivalent command of another target or workspace tells what the source includes, when it was the
-			// one built.
+			// one built. The other targets of the best command's build can compile code it leaves out with their own defines, like
+			// the system overrides of the targets that override, so their commands are checked too.
 			for (auto &Candidate : BestForFile)
 			{
 				auto &Command = Candidate.m_Command;
+				TCVector<CTidyCommand> OtherTargets;
 				if (auto *pOthers = OtherForFile.f_FindEqual(Command.m_File))
 				{
+					TCMap<CStr, umint> OtherTargetKeys;
+					TCVector<CTidyCommand const *> Equivalents;
 					for (auto &Other : *pOthers)
 					{
-						if (Other.m_Key != Command.m_Key)
+						auto &OtherCommand = Other.m_Command;
+						bool bOtherTarget
+							= OtherCommand.m_Key != Command.m_Key
+							&& Other.m_pDatabase->m_Workspace == Candidate.m_pDatabase->m_Workspace
+							&& Other.m_pDatabase->m_Configuration == Candidate.m_pDatabase->m_Configuration
+							&& Other.m_pDatabase->m_Target != Candidate.m_pDatabase->m_Target
+						;
+						if (bOtherTarget && !OtherTargetKeys.f_FindEqual(OtherCommand.m_Key))
+						{
+							OtherTargetKeys[OtherCommand.m_Key] = OtherTargets.f_GetLen();
+							OtherTargets.f_Insert(fg_Move(OtherCommand));
+						}
+						else
+							Equivalents.f_Insert(&OtherCommand);
+					}
+
+					for (auto *pEquivalent : Equivalents)
+					{
+						CTidyCommand *pCommand = nullptr;
+						if (pEquivalent->m_Key == Command.m_Key)
+							pCommand = &Command;
+						else if (auto *pOtherTarget = OtherTargetKeys.f_FindEqual(pEquivalent->m_Key))
+							pCommand = &OtherTargets[*pOtherTarget];
+						else
 							continue;
-						Command.m_EquivalentOutputs.f_Insert(Other.m_Output);
-						Command.m_EquivalentDependencyFiles.f_Insert(Other.m_DependencyFile);
-						Command.m_EquivalentBuildDirectories.f_Insert(Other.m_BuildDirectory);
+
+						pCommand->m_EquivalentOutputs.f_Insert(pEquivalent->m_Output);
+						pCommand->m_EquivalentDependencyFiles.f_Insert(pEquivalent->m_DependencyFile);
+						pCommand->m_EquivalentBuildDirectories.f_Insert(pEquivalent->m_BuildDirectory);
 					}
 				}
 
 				PassCommands.f_Insert(fg_Move(Command));
+				PassCommands.f_Insert(fg_Move(OtherTargets));
 			}
 
 			for (auto &Command : PassCommands)
@@ -1046,7 +1098,7 @@ namespace NMib::NTool::NTidy
 				, _DatabaseDirectory
 				, "--quiet"
 				, "--use-color=false"
-				, "--header-filter={}"_f << fg_GetTidyHeaderFilter(Options.m_CheckedRepositories)
+				, "--header-filter={}"_f << fg_GetTidyHeaderFilter(Options.m_ReportedRepositories)
 			}
 		;
 
@@ -1657,7 +1709,10 @@ namespace NMib::NTool::NTidy
 			}
 		;
 
-		for (auto *pLocations : {&_Options.m_CheckedRepositories, &_Options.m_AllRepositories})
+		if (_Options.m_ReportedRepositories.f_IsEmpty())
+			_Options.m_ReportedRepositories = _Options.m_CheckedRepositories;
+
+		for (auto *pLocations : {&_Options.m_CheckedRepositories, &_Options.m_ReportedRepositories, &_Options.m_AllRepositories})
 		{
 			for (auto &Location : *pLocations)
 				Location = fCondenseLocation(Location);
@@ -1902,7 +1957,7 @@ namespace NMib::NTool::NTidy
 				Directories[CFile::fs_GetPath(Command.m_File)];
 
 			TCFutureVector<TCVector<CStr>> Configurations;
-			for (auto &Repository : _Options.m_CheckedRepositories)
+			for (auto &Repository : _Options.m_ReportedRepositories)
 				fg_GetTidyConfigurationDirectories(Repository, _Options) > Configurations;
 
 			for (auto &RepositoryDirectories : co_await fg_AllDone(Configurations))
