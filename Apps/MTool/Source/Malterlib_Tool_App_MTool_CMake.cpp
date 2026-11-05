@@ -7,7 +7,8 @@
 
 #ifdef DMToolEmbedCMake
 
-int cmake_main(int ac, char const * const *av);
+// NOLINTNEXTLINE(malterlib-function-naming): the entry point of the embedded CMake, which External/cmake defines
+int cmake_main(int _nArgs, char const * const *_pArgs);
 
 struct CTool_CMake : public CDistributedTool
 {
