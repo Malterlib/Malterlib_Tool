@@ -7,65 +7,67 @@
 
 struct CTool_LaunchTimed : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
+	aint f_Run(NContainer::CRegistry &_Params);
+};
+
+aint CTool_LaunchTimed::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr FileName = _Params.f_GetValue("0", "012301231023Error");
+	if (FileName == "012301231023Error")
+		DError("Wrong number of parameters");
+
+	CStr Params;
+	int iParam = 1;
+	CStr Param;
+	while ((Param = _Params.f_GetValue(CStr::fs_ToStr(iParam), "012301231023Error")) != "012301231023Error")
 	{
-		CStr FileName = _Params.f_GetValue("0", "012301231023Error");
-		if (FileName == "012301231023Error")
-			DError("Wrong number of parameters");
+		Params += CStr(" ") + Param;
+		++iParam;
+	}
 
-		CStr Params;
-		int iParam = 1;
-		CStr Param;
-		while ((Param = _Params.f_GetValue(CStr::fs_ToStr(iParam), "012301231023Error")) != "012301231023Error")
-		{
-			Params += CStr(" ") + Param;
-			++iParam;
-		}
+	int Ret = 0;
 
-		int Ret = 0;
-
-		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutableRawParams
-			(
-				FileName
-				, Params
-				, CFile::fs_GetCurrentDirectory()
-				, [&](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
-				{
-					if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
-					{
-						DConOut("{}", _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
-						Ret = 255;
-					}
-					else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
-					{
-						DConOut("Program took {} seconds to run." DNewLine, _TimeSinceLaunch);
-						Ret = _StateChange.f_Get<EProcessLaunchState_Exited>();
-					}
-				}
-			)
-		;
-
-		LaunchParams.m_fOnOutput = [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+	CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutableRawParams
+		(
+			FileName
+			, Params
+			, CFile::fs_GetCurrentDirectory()
+			, [&](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
 			{
-				switch (_OutputType)
+				if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
 				{
-				case EProcessLaunchOutputType_GeneralError:
-				case EProcessLaunchOutputType_StdErr:
-				case EProcessLaunchOutputType_TerminateMessage:
-					DConErrOutRaw(_Output);
-					break;
-				case EProcessLaunchOutputType_StdOut: DConOutRaw(_Output); break;
-				case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
+					DConOut("{}", _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
+					Ret = 255;
+				}
+				else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
+				{
+					DConOut("Program took {} seconds to run." DNewLine, _TimeSinceLaunch);
+					Ret = _StateChange.f_Get<EProcessLaunchState_Exited>();
 				}
 			}
-		;
-		{
-			CProcessLaunch Launch(LaunchParams, EProcessLaunchCloseFlag_BlockOnExit);
-		}
+		)
+	;
 
-		return Ret;
+	LaunchParams.m_fOnOutput = [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+		{
+			switch (_OutputType)
+			{
+			case EProcessLaunchOutputType_GeneralError:
+			case EProcessLaunchOutputType_StdErr:
+			case EProcessLaunchOutputType_TerminateMessage:
+				DConErrOutRaw(_Output);
+				break;
+			case EProcessLaunchOutputType_StdOut: DConOutRaw(_Output); break;
+			case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
+			}
+		}
+	;
+	{
+		CProcessLaunch Launch(LaunchParams, EProcessLaunchCloseFlag_BlockOnExit);
 	}
-};
+
+	return Ret;
+}
 
 DMibRuntimeClass(CTool, CTool_LaunchTimed);
 
@@ -130,296 +132,302 @@ void fg_OutputWholeLines(CStr &_Buffer, EProcessLaunchOutputType _Type, bool _bF
 
 struct CTool_LaunchParallell : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
+	aint f_Run(NContainer::CRegistry &_Params);
+};
+
+aint CTool_LaunchParallell::f_Run(NContainer::CRegistry &_Params)
+{
+	DScopeConOutTimeMeasure("LaunchParallell");
+	struct CProgram
 	{
-		DScopeConOutTimeMeasure("LaunchParallell");
-		struct CProgram
+		CProgram()
+			: m_bFilterP4(false)
+			, m_bSandboxed(false)
 		{
-			CProgram()
-				: m_bFilterP4(false)
-				, m_bSandboxed(false)
-			{
-			}
+		}
 
-			TCVector<CStr> m_Params;
-			bool m_bFilterP4;
-			bool m_bSandboxed;
-			CStr m_LockFile;
-
-			CStr f_GetParams() const
-			{
-				return CProcessLaunchParams::fs_GetParams(m_Params);
-			}
-		};
-
-		CStr LockFilePath;
-
-		TCVector<CProgram> Programs;
-		TCVector<CStr> Params2;
-		int32 iParam = 0;
-		int32 iNestedParam = 0;
-		uint32 iExtraErrorSuccess = 0;
-		bool bNextFilterP4 = false;
-		bool bNextSandboxed = false;
-		bool bDelayOutput = false;
-		bool bSeparateStdErr = false;
-		CProgram *pCurrentProgram = nullptr;
-		CStr Param;
-		while ((Param = _Params.f_GetValue(CStr::fs_ToStr(iParam), "012301231023Error")) != "012301231023Error")
+		CStr f_GetParams() const
 		{
-			Params2.f_Insert(Param);
-			if (Param == "(")
+			return CProcessLaunchParams::fs_GetParams(m_Params);
+		}
+
+		TCVector<CStr> m_Params;
+		bool m_bFilterP4;
+		bool m_bSandboxed;
+		CStr m_LockFile;
+	};
+
+	CStr LockFilePath;
+
+	TCVector<CProgram> Programs;
+	TCVector<CStr> Params2;
+	int32 iParam = 0;
+	int32 iNestedParam = 0;
+	uint32 iExtraErrorSuccess = 0;
+	bool bNextFilterP4 = false;
+	bool bNextSandboxed = false;
+	bool bDelayOutput = false;
+	bool bSeparateStdErr = false;
+	CProgram *pCurrentProgram = nullptr;
+	CStr Param;
+	while ((Param = _Params.f_GetValue(CStr::fs_ToStr(iParam), "012301231023Error")) != "012301231023Error")
+	{
+		Params2.f_Insert(Param);
+		if (Param == "(")
+		{
+			if (++iNestedParam == 1)
 			{
-				if (++iNestedParam == 1)
-				{
-					pCurrentProgram = &Programs.f_Insert();
-					pCurrentProgram->m_bFilterP4 = bNextFilterP4;
-					pCurrentProgram->m_bSandboxed = bNextSandboxed;
-					bNextFilterP4 = false;
-					bNextSandboxed = false;
-				}
-				else
-					pCurrentProgram->m_Params.f_Insert(Param);
+				pCurrentProgram = &Programs.f_Insert();
+				pCurrentProgram->m_bFilterP4 = bNextFilterP4;
+				pCurrentProgram->m_bSandboxed = bNextSandboxed;
+				bNextFilterP4 = false;
+				bNextSandboxed = false;
 			}
-			else if (Param == ")")
-			{
-				if (--iNestedParam == 0)
-					pCurrentProgram = nullptr;
-				else if (pCurrentProgram)
-					pCurrentProgram->m_Params.f_Insert(Param);
-			}
+			else
+				pCurrentProgram->m_Params.f_Insert(Param);
+		}
+		else if (Param == ")")
+		{
+			if (--iNestedParam == 0)
+				pCurrentProgram = nullptr;
 			else if (pCurrentProgram)
 				pCurrentProgram->m_Params.f_Insert(Param);
-			else if (Param == "p4")
-				bNextFilterP4 = true;
-			else if (Param == "sandboxed")
-				bNextSandboxed = true;
-			else if (Param == "delay")
-				bDelayOutput = false;
-			else if (Param == "sepstderr")
-				bSeparateStdErr = true;
-			else if (Param.f_StartsWith("lockfile="))
-				LockFilePath = Param.f_Extract(9);
-			else if (Param.f_StartsWith("extrasucess="))
-				iExtraErrorSuccess = Param.f_Extract(12).f_ToInt(uint32(0));
-			else
-				DError("Invalid () secquence");
-			++iParam;
+		}
+		else if (pCurrentProgram)
+			pCurrentProgram->m_Params.f_Insert(Param);
+		else if (Param == "p4")
+			bNextFilterP4 = true;
+		else if (Param == "sandboxed")
+			bNextSandboxed = true;
+		else if (Param == "delay")
+			bDelayOutput = false;
+		else if (Param == "sepstderr")
+			bSeparateStdErr = true;
+		else if (Param.f_StartsWith("lockfile="))
+			LockFilePath = Param.f_Extract(9);
+		else if (Param.f_StartsWith("extrasucess="))
+			iExtraErrorSuccess = Param.f_Extract(12).f_ToInt(uint32(0));
+		else
+			DError("Invalid () secquence");
+		++iParam;
+	}
+
+	if (Programs.f_IsEmpty())
+		DError(CStr::CFormat("No programs to run with params: {}") << CProcessLaunchParams::fs_GetParams(Params2));
+
+	uint32 ReturnValue = 0;
+	CMutual ConOutLock;
+	{
+		NFile::CLockFile LockFile(LockFilePath);
+
+		if (!LockFilePath.f_IsEmpty())
+		{
+			NFile::CLockFile::ELockResult Result;
+
+			Result = LockFile.f_Lock(-1);
+
+			if (Result != NFile::CLockFile::ELockResult_Locked)
+				DError(CStr::CFormat("Failed to lock lockfile. Check that permission are correct: {}") << LockFilePath);
 		}
 
-		if (Programs.f_IsEmpty())
-			DError(CStr::CFormat("No programs to run with params: {}") << CProcessLaunchParams::fs_GetParams(Params2));
-
-		uint32 ReturnValue = 0;
-		CMutual ConOutLock;
+		CProcessLaunchHandler LaunchHandler;
+		for (auto iProgram = Programs.f_GetIterator(); iProgram; ++iProgram)
 		{
-			NFile::CLockFile LockFile(LockFilePath);
-
-			if (!LockFilePath.f_IsEmpty())
+			CProgram const &Program = *iProgram;
+			umint nParams = Program.m_Params.f_GetLen();
+			if (nParams > 0)
 			{
-				NFile::CLockFile::ELockResult Result;
+				CStr FileName = Program.m_Params[0];
 
-				Result = LockFile.f_Lock(-1);
+				TCSharedPointer<CStr> pStdOutBuffer = fg_Construct();
+				TCSharedPointer<CStr> pStdErrBuffer = fg_Construct();
 
-				if (Result != NFile::CLockFile::ELockResult_Locked)
-					DError(CStr::CFormat("Failed to lock lockfile. Check that permission are correct: {}") << LockFilePath);
-			}
+				TCVector<CStr> Params = Program.m_Params;
+				Params.f_Remove(0);
 
-			CProcessLaunchHandler LaunchHandler;
-			for (auto iProgram = Programs.f_GetIterator(); iProgram; ++iProgram)
-			{
-				CProgram const &Program = *iProgram;
-				umint nParams = Program.m_Params.f_GetLen();
-				if (nParams > 0)
-				{
-					CStr FileName = Program.m_Params[0];
-
-					TCSharedPointer<CStr> pStdOutBuffer = fg_Construct();
-					TCSharedPointer<CStr> pStdErrBuffer = fg_Construct();
-
-					TCVector<CStr> Params = Program.m_Params;
-					Params.f_Remove(0);
-
-					CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
-						(
-							FileName
-							, Params
-							, CFile::fs_GetCurrentDirectory()
-							, [&, Program, FileName, pStdOutBuffer, pStdErrBuffer](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
+				CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutable
+					(
+						FileName
+						, Params
+						, CFile::fs_GetCurrentDirectory()
+						, [&, Program, FileName, pStdOutBuffer, pStdErrBuffer](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
+						{
+							if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
 							{
-								if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
+								CStr Params = Program.f_GetParams();
+								DConOut("error: {} failed to launch: {}", Params, _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
+								ReturnValue = fg_Max(ReturnValue, 255u);
+							}
+							else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
+							{
+								//DConOut("Program took {} seconds to run." DNewLine, _TimeSinceLaunch);
+								uint32 ThisValue = _StateChange.f_Get<EProcessLaunchState_Exited>();
+								if (ThisValue != 0 && ThisValue != iExtraErrorSuccess)
 								{
 									CStr Params = Program.f_GetParams();
-									DConOut("error: {} failed to launch: {}", Params, _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
-									ReturnValue = fg_Max(ReturnValue, 255u);
-								}
-								else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
-								{
-									//DConOut("Program took {} seconds to run." DNewLine, _TimeSinceLaunch);
-									uint32 ThisValue = _StateChange.f_Get<EProcessLaunchState_Exited>();
-									if (ThisValue != 0 && ThisValue != iExtraErrorSuccess)
-									{
-										CStr Params = Program.f_GetParams();
-										DLock(ConOutLock);
-										DConOut("error: {} exited with {}" DNewLine, Params, ThisValue);
-										ReturnValue = fg_Max(ReturnValue, ThisValue);
-									}
-									fg_OutputWholeLines(*pStdOutBuffer, EProcessLaunchOutputType_StdOut, Program.m_bFilterP4, true);
-									fg_OutputWholeLines(*pStdErrBuffer, EProcessLaunchOutputType_StdErr, false, true);
-								}
-							}
-						)
-					;
-
-					LaunchParams.m_fOnOutput = [&, Program, pStdOutBuffer, pStdErrBuffer](EProcessLaunchOutputType _OutputType, CStr const &_Output)
-						{
-							switch (_OutputType)
-							{
-							case EProcessLaunchOutputType_GeneralError:
-							case EProcessLaunchOutputType_StdErr:
-							case EProcessLaunchOutputType_TerminateMessage:
-								{
 									DLock(ConOutLock);
-									*pStdErrBuffer += _Output;
-									fg_OutputWholeLines(*pStdErrBuffer, EProcessLaunchOutputType_StdErr, false, false);
+									DConOut("error: {} exited with {}" DNewLine, Params, ThisValue);
+									ReturnValue = fg_Max(ReturnValue, ThisValue);
 								}
-								break;
-							case EProcessLaunchOutputType_StdOut:
-								{
-									DLock(ConOutLock);
-									*pStdOutBuffer += _Output;
-									fg_OutputWholeLines(*pStdOutBuffer, EProcessLaunchOutputType_StdOut, Program.m_bFilterP4, false);
-								}
-								break;
-							case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
+								fg_OutputWholeLines(*pStdOutBuffer, EProcessLaunchOutputType_StdOut, Program.m_bFilterP4, true);
+								fg_OutputWholeLines(*pStdErrBuffer, EProcessLaunchOutputType_StdErr, false, true);
 							}
 						}
-					;
+					)
+				;
 
-					LaunchParams.m_bSeparateStdErr = bSeparateStdErr;
-					LaunchParams.m_bSandboxed = Program.m_bSandboxed;
-					LaunchParams.m_bShowLaunched = false;
-					LaunchParams.m_bAllowExecutableLocate = true;
+				LaunchParams.m_fOnOutput = [&, Program, pStdOutBuffer, pStdErrBuffer](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+					{
+						switch (_OutputType)
+						{
+						case EProcessLaunchOutputType_GeneralError:
+						case EProcessLaunchOutputType_StdErr:
+						case EProcessLaunchOutputType_TerminateMessage:
+							{
+								DLock(ConOutLock);
+								*pStdErrBuffer += _Output;
+								fg_OutputWholeLines(*pStdErrBuffer, EProcessLaunchOutputType_StdErr, false, false);
+							}
+							break;
+						case EProcessLaunchOutputType_StdOut:
+							{
+								DLock(ConOutLock);
+								*pStdOutBuffer += _Output;
+								fg_OutputWholeLines(*pStdOutBuffer, EProcessLaunchOutputType_StdOut, Program.m_bFilterP4, false);
+							}
+							break;
+						case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
+						}
+					}
+				;
 
-					LaunchHandler.f_AddLaunch(LaunchParams, bDelayOutput);
-				}
-				else
-					DError("Empty program statements not allowed");
+				LaunchParams.m_bSeparateStdErr = bSeparateStdErr;
+				LaunchParams.m_bSandboxed = Program.m_bSandboxed;
+				LaunchParams.m_bShowLaunched = false;
+				LaunchParams.m_bAllowExecutableLocate = true;
+
+				LaunchHandler.f_AddLaunch(LaunchParams, bDelayOutput);
 			}
-			LaunchHandler.f_BlockOnExit();
-
-			if (LockFile.f_HasLock())
-				LockFile.f_Unlock();
+			else
+				DError("Empty program statements not allowed");
 		}
-		return ReturnValue;
+		LaunchHandler.f_BlockOnExit();
+
+		if (LockFile.f_HasLock())
+			LockFile.f_Unlock();
 	}
-};
+	return ReturnValue;
+}
 
 DMibRuntimeClass(CTool, CTool_LaunchParallell);
 
 struct CTool_TestStdOut : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		fp64 Sleep = fg_GetRandomFloat();
-		DConOut("Testing standard out {}" DNewLine, Sleep);
-		// NSys::fg_ConsoleOutputFlush();
-		NSys::fg_Thread_Sleep(Sleep);
-		Sleep = fg_GetRandomFloat();
-		DConErrOut("Testing standard err {}" DNewLine, Sleep);
-		// NSys::fg_ConsoleErrorOutputFlush();
-		NSys::fg_Thread_Sleep(Sleep);
-		Sleep = fg_GetRandomFloat();
-		DConErrOut("Sleep {}" DNewLine, Sleep);
-		// NSys::fg_ConsoleErrorOutputFlush();
-		NSys::fg_Thread_Sleep(Sleep);
-
-		return 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_TestStdOut::f_Run(NContainer::CRegistry &_Params)
+{
+	fp64 Sleep = fg_GetRandomFloat();
+	DConOut("Testing standard out {}" DNewLine, Sleep);
+	// NSys::fg_ConsoleOutputFlush();
+	NSys::fg_Thread_Sleep(Sleep);
+	Sleep = fg_GetRandomFloat();
+	DConErrOut("Testing standard err {}" DNewLine, Sleep);
+	// NSys::fg_ConsoleErrorOutputFlush();
+	NSys::fg_Thread_Sleep(Sleep);
+	Sleep = fg_GetRandomFloat();
+	DConErrOut("Sleep {}" DNewLine, Sleep);
+	// NSys::fg_ConsoleErrorOutputFlush();
+	NSys::fg_Thread_Sleep(Sleep);
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_TestStdOut);
 
 struct CTool_LaunchSandboxed : public CTool2
 {
-	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
-	{
-		CStr FileName, Params;
-
-		{
-			auto iFile = _Files.f_GetIterator();
-			if (!iFile)
-				DError("Wrong number of parameters");
-			FileName = *iFile;
-			++iFile;
-
-			for (; iFile; ++iFile)
-				Params += CStr(" ") + *iFile;
-		}
-
-		int Ret = 0;
-
-		CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutableRawParams
-			(
-				FileName
-				, Params
-				, CFile::fs_GetCurrentDirectory()
-				, [&](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
-				{
-					if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
-					{
-						DConOut("{}", _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
-						Ret = 255;
-					}
-					else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
-					{
-						DConOut("Program took {} seconds to run." DNewLine, _TimeSinceLaunch);
-						Ret = _StateChange.f_Get<EProcessLaunchState_Exited>();
-					}
-				}
-			)
-		;
-
-		LaunchParams.m_bSandboxed = true;
-		LaunchParams.m_bCopyRootToSandbox = !!_Params.f_FindEqual("CopyRoot");
-
-		{
-			int iRoot = 0;
-
-			for (auto pRootParam = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)); pRootParam; pRootParam = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)))
-			{
-				CStr CurRootStr = *pRootParam;
-
-				CStr Root = fg_GetStrSep(CurRootStr, "=");
-				LaunchParams.m_SandboxRoots[Root] = fg_GetStrSep(CurRootStr, "=");
-
-				DConOut("Mapping: {} : {}" DNewLine, Root, LaunchParams.m_SandboxRoots[Root]);
-
-				++iRoot;
-			}
-		}
-
-		LaunchParams.m_fOnOutput = [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
-			{
-				switch (_OutputType)
-				{
-				case EProcessLaunchOutputType_GeneralError:
-				case EProcessLaunchOutputType_StdErr:
-				case EProcessLaunchOutputType_TerminateMessage:
-					DConErrOutRaw(_Output);
-					break;
-				case EProcessLaunchOutputType_StdOut: DConOutRaw(_Output); break;
-				case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
-				}
-			}
-		;
-
-		{
-			CProcessLaunch Launch(LaunchParams, EProcessLaunchCloseFlag_BlockOnExit);
-		}
-
-		return Ret;
-	}
+	aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params);
 };
+
+aint CTool_LaunchSandboxed::f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
+{
+	CStr FileName, Params;
+
+	{
+		auto iFile = _Files.f_GetIterator();
+		if (!iFile)
+			DError("Wrong number of parameters");
+		FileName = *iFile;
+		++iFile;
+
+		for (; iFile; ++iFile)
+			Params += CStr(" ") + *iFile;
+	}
+
+	int Ret = 0;
+
+	CProcessLaunchParams LaunchParams = CProcessLaunchParams::fs_LaunchExecutableRawParams
+		(
+			FileName
+			, Params
+			, CFile::fs_GetCurrentDirectory()
+			, [&](CProcessLaunchStateChangeVariant const &_StateChange, fp64 _TimeSinceLaunch)
+			{
+				if (_StateChange.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
+				{
+					DConOut("{}", _StateChange.f_Get<EProcessLaunchState_LaunchFailed>());
+					Ret = 255;
+				}
+				else if (_StateChange.f_GetTypeID() == EProcessLaunchState_Exited)
+				{
+					DConOut("Program took {} seconds to run." DNewLine, _TimeSinceLaunch);
+					Ret = _StateChange.f_Get<EProcessLaunchState_Exited>();
+				}
+			}
+		)
+	;
+
+	LaunchParams.m_bSandboxed = true;
+	LaunchParams.m_bCopyRootToSandbox = !!_Params.f_FindEqual("CopyRoot");
+
+	{
+		int iRoot = 0;
+
+		for (auto pRootParam = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)); pRootParam; pRootParam = _Params.f_FindEqual(CStr(CStr::CFormat("Root{}") << iRoot)))
+		{
+			CStr CurRootStr = *pRootParam;
+
+			CStr Root = fg_GetStrSep(CurRootStr, "=");
+			LaunchParams.m_SandboxRoots[Root] = fg_GetStrSep(CurRootStr, "=");
+
+			DConOut("Mapping: {} : {}" DNewLine, Root, LaunchParams.m_SandboxRoots[Root]);
+
+			++iRoot;
+		}
+	}
+
+	LaunchParams.m_fOnOutput = [&](EProcessLaunchOutputType _OutputType, CStr const &_Output)
+		{
+			switch (_OutputType)
+			{
+			case EProcessLaunchOutputType_GeneralError:
+			case EProcessLaunchOutputType_StdErr:
+			case EProcessLaunchOutputType_TerminateMessage:
+				DConErrOutRaw(_Output);
+				break;
+			case EProcessLaunchOutputType_StdOut: DConOutRaw(_Output); break;
+			case EProcessLaunchOutputType_Max: DMibNeverGetHere; break;
+			}
+		}
+	;
+
+	{
+		CProcessLaunch Launch(LaunchParams, EProcessLaunchCloseFlag_BlockOnExit);
+	}
+
+	return Ret;
+}
 
 DMibRuntimeClass(CTool, CTool_LaunchSandboxed);

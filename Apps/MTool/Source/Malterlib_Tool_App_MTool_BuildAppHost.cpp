@@ -110,20 +110,23 @@ namespace
 	// so random-access patches don't disturb the caller's append cursor.
 	struct CStreamPositionGuard
 	{
+		CStreamPositionGuard(TCBinaryStreamMemory<> &_Stream);
+		~CStreamPositionGuard();
+
 		TCBinaryStreamMemory<> &m_Stream;
 		NStream::CFilePos m_SavedPos;
-
-		CStreamPositionGuard(TCBinaryStreamMemory<> &_Stream)
-			: m_Stream(_Stream)
-			, m_SavedPos(_Stream.f_GetPosition())
-		{
-		}
-
-		~CStreamPositionGuard()
-		{
-			m_Stream.f_SetPosition(m_SavedPos);
-		}
 	};
+
+	CStreamPositionGuard::CStreamPositionGuard(TCBinaryStreamMemory<> &_Stream)
+		: m_Stream(_Stream)
+		, m_SavedPos(_Stream.f_GetPosition())
+	{
+	}
+
+	CStreamPositionGuard::~CStreamPositionGuard()
+	{
+		m_Stream.f_SetPosition(m_SavedPos);
+	}
 
 	// Search 64-byte AppBinaryPath placeholder. Replaces it with the managed-dll
 	// name (UTF-8, null-terminated) and zeros the remainder of the 64-byte slot.
@@ -238,194 +241,203 @@ struct CTool_BuildAppHost : public CDistributedTool, public CAllowUnsafeThis
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
 		)
-	{
-		if (fg_IsMalterlib())
-			return;
-
-		o_ToolsSection.f_RegisterCommand
-			(
-				{
-					"Names"_o= _o["BuildAppHost"]
-					, "Description"_o= "Patch a .NET apphost.exe template into the launcher for a managed assembly.\n"
-					"With one or more --bundle-file, additionally append a .NET 8 single-file\n"
-					"bundle (format v6) embedding the managed assembly and runtimeconfig.json.\n"
-					, "Category"_o= "Build"
-					, "Options"_o=
-					{
-						"Template"_o=
-						{
-							"Names"_o= _o["--template"]
-							, "Type"_o= ""
-							, "Description"_o= "Path to the apphost.exe template (e.g. from packs/Microsoft.NETCore.App.Host.win-<arch>/<ver>/runtimes/win-<arch>/native/apphost.exe).\n"
-						}
-						, "Output"_o=
-						{
-							"Names"_o= _o["--output"]
-							, "Type"_o= ""
-							, "Description"_o= "Path of the .exe to write.\n"
-						}
-						, "AssemblyName"_o=
-						{
-							"Names"_o= _o["--assembly"]
-							, "Type"_o= ""
-							, "Description"_o= "Filename of the managed entry-point .dll (embedded in the apphost so hostfxr finds it).\n"
-						}
-						, "Gui?"_o=
-						{
-							"Names"_o= _o["--gui"]
-							, "Default"_o= false
-							, "Description"_o= "Patch the apphost's PE Subsystem field to Windows GUI (2). Default is Console (3).\n"
-						}
-						, "BundleFiles?"_o=
-						{
-							"Names"_o= _o["--bundle-file"]
-							, "Type"_o= _o[""]
-							, "Default"_o= _o[]
-							, "Description"_o= "Comma-separated paths of files to embed in a single-file bundle.\n"
-							"Type is inferred from each extension: .dll = assembly, .runtimeconfig.json\n"
-							"= runtimeconfig, .deps.json = depsjson, .pdb = symbols, .exe/.so/.dylib =\n"
-							"native, otherwise unknown. Omit to skip bundle generation. When bundling,\n"
-							"the file list must include the managed entry-point .dll named in --assembly.\n"
-						}
-					}
-				}
-				, [](NEncoding::CEJsonSorted const _Params, TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
-				{
-					co_await ECoroutineFlag_CaptureExceptions;
-
-					CStr Template = _Params["Template"].f_String();
-					CStr Output = _Params["Output"].f_String();
-					CStr AssemblyName = _Params["AssemblyName"].f_String();
-					bool bGui = _Params["Gui"].f_Boolean();
-					TCVector<CStr> BundleFiles = _Params["BundleFiles"].f_StringArray();
-
-					TCVector<CBundleFile> Files;
-					for (auto const &Path : BundleFiles)
-					{
-						CBundleFile File;
-						File.m_SrcPath = Path;
-						File.m_Type = fg_InferBundleFileType(Path);
-						File.m_RelPath = NFile::CFile::fs_GetFile(Path);
-						Files.f_InsertLast(fg_Move(File));
-					}
-
-					CByteVector TemplateBytes = NFile::CFile::fs_ReadFile(Template);
-					if (TemplateBytes.f_IsEmpty())
-						DMibError("Failed to read apphost template: '{}'"_f << Template);
-
-					TCBinaryStreamMemory<> AppHost;
-					AppHost.f_Open(fg_Move(TemplateBytes));
-					AppHost.f_SetPosition(AppHost.f_GetLength());
-
-					fg_PatchAppBinaryPath(AppHost, AssemblyName, Template);
-
-					if (bGui)
-						fg_PatchSubsystemWindowsGUI(AppHost, Template);
-
-					if (!Files.f_IsEmpty())
-					{
-						bool bAssemblyFound = false;
-						for (auto const &File : Files)
-						{
-							if (File.m_Type == EBundleFileType_Assembly && File.m_RelPath == AssemblyName)
-							{
-								bAssemblyFound = true;
-								break;
-							}
-						}
-						if (!bAssemblyFound)
-							DMibError("Bundle does not contain managed entry-point assembly '{}'; add it to --bundle-file"_f << AssemblyName);
-
-						for (auto &File : Files)
-						{
-							File.m_Contents = NFile::CFile::fs_ReadFile(File.m_SrcPath);
-							File.m_Size = File.m_Contents.f_GetLen();
-							if (File.m_Size == 0)
-								DMibError("Bundle source file is empty or missing: '{}'"_f << File.m_SrcPath);
-						}
-
-						// Compute BundleID before contents are consumed by the
-						// append loop below.
-						CStr BundleID = fg_ComputeBundleID(AssemblyName, Files);
-
-						// Ninja .NET pipeline runs on Windows hosts only — the
-						// apphost pack we patch is per-target-arch, but every
-						// Windows variant uses the same 4096-byte alignment.
-						constexpr uint64 c_AssemblyAlignment = 4096;
-
-						for (auto &File : Files)
-						{
-							if (File.m_Type == EBundleFileType_Assembly)
-							{
-								uint64 nCurrent = AppHost.f_GetLength();
-								uint64 nAligned = (nCurrent + c_AssemblyAlignment - 1) / c_AssemblyAlignment * c_AssemblyAlignment;
-								if (nAligned > nCurrent)
-								{
-									AppHost.f_SetLength(NStream::CFilePos(nAligned));
-									AppHost.f_SetPosition(NStream::CFilePos(nAligned));
-								}
-							}
-							File.m_Offset = AppHost.f_GetPosition();
-							AppHost.f_FeedBytes(File.m_Contents.f_GetArray(), umint(File.m_Size));
-							// We don't compress — the runtime treats entries
-							// with CompressedSize == 0 as stored uncompressed.
-							File.m_Contents.f_Clear();
-						}
-
-						uint64 nManifestOffset = AppHost.f_GetPosition();
-
-						// Manifest header (.NET 8 = bundle format v6.0).
-						AppHost << uint32(6); // MajorVersion
-						AppHost << uint32(0); // MinorVersion
-						AppHost << uint32(Files.f_GetLen()); // FileCount
-
-						// BundleID derived from the bundle contents so each app
-						// gets a unique value (the runtime uses it as the cache
-						// key when extracting native/symbol entries).
-						fg_FeedVarLenString(AppHost, BundleID);
-
-						// v6 header carries deps.json / runtimeconfig.json
-						// offsets explicitly so hostfxr finds them without
-						// scanning the file table.
-						uint64 nDepsJsonOffset = 0, nDepsJsonSize = 0;
-						uint64 nRuntimeCfgOffset = 0, nRuntimeCfgSize = 0;
-						for (auto const &File : Files)
-						{
-							if (File.m_Type == EBundleFileType_DepsJson)
-							{
-								nDepsJsonOffset = File.m_Offset;
-								nDepsJsonSize = File.m_Size;
-							}
-							else if (File.m_Type == EBundleFileType_RuntimeConfigJson)
-							{
-								nRuntimeCfgOffset = File.m_Offset;
-								nRuntimeCfgSize = File.m_Size;
-							}
-						}
-						AppHost << nDepsJsonOffset;
-						AppHost << nDepsJsonSize;
-						AppHost << nRuntimeCfgOffset;
-						AppHost << nRuntimeCfgSize;
-						AppHost << uint64(0); // Flags
-
-						for (auto const &File : Files)
-						{
-							AppHost << File.m_Offset;
-							AppHost << File.m_Size;
-							AppHost << uint64(0); // CompressedSize
-							AppHost << uint8(File.m_Type);
-							fg_FeedVarLenString(AppHost, File.m_RelPath);
-						}
-
-						fg_PatchBundleHeaderOffset(AppHost, nManifestOffset, Template);
-					}
-
-					NFile::CFile::fs_CopyFileDiff(AppHost.f_MoveVector(), Output, NTime::CTime::fs_NowUTC());
-					co_return 0u;
-				}
-			)
-		;
-	}
+	;
 };
+
+void CTool_BuildAppHost::f_Register
+	(
+		TCActor<CDistributedToolAppActor> const &_ToolActor
+		, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+		, CDistributedAppCommandLineSpecification &o_CommandLine
+		, NStr::CStr const &_ClassName
+	)
+{
+	if (fg_IsMalterlib())
+		return;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["BuildAppHost"]
+				, "Description"_o= "Patch a .NET apphost.exe template into the launcher for a managed assembly.\n"
+				"With one or more --bundle-file, additionally append a .NET 8 single-file\n"
+				"bundle (format v6) embedding the managed assembly and runtimeconfig.json.\n"
+				, "Category"_o= "Build"
+				, "Options"_o=
+				{
+					"Template"_o=
+					{
+						"Names"_o= _o["--template"]
+						, "Type"_o= ""
+						, "Description"_o= "Path to the apphost.exe template (e.g. from packs/Microsoft.NETCore.App.Host.win-<arch>/<ver>/runtimes/win-<arch>/native/apphost.exe).\n"
+					}
+					, "Output"_o=
+					{
+						"Names"_o= _o["--output"]
+						, "Type"_o= ""
+						, "Description"_o= "Path of the .exe to write.\n"
+					}
+					, "AssemblyName"_o=
+					{
+						"Names"_o= _o["--assembly"]
+						, "Type"_o= ""
+						, "Description"_o= "Filename of the managed entry-point .dll (embedded in the apphost so hostfxr finds it).\n"
+					}
+					, "Gui?"_o=
+					{
+						"Names"_o= _o["--gui"]
+						, "Default"_o= false
+						, "Description"_o= "Patch the apphost's PE Subsystem field to Windows GUI (2). Default is Console (3).\n"
+					}
+					, "BundleFiles?"_o=
+					{
+						"Names"_o= _o["--bundle-file"]
+						, "Type"_o= _o[""]
+						, "Default"_o= _o[]
+						, "Description"_o= "Comma-separated paths of files to embed in a single-file bundle.\n"
+						"Type is inferred from each extension: .dll = assembly, .runtimeconfig.json\n"
+						"= runtimeconfig, .deps.json = depsjson, .pdb = symbols, .exe/.so/.dylib =\n"
+						"native, otherwise unknown. Omit to skip bundle generation. When bundling,\n"
+						"the file list must include the managed entry-point .dll named in --assembly.\n"
+					}
+				}
+			}
+			, [](NEncoding::CEJsonSorted const _Params, TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				CStr Template = _Params["Template"].f_String();
+				CStr Output = _Params["Output"].f_String();
+				CStr AssemblyName = _Params["AssemblyName"].f_String();
+				bool bGui = _Params["Gui"].f_Boolean();
+				TCVector<CStr> BundleFiles = _Params["BundleFiles"].f_StringArray();
+
+				TCVector<CBundleFile> Files;
+				for (auto const &Path : BundleFiles)
+				{
+					CBundleFile File;
+					File.m_SrcPath = Path;
+					File.m_Type = fg_InferBundleFileType(Path);
+					File.m_RelPath = NFile::CFile::fs_GetFile(Path);
+					Files.f_InsertLast(fg_Move(File));
+				}
+
+				CByteVector TemplateBytes = NFile::CFile::fs_ReadFile(Template);
+				if (TemplateBytes.f_IsEmpty())
+					DMibError("Failed to read apphost template: '{}'"_f << Template);
+
+				TCBinaryStreamMemory<> AppHost;
+				AppHost.f_Open(fg_Move(TemplateBytes));
+				AppHost.f_SetPosition(AppHost.f_GetLength());
+
+				fg_PatchAppBinaryPath(AppHost, AssemblyName, Template);
+
+				if (bGui)
+					fg_PatchSubsystemWindowsGUI(AppHost, Template);
+
+				if (!Files.f_IsEmpty())
+				{
+					bool bAssemblyFound = false;
+					for (auto const &File : Files)
+					{
+						if (File.m_Type == EBundleFileType_Assembly && File.m_RelPath == AssemblyName)
+						{
+							bAssemblyFound = true;
+							break;
+						}
+					}
+					if (!bAssemblyFound)
+						DMibError("Bundle does not contain managed entry-point assembly '{}'; add it to --bundle-file"_f << AssemblyName);
+
+					for (auto &File : Files)
+					{
+						File.m_Contents = NFile::CFile::fs_ReadFile(File.m_SrcPath);
+						File.m_Size = File.m_Contents.f_GetLen();
+						if (File.m_Size == 0)
+							DMibError("Bundle source file is empty or missing: '{}'"_f << File.m_SrcPath);
+					}
+
+					// Compute BundleID before contents are consumed by the
+					// append loop below.
+					CStr BundleID = fg_ComputeBundleID(AssemblyName, Files);
+
+					// Ninja .NET pipeline runs on Windows hosts only — the
+					// apphost pack we patch is per-target-arch, but every
+					// Windows variant uses the same 4096-byte alignment.
+					constexpr uint64 c_AssemblyAlignment = 4096;
+
+					for (auto &File : Files)
+					{
+						if (File.m_Type == EBundleFileType_Assembly)
+						{
+							uint64 nCurrent = AppHost.f_GetLength();
+							uint64 nAligned = (nCurrent + c_AssemblyAlignment - 1) / c_AssemblyAlignment * c_AssemblyAlignment;
+							if (nAligned > nCurrent)
+							{
+								AppHost.f_SetLength(NStream::CFilePos(nAligned));
+								AppHost.f_SetPosition(NStream::CFilePos(nAligned));
+							}
+						}
+						File.m_Offset = AppHost.f_GetPosition();
+						AppHost.f_FeedBytes(File.m_Contents.f_GetArray(), umint(File.m_Size));
+						// We don't compress — the runtime treats entries
+						// with CompressedSize == 0 as stored uncompressed.
+						File.m_Contents.f_Clear();
+					}
+
+					uint64 nManifestOffset = AppHost.f_GetPosition();
+
+					// Manifest header (.NET 8 = bundle format v6.0).
+					AppHost << uint32(6); // MajorVersion
+					AppHost << uint32(0); // MinorVersion
+					AppHost << uint32(Files.f_GetLen()); // FileCount
+
+					// BundleID derived from the bundle contents so each app
+					// gets a unique value (the runtime uses it as the cache
+					// key when extracting native/symbol entries).
+					fg_FeedVarLenString(AppHost, BundleID);
+
+					// v6 header carries deps.json / runtimeconfig.json
+					// offsets explicitly so hostfxr finds them without
+					// scanning the file table.
+					uint64 nDepsJsonOffset = 0, nDepsJsonSize = 0;
+					uint64 nRuntimeCfgOffset = 0, nRuntimeCfgSize = 0;
+					for (auto const &File : Files)
+					{
+						if (File.m_Type == EBundleFileType_DepsJson)
+						{
+							nDepsJsonOffset = File.m_Offset;
+							nDepsJsonSize = File.m_Size;
+						}
+						else if (File.m_Type == EBundleFileType_RuntimeConfigJson)
+						{
+							nRuntimeCfgOffset = File.m_Offset;
+							nRuntimeCfgSize = File.m_Size;
+						}
+					}
+					AppHost << nDepsJsonOffset;
+					AppHost << nDepsJsonSize;
+					AppHost << nRuntimeCfgOffset;
+					AppHost << nRuntimeCfgSize;
+					AppHost << uint64(0); // Flags
+
+					for (auto const &File : Files)
+					{
+						AppHost << File.m_Offset;
+						AppHost << File.m_Size;
+						AppHost << uint64(0); // CompressedSize
+						AppHost << uint8(File.m_Type);
+						fg_FeedVarLenString(AppHost, File.m_RelPath);
+					}
+
+					fg_PatchBundleHeaderOffset(AppHost, nManifestOffset, Template);
+				}
+
+				NFile::CFile::fs_CopyFileDiff(AppHost.f_MoveVector(), Output, NTime::CTime::fs_NowUTC());
+				co_return 0u;
+			}
+		)
+	;
+}
 
 DMibRuntimeClass(NMib::NConcurrency::CDistributedTool, CTool_BuildAppHost);

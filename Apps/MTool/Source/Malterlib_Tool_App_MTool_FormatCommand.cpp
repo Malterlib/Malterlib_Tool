@@ -226,126 +226,134 @@ struct CTool_Format : CDistributedTool
 			, NStr::CStr const &_ClassName
 		)
 		override
-	{
-		if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
-			return;
+	;
+};
 
-		o_ToolsSection.f_RegisterCommand
-			(
+void CTool_Format::f_Register
+	(
+		TCActor<CDistributedToolAppActor> const &_ToolActor
+		, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+		, CDistributedAppCommandLineSpecification &o_CommandLine
+		, NStr::CStr const &_ClassName
+	)
+{
+	if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
+		return;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["Format"]
+				, "Description"_o= "Format sources that opt in with malterlib_format = malterlib, malterlib-c or malterlib-buildsystem in .editorconfig.\n"
+				, "Category"_o= "Validation"
+				, "Options"_o=
 				{
-					"Names"_o= _o["Format"]
-					, "Description"_o= "Format sources that opt in with malterlib_format = malterlib, malterlib-c or malterlib-buildsystem in .editorconfig.\n"
-					, "Category"_o= "Validation"
-					, "Options"_o=
+					"WorkingDirectory?"_o=
 					{
-						"WorkingDirectory?"_o=
-						{
-							"Names"_o= _o["--working-directory", "-C"]
-							, "Default"_o= CFile::fs_GetCurrentDirectory()
-							, "Description"_o= "Directory that relative files and patterns resolve against.\n"
-						}
-						, "File?"_o=
-						{
-							"Names"_o= _o["--file", "-f"]
-							, "Type"_o= _o[""]
-							, "Default"_o= _o[]
-							, "Description"_o= "Format these files, given as one path or a comma-separated list.\n"
-						}
-						, "Pattern?"_o=
-						{
-							"Names"_o= _o["--pattern", "-p"]
-							, "Type"_o= _o[""]
-							, "Default"_o= _o[]
-							, "Description"_o= "Format files matching these wildcards, given as one pattern or a comma-separated list. Quote patterns so the shell does not expand them.\n"
-						}
-						, "Recursive?"_o=
-						{
-							"Names"_o= _o["--recursive", "-r"]
-							, "Default"_o= false
-							, "Description"_o=
-								"Also match patterns in descendant directories. A directory git ignores, or one a configuration document disables formatting under, is not entered.\n"
-						}
-						, "NestedRepositories?"_o=
-						{
-							"Names"_o= _o["--nested-repositories"]
-							, "Default"_o= false
-							, "Description"_o=
-								"With --recursive, also enter the repositories checked out in directories the repository around them ignores, each with its own ignore rules.\n"
-						}
-						, "Check?"_o=
-						{
-							"Names"_o= _o["--check"]
-							, "Default"_o= false
-							, "Description"_o= "Report formatting violations without writing any file.\n"
-						}
-						, "Diff?"_o=
-						{
-							"Names"_o= _o["--diff"]
-							, "Default"_o= false
-							, "Description"_o= "Print the proposed patch without writing any file.\n"
-						}
-						, "Jobs?"_o=
-						{
-							"Names"_o= _o["--jobs", "-j"]
-							, "Default"_o= 0
-							, "Description"_o= "Maximum number of files formatted concurrently. Zero selects a bounded host-capacity default.\n"
-						}
-						, "Slowest?"_o=
-						{
-							"Names"_o= _o["--slowest"]
-							, "Default"_o= 0
-							, "Description"_o= "After the run, list this many of the files the formatting engine took the longest on, with its times.\n"
-						}
-						, "Lines?"_o=
-						{
-							"Names"_o= _o["--lines"]
-							, "Type"_o= ""
-							, "Description"_o= "Format only these one-based inclusive source lines, written as FIRST:LAST.\n"
-						}
-						, "Offset?"_o=
-						{
-							"Names"_o= _o["--offset"]
-							, "Type"_o= ""
-							, "Description"_o= "Format only the selection starting at this zero-based byte offset. Requires --length.\n"
-						}
-						, "Length?"_o=
-						{
-							"Names"_o= _o["--length"]
-							, "Type"_o= ""
-							, "Description"_o= "Byte length of the --offset selection. A zero length formats the unit at the cursor.\n"
-						}
-						, "Stdin?"_o=
-						{
-							"Names"_o= _o["--stdin"]
-							, "Default"_o= false
-							, "Description"_o= "Format the source read from stdin as the one --file would be, with its configuration, and write the result to stdout. The file is"
-							" neither read nor written. Exits with 3, writing nothing, when the file does not opt in.\n"
-						}
-						, "StrictRange?"_o=
-						{
-							"Names"_o= _o["--strict-range"]
-							, "Default"_o= false
-							, "Description"_o= "Never modify bytes outside the requested range; report units that would need one instead.\n"
-						}
+						"Names"_o= _o["--working-directory", "-C"]
+						, "Default"_o= CFile::fs_GetCurrentDirectory()
+						, "Description"_o= "Directory that relative files and patterns resolve against.\n"
+					}
+					, "File?"_o=
+					{
+						"Names"_o= _o["--file", "-f"]
+						, "Type"_o= _o[""]
+						, "Default"_o= _o[]
+						, "Description"_o= "Format these files, given as one path or a comma-separated list.\n"
+					}
+					, "Pattern?"_o=
+					{
+						"Names"_o= _o["--pattern", "-p"]
+						, "Type"_o= _o[""]
+						, "Default"_o= _o[]
+						, "Description"_o= "Format files matching these wildcards, given as one pattern or a comma-separated list. Quote patterns so the shell does not expand them.\n"
+					}
+					, "Recursive?"_o=
+					{
+						"Names"_o= _o["--recursive", "-r"]
+						, "Default"_o= false
+						, "Description"_o=
+							"Also match patterns in descendant directories. A directory git ignores, or one a configuration document disables formatting under, is not entered.\n"
+					}
+					, "NestedRepositories?"_o=
+					{
+						"Names"_o= _o["--nested-repositories"]
+						, "Default"_o= false
+						, "Description"_o= "With --recursive, also enter the repositories checked out in directories the repository around them ignores, each with its own ignore rules.\n"
+					}
+					, "Check?"_o=
+					{
+						"Names"_o= _o["--check"]
+						, "Default"_o= false
+						, "Description"_o= "Report formatting violations without writing any file.\n"
+					}
+					, "Diff?"_o=
+					{
+						"Names"_o= _o["--diff"]
+						, "Default"_o= false
+						, "Description"_o= "Print the proposed patch without writing any file.\n"
+					}
+					, "Jobs?"_o=
+					{
+						"Names"_o= _o["--jobs", "-j"]
+						, "Default"_o= 0
+						, "Description"_o= "Maximum number of files formatted concurrently. Zero selects a bounded host-capacity default.\n"
+					}
+					, "Slowest?"_o=
+					{
+						"Names"_o= _o["--slowest"]
+						, "Default"_o= 0
+						, "Description"_o= "After the run, list this many of the files the formatting engine took the longest on, with its times.\n"
+					}
+					, "Lines?"_o=
+					{
+						"Names"_o= _o["--lines"]
+						, "Type"_o= ""
+						, "Description"_o= "Format only these one-based inclusive source lines, written as FIRST:LAST.\n"
+					}
+					, "Offset?"_o=
+					{
+						"Names"_o= _o["--offset"]
+						, "Type"_o= ""
+						, "Description"_o= "Format only the selection starting at this zero-based byte offset. Requires --length.\n"
+					}
+					, "Length?"_o=
+					{
+						"Names"_o= _o["--length"]
+						, "Type"_o= ""
+						, "Description"_o= "Byte length of the --offset selection. A zero length formats the unit at the cursor.\n"
+					}
+					, "Stdin?"_o=
+					{
+						"Names"_o= _o["--stdin"]
+						, "Default"_o= false
+						, "Description"_o= "Format the source read from stdin as the one --file would be, with its configuration, and write the result to stdout. The file is"
+						" neither read nor written. Exits with 3, writing nothing, when the file does not opt in.\n"
+					}
+					, "StrictRange?"_o=
+					{
+						"Names"_o= _o["--strict-range"]
+						, "Default"_o= false
+						, "Description"_o= "Never modify bytes outside the requested range; report units that would need one instead.\n"
 					}
 				}
-				, [](CEJsonSorted const _Params, TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
-				{
-					co_await ECoroutineFlag_CaptureExceptions;
+			}
+			, [](CEJsonSorted const _Params, TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
 
-					auto Prepared = co_await NTool::NFormat::fg_PrepareAndRunFormat(_Params, _pCommandLine).f_Wrap();
-					if (Prepared)
-						co_return *Prepared;
+				auto Prepared = co_await NTool::NFormat::fg_PrepareAndRunFormat(_Params, _pCommandLine).f_Wrap();
+				if (Prepared)
+					co_return *Prepared;
 
-					// Input, configuration, and worker failures are operational errors, which
-					// stay distinguishable from formatting violations.
-					*_pCommandLine %= "{}\n"_f << Prepared.f_GetExceptionStr();
+				// Input, configuration, and worker failures are operational errors, which
+				// stay distinguishable from formatting violations.
+				*_pCommandLine %= "{}\n"_f << Prepared.f_GetExceptionStr();
 
-					co_return 2;
-				}
-			)
-		;
-	}
-};
+				co_return 2;
+			}
+		)
+	;
+}
 
 DMibRuntimeClass(NMib::NConcurrency::CDistributedTool, CTool_Format);

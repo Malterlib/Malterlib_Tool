@@ -769,85 +769,94 @@ struct CTool_Validate : CDistributedTool
 			, NStr::CStr const &_ClassName
 		)
 		override
-	{
-		if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
-			return;
-
-		o_ToolsSection.f_RegisterCommand
-			(
-				{
-					"Names"_o= _o["Validate"]
-					, "Description"_o= "Validate the text files of a repository using .editorconfig: max_line_length, and the formatting rules of files that opt in.\n"
-					, "Category"_o= "Validation"
-					, "Options"_o=
-					{
-						"WorkingDirectory?"_o=
-						{
-							"Names"_o= _o["--working-directory", "-C"]
-							, "Default"_o= CFile::fs_GetCurrentDirectory()
-							, "Description"_o= "Git repository to validate.\n"
-						}
-						, "Staged?"_o=
-						{
-							"Names"_o= _o["--staged"]
-							, "Default"_o= false
-							, "Description"_o= "Only validate added or modified lines in the index, using staged .editorconfig files.\n"
-						}
-						, "Base?"_o=
-						{
-							"Names"_o= _o["--base"]
-							, "Type"_o= ""
-							, "Description"_o= "Validate committed changes from the merge base with this reference to HEAD, using HEAD's .editorconfig files.\n"
-						}
-						, "Summary?"_o=
-						{
-							"Names"_o= _o["--summary"]
-							, "Default"_o= !fg_IsRunningUnderGitHook()
-							, "Description"_o= "End with the summary line. Defaults to off when run by a git hook, so a clean commit stays silent.\n"
-						}
-					}
-				}
-				, [](CEJsonSorted const _Params, TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
-				{
-					auto CaptureScope = co_await (g_CaptureExceptions % "Running Validate");
-
-					CStopwatch Stopwatch{true};
-					CStr Base;
-					if (auto pBase = _Params.f_GetMember("Base"))
-					{
-						if (_Params["Staged"].f_Boolean())
-							co_return DMibErrorInstance("--base and --staged cannot be combined");
-						if (pBase->f_String().f_IsEmpty())
-							co_return DMibErrorInstance("--base requires a nonempty commit reference");
-
-						Base = pBase->f_String();
-					}
-
-					CFormatSink Sink;
-					Sink.m_fReport = [_pCommandLine](CStr const &_Text)
-						{
-							*_pCommandLine %= _Text;
-						}
-					;
-					auto Directory = _Params["WorkingDirectory"].f_String();
-					CValidationResult Result;
-					if (Base || _Params["Staged"].f_Boolean())
-					{
-						auto Workers = fg_ConstructFormatWorkerPool(fg_GetDefaultFormatJobs());
-						auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
-						Result = co_await fg_ValidateChanges(Directory, Base, Workers, fg_Move(Sink));
-					}
-					else
-						Result = co_await fg_ValidateRepositories({Directory}, fg_Move(Sink));
-					*_pCommandLine %= fg_DescribeValidationFailure(Result.m_Kind, Result.m_Counts);
-					if (_Params["Summary"].f_Boolean())
-						*_pCommandLine %= fg_DescribeValidationSummary(Result.m_Kind, Result.m_Counts, Stopwatch.f_GetTime());
-
-					co_return Result.m_Counts.f_GetErrors() || Result.m_Counts.m_nFormatFailed ? 1 : 0;
-				}
-			)
-		;
-	}
+	;
 };
+
+void CTool_Validate::f_Register
+	(
+		TCActor<CDistributedToolAppActor> const &_ToolActor
+		, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+		, CDistributedAppCommandLineSpecification &o_CommandLine
+		, NStr::CStr const &_ClassName
+	)
+{
+	if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
+		return;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["Validate"]
+				, "Description"_o= "Validate the text files of a repository using .editorconfig: max_line_length, and the formatting rules of files that opt in.\n"
+				, "Category"_o= "Validation"
+				, "Options"_o=
+				{
+					"WorkingDirectory?"_o=
+					{
+						"Names"_o= _o["--working-directory", "-C"]
+						, "Default"_o= CFile::fs_GetCurrentDirectory()
+						, "Description"_o= "Git repository to validate.\n"
+					}
+					, "Staged?"_o=
+					{
+						"Names"_o= _o["--staged"]
+						, "Default"_o= false
+						, "Description"_o= "Only validate added or modified lines in the index, using staged .editorconfig files.\n"
+					}
+					, "Base?"_o=
+					{
+						"Names"_o= _o["--base"]
+						, "Type"_o= ""
+						, "Description"_o= "Validate committed changes from the merge base with this reference to HEAD, using HEAD's .editorconfig files.\n"
+					}
+					, "Summary?"_o=
+					{
+						"Names"_o= _o["--summary"]
+						, "Default"_o= !fg_IsRunningUnderGitHook()
+						, "Description"_o= "End with the summary line. Defaults to off when run by a git hook, so a clean commit stays silent.\n"
+					}
+				}
+			}
+			, [](CEJsonSorted const _Params, TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				auto CaptureScope = co_await (g_CaptureExceptions % "Running Validate");
+
+				CStopwatch Stopwatch{true};
+				CStr Base;
+				if (auto pBase = _Params.f_GetMember("Base"))
+				{
+					if (_Params["Staged"].f_Boolean())
+						co_return DMibErrorInstance("--base and --staged cannot be combined");
+					if (pBase->f_String().f_IsEmpty())
+						co_return DMibErrorInstance("--base requires a nonempty commit reference");
+
+					Base = pBase->f_String();
+				}
+
+				CFormatSink Sink;
+				Sink.m_fReport = [_pCommandLine](CStr const &_Text)
+					{
+						*_pCommandLine %= _Text;
+					}
+				;
+				auto Directory = _Params["WorkingDirectory"].f_String();
+				CValidationResult Result;
+				if (Base || _Params["Staged"].f_Boolean())
+				{
+					auto Workers = fg_ConstructFormatWorkerPool(fg_GetDefaultFormatJobs());
+					auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
+					Result = co_await fg_ValidateChanges(Directory, Base, Workers, fg_Move(Sink));
+				}
+				else
+					Result = co_await fg_ValidateRepositories({Directory}, fg_Move(Sink));
+				*_pCommandLine %= fg_DescribeValidationFailure(Result.m_Kind, Result.m_Counts);
+				if (_Params["Summary"].f_Boolean())
+					*_pCommandLine %= fg_DescribeValidationSummary(Result.m_Kind, Result.m_Counts, Stopwatch.f_GetTime());
+
+				co_return Result.m_Counts.f_GetErrors() || Result.m_Counts.m_nFormatFailed ? 1 : 0;
+			}
+		)
+	;
+}
 
 DMibRuntimeClass(NMib::NConcurrency::CDistributedTool, CTool_Validate);
