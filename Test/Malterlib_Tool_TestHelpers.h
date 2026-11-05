@@ -40,6 +40,8 @@ namespace NMib::NTool::NTestHelpers
 		CStr f_ShellScriptTool(CStr const &_Script) const;
 		bool f_HasTemporaryAttributes() const;
 		TCFuture<CStr> f_Validate(CStr _Case, uint32 _Expected = 0, bool _bStaged = true, CStr _Base = {});
+		void f_MakePerforceRoot(CStr const &_Config);
+		void f_SetPerforceEnvironment();
 
 		CStr m_Root;
 		CStr m_Path;

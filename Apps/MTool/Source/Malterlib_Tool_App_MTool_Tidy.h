@@ -5,6 +5,8 @@
 
 #include "Malterlib_Tool_App_MTool_Format.h"
 
+#include <Mib/Perforce/Ignore>
+
 namespace NMib::NTool::NTidy
 {
 	// Which compile commands of the per-target databases are checked.
@@ -33,18 +35,23 @@ namespace NMib::NTool::NTidy
 		NStr::CStr m_Workspace;                                                // Wildcard: the workspace checked, or with mc_File, preferred.
 		NContainer::TCVector<NStr::CStr> m_Configurations;                     // Configurations checked, each by name, base name or file name.
 		NStr::CStr m_Checks;                                                   // Added to the checks of the .clang-tidy files.
-		NStr::CStr m_Base;                                                     // Only check files changed from the merge base with this to HEAD.
-		bool m_bStaged = false;                                                // Only check files changed in the index.
+		NStr::CStr m_Base;                                                     // Only check files changed from the merge base with this to HEAD, or in a Perforce root after this changelist
+		NStr::CStr m_PerforceBase;                                             // The Perforce root's changelist, when m_Base is the git repositories' reference
+		bool m_bStaged = false;                                                // Only check files changed in the index, or opened in a Perforce root
 		bool m_bFix = false;                                                   // Apply the fixes the checks offer.
 		umint m_nJobs = 1;
 		NContainer::TCVector<NStr::CStr> m_CheckedRepositories;                // The locations of the repositories whose sources are compiled
 		NContainer::TCVector<NStr::CStr> m_ReportedRepositories;               // The locations of every repository that checks its files
 		NContainer::TCVector<NStr::CStr> m_AllRepositories;                    // Every repository location, which tells what nests in them.
 		NContainer::TCMap<NStr::CStr, CTidyRepositoryFiles> m_RepositoryFiles; // By location: the files checked repositories check.
+		NStr::CStr m_PerforceRoot;                                             // The checked Perforce root, or empty
+		NContainer::TCMap<NStr::CStr, NStr::CStr> m_PerforceEnvironment;       // The variables of it that the Perforce root's settings are read with
 		NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> m_pCancelled;       // Set when the user aborts: no command starts and the running ones stop.
 		bool m_bSorted = false;                                                // Report the diagnostics in path order once all are done, not as they come.
 		bool m_bShowProgress = false;                                          // Report how many commands are left as they run.
 		bool m_bAnsiProgress = false;                                          // Rewrite one progress line in place, instead of a line now and then.
+
+		NStorage::TCSharedPointer<NPerforce::CPerforceRootFiles> m_pPerforceRootFiles; // Set by fg_RunTidy for m_PerforceRoot
 	};
 
 	struct CTidySummary

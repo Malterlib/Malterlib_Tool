@@ -211,6 +211,104 @@ namespace NMib::NTool
 
 				co_return {};
 			};
+
+			DMibTestSuite("PerforceRoot") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Testing check-license in a Perforce root");
+
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+				Repo.f_MakePerforceRoot("P4CLIENT=Offline\n");
+				Repo.f_Write(".p4ignore", "/Ignored/\n");
+				Repo.f_Write("Missing.cpp", "int a;\n");
+				Repo.f_Write("Ignored/Missing.cpp", "int a;\n");
+				Repo.f_Write("Unknown/Missing.cpp", "int a;\n");
+				auto UnknownInit = co_await Repo.f_Run("git", {"init", "-q", "-b", "main", Repo.m_Path / "Unknown"}, Repo.m_Path);
+				DMibAssert(UnknownInit.m_ExitCode, ==, 0u);
+
+				auto fConfigure = [&](CStr const &_PerforceRoot)
+					{
+						Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot " + _PerforceRoot + "\n}\n");
+					}
+				;
+
+				auto fCheck = [&](bool _bFix) -> TCFuture<CProcessLaunchActor::CSimpleLaunchResult>
+					{
+						TCVector<CStr> Params =
+							{
+								"check-license"
+								, "--skip-update"
+								, "--no-color"
+								, "--build-system"
+								, Repo.m_Path / "Test.MBuildSystem"
+								, "--output-directory"
+								, Repo.m_Root / "output"
+								, "--no-use-user-settings"
+								, "--no-use-cached-environment"
+							}
+						;
+						if (_bFix)
+							Params.f_Insert("--fix");
+
+						return Repo.f_Tool(fg_Move(Params), true);
+					}
+				;
+
+				fConfigure("{CheckLicense: true, License: {Header: [\"Copyright fixture\"], Include: [\"*.cpp\"]}}");
+
+				{
+					DMibTestPath("Check");
+					auto Result = co_await fCheck(false);
+					DMibExpect(Result.m_ExitCode, !=, 0u);
+					CStr Output = Result.f_GetCombinedOut();
+					DMibExpect(Output.f_Find("Missing header: Missing.cpp"), >=, 0);
+					DMibExpect(Output.f_Find("Ignored"), <, 0);
+					DMibExpect(Output.f_Find("Unknown"), <, 0);
+				}
+
+				{
+					DMibTestPath("Fix");
+					auto Fixed = co_await fCheck(true);
+					DMibExpect(Fixed.m_ExitCode, ==, 0u);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Missing.cpp", true).f_Find("Copyright fixture"), >=, 0);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Ignored/Missing.cpp", true), ==, "int a;\n");
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Unknown/Missing.cpp", true), ==, "int a;\n");
+
+					auto Result = co_await fCheck(false);
+					DMibExpect(Result.m_ExitCode, ==, 0u);
+				}
+
+				{
+					DMibTestPath("NotOptedIn");
+					Repo.f_Write("Missing.cpp", "int a;\n");
+					fConfigure("{CheckLicense: false, License: {Header: [\"Copyright fixture\"], Include: [\"*.cpp\"]}}");
+					auto Result = co_await fCheck(false);
+					DMibExpect(Result.m_ExitCode, ==, 0u);
+					DMibExpect(Result.f_GetCombinedOut().f_Find("Missing header"), <, 0);
+				}
+
+				{
+					// The default Exclude of CLicenseConfig keeps REUSE.toml and LICENSE out.
+					DMibTestPath("DefaultExclude");
+					Repo.f_Write("LICENSE", "License text\n");
+					fConfigure
+						(
+							"{CheckLicense: true, License: {Header: [\"Copyright fixture\"], Include: [\"*.cpp\", \"*.toml\", \"LICENSE\"]"
+							", ReuseAnnotations: [{Path: [\"Missing.cpp\"], CopyrightText: \"Fixture\", LicenseIdentifier: \"MIT\"}]}}"
+						)
+					;
+					auto Fixed = co_await fCheck(true);
+					DMibExpect(Fixed.m_ExitCode, ==, 0u);
+					DMibExpect(CFile::fs_FileExists(Repo.m_Path / "REUSE.toml"), ==, true);
+
+					auto Result = co_await fCheck(false);
+					DMibExpect(Result.m_ExitCode, ==, 0u);
+					DMibExpect(Result.f_GetCombinedOut().f_Find("Missing header"), <, 0);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "LICENSE", true), ==, "License text\n");
+				}
+
+				co_return {};
+			};
 		}
 	};
 

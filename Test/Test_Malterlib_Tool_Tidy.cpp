@@ -3,6 +3,22 @@
 
 #include "Malterlib_Tool_TestHelpers.h"
 
+#include <Mib/Concurrency/AsyncDestroy>
+
+// The Perforce headers use Malterlib's types without their namespaces.
+namespace NMib::NPerforce
+{
+	using namespace NMib::NStr;
+	using namespace NMib::NContainer;
+	using namespace NMib::NStorage;
+	using namespace NMib::NFunction;
+	using namespace NMib::NConcurrency;
+	using namespace NMib::NEncoding;
+}
+
+#include <Mib/Perforce/TestServer>
+#include <Mib/Perforce/Wrapper>
+
 namespace NMib::NTool
 {
 	using namespace NTestHelpers;
@@ -53,6 +69,22 @@ namespace NMib::NTool
 				CStr Configuration = fRepository(".", m_Repo.m_Path, _Tidy);
 				if (_LibTidy)
 					Configuration += fRepository("Lib", m_Repo.m_Path / "Lib", _LibTidy);
+				m_Repo.f_Write("Test.MBuildSystem", Configuration);
+			}
+
+			// With _LibTidy, Lib is a repository in the root.
+			void f_ConfigurePerforceRoot(CStr const &_Tidy, CStr const &_LibTidy = {}) const
+			{
+				CStr Configuration;
+				if (_Tidy)
+					Configuration += "Property\n{\n\tPerforceRoot {Tidy: " + _Tidy + "}\n}\n";
+				if (_LibTidy)
+				{
+					Configuration += "%Repository \"Lib\"\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n\t\tDefaultBranch \"main\"\n";
+					Configuration += "\t\tURL \"https://example.invalid/tidy-fixture.git\"\n";
+					Configuration += "\t\tLocation " + CEJsonSorted(m_Repo.m_Path / "Lib").f_ToString() + "\n";
+					Configuration += "\t\tTidy " + _LibTidy + "\n\t}\n}\n";
+				}
 				m_Repo.f_Write("Test.MBuildSystem", Configuration);
 			}
 
@@ -140,7 +172,7 @@ namespace NMib::NTool
 				;
 				Params.f_Insert(_Extra);
 
-				return m_Repo.f_Tool(fg_Move(Params), true);
+				return m_Repo.f_Run(m_Repo.m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension), fg_Move(Params), m_WorkingDirectory, true);
 			}
 
 			// The sources clang-tidy was run on, in the order of the log.
@@ -158,9 +190,10 @@ namespace NMib::NTool
 			}
 
 			CRepositoryFixture &m_Repo;
+			CStr m_WorkingDirectory = m_Repo.m_Root; // Where MTool runs
 			CStr m_Output;
-			CStr m_Script; // The script that stands in for clang-tidy
-			CStr m_Tool;   // What runs the script
+			CStr m_Script;                           // The script that stands in for clang-tidy
+			CStr m_Tool;                             // What runs the script
 		};
 	}
 
@@ -612,6 +645,490 @@ namespace NMib::NTool
 					auto Result = co_await Tidy.f_Run({"--staged"});
 					DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"A.cpp"}));
 					DMibExpect(Result.f_GetCombinedOut().f_Find("No compile database compiles the changed"), <, 0);
+
+					co_return {};
+				};
+
+				DMibTestCategory("PerforceRoot") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "PerforceRoot");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_MakePerforceRoot("P4CLIENT=Offline\n");
+					Repo.f_Write(".p4ignore", "/Ignored/\nShared.h\n");
+					Repo.f_Write("A.cpp", "");
+					Repo.f_Write("Ignored/Ignored.cpp", "");
+					Repo.f_Write("Shared.h", "");
+					Repo.f_Write("Lib/Other.h", "");
+					Repo.f_Write("Lib/.clang-tidy", "Checks: Invalid\n");
+					auto LibInit = co_await Repo.f_Run("git", {"init", "-q", "-b", "main", Repo.m_Path / "Lib"}, Repo.m_Path);
+					DMibAssert(LibInit.m_ExitCode, ==, 0u);
+					// A repository the build system doesn't know.
+					Repo.f_Write("Unknown/Header.h", "");
+					Repo.f_Write("Unknown/.clang-tidy", "Checks: Invalid\n");
+					auto UnknownInit = co_await Repo.f_Run("git", {"init", "-q", "-b", "main", Repo.m_Path / "Unknown"}, Repo.m_Path);
+					DMibAssert(UnknownInit.m_ExitCode, ==, 0u);
+					// Only the configuration of the root's own headers is verified.
+					Repo.f_Write("Ignored/Header.h", "");
+					Repo.f_Write("Ignored/.clang-tidy", "Checks: Invalid\n");
+					Repo.f_Write("Checked/Header.h", "");
+					Repo.f_Write("Checked/.clang-tidy", "Checks: Invalid\n");
+
+					CTidyFixture Tidy(Repo);
+					CFile::fs_WriteStringToFile
+						(
+							Tidy.m_Script
+							, "#!/bin/sh\n"
+							"if [ \"$1\" = --verify-config ]; then\n"
+							"  if grep -q Invalid .clang-tidy 2>/dev/null; then echo \"error: unknown check 'Invalid'\"; exit 1; fi\n"
+							"  echo 'No config errors detected.'; exit 0\n"
+							"fi\n"
+							+ g_FakeClangTidy
+							, false
+						)
+					;
+					Repo.f_ShellScriptTool(Tidy.m_Script);
+					Tidy.f_AddDatabase("Main", 200, "Lib_A", "Debug", 101, {"A.cpp", "Ignored/Ignored.cpp"}, "DEBUG");
+
+					{
+						DMibTestPath("Checked");
+						Tidy.f_ConfigurePerforceRoot("{Enabled: true}", "{Enabled: false}");
+						auto Result = co_await Tidy.f_Run({"--sorted"});
+						DMibExpect(Result.m_ExitCode, ==, 1u);
+						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"A.cpp"}));
+						CStr Output = Result.f_GetCombinedOut();
+						DMibExpect(Output.f_Find(Repo.m_Path / "A.cpp:1:2: warning: in source [fake-check]"), >=, 0);
+						DMibExpect(Output.f_Find(Repo.m_Path / "Checked: the configuration of the headers is not valid"), >=, 0);
+						DMibExpect(Output.f_Find("Ignored"), <, 0);
+						DMibExpect(Output.f_Find("in header"), <, 0);
+						DMibExpect(Output.f_Find("Unknown"), <, 0);
+						DMibExpect(Output.f_Find(Repo.m_Path / "Lib"), <, 0);
+					}
+
+					{
+						DMibTestPath("ExcludeFiles");
+						Tidy.f_ConfigurePerforceRoot("{Enabled: true, ExcludeFiles: [\"Checked/*\", \"*.h\"]}", "{Enabled: false}");
+						auto Result = co_await Tidy.f_Run({"--sorted"});
+						CStr Output = Result.f_GetCombinedOut();
+						DMibExpect(Output.f_Find("Checked:"), <, 0);
+						DMibExpect(Output.f_Find("in header"), <, 0);
+						DMibExpect(Output.f_Find("Checked 1 file with 1 command: 1 warning, 0 errors"), >=, 0);
+					}
+
+					{
+						DMibTestPath("GitBase");
+						Tidy.f_ConfigurePerforceRoot("{Enabled: true}");
+						auto Result = co_await Tidy.f_Run({"--base", "main"});
+						DMibExpect(Result.m_ExitCode, !=, 0u);
+						DMibExpect(Result.f_GetCombinedOut().f_Find("is a Perforce root, whose base is a changelist, like @1234, which 'main' is not"), >=, 0);
+						DMibExpect(Tidy.f_Checked(), ==, TCVector<CStr>{});
+					}
+
+					{
+						DMibTestPath("NotOptedIn");
+						Tidy.f_ConfigurePerforceRoot("{Enabled: false}");
+						auto Result = co_await Tidy.f_Run({});
+						DMibExpect(Result.m_ExitCode, ==, 0u);
+						DMibExpect(Result.f_GetCombinedOut().f_Find("No repository sets Repository.Tidy"), >=, 0);
+					}
+
+					co_return {};
+				};
+
+				// Shared_Compile_MalterlibTidy.MSettings declares PerforceRootTidyRules, which generating sets.
+				DMibTestCategory("PerforceRootPluginRules") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "PerforceRootPluginRules");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_MakePerforceRoot("P4CLIENT=Offline\n");
+					Repo.f_Write(".p4ignore", "/Ignored/\n*.gen.h\n");
+					Repo.f_Write("A.cpp", "");
+					Repo.f_Write("B.gen.h", "");
+					Repo.f_Write("Ignored/A.h", "");
+					Repo.f_Write("Sub/C.gen.h", "");
+					Repo.f_Write("Unknown/A.h", "");
+					Repo.f_Write("Local/Local.h", "");
+					auto UnknownInit = co_await Repo.f_Run("git", {"init", "-q", "-b", "main", Repo.m_Path / "Unknown"}, Repo.m_Path);
+					DMibAssert(UnknownInit.m_ExitCode, ==, 0u);
+
+					struct CGenerated
+					{
+						CStr m_Rules;
+						CStr m_Output;
+					};
+
+					// With _bBuild, as a build generates: only when a dependency changed.
+					auto fGenerate = [&](CStr _PerforceRoot, bool _bWriteBuildSystem, bool _bBuild, bool _bCachedEnvironment = false) -> TCUnsafeFuture<CGenerated>
+						{
+							CStr Configuration = "Property\n{\n"
+								"\tPerforceRootTidyRules: [{Location: string, Tidy: {Enabled: bool, IncludeFiles: [string], ExcludeFiles: [string]}}] = []\n"
+							;
+							if (_PerforceRoot)
+								Configuration += "\tPerforceRoot " + _PerforceRoot + "\n";
+							Configuration += "}\n"
+								"*Configuration\n{\n\tDebug \"Debug\"\n}\n*Platform\n{\n\tTestPlatform \"Test platform\"\n}\n"
+								"*Architecture\n{\n\tTestArch \"Test architecture\"\n}\n"
+								"%GenerateFile \"Rules\"\n{\n\tGenerateFile\n\t{\n\t\tName `@(BuildSystemOutputDir)/Rules.json`\n"
+								"\t\tContents PerforceRootTidyRules->ToString()\n\t}\n}\n"
+							;
+							if (_bWriteBuildSystem)
+								Repo.f_Write("Test.MBuildSystem", Configuration);
+
+							TCVector<CStr> Params =
+								{
+									"generate"
+									, "--no-color"
+									, "--skip-update"
+									, "--build-system"
+									, Repo.m_Path / "Test.MBuildSystem"
+									, "--output-directory"
+									, Repo.m_Root / "output"
+									, "--no-use-user-settings"
+									, _bCachedEnvironment ? "--use-cached-environment" : "--no-use-cached-environment"
+									, "--no-signal-changed"
+								}
+							;
+							if (_bBuild)
+							{
+								Params.f_Insert("--action");
+								Params.f_Insert("Build");
+							}
+
+							auto Result = co_await Repo.f_Tool(fg_Move(Params), true);
+							if (Result.m_ExitCode)
+								co_return DMibErrorInstance("Generate failed: {}"_f << Result.f_GetCombinedOut());
+
+							co_return CGenerated{CFile::fs_ReadStringFromFile(Repo.m_Root / "output/Rules.json", true), Result.f_GetCombinedOut()};
+						}
+					;
+					auto fRules = [&](CStr _PerforceRoot) -> TCUnsafeFuture<CStr>
+						{
+							co_return (co_await fGenerate(_PerforceRoot, true, false)).m_Rules;
+						}
+					;
+
+					CStr const TidyRoot = "{Tidy: {Enabled: true, ExcludeFiles: [\"Generated/*\"]}}";
+					auto fBuildExcluded = [&]() -> TCUnsafeFuture<TCSet<CStr>>
+						{
+							auto Generated = co_await fGenerate(TidyRoot, false, true);
+							DMibExpect(Generated.m_Output.f_Find("No changes found"), <, 0);
+
+							TCSet<CStr> Excluded;
+							for (auto &Wildcard : CEJsonSorted::fs_FromString(Generated.m_Rules).f_Array()[0]["Tidy"]["ExcludeFiles"].f_Array())
+								Excluded[Wildcard.f_String()];
+							co_return Excluded;
+						}
+					;
+
+					{
+						// The plugin knows no P4IGNORE, so what mib tidy leaves out is excluded by name.
+						DMibTestPath("Tidy");
+						auto Rules = CEJsonSorted::fs_FromString(co_await fRules(TidyRoot));
+						DMibExpect
+							(
+								Rules
+								, ==
+								, CEJsonSorted
+								(
+									_
+									[
+										CEJsonSorted
+										{
+											"Location"_= Repo.m_Path
+											, "Tidy"_= CEJsonSorted
+											{
+												"Enabled"_= true
+												, "IncludeFiles"_= _[]
+												, "ExcludeFiles"_= _["Generated/*", ".p4config", "B.gen.h", "Ignored/*", "Sub/C.gen.h", "Unknown/*"]
+											}
+										}
+									]
+								)
+							)
+						;
+					}
+
+					{
+						DMibTestPath("UnchangedBuildKeepsGeneration");
+						auto Generated = co_await fGenerate(TidyRoot, false, true);
+						DMibExpect(Generated.m_Output.f_Find("No changes found"), >=, 0);
+					}
+
+					{
+						DMibTestPath("IgnoreFileChangeGeneratesAgain");
+						Repo.f_Write(".p4ignore", "/Ignored/\n*.gen.h\n/Sub/\n");
+						auto Excluded = co_await fBuildExcluded();
+						DMibExpectTrue(Excluded.f_FindEqual("Sub/*"));
+					}
+
+					{
+						DMibTestPath("IgnoreFileCreatedGeneratesAgain");
+						Repo.f_Write("Local/.p4ignore", "Local.h\n");
+						auto Excluded = co_await fBuildExcluded();
+						DMibExpectTrue(Excluded.f_FindEqual("Local/Local.h"));
+					}
+
+					{
+						DMibTestPath("GitCreatedGeneratesAgain");
+						CFile::fs_CreateDirectory(Repo.m_Path / "Local/.git");
+						auto Excluded = co_await fBuildExcluded();
+						DMibExpectTrue(Excluded.f_FindEqual("Local/*"));
+						CFile::fs_DeleteDirectoryRecursive(Repo.m_Path / "Local/.git");
+					}
+
+					{
+						DMibTestPath("IgnoreEnvironmentChangeGeneratesAgain");
+						Repo.f_Write("Custom.ignore", "*.cpp\n");
+						Repo.m_Environment["P4IGNORE"] = "Custom.ignore";
+						auto Excluded = co_await fBuildExcluded();
+						DMibExpectTrue(Excluded.f_FindEqual("A.cpp"));
+						DMibExpectFalse(Excluded.f_FindEqual("B.gen.h"));
+					}
+
+					auto fExcludedOf = [](CStr const &_Rules)
+						{
+							TCSet<CStr> Excluded;
+							for (auto &Wildcard : CEJsonSorted::fs_FromString(_Rules).f_Array()[0]["Tidy"]["ExcludeFiles"].f_Array())
+								Excluded[Wildcard.f_String()];
+							return Excluded;
+						}
+					;
+
+					{
+						// The Perforce settings come from the environment generation uses, here the cached one with P4IGNORE set to
+						// Custom.ignore, not from the process's.
+						DMibTestPath("CachedEnvironment");
+						Repo.m_Environment["P4IGNORE"] = ".p4ignore";
+						auto Generated = co_await fGenerate(TidyRoot, true, false, true);
+						DMibExpectTrue(fExcludedOf(Generated.m_Rules).f_FindEqual("A.cpp"));
+					}
+
+					{
+						DMibTestPath("EnviroFileChangeGeneratesAgain");
+						Repo.m_Environment.f_Remove("P4IGNORE");
+						auto Excluded = co_await fBuildExcluded();
+						DMibExpectFalse(Excluded.f_FindEqual("A.cpp"));
+
+						{
+							DMibTestPath("Created");
+							CFile::fs_WriteStringToFile(Repo.m_Root / "p4enviro", "P4IGNORE=Custom.ignore\n", false);
+							auto Created = co_await fBuildExcluded();
+							DMibExpectTrue(Created.f_FindEqual("A.cpp"));
+						}
+					}
+
+					{
+						// P4CONFIG names a path, which p4 looks for from the root as it does a name.
+						DMibTestPath("PathConfigChangeGeneratesAgain");
+						Repo.f_Write("Config/p4config", "P4CLIENT=Offline\n");
+						Repo.m_Environment["P4CONFIG"] = "Config/p4config";
+						auto Excluded = co_await fBuildExcluded();
+						DMibExpectTrue(Excluded.f_FindEqual("A.cpp"));
+
+						{
+							DMibTestPath("Changed");
+							Repo.f_Write("Config/p4config", "P4CLIENT=Offline\nP4IGNORE=.p4ignore\n");
+							auto Changed = co_await fBuildExcluded();
+							DMibExpectFalse(Changed.f_FindEqual("A.cpp"));
+							DMibExpectTrue(Changed.f_FindEqual("Sub/*"));
+						}
+					}
+
+					{
+						// A P4CONFIG file created later makes the checkout a Perforce root.
+						DMibTestPath("ConfigCreatedGeneratesAgain");
+						Repo.m_Environment["P4CONFIG"] = "Later.p4config";
+						auto Generated = co_await fGenerate(TidyRoot, false, true);
+						DMibExpect(CEJsonSorted::fs_FromString(Generated.m_Rules), ==, CEJsonSorted(_[]));
+
+						{
+							DMibTestPath("Created");
+							Repo.f_Write("Later.p4config", "P4CLIENT=Offline\n");
+							auto Created = co_await fGenerate(TidyRoot, false, true);
+							DMibExpect(Created.m_Output.f_Find("No changes found"), <, 0);
+							DMibExpect(CEJsonSorted::fs_FromString(Created.m_Rules).f_Array().f_GetLen(), ==, 1u);
+						}
+					}
+
+					{
+						DMibTestPath("NoTidy");
+						auto Rules = CEJsonSorted::fs_FromString(co_await fRules(""));
+						DMibExpect
+							(
+								Rules
+								, ==
+								, CEJsonSorted
+								(
+									_
+									[
+										CEJsonSorted
+										{
+											"Location"_= Repo.m_Path
+											, "Tidy"_= CEJsonSorted{"Enabled"_= false, "IncludeFiles"_= _[], "ExcludeFiles"_= _[]}
+										}
+									]
+								)
+							)
+						;
+					}
+
+					co_return {};
+				};
+
+				DMibTestCategory("PerforceRootChanges") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "PerforceRootChanges");
+
+					if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+					{
+						DMibConOut("{}\n", "Skipping the tidy tests of the changed files of a Perforce root: p4d was not found in PATH");
+						co_return {};
+					}
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+
+					CStr const Password = "TestPass123";
+					TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+					co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+					auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+					CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+					co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+					co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+					using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+					int64 FirstChangelist = co_await Server
+						(
+							&NPerforce::CPerforceTestServer::f_SubmitFiles
+							, CStr("//Streams/Main")
+							, TCVector<CPerforceFile>{{"A.cpp", ""}, {"B.cpp", ""}, {"Shared.h", ""}, {"Lib/C.cpp", ""}}
+							, CStr("Add the sources")
+						)
+					;
+					co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"A.cpp", "int a;\n"}}, CStr("Change A"));
+
+					// The server is open until the password is set below.
+					co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+					auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor())
+							/ [Connection, Workspace = Repo.m_Path]()
+							{
+								NPerforce::CPerforceClientThrow Client(Connection);
+								Client.f_Login(CStr());
+								Client.f_Sync(Workspace / "...");
+								Client.f_OpenForEdit(Workspace / "B.cpp");
+								Client.f_OpenForEdit(Workspace / "Lib/C.cpp");
+							}
+							% "Failed to set up the test workspace"
+						)
+					;
+
+					// The user and workspace come from the environment, not from the P4CONFIG of the directory mib runs in.
+					Repo.f_MakePerforceRoot("P4PORT={}\n"_f << Port);
+					Repo.m_Environment["P4USER"] = "tester";
+					Repo.m_Environment["P4CLIENT"] = "TestWork";
+					Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+					CFile::fs_CreateDirectory(Repo.m_Root / "Elsewhere");
+					CFile::fs_WriteStringToFile(Repo.m_Root / "Elsewhere/.p4config", "P4USER=elsewhere\nP4CLIENT=Elsewhere\n", false);
+
+					Repo.f_Write("Lib/C.cpp", "");
+					auto fGitInLib = [&](TCVector<CStr> _Params) -> TCUnsafeFuture<CStr>
+						{
+							auto Result = co_await Repo.f_Run("git", fg_Move(_Params), Repo.m_Path / "Lib");
+							if (Result.m_ExitCode)
+								co_return DMibErrorInstance("Git failed in Lib: {}"_f << Result.f_GetCombinedOut());
+
+							co_return Result.f_GetStdOut().f_Trim();
+						}
+					;
+					co_await fGitInLib({"init", "-q", "-b", "main"});
+					co_await fGitInLib({"add", "-A"});
+					co_await fGitInLib({"commit", "-qm", "First"});
+					CStr LibFirst = co_await fGitInLib({"rev-parse", "HEAD"});
+					Repo.f_Write("Lib/C.cpp", "int c;\n");
+					co_await fGitInLib({"commit", "-qam", "Change C"});
+
+					CTidyFixture Tidy(Repo);
+					Tidy.m_WorkingDirectory = Repo.m_Root / "Elsewhere";
+					Tidy.f_ConfigurePerforceRoot("{Enabled: true}");
+					Tidy.f_AddDatabase("Main", 200, "Lib_A", "Debug", 101, {"A.cpp", "B.cpp", "Lib/C.cpp"}, "DEBUG");
+
+					{
+						DMibTestPath("OpenServer");
+						auto Result = co_await Tidy.f_Run({"--staged"});
+						DMibExpect(Result.m_ExitCode, ==, 1u);
+						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"B.cpp"}));
+					}
+
+					// mib uses the ticket the fixture's login leaves.
+					co_await Server(&NPerforce::CPerforceTestServer::f_SetUserPassword, Password);
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor())
+							/ [Connection, Password]()
+							{
+								NPerforce::CPerforceClientThrow Client(Connection);
+								Client.f_Login(Password);
+							}
+							% "Failed to log in to the test server"
+						)
+					;
+
+					{
+						DMibTestPath("Staged");
+						auto Result = co_await Tidy.f_Run({"--staged"});
+						DMibExpect(Result.m_ExitCode, ==, 1u);
+						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"B.cpp"}));
+					}
+
+					{
+						DMibTestPath("Base");
+						auto Result = co_await Tidy.f_Run({"--base", "@{}"_f << FirstChangelist});
+						DMibExpect(Result.m_ExitCode, ==, 1u);
+						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"A.cpp"}));
+					}
+
+					{
+						DMibTestPath("LargeBase");
+						auto Large = co_await Tidy.f_Run({"--base", "@4294967296"});
+						DMibExpect(Large.f_GetCombinedOut().f_Find("which '@4294967296' is not"), <, 0);
+						auto Largest = co_await Tidy.f_Run({"--base", "@9223372036854775807"});
+						DMibExpect(Largest.m_ExitCode, !=, 0u);
+						DMibExpect(Largest.f_GetCombinedOut().f_Find("which '@9223372036854775807' is not"), >=, 0);
+					}
+
+					Tidy.f_ConfigurePerforceRoot("{Enabled: true}", "{Enabled: true}");
+
+					{
+						// A file of a repository in the root is that repository's, whose index has no change, although the
+						// workspace has it open.
+						DMibTestPath("StagedNestedRepository");
+						auto Result = co_await Tidy.f_Run({"--staged"});
+						DMibExpect(Result.m_ExitCode, ==, 1u);
+						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"B.cpp"}));
+					}
+
+					{
+						DMibTestPath("MixedBases");
+						auto Result = co_await Tidy.f_Run({"--base", LibFirst, "--perforce-base", "@{}"_f << FirstChangelist});
+						DMibExpect(Result.m_ExitCode, ==, 1u);
+						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"A.cpp", "Lib/C.cpp"}));
+					}
+
+					// A numeric git reference reads as a changelist too, so the root's base is given on its own.
+					for (CStr const &Base : {CStr("@{}"_f << FirstChangelist), CStr::fs_ToStr(FirstChangelist), LibFirst})
+					{
+						DMibTestPath("OneBaseForBoth" + Base);
+						auto Result = co_await Tidy.f_Run({"--base", Base});
+						DMibExpect(Result.m_ExitCode, !=, 0u);
+						DMibExpect(Result.f_GetCombinedOut().f_Find("cannot be the base of both the git repositories and the Perforce root"), >=, 0);
+						DMibExpect(Tidy.f_Checked(), ==, TCVector<CStr>{});
+					}
 
 					co_return {};
 				};
