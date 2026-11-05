@@ -63,35 +63,41 @@ namespace
 
 	struct CDependencyFile
 	{
+		void f_AddDependencyInfoHelper(uint8 _Opcode, CStr const &_Path);
+		void f_AddTool(CStr const &_Name);
+		void f_AddInput(CStr const &_Path);
+		void f_AddNotFound(CStr const &_Path);
+		void f_AddOutput(CStr const &_Path);
+
 		TCBinaryStreamMemory<> m_Stream;
-
-		void f_AddDependencyInfoHelper(uint8 _Opcode, CStr const &_Path)
-		{
-			m_Stream << _Opcode;
-			m_Stream.f_FeedBytes((uint8 const *)_Path.f_GetStr(), _Path.f_GetLen());
-			m_Stream << uint8(0);
-		}
-
-		void f_AddTool(CStr const &_Name)
-		{
-			f_AddDependencyInfoHelper(0x00, _Name);
-		}
-
-		void f_AddInput(CStr const &_Path)
-		{
-			f_AddDependencyInfoHelper(0x10, _Path);
-		}
-
-		void f_AddNotFound(CStr const &_Path)
-		{
-			f_AddDependencyInfoHelper(0x11, _Path);
-		}
-
-		void f_AddOutput(CStr const &_Path)
-		{
-			f_AddDependencyInfoHelper(0x40, _Path);
-		}
 	};
+
+	void CDependencyFile::f_AddDependencyInfoHelper(uint8 _Opcode, CStr const &_Path)
+	{
+		m_Stream << _Opcode;
+		m_Stream.f_FeedBytes((uint8 const *)_Path.f_GetStr(), _Path.f_GetLen());
+		m_Stream << uint8(0);
+	}
+
+	void CDependencyFile::f_AddTool(CStr const &_Name)
+	{
+		f_AddDependencyInfoHelper(0x00, _Name);
+	}
+
+	void CDependencyFile::f_AddInput(CStr const &_Path)
+	{
+		f_AddDependencyInfoHelper(0x10, _Path);
+	}
+
+	void CDependencyFile::f_AddNotFound(CStr const &_Path)
+	{
+		f_AddDependencyInfoHelper(0x11, _Path);
+	}
+
+	void CDependencyFile::f_AddOutput(CStr const &_Path)
+	{
+		f_AddDependencyInfoHelper(0x40, _Path);
+	}
 }
 
 namespace
@@ -119,38 +125,40 @@ namespace
 
 struct CTool_DoxygenCompile : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		CRegistry Registry = fg_ExtractOptions(_Params);
-
-		auto pFile = Registry.f_GetChild("-c");
-		if (pFile)
-			Registry.f_CreateChild("Files")->f_CreateChildNoPath(pFile->f_GetThisValue(), true);
-
-		// DConOut("\n{}\n", Registry.f_GenerateStr());
-		CStr DiagFile = Registry.f_GetValue("--serialize-diagnostics", "");
-
-		if (DiagFile)
-		{
-			CFile::fs_CreateDirectory(CFile::fs_GetPath(DiagFile));
-			CFile::fs_WriteFile(DiagFile, CByteVector(gc_EmptySerializedDiagnostics, sizeof(gc_EmptySerializedDiagnostics)));
-		}
-
-		CStr OutputFile = Registry.f_GetValue("-o", "");
-		if (OutputFile.f_IsEmpty())
-			DError("No output file found in command line options");
-		{
-			//DConOut("Writing to: {}{\n}", OutputFile);
-			CStr Data = Registry.f_GenerateStr();
-			CFile::fs_WriteStringToFile(CStr(OutputFile), Data);
-		}
-
-		if (auto pDependenciesFile = Registry.f_GetChild("-MF"))
-			CFile::fs_Touch(pDependenciesFile->f_GetThisValue());
-
-		return 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_DoxygenCompile::f_Run(NContainer::CRegistry &_Params)
+{
+	CRegistry Registry = fg_ExtractOptions(_Params);
+
+	auto pFile = Registry.f_GetChild("-c");
+	if (pFile)
+		Registry.f_CreateChild("Files")->f_CreateChildNoPath(pFile->f_GetThisValue(), true);
+
+	// DConOut("\n{}\n", Registry.f_GenerateStr());
+	CStr DiagFile = Registry.f_GetValue("--serialize-diagnostics", "");
+
+	if (DiagFile)
+	{
+		CFile::fs_CreateDirectory(CFile::fs_GetPath(DiagFile));
+		CFile::fs_WriteFile(DiagFile, CByteVector(gc_EmptySerializedDiagnostics, sizeof(gc_EmptySerializedDiagnostics)));
+	}
+
+	CStr OutputFile = Registry.f_GetValue("-o", "");
+	if (OutputFile.f_IsEmpty())
+		DError("No output file found in command line options");
+	{
+		//DConOut("Writing to: {}{\n}", OutputFile);
+		CStr Data = Registry.f_GenerateStr();
+		CFile::fs_WriteStringToFile(CStr(OutputFile), Data);
+	}
+
+	if (auto pDependenciesFile = Registry.f_GetChild("-MF"))
+		CFile::fs_Touch(pDependenciesFile->f_GetThisValue());
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_DoxygenCompile);
 
@@ -163,127 +171,149 @@ struct CTool_DoxygenLibTool : public CDistributedTool
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
 		)
-	{
-		if (!fg_IsLibTool())
-			return;
+	;
+};
 
-		o_ToolsSection.f_RegisterDirectCommand
-			(
+void CTool_DoxygenLibTool::f_Register
+	(
+		TCActor<CDistributedToolAppActor> const &_ToolActor
+		, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+		, CDistributedAppCommandLineSpecification &o_CommandLine
+		, NStr::CStr const &_ClassName
+	)
+{
+	if (!fg_IsLibTool())
+		return;
+
+	o_ToolsSection.f_RegisterDirectCommand
+		(
+			{
+				"Names"_o= _o["-V"]
+				, "Description"_o= "Libtool version.\n"
+				, "ErrorOnCommandAsParameter"_o= false
+				, "ErrorOnOptionAsParameter"_o= false
+				, "GreedyDefaultCommand"_o= true
+			}
+			, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			{
+				DMibConOut("Apple Inc. version cctools-1010.6\n");
+				return 0;
+			}
+		)
+	;
+
+	auto LibToolCommand = o_ToolsSection.f_RegisterDirectCommand
+		(
+			{
+				"Names"_o= _o["libtool"]
+				, "Description"_o= "Runs libtool command line.\n"
+				, "Parameters"_o=
 				{
-					"Names"_o= _o["-V"]
-					, "Description"_o= "Libtool version.\n"
-					, "ErrorOnCommandAsParameter"_o= false
-					, "ErrorOnOptionAsParameter"_o= false
-					, "GreedyDefaultCommand"_o= true
+					"Params...?"_o=
+					{
+						"Type"_o= _o[""]
+						, "Description"_o= "The cmake params."
+					}
 				}
-				, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+				, "ErrorOnCommandAsParameter"_o= false
+				, "ErrorOnOptionAsParameter"_o= false
+				, "GreedyDefaultCommand"_o= true
+			}
+			, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			{
+				CDependencyFile DependencyFile;
+				DependencyFile.f_AddTool("libtool");
+
+				CRegistry Params;
+
+				if (auto pParams = _Params.f_GetMember("Params"))
+				{
+					umint iParam = 0;
+					for (auto &Param : pParams->f_Array())
+					{
+						Params.f_SetValue(CStr::fs_ToStr(iParam), Param.f_String());
+						++iParam;
+					}
+				}
+
+				CRegistry Registry = fg_ExtractOptions(Params);
+
+				auto pFilesReg = Registry.f_CreateChild("Files");
+
+				if (Registry.f_GetChild("-V"))
 				{
 					DMibConOut("Apple Inc. version cctools-1010.6\n");
 					return 0;
 				}
-			)
-		;
 
-		auto LibToolCommand = o_ToolsSection.f_RegisterDirectCommand
-			(
+				auto pFileFile = Registry.f_GetChild("-filelist");
+				if (pFileFile)
 				{
-					"Names"_o= _o["libtool"]
-					, "Description"_o= "Runs libtool command line.\n"
-					, "Parameters"_o=
+					CStr FileContents = CFile::fs_ReadStringFromFile(CStr(pFileFile->f_GetThisValue()));
+					while (!FileContents.f_IsEmpty())
 					{
-						"Params...?"_o=
+						CStr FileName = fg_GetStrLineSep(FileContents);
+						DependencyFile.f_AddInput(FileName);
+
+						if (CFile::fs_GetExtension(FileName).f_CmpNoCase("o") == 0)
+							pFilesReg->f_CreateChildNoPath(FileName, true);
+						else if (CFile::fs_GetExtension(FileName).f_CmpNoCase("a") == 0)
 						{
-							"Type"_o= _o[""]
-							, "Description"_o= "The cmake params."
-						}
-					}
-					, "ErrorOnCommandAsParameter"_o= false
-					, "ErrorOnOptionAsParameter"_o= false
-					, "GreedyDefaultCommand"_o= true
-				}
-				, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
-				{
-					CDependencyFile DependencyFile;
-					DependencyFile.f_AddTool("libtool");
+							CRegistry LibraryContents;
+							LibraryContents.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
 
-					CRegistry Params;
-
-					if (auto pParams = _Params.f_GetMember("Params"))
-					{
-						umint iParam = 0;
-						for (auto &Param : pParams->f_Array())
-						{
-							Params.f_SetValue(CStr::fs_ToStr(iParam), Param.f_String());
-							++iParam;
-						}
-					}
-
-					CRegistry Registry = fg_ExtractOptions(Params);
-
-					auto pFilesReg = Registry.f_CreateChild("Files");
-
-					if (Registry.f_GetChild("-V"))
-					{
-						DMibConOut("Apple Inc. version cctools-1010.6\n");
-						return 0;
-					}
-
-					auto pFileFile = Registry.f_GetChild("-filelist");
-					if (pFileFile)
-					{
-						CStr FileContents = CFile::fs_ReadStringFromFile(CStr(pFileFile->f_GetThisValue()));
-						while (!FileContents.f_IsEmpty())
-						{
-							CStr FileName = fg_GetStrLineSep(FileContents);
-							DependencyFile.f_AddInput(FileName);
-
-							if (CFile::fs_GetExtension(FileName).f_CmpNoCase("o") == 0)
-								pFilesReg->f_CreateChildNoPath(FileName, true);
-							else if (CFile::fs_GetExtension(FileName).f_CmpNoCase("a") == 0)
+							auto pFiles = LibraryContents.f_GetChildNoPath("Files");
+							if (pFiles)
 							{
-								CRegistry LibraryContents;
-								LibraryContents.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
-
-								auto pFiles = LibraryContents.f_GetChildNoPath("Files");
-								if (pFiles)
+								for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
 								{
-									for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
-									{
-										DependencyFile.f_AddInput(iFile->f_GetName());
-										pFilesReg->f_CreateChildNoPath(iFile->f_GetName(), true);
-									}
+									DependencyFile.f_AddInput(iFile->f_GetName());
+									pFilesReg->f_CreateChildNoPath(iFile->f_GetName(), true);
 								}
 							}
 						}
 					}
-
-					CStr OutputFile = Registry.f_GetValue("-o", "");
-					if (OutputFile.f_IsEmpty())
-						DError("No output file found in command line options");
-
-					DependencyFile.f_AddOutput(OutputFile);
-
-					{
-						CStr Data = Registry.f_GenerateStr();
-						CFile::fs_WriteStringToFile(CStr(OutputFile), Data);
-					}
-
-					if (auto pDependenciesFile = Registry.f_GetChild("-dependency_info"))
-						CFile::fs_WriteFile(pDependenciesFile->f_GetThisValue(), DependencyFile.m_Stream.f_MoveVector());
-
-					return 0;
 				}
-			)
-		;
 
-		o_CommandLine.f_SetDefaultCommand(LibToolCommand);
-	}
-};
+				CStr OutputFile = Registry.f_GetValue("-o", "");
+				if (OutputFile.f_IsEmpty())
+					DError("No output file found in command line options");
+
+				DependencyFile.f_AddOutput(OutputFile);
+
+				{
+					CStr Data = Registry.f_GenerateStr();
+					CFile::fs_WriteStringToFile(CStr(OutputFile), Data);
+				}
+
+				if (auto pDependenciesFile = Registry.f_GetChild("-dependency_info"))
+					CFile::fs_WriteFile(pDependenciesFile->f_GetThisValue(), DependencyFile.m_Stream.f_MoveVector());
+
+				return 0;
+			}
+		)
+	;
+
+	o_CommandLine.f_SetDefaultCommand(LibToolCommand);
+}
 
 DMibRuntimeClass(CTool, CTool_DoxygenLibTool);
 
 struct CTool_DoxygenLD : public CTool
 {
+	struct CModule
+	{
+		TCSet<CStr> m_IncludePaths;
+		TCSet<CStr> m_Predefines;
+		TCMap<CStr, CStr> m_ClangOptions;
+		TCSet<CStr> m_Inputs;
+		TCSet<CStr> m_Images;
+	};
+
+	void f_ExtractModules();
+	void f_LaunchModules(bool _bGenerateTags, CStr const &_IncludeFile);
+	aint f_Run(NContainer::CRegistry &_Params);
+
 	CDependencyFile m_DependencyFile;
 
 	CStr m_DoxygenExecutable;
@@ -299,365 +329,356 @@ struct CTool_DoxygenLD : public CTool
 	TCLinkedList<CRegistry> m_Libraries;
 	TCMap<CStr, CStr> m_Tags;
 
-	struct CModule
-	{
-		TCSet<CStr> m_IncludePaths;
-		TCSet<CStr> m_Predefines;
-		TCMap<CStr, CStr> m_ClangOptions;
-		TCSet<CStr> m_Inputs;
-		TCSet<CStr> m_Images;
-	};
-
 	TCMap<CStr, CModule> m_Modules;
+};
 
-	void f_ExtractModules()
+void CTool_DoxygenLD::f_ExtractModules()
+{
+	for (auto &Library : m_Libraries)
 	{
-		for (auto &Library : m_Libraries)
+		auto pFilesReg = Library.f_CreateChild("Files");
+
+		for (auto iFile = pFilesReg->f_GetChildIterator(); iFile; ++iFile)
 		{
-			auto pFilesReg = Library.f_CreateChild("Files");
+			m_DependencyFile.f_AddInput(iFile->f_GetName());
 
-			for (auto iFile = pFilesReg->f_GetChildIterator(); iFile; ++iFile)
+			CRegistry const &ObjectRegistry = *iFile;
+
+			CStr ModuleName = ObjectRegistry.f_GetValue("--documentation-module", "");
+
+			if (ModuleName.f_IsEmpty())
+				DMibError("Library '{}' File '{}' has no module specified"_f << Library.f_GetName() << iFile->f_GetName());
+
+			auto &Module = m_Modules[ModuleName];
+
+			bool bValid = false;
+			auto *pFiles = ObjectRegistry.f_GetChild("Files");
+			if (pFiles)
 			{
-				m_DependencyFile.f_AddInput(iFile->f_GetName());
-
-				CRegistry const &ObjectRegistry = *iFile;
-
-				CStr ModuleName = ObjectRegistry.f_GetValue("--documentation-module", "");
-
-				if (ModuleName.f_IsEmpty())
-					DMibError("Library '{}' File '{}' has no module specified"_f << Library.f_GetName() << iFile->f_GetName());
-
-				auto &Module = m_Modules[ModuleName];
-
-				bool bValid = false;
-				auto *pFiles = ObjectRegistry.f_GetChild("Files");
-				if (pFiles)
+				for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
 				{
-					for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
+					m_DependencyFile.f_AddInput(iFile->f_GetName());
+
+					if (!m_DoxygenRoot.f_IsEmpty() && !iFile->f_GetName().f_StartsWith(m_DoxygenRoot))
+						continue;
+
+					bValid = true;
+
+					auto &FileName = iFile->f_GetName();
+					if (m_DoxygenImageExtensions.f_FindEqual(CFile::fs_GetExtension(FileName)))
+						Module.m_Images[FileName];
+					else
+						Module.m_Inputs[FileName];
+				}
+			}
+
+			if (!bValid)
+				continue;
+
+			for (auto iConfig = ObjectRegistry.f_GetChildIterator(); iConfig; ++iConfig)
+			{
+				if (iConfig->f_HasChildren())
+					continue;
+				CStr Name = iConfig->f_GetName();
+				if (Name.f_StartsWith("--documentation-"))
+					continue;
+				if (Name.f_StartsWith("-I"))
+				{
+					CStr Path = Name.f_Extract(2);
+					Module.m_IncludePaths[CFile::fs_GetExpandedPath(Path)];
+				}
+				else
+				{
+					if
+					(
+						Name != "-o"
+						&& Name != "-c"
+						&& Name != "--serialize-diagnostics"
+						&& Name != "-MF"
+						&& Name != "-MMD"
+						&& Name != "-MT"
+						&& Name != "-g"
+						&& Name != "-x"
+						&& Name != "-Werror"
+						&& Name != "-target"
+						&& !Name.f_StartsWith("-O")
+					)
 					{
-						m_DependencyFile.f_AddInput(iFile->f_GetName());
-
-						if (!m_DoxygenRoot.f_IsEmpty() && !iFile->f_GetName().f_StartsWith(m_DoxygenRoot))
-							continue;
-
-						bValid = true;
-
-						auto &FileName = iFile->f_GetName();
-						if (m_DoxygenImageExtensions.f_FindEqual(CFile::fs_GetExtension(FileName)))
-							Module.m_Images[FileName];
-						else
-							Module.m_Inputs[FileName];
+						Module.m_ClangOptions[Name] = iConfig->f_GetThisValue();
 					}
 				}
-
-				if (!bValid)
-					continue;
-
-				for (auto iConfig = ObjectRegistry.f_GetChildIterator(); iConfig; ++iConfig)
+				if (Name.f_StartsWith("-D"))
 				{
-					if (iConfig->f_HasChildren())
-						continue;
-					CStr Name = iConfig->f_GetName();
-					if (Name.f_StartsWith("--documentation-"))
-						continue;
-					if (Name.f_StartsWith("-I"))
+					CStr Define = Name.f_Extract(2);
+					Module.m_Predefines[Define];
+				}
+			}
+		}
+	}
+}
+
+void CTool_DoxygenLD::f_LaunchModules(bool _bGenerateTags, CStr const &_IncludeFile)
+{
+	CProcessLaunchHandler Handler;
+
+	CMutual OutputLock;
+	TCAtomic<uint32> ExitCode(0);
+
+	auto fAddModules = [&]()
+		{
+			for (auto &Module : m_Modules)
+			{
+				TCVector<CStr> LaunchParams = m_DoxygenOptions;
+
+				struct CState
+				{
+					CStr m_StdOut;
+					CStr m_StdErr;
+				};
+
+				TCSharedPointer<CState> pState = fg_Construct();
+
+				{
+					CStr DoxygenFileContents;
+
+					if (!_IncludeFile.f_IsEmpty())
+						DoxygenFileContents += CStr::CFormat("@INCLUDE={}\n") << _IncludeFile;
+
+					CStr LibraryName = m_Modules.fs_GetKey(Module);
+
+					DoxygenFileContents += CStr::CFormat("PROJECT_NAME = {}\n") << LibraryName;
+
+					CStr OutputDir = m_OutputDir + "/" + LibraryName;
+
+					CFile::fs_CreateDirectory(OutputDir);
+
+					CStr DoxygenConfigFile = CFile::fs_GetPath(m_OutputDir) + "/" + LibraryName + ".doxygen";
+
+					DoxygenFileContents += CStr::CFormat("OUTPUT_DIRECTORY={}\n") << OutputDir;
+					if (_bGenerateTags)
 					{
-						CStr Path = Name.f_Extract(2);
-						Module.m_IncludePaths[CFile::fs_GetExpandedPath(Path)];
+						CStr DoxygenTagOutput = CFile::fs_GetPath(m_OutputDir) + "/" + LibraryName + ".tag";
+						DoxygenFileContents += CStr::CFormat("GENERATE_TAGFILE = {}\n") << DoxygenTagOutput;
+						m_Tags[DoxygenTagOutput] = CStr::CFormat("../../{}/html") << LibraryName;
 					}
 					else
 					{
-						if
-						(
-							Name != "-o"
-							&& Name != "-c"
-							&& Name != "--serialize-diagnostics"
-							&& Name != "-MF"
-							&& Name != "-MMD"
-							&& Name != "-MT"
-							&& Name != "-g"
-							&& Name != "-x"
-							&& Name != "-Werror"
-							&& Name != "-target"
-							&& !Name.f_StartsWith("-O")
-						)
+						CStr DoxygenTagOutput = CFile::fs_GetPath(m_OutputDir) + "/" + LibraryName + ".tag";
+						DoxygenFileContents += "TAGFILES	= \\\n";
+						for (auto iTag = m_Tags.f_GetIterator(); iTag; ++iTag)
 						{
-							Module.m_ClangOptions[Name] = iConfig->f_GetThisValue();
+							if (iTag.f_GetKey() != DoxygenTagOutput)
+								DoxygenFileContents += CStr::CFormat("	{}={} \\\n") << iTag.f_GetKey() << *iTag;
 						}
+						DoxygenFileContents += "\n";
 					}
-					if (Name.f_StartsWith("-D"))
+					if (!m_DoxygenRoot.f_IsEmpty())
 					{
-						CStr Define = Name.f_Extract(2);
-						Module.m_Predefines[Define];
+						DoxygenFileContents += CStr::CFormat("STRIP_FROM_INC_PATH = {}\n") << m_DoxygenRoot;
+						DoxygenFileContents += CStr::CFormat("STRIP_FROM_PATH = {}\n") << m_DoxygenRoot;
 					}
+
+					CStr ImagePath = CFile::fs_GetPath(m_OutputDir) + "/Images";
+					CFile::fs_CreateDirectory(ImagePath);
+					DoxygenFileContents += CStr::CFormat("IMAGE_PATH	= {}\n") << ImagePath;
+					for (auto &FileName : Module.m_Images)
+						CFile::fs_CopyFile(FileName, CFile::fs_AppendPath(ImagePath, CFile::fs_GetFile(FileName)));
+
+					DoxygenFileContents += "INPUT	= \\\n";
+
+					for (auto &FileName : Module.m_Inputs)
+						DoxygenFileContents += CStr::CFormat("	{} \\\n") << FileName;
+					DoxygenFileContents += "\n";
+
+					DoxygenFileContents += "PREDEFINED	= \\\n";
+
+					for (auto &Define : Module.m_Predefines)
+						DoxygenFileContents += CStr::CFormat("	{} \\\n") << Define;
+					DoxygenFileContents += "\n";
+
+					{
+						DoxygenFileContents += "INCLUDE_PATH	= \\\n";
+						for (auto &Name : Module.m_IncludePaths)
+						{
+							if (CFile::fs_FileExists(Name, EFileAttrib_Directory))
+								DoxygenFileContents += CStr::CFormat("	{} \\\n") << Name;
+						}
+						DoxygenFileContents += "\n";
+					}
+
+					if (m_bDoxygenEnableClang)
+					{
+						CStr AllOptions;
+						for (auto iOption = Module.m_ClangOptions.f_GetIterator(); iOption; ++iOption)
+						{
+							fg_AddStrSepEscaped(AllOptions, iOption.f_GetKey(), ' ');
+							if (!iOption->f_IsEmpty())
+								fg_AddStrSepEscaped(AllOptions, *iOption, ' ');
+						}
+						DoxygenFileContents += CStr::CFormat("CLANG_OPTIONS	= {}") << AllOptions;
+						DoxygenFileContents += "CLANG_ASSISTED_PARSING   = YES\n";
+					}
+
+					//DConOut("DoxygenFileContents: \n{}\n", DoxygenFileContents);
+
+					CFile::fs_WriteStringToFile(CStr(DoxygenConfigFile), DoxygenFileContents, false);
+					LaunchParams.f_Insert(DoxygenConfigFile);
 				}
-			}
-		}
-	}
 
-	void f_LaunchModules(bool _bGenerateTags, CStr const &_IncludeFile)
-	{
-		CProcessLaunchHandler Handler;
+				//DConOut("Launching Doxygen at '{}' with: \n{}\n", CFile::fs_GetPath(m_OutputDir), LaunchParams);
 
-		CMutual OutputLock;
-		TCAtomic<uint32> ExitCode(0);
-
-		auto fAddModules = [&]()
-			{
-				for (auto &Module : m_Modules)
-				{
-					TCVector<CStr> LaunchParams = m_DoxygenOptions;
-
-					struct CState
-					{
-						CStr m_StdOut;
-						CStr m_StdErr;
-					};
-
-					TCSharedPointer<CState> pState = fg_Construct();
-
-					{
-						CStr DoxygenFileContents;
-
-						if (!_IncludeFile.f_IsEmpty())
-							DoxygenFileContents += CStr::CFormat("@INCLUDE={}\n") << _IncludeFile;
-
-						CStr LibraryName = m_Modules.fs_GetKey(Module);
-
-						DoxygenFileContents += CStr::CFormat("PROJECT_NAME = {}\n") << LibraryName;
-
-						CStr OutputDir = m_OutputDir + "/" + LibraryName;
-
-						CFile::fs_CreateDirectory(OutputDir);
-
-						CStr DoxygenConfigFile = CFile::fs_GetPath(m_OutputDir) + "/" + LibraryName + ".doxygen";
-
-						DoxygenFileContents += CStr::CFormat("OUTPUT_DIRECTORY={}\n") << OutputDir;
-						if (_bGenerateTags)
+				CProcessLaunchParams Params = CProcessLaunchParams::fs_LaunchExecutable
+					(
+						m_DoxygenExecutable
+						, LaunchParams
+						, CFile::fs_GetPath(m_OutputDir)
+						, [&, pState](CProcessLaunchStateChangeVariant const &_State, fp64 _TimeSinceStart)
 						{
-							CStr DoxygenTagOutput = CFile::fs_GetPath(m_OutputDir) + "/" + LibraryName + ".tag";
-							DoxygenFileContents += CStr::CFormat("GENERATE_TAGFILE = {}\n") << DoxygenTagOutput;
-							m_Tags[DoxygenTagOutput] = CStr::CFormat("../../{}/html") << LibraryName;
-						}
-						else
-						{
-							CStr DoxygenTagOutput = CFile::fs_GetPath(m_OutputDir) + "/" + LibraryName + ".tag";
-							DoxygenFileContents += "TAGFILES	= \\\n";
-							for (auto iTag = m_Tags.f_GetIterator(); iTag; ++iTag)
+							if (_State.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
+								DConErrOut("Error launching doxygen: {}\n", _State.f_Get<EProcessLaunchState_LaunchFailed>());
+							else if (_State.f_GetTypeID() == EProcessLaunchState_Exited)
 							{
-								if (iTag.f_GetKey() != DoxygenTagOutput)
-									DoxygenFileContents += CStr::CFormat("	{}={} \\\n") << iTag.f_GetKey() << *iTag;
-							}
-							DoxygenFileContents += "\n";
-						}
-						if (!m_DoxygenRoot.f_IsEmpty())
-						{
-							DoxygenFileContents += CStr::CFormat("STRIP_FROM_INC_PATH = {}\n") << m_DoxygenRoot;
-							DoxygenFileContents += CStr::CFormat("STRIP_FROM_PATH = {}\n") << m_DoxygenRoot;
-						}
+								uint32 ThisExit = _State.f_Get<EProcessLaunchState_Exited>();
+								if (ThisExit)
+									ExitCode.f_Exchange(ThisExit);
 
-						CStr ImagePath = CFile::fs_GetPath(m_OutputDir) + "/Images";
-						CFile::fs_CreateDirectory(ImagePath);
-						DoxygenFileContents += CStr::CFormat("IMAGE_PATH	= {}\n") << ImagePath;
-						for (auto &FileName : Module.m_Images)
-							CFile::fs_CopyFile(FileName, CFile::fs_AppendPath(ImagePath, CFile::fs_GetFile(FileName)));
-
-						DoxygenFileContents += "INPUT	= \\\n";
-
-						for (auto &FileName : Module.m_Inputs)
-							DoxygenFileContents += CStr::CFormat("	{} \\\n") << FileName;
-						DoxygenFileContents += "\n";
-
-						DoxygenFileContents += "PREDEFINED	= \\\n";
-
-						for (auto &Define : Module.m_Predefines)
-							DoxygenFileContents += CStr::CFormat("	{} \\\n") << Define;
-						DoxygenFileContents += "\n";
-
-						{
-							DoxygenFileContents += "INCLUDE_PATH	= \\\n";
-							for (auto &Name : Module.m_IncludePaths)
-							{
-								if (CFile::fs_FileExists(Name, EFileAttrib_Directory))
-									DoxygenFileContents += CStr::CFormat("	{} \\\n") << Name;
-							}
-							DoxygenFileContents += "\n";
-						}
-
-						if (m_bDoxygenEnableClang)
-						{
-							CStr AllOptions;
-							for (auto iOption = Module.m_ClangOptions.f_GetIterator(); iOption; ++iOption)
-							{
-								fg_AddStrSepEscaped(AllOptions, iOption.f_GetKey(), ' ');
-								if (!iOption->f_IsEmpty())
-									fg_AddStrSepEscaped(AllOptions, *iOption, ' ');
-							}
-							DoxygenFileContents += CStr::CFormat("CLANG_OPTIONS	= {}") << AllOptions;
-							DoxygenFileContents += "CLANG_ASSISTED_PARSING   = YES\n";
-						}
-
-						//DConOut("DoxygenFileContents: \n{}\n", DoxygenFileContents);
-
-						CFile::fs_WriteStringToFile(CStr(DoxygenConfigFile), DoxygenFileContents, false);
-						LaunchParams.f_Insert(DoxygenConfigFile);
-					}
-
-					//DConOut("Launching Doxygen at '{}' with: \n{}\n", CFile::fs_GetPath(m_OutputDir), LaunchParams);
-
-					CProcessLaunchParams Params = CProcessLaunchParams::fs_LaunchExecutable
-						(
-							m_DoxygenExecutable
-							, LaunchParams
-							, CFile::fs_GetPath(m_OutputDir)
-							, [&, pState](CProcessLaunchStateChangeVariant const &_State, fp64 _TimeSinceStart)
-							{
-								if (_State.f_GetTypeID() == EProcessLaunchState_LaunchFailed)
-									DConErrOut("Error launching doxygen: {}\n", _State.f_Get<EProcessLaunchState_LaunchFailed>());
-								else if (_State.f_GetTypeID() == EProcessLaunchState_Exited)
 								{
-									uint32 ThisExit = _State.f_Get<EProcessLaunchState_Exited>();
-									if (ThisExit)
-										ExitCode.f_Exchange(ThisExit);
-
-									{
-										DLock(OutputLock);
-										DConErrOutRaw(pState->m_StdErr);
-									}
+									DLock(OutputLock);
+									DConErrOutRaw(pState->m_StdErr);
 								}
 							}
-						)
-					;
-
-					Params.m_fOnOutput = [&, pState](EProcessLaunchOutputType _OutputType, NMib::NStr::CStr const &_Output)
-						{
-							DLock(OutputLock);
-							if (_OutputType == EProcessLaunchOutputType_StdOut)
-								DConOutRaw(_Output);
-							else
-								pState->m_StdErr += _Output;
 						}
-					;
+					)
+				;
 
-					Params.m_bMergeEnvironment = true;
-					Params.m_Environment["PATH"] = "/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:/usr/local/bin:{}"_f << fg_GetSys()->f_GetEnvironmentVariable("PATH");
+				Params.m_fOnOutput = [&, pState](EProcessLaunchOutputType _OutputType, NMib::NStr::CStr const &_Output)
+					{
+						DLock(OutputLock);
+						if (_OutputType == EProcessLaunchOutputType_StdOut)
+							DConOutRaw(_Output);
+						else
+							pState->m_StdErr += _Output;
+					}
+				;
 
-					Handler.f_AddLaunch(Params, false);
-				}
+				Params.m_bMergeEnvironment = true;
+				Params.m_Environment["PATH"] = "/opt/homebrew/sbin:/opt/homebrew/bin:/usr/local/sbin:/usr/local/bin:{}"_f << fg_GetSys()->f_GetEnvironmentVariable("PATH");
+
+				Handler.f_AddLaunch(Params, false);
 			}
-		;
+		}
+	;
 
-		fAddModules();
+	fAddModules();
 
-		Handler.f_BlockOnExit();
+	Handler.f_BlockOnExit();
 
-		if (ExitCode.f_Load())
-			DError(fg_Format("doxygen exited with code: {}", ExitCode.f_Load()));
-	}
+	if (ExitCode.f_Load())
+		DError(fg_Format("doxygen exited with code: {}", ExitCode.f_Load()));
+}
 
-	aint f_Run(NContainer::CRegistry &_Params)
+aint CTool_DoxygenLD::f_Run(NContainer::CRegistry &_Params)
+{
+	m_DependencyFile.f_AddTool("ld64");
+
+	CRegistry Registry = fg_ExtractOptions(_Params);
+
+	CStr OutputFile = Registry.f_GetValue("-o", "");
+	if (OutputFile.f_IsEmpty())
+		DError("No output file found in command line options");
+
+	auto &LocalLibrary = m_Libraries.f_Insert();
+
+	m_DependencyFile.f_AddOutput(OutputFile);
+
+	LocalLibrary.f_SetValue("-o", OutputFile);
+
+	auto pLocalFilesReg = LocalLibrary.f_CreateChild("Files");
+
+	TCSet<CStr> Files;
+
+	auto pFileFile = Registry.f_GetChild("-filelist");
+	if (pFileFile)
 	{
-		m_DependencyFile.f_AddTool("ld64");
-
-		CRegistry Registry = fg_ExtractOptions(_Params);
-
-		CStr OutputFile = Registry.f_GetValue("-o", "");
-		if (OutputFile.f_IsEmpty())
-			DError("No output file found in command line options");
-
-		auto &LocalLibrary = m_Libraries.f_Insert();
-
-		m_DependencyFile.f_AddOutput(OutputFile);
-
-		LocalLibrary.f_SetValue("-o", OutputFile);
-
-		auto pLocalFilesReg = LocalLibrary.f_CreateChild("Files");
-
-		TCSet<CStr> Files;
-
-		auto pFileFile = Registry.f_GetChild("-filelist");
-		if (pFileFile)
+		CStr FileContents = CFile::fs_ReadStringFromFile(CStr(pFileFile->f_GetThisValue()));
+		while (!FileContents.f_IsEmpty())
 		{
-			CStr FileContents = CFile::fs_ReadStringFromFile(CStr(pFileFile->f_GetThisValue()));
-			while (!FileContents.f_IsEmpty())
-			{
-				CStr FileName = fg_GetStrLineSep(FileContents);
-				Files[FileName];
-			}
+			CStr FileName = fg_GetStrLineSep(FileContents);
+			Files[FileName];
 		}
-
-		{
-			auto pFiles = Registry.f_GetChildNoPath("Files");
-			for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
-				Files[iFile->f_GetName()];
-		}
-
-		for (auto &FileName : Files)
-		{
-			m_DependencyFile.f_AddInput(FileName);
-			CStr Extension = CFile::fs_GetExtension(FileName);
-			if (Extension.f_CmpNoCase("a") == 0)
-			{
-				auto &Launch = m_Libraries.f_Insert();
-				Launch.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
-
-				auto pFiles = Launch.f_GetChildNoPath("Files");
-				if (pFiles)
-				{
-					for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
-						iFile->f_ParseStr(CFile::fs_ReadStringFromFile(CStr(iFile->f_GetName())), iFile->f_GetName());
-				}
-			}
-			else if (Extension.f_CmpNoCase("o") == 0)
-			{
-				auto pChild = pLocalFilesReg->f_CreateChildNoPath(FileName, true);
-				pChild->f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
-			}
-		}
-
-		m_OutputDir = OutputFile;
-		CFile::fs_CreateDirectory(OutputFile);
-
-		m_DoxygenExecutable = Registry.f_GetValue("--doxygen-executable", "");
-		if (m_DoxygenExecutable.f_IsEmpty())
-			DError("No doxygen executable specified");
-
-		m_DoxygenInclude = Registry.f_GetValue("--doxygen-include", "");
-		m_DoxygenTagInclude = Registry.f_GetValue("--doxygen-tag-include", "");
-		m_DoxygenRoot = Registry.f_GetValue("--doxygen-root", "");
-		m_bDoxygenEnableClang = Registry.f_GetValue("--doxygen-enable-clang", "") == "true";
-
-		{
-			CStr ImageExtensions = Registry.f_GetValue("--doxygen-image-extensions", "");
-			while (!ImageExtensions.f_IsEmpty())
-				m_DoxygenImageExtensions[fg_GetStrSep(ImageExtensions, ",")];
-		}
-		{
-			CStr Options = Registry.f_GetValue("--doxygen-options", "");
-			while (!Options.f_IsEmpty())
-				m_DoxygenOptions.f_Insert(fg_GetStrSep(Options, ","));
-		}
-
-		// DConOut("\n{}\n", Registry.f_GenerateStr());
-		/*
-		for (auto &Launch : m_Libraries)
-		{
-			DConOut("\n{}\n", Launch.f_GenerateStr());
-		}
-		*/
-		f_ExtractModules();
-
-		f_LaunchModules(true, m_DoxygenTagInclude);
-		f_LaunchModules(false, m_DoxygenInclude);
-
-		NFile::CFile::fs_SetWriteTime(OutputFile, NTime::CTime::fs_NowUTC());
-
-		if (auto pDependenciesFile = Registry.f_GetChild("-dependency_info"))
-			CFile::fs_WriteFile(pDependenciesFile->f_GetThisValue(), m_DependencyFile.m_Stream.f_MoveVector());
-
-		return 0;
 	}
-};
+
+	{
+		auto pFiles = Registry.f_GetChildNoPath("Files");
+		for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
+			Files[iFile->f_GetName()];
+	}
+
+	for (auto &FileName : Files)
+	{
+		m_DependencyFile.f_AddInput(FileName);
+		CStr Extension = CFile::fs_GetExtension(FileName);
+		if (Extension.f_CmpNoCase("a") == 0)
+		{
+			auto &Launch = m_Libraries.f_Insert();
+			Launch.f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
+
+			auto pFiles = Launch.f_GetChildNoPath("Files");
+			if (pFiles)
+			{
+				for (auto iFile = pFiles->f_GetChildIterator(); iFile; ++iFile)
+					iFile->f_ParseStr(CFile::fs_ReadStringFromFile(CStr(iFile->f_GetName())), iFile->f_GetName());
+			}
+		}
+		else if (Extension.f_CmpNoCase("o") == 0)
+		{
+			auto pChild = pLocalFilesReg->f_CreateChildNoPath(FileName, true);
+			pChild->f_ParseStr(CFile::fs_ReadStringFromFile(CStr(FileName)), FileName);
+		}
+	}
+
+	m_OutputDir = OutputFile;
+	CFile::fs_CreateDirectory(OutputFile);
+
+	m_DoxygenExecutable = Registry.f_GetValue("--doxygen-executable", "");
+	if (m_DoxygenExecutable.f_IsEmpty())
+		DError("No doxygen executable specified");
+
+	m_DoxygenInclude = Registry.f_GetValue("--doxygen-include", "");
+	m_DoxygenTagInclude = Registry.f_GetValue("--doxygen-tag-include", "");
+	m_DoxygenRoot = Registry.f_GetValue("--doxygen-root", "");
+	m_bDoxygenEnableClang = Registry.f_GetValue("--doxygen-enable-clang", "") == "true";
+
+	{
+		CStr ImageExtensions = Registry.f_GetValue("--doxygen-image-extensions", "");
+		while (!ImageExtensions.f_IsEmpty())
+			m_DoxygenImageExtensions[fg_GetStrSep(ImageExtensions, ",")];
+	}
+	{
+		CStr Options = Registry.f_GetValue("--doxygen-options", "");
+		while (!Options.f_IsEmpty())
+			m_DoxygenOptions.f_Insert(fg_GetStrSep(Options, ","));
+	}
+
+	// DConOut("\n{}\n", Registry.f_GenerateStr());
+	/*
+	for (auto &Launch : m_Libraries)
+	{
+		DConOut("\n{}\n", Launch.f_GenerateStr());
+	}
+	*/
+	f_ExtractModules();
+
+	f_LaunchModules(true, m_DoxygenTagInclude);
+	f_LaunchModules(false, m_DoxygenInclude);
+
+	NFile::CFile::fs_SetWriteTime(OutputFile, NTime::CTime::fs_NowUTC());
+
+	if (auto pDependenciesFile = Registry.f_GetChild("-dependency_info"))
+		CFile::fs_WriteFile(pDependenciesFile->f_GetThisValue(), m_DependencyFile.m_Stream.f_MoveVector());
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_DoxygenLD);
 

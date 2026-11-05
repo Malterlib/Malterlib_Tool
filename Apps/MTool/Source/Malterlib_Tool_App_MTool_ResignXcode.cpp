@@ -14,295 +14,304 @@ struct CTool_ResignXcode : public CDistributedTool, public CAllowUnsafeThis
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
 		)
-	{
-		if (fg_IsMalterlib())
-			return;
+	;
+};
 
-		o_ToolsSection.f_RegisterCommand
-			(
+void CTool_ResignXcode::f_Register
+	(
+		TCActor<CDistributedToolAppActor> const &_ToolActor
+		, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+		, CDistributedAppCommandLineSpecification &o_CommandLine
+		, NStr::CStr const &_ClassName
+	)
+{
+	if (fg_IsMalterlib())
+		return;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["ResignXcode"]
+				, "Description"_o= "Resign Xcode.\n"
+				, "Category"_o= "Legacy"
+				, "Options"_o=
 				{
-					"Names"_o= _o["ResignXcode"]
-					, "Description"_o= "Resign Xcode.\n"
-					, "Category"_o= "Legacy"
-					, "Options"_o=
+					"Source"_o=
 					{
-						"Source"_o=
-						{
-							"Names"_o= _o["--source"]
-							, "Default"_o= "/Users/erik/Downloads/Xcode.app"
-							, "Description"_o= "Xcode source location.\n"
-						}
-						, "Destination"_o=
-						{
-							"Names"_o= _o["--destination"]
-							, "Default"_o= "/Applications/XcodePatched.app"
-							, "Description"_o= "Xcode destination location.\n"
-						}
+						"Names"_o= _o["--source"]
+						, "Default"_o= "/Users/erik/Downloads/Xcode.app"
+						, "Description"_o= "Xcode source location.\n"
+					}
+					, "Destination"_o=
+					{
+						"Names"_o= _o["--destination"]
+						, "Default"_o= "/Applications/XcodePatched.app"
+						, "Description"_o= "Xcode destination location.\n"
 					}
 				}
-				, [=](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
-				{
-					co_await ECoroutineFlag_CaptureExceptions;
+			}
+			, [=](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
 
-					auto Source = _Params["Source"].f_String();
-					auto Destination = _Params["Destination"].f_String();
+				auto Source = _Params["Source"].f_String();
+				auto Destination = _Params["Destination"].f_String();
 
-					*_pCommandLine %= "Source      : {}\n"_f << Source;
-					*_pCommandLine %= "Destination : {}\n"_f << Destination;
+				*_pCommandLine %= "Source      : {}\n"_f << Source;
+				*_pCommandLine %= "Destination : {}\n"_f << Destination;
 
-					CStr StateFile = Destination / "Contents/SignState.json";
+				CStr StateFile = Destination / "Contents/SignState.json";
 
-					CEJsonSorted SignState = EJsonType_Object;
+				CEJsonSorted SignState = EJsonType_Object;
 
-					if (CFile::fs_FileExists(StateFile))
-						SignState = CEJsonSorted::fs_FromString(CFile::fs_ReadStringFromFile(StateFile, true), StateFile);
+				if (CFile::fs_FileExists(StateFile))
+					SignState = CEJsonSorted::fs_FromString(CFile::fs_ReadStringFromFile(StateFile, true), StateFile);
 
-					bool bCopyDone = false;
-					if (auto *pValue = SignState.f_GetMember("CopyDone"))
-						bCopyDone = pValue->f_Boolean();
+				bool bCopyDone = false;
+				if (auto *pValue = SignState.f_GetMember("CopyDone"))
+					bCopyDone = pValue->f_Boolean();
 
-					TCSet<CStr> ToSignExecutables;
+				TCSet<CStr> ToSignExecutables;
 
-					TCSet<CStr> ToSign;
-					if (auto *pValue = SignState.f_GetMember("ToSign"))
-						ToSign = TCSet<CStr>::fs_FromContainer(pValue->f_StringArray());
+				TCSet<CStr> ToSign;
+				if (auto *pValue = SignState.f_GetMember("ToSign"))
+					ToSign = TCSet<CStr>::fs_FromContainer(pValue->f_StringArray());
 
-					if (auto *pValue = SignState.f_GetMember("ToSignExecutables"))
-						ToSignExecutables = TCSet<CStr>::fs_FromContainer(pValue->f_StringArray());
+				if (auto *pValue = SignState.f_GetMember("ToSignExecutables"))
+					ToSignExecutables = TCSet<CStr>::fs_FromContainer(pValue->f_StringArray());
 
-					auto Cleaup = g_OnScopeExit / [&]
-						{
-							try
-							{
-								if (!CFile::fs_FileExists(CFile::fs_GetPath(StateFile)))
-									return;
-
-								SignState["ToSign"] = TCVector<CStr>::fs_FromContainer(ToSign);
-								SignState["ToSignExecutables"] = TCVector<CStr>::fs_FromContainer(ToSignExecutables);
-
-								CFile::fs_WriteStringToFile(StateFile, SignState.f_ToString(), false);
-							}
-							catch (...)
-							{
-							}
-						}
-					;
-
-					TCSet<CStr> SigningWhiteList = {Destination, "/xcodebuild", "/llbuild.framework", "/XCBBuildService.framework", "/XCBBuildService.bundle"};
-
-					umint nFiles = 0;
-					umint nFilesSkipped = 0;
-
-					if (!bCopyDone)
+				auto Cleaup = g_OnScopeExit / [&]
 					{
-						auto BlockingActorCheckout = fg_BlockingActor();
-						auto [nFilesRet, ToSignExecutablesRet, ToSignRet] = co_await
-							(
-								g_Dispatch(BlockingActorCheckout) / [Source, Destination, StateFile, SigningWhiteList, pCommandLine = _pCommandLine]
-								{
-									CStopwatch Stopwatch{true};
-									umint nFiles = 0;
-									TCSet<CStr> ToSignExecutables;
-									TCSet<CStr> ToSign;
+						try
+						{
+							if (!CFile::fs_FileExists(CFile::fs_GetPath(StateFile)))
+								return;
 
-									CFile::fs_DiffCopyFileOrDirectory
-										(
-											Source
-											, Destination
-											, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
+							SignState["ToSign"] = TCVector<CStr>::fs_FromContainer(ToSign);
+							SignState["ToSignExecutables"] = TCVector<CStr>::fs_FromContainer(ToSignExecutables);
+
+							CFile::fs_WriteStringToFile(StateFile, SignState.f_ToString(), false);
+						}
+						catch (...)
+						{
+						}
+					}
+				;
+
+				TCSet<CStr> SigningWhiteList = {Destination, "/xcodebuild", "/llbuild.framework", "/XCBBuildService.framework", "/XCBBuildService.bundle"};
+
+				umint nFiles = 0;
+				umint nFilesSkipped = 0;
+
+				if (!bCopyDone)
+				{
+					auto BlockingActorCheckout = fg_BlockingActor();
+					auto [nFilesRet, ToSignExecutablesRet, ToSignRet] = co_await
+						(
+							g_Dispatch(BlockingActorCheckout) / [Source, Destination, StateFile, SigningWhiteList, pCommandLine = _pCommandLine]
+							{
+								CStopwatch Stopwatch{true};
+								umint nFiles = 0;
+								TCSet<CStr> ToSignExecutables;
+								TCSet<CStr> ToSign;
+
+								CFile::fs_DiffCopyFileOrDirectory
+									(
+										Source
+										, Destination
+										, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
+										{
+											if (_Destination == StateFile)
+												return CFile::EDiffCopyChangeAction_Skip;
+
+											if (_Source.f_Find("/CoreSimulator/") >= 0)
 											{
-												if (_Destination == StateFile)
-													return CFile::EDiffCopyChangeAction_Skip;
+												++nFiles;
+												return CFile::EDiffCopyChangeAction_Perform;
+											}
 
-												if (_Source.f_Find("/CoreSimulator/") >= 0)
+											if (_Source.f_EndsWith("/_CodeSignature"))
+											{
+												CStr ToSignPath = CFile::fs_GetPath(_Destination);
+												ToSignPath = ToSignPath.f_RemoveSuffix("/Versions/B");
+												ToSignPath = ToSignPath.f_RemoveSuffix("/Versions/A");
+												ToSignPath = ToSignPath.f_RemoveSuffix("/Contents");
+
+												for (auto &WhiteListed : SigningWhiteList)
 												{
-													++nFiles;
-													return CFile::EDiffCopyChangeAction_Perform;
+													if (ToSignPath.f_EndsWith(WhiteListed))
+													{
+														ToSign[ToSignPath];
+														break;
+													}
 												}
+											}
 
-												if (_Source.f_EndsWith("/_CodeSignature"))
+											auto Attribs = CFile::fs_GetAttributesOnLink(_Source);
+											if (!(Attribs & EFileAttrib_Link) && !(Attribs & EFileAttrib_Directory) && (Attribs & EFileAttrib_UserExecute))
+											{
+												if (CFile::fs_GetExtension(_Destination) == "")
 												{
-													CStr ToSignPath = CFile::fs_GetPath(_Destination);
-													ToSignPath = ToSignPath.f_RemoveSuffix("/Versions/B");
-													ToSignPath = ToSignPath.f_RemoveSuffix("/Versions/A");
-													ToSignPath = ToSignPath.f_RemoveSuffix("/Contents");
-
 													for (auto &WhiteListed : SigningWhiteList)
 													{
-														if (ToSignPath.f_EndsWith(WhiteListed))
+														if (_Destination.f_EndsWith(WhiteListed))
 														{
-															ToSign[ToSignPath];
+															ToSignExecutables[_Destination];
 															break;
 														}
 													}
 												}
-
-												auto Attribs = CFile::fs_GetAttributesOnLink(_Source);
-												if (!(Attribs & EFileAttrib_Link) && !(Attribs & EFileAttrib_Directory) && (Attribs & EFileAttrib_UserExecute))
-												{
-													if (CFile::fs_GetExtension(_Destination) == "")
-													{
-														for (auto &WhiteListed : SigningWhiteList)
-														{
-															if (_Destination.f_EndsWith(WhiteListed))
-															{
-																ToSignExecutables[_Destination];
-																break;
-															}
-														}
-													}
-												}
-
-												if (Stopwatch.f_GetTime() > 1.0)
-												{
-													CUStr ToOutput = CStr("  {} files done"_f << nFiles);
-
-													*pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
-													Stopwatch.f_AddOffset(1.0);
-												}
-
-												++nFiles;
-
-												return CFile::EDiffCopyChangeAction_Perform;
 											}
-											, {} // ExcludePatterns
-											, 0.0
-										)
-									;
 
-									return fg_Tuple(nFiles, ToSignExecutables, ToSign);
-								}
-							)
-						;
+											if (Stopwatch.f_GetTime() > 1.0)
+											{
+												CUStr ToOutput = CStr("  {} files done"_f << nFiles);
 
-						nFiles = nFilesRet;
-						ToSignExecutables += ToSignExecutablesRet;
-						ToSign += ToSignRet;
+												*pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
+												Stopwatch.f_AddOffset(1.0);
+											}
 
-						SignState["CopyDone"] = true;
-						*_pCommandLine %= "\n";
-					}
+											++nFiles;
 
-					auto fSortByLength = [](CStr const &_Left, CStr const &_Right)
-						{
-							if (auto Compare = _Right.f_GetLen() <=> _Left.f_GetLen(); Compare != 0)
-								return Compare;
+											return CFile::EDiffCopyChangeAction_Perform;
+										}
+										, {} // ExcludePatterns
+										, 0.0
+									)
+								;
 
-							return _Left <=> _Right;
-						}
+								return fg_Tuple(nFiles, ToSignExecutables, ToSign);
+							}
+						)
 					;
 
-					auto ToSignVector = TCVector<CStr>::fs_FromContainer(ToSign);
-					ToSignVector.f_Sort(fSortByLength);
+					nFiles = nFilesRet;
+					ToSignExecutables += ToSignExecutablesRet;
+					ToSign += ToSignRet;
 
-					auto ToSignExecutablesVector = TCVector<CStr>::fs_FromContainer(ToSignExecutables);
-					ToSignExecutablesVector.f_Sort(fSortByLength);
+					SignState["CopyDone"] = true;
+					*_pCommandLine %= "\n";
+				}
 
-					CStr MainExecutable = Destination / "Contents/MacOS/Xcode";
+				auto fSortByLength = [](CStr const &_Left, CStr const &_Right)
+					{
+						if (auto Compare = _Right.f_GetLen() <=> _Left.f_GetLen(); Compare != 0)
+							return Compare;
+
+						return _Left <=> _Right;
+					}
+				;
+
+				auto ToSignVector = TCVector<CStr>::fs_FromContainer(ToSign);
+				ToSignVector.f_Sort(fSortByLength);
+
+				auto ToSignExecutablesVector = TCVector<CStr>::fs_FromContainer(ToSignExecutables);
+				ToSignExecutablesVector.f_Sort(fSortByLength);
+
+				CStr MainExecutable = Destination / "Contents/MacOS/Xcode";
 
 #if DUseExistingEntitlements
-					CFile::fs_CreateDirectory(CFile::fs_GetTemporaryDirectory());
-					CStr TempEntitlementsFile = CFile::fs_GetTemporaryDirectory() / "Temp.entitlements";
+				CFile::fs_CreateDirectory(CFile::fs_GetTemporaryDirectory());
+				CStr TempEntitlementsFile = CFile::fs_GetTemporaryDirectory() / "Temp.entitlements";
 #endif
 
-					umint nExecutableSign = 0;
+				umint nExecutableSign = 0;
 
-					for (auto &ToSign : ToSignExecutablesVector)
+				for (auto &ToSign : ToSignExecutablesVector)
+				{
+					if (ToSign == MainExecutable)
 					{
-						if (ToSign == MainExecutable)
+						++nExecutableSign;
+						continue;
+					}
+
+					TCActor<CProcessLaunchActor> Launch = fg_Construct();
+
+					TCVector<CStr> Params;
+#if DUseExistingEntitlements
+					auto SourcePath = Source / ToSign.f_RemovePrefix(Destination);
+					CStr Entitlements;
+					{
+						TCVector<CStr> Params = {"-d", "--entitlements", "-", "--xml", SourcePath};
+						CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
+						auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch)).f_Wrap();
+						if (Result)
+							Entitlements = Result->f_GetStdOut().f_Trim();
+					}
+
+					if (Entitlements && !ToSign.f_EndsWith("/xcodebuild"))
+					{
+						if (Entitlements.f_Find("com.apple.private"))
 						{
 							++nExecutableSign;
 							continue;
 						}
 
-						TCActor<CProcessLaunchActor> Launch = fg_Construct();
-
-						TCVector<CStr> Params;
-#if DUseExistingEntitlements
-						auto SourcePath = Source / ToSign.f_RemovePrefix(Destination);
-						CStr Entitlements;
-						{
-							TCVector<CStr> Params = {"-d", "--entitlements", "-", "--xml", SourcePath};
-							CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
-							auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch)).f_Wrap();
-							if (Result)
-								Entitlements = Result->f_GetStdOut().f_Trim();
-						}
-
-						if (Entitlements && !ToSign.f_EndsWith("/xcodebuild"))
-						{
-							if (Entitlements.f_Find("com.apple.private"))
-							{
-								++nExecutableSign;
-								continue;
-							}
-
-							DMibConOut("{}: {}\n", SourcePath, Entitlements);
-							CFile::fs_WriteStringToFile(TempEntitlementsFile, Entitlements, false);
-							Params = {"--entitlements", TempEntitlementsFile};
-						}
-#endif
-						Params.f_Insert({"-f", "-s", "-", ToSign});
-
-						CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
-						auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch));
-
-						++nExecutableSign;
-						CUStr ToOutput = CStr("  {}/{} executables signed"_f << nExecutableSign << ToSignExecutablesVector.f_GetLen());
-						*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
+						DMibConOut("{}: {}\n", SourcePath, Entitlements);
+						CFile::fs_WriteStringToFile(TempEntitlementsFile, Entitlements, false);
+						Params = {"--entitlements", TempEntitlementsFile};
 					}
-					*_pCommandLine %= "\n";
-
-					umint nSign = 0;
-
-					for (auto &ToSign : ToSignVector)
-					{
-						TCActor<CProcessLaunchActor> Launch = fg_Construct();
-
-						TCVector<CStr> Params;
-#if DUseExistingEntitlements
-						auto SourcePath = Source / ToSign.f_RemovePrefix(Destination);
-						CStr Entitlements;
-						{
-							TCVector<CStr> Params = {"-d", "--entitlements", "-", "--xml", SourcePath};
-							CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
-							auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch)).f_Wrap();
-							if (Result)
-								Entitlements = Result->f_GetStdOut().f_Trim();
-						}
-
-						if (Entitlements && ToSign != Destination)
-						{
-							if (Entitlements.f_Find("com.apple.private"))
-							{
-								++nSign;
-								continue;
-							}
-
-							DMibConOut("{}: {}\n", SourcePath, Entitlements);
-							CFile::fs_WriteStringToFile(TempEntitlementsFile, Entitlements, false);
-							Params = {"--entitlements", TempEntitlementsFile};
-						}
 #endif
-						Params.f_Insert({"-f", "-s", "-", ToSign});
+					Params.f_Insert({"-f", "-s", "-", ToSign});
 
-						CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
-						auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch));
+					CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
+					auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch));
 
-						++nSign;
-						CUStr ToOutput = CStr("  {}/{} bundles signed"_f << nSign << ToSignVector.f_GetLen());
-						*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
-					}
-					*_pCommandLine %= "\n";
-
-					*_pCommandLine %= "{} files copied. {} files skipped. {} total files.\n"_f << nFiles << nFilesSkipped << (nFiles + nFilesSkipped);
-					*_pCommandLine %= "{} executables signed. {} bundles signed. {} total sign.\n"_f << nExecutableSign << nSign << (nSign + nExecutableSign);
-
-					co_return {};
+					++nExecutableSign;
+					CUStr ToOutput = CStr("  {}/{} executables signed"_f << nExecutableSign << ToSignExecutablesVector.f_GetLen());
+					*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
 				}
-			)
-		;
-	}
-};
+				*_pCommandLine %= "\n";
+
+				umint nSign = 0;
+
+				for (auto &ToSign : ToSignVector)
+				{
+					TCActor<CProcessLaunchActor> Launch = fg_Construct();
+
+					TCVector<CStr> Params;
+#if DUseExistingEntitlements
+					auto SourcePath = Source / ToSign.f_RemovePrefix(Destination);
+					CStr Entitlements;
+					{
+						TCVector<CStr> Params = {"-d", "--entitlements", "-", "--xml", SourcePath};
+						CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
+						auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch)).f_Wrap();
+						if (Result)
+							Entitlements = Result->f_GetStdOut().f_Trim();
+					}
+
+					if (Entitlements && ToSign != Destination)
+					{
+						if (Entitlements.f_Find("com.apple.private"))
+						{
+							++nSign;
+							continue;
+						}
+
+						DMibConOut("{}: {}\n", SourcePath, Entitlements);
+						CFile::fs_WriteStringToFile(TempEntitlementsFile, Entitlements, false);
+						Params = {"--entitlements", TempEntitlementsFile};
+					}
+#endif
+					Params.f_Insert({"-f", "-s", "-", ToSign});
+
+					CProcessLaunchActor::CSimpleLaunch SimpleLaunch("codesign", Params, "", CProcessLaunchActor::ESimpleLaunchFlag_GenerateExceptionOnNonZeroExitCode);
+					auto Result = co_await Launch(&CProcessLaunchActor::f_LaunchSimple, fg_Move(SimpleLaunch));
+
+					++nSign;
+					CUStr ToOutput = CStr("  {}/{} bundles signed"_f << nSign << ToSignVector.f_GetLen());
+					*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
+				}
+				*_pCommandLine %= "\n";
+
+				*_pCommandLine %= "{} files copied. {} files skipped. {} total files.\n"_f << nFiles << nFilesSkipped << (nFiles + nFilesSkipped);
+				*_pCommandLine %= "{} executables signed. {} bundles signed. {} total sign.\n"_f << nExecutableSign << nSign << (nSign + nExecutableSign);
+
+				co_return {};
+			}
+		)
+	;
+}
 
 DMibRuntimeClass(CTool, CTool_ResignXcode);

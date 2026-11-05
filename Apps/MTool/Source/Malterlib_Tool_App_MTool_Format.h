@@ -33,6 +33,8 @@ namespace NMib::NTool::NFormat
 
 	struct CFormatJob
 	{
+		bool f_IsCancelled() const;
+
 		NStr::CStr m_Path;                                                                 // Absolute path, used for reading, writing, and diagnostics.
 		NStr::CStr m_DisplayPath;                                                          // Repository-relative path used in patch headers.
 		NStr::CStr m_Root;                                                                 // Bounds configuration discovery when the worker resolves the settings.
@@ -53,8 +55,6 @@ namespace NMib::NTool::NFormat
 		NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> m_pCancelled;                   // Once set, the file is left unwritten.
 		NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> m_pStopped;                     // The run's own m_pCancelled, set when its selection fails.
 		NStr::CStr m_PatchRoot;                                                            // With m_bResolveSettings, what patch paths are relative to, when not m_Root.
-
-		bool f_IsCancelled() const;
 	};
 
 	struct CFormatJobResult

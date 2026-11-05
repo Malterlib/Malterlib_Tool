@@ -5,51 +5,53 @@
 
 struct CTool_AddPortSource : public CTool2
 {
-	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override
+	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override;
+};
+
+aint CTool_AddPortSource::f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params)
+{
+	CStr Source = f_GetOption(_Params, "Source").f_Trim();
+
+	CStr ConfigFile("/opt/local/etc/macports/sources.conf");
+
+	CStr FileContents = CFile::fs_ReadStringFromFile(ConfigFile);
+
+	auto pParse = FileContents.f_GetStr();
+
+	TCVector<CStr> Sources;
+
+	CStr NewContents;
+
+	while (*pParse)
 	{
-		CStr Source = f_GetOption(_Params, "Source").f_Trim();
+		auto pStart = pParse;
+		fg_ParseToEndOfLine(pParse);
+		CStr Line(pStart, pParse - pStart);
+		fg_ParseEndOfLine(pParse);
 
-		CStr ConfigFile("/opt/local/etc/macports/sources.conf");
-
-		CStr FileContents = CFile::fs_ReadStringFromFile(ConfigFile);
-
-		auto pParse = FileContents.f_GetStr();
-
-		TCVector<CStr> Sources;
-
-		CStr NewContents;
-
-		while (*pParse)
+		if (Line.f_StartsWith("#") || Line.f_Trim().f_IsEmpty())
 		{
-			auto pStart = pParse;
-			fg_ParseToEndOfLine(pParse);
-			CStr Line(pStart, pParse - pStart);
-			fg_ParseEndOfLine(pParse);
-
-			if (Line.f_StartsWith("#") || Line.f_Trim().f_IsEmpty())
-			{
-				// Comment
-				NewContents += Line;
-				NewContents += DMibNewLine;
-			}
-			else
-				Sources.f_Insert(Line.f_Trim());
-		}
-
-		if (Sources.f_Contains(Source) < 0)
-			Sources.f_InsertFirst(Source);
-
-		for (auto iSource = Sources.f_GetIterator(); iSource; ++iSource)
-		{
-			NewContents += *iSource;
+			// Comment
+			NewContents += Line;
 			NewContents += DMibNewLine;
 		}
-
-		CFile::fs_WriteStringToFile(ConfigFile, NewContents, false);
-
-		return 0;
+		else
+			Sources.f_Insert(Line.f_Trim());
 	}
-};
+
+	if (Sources.f_Contains(Source) < 0)
+		Sources.f_InsertFirst(Source);
+
+	for (auto iSource = Sources.f_GetIterator(); iSource; ++iSource)
+	{
+		NewContents += *iSource;
+		NewContents += DMibNewLine;
+	}
+
+	CFile::fs_WriteStringToFile(ConfigFile, NewContents, false);
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_AddPortSource);
 

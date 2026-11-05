@@ -7,207 +7,220 @@
 
 struct CTool_Sleep : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		CStr SleepTime = _Params.f_GetValue("0", "NotExist");
-
-		NSys::fg_Thread_Sleep(SleepTime.f_ToFloat(fp32(0.0)));
-
-		return 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_Sleep::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr SleepTime = _Params.f_GetValue("0", "NotExist");
+
+	NSys::fg_Thread_Sleep(SleepTime.f_ToFloat(fp32(0.0)));
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_Sleep);
 
 struct CTool_Touch : public CTool
 {
-	void f_Touch(CStr const &_Path, CStr const &_Pattern, NTime::CTime const &_Time, bool _bRecursive)
+	void f_Touch(CStr const &_Path, CStr const &_Pattern, NTime::CTime const &_Time, bool _bRecursive);
+	aint f_Run(NContainer::CRegistry &_Params);
+};
+
+void CTool_Touch::f_Touch(CStr const &_Path, CStr const &_Pattern, NTime::CTime const &_Time, bool _bRecursive)
+{
+	TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/" + _Pattern, EFileAttrib_File, _bRecursive);
+	for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
 	{
-		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/" + _Pattern, EFileAttrib_File, _bRecursive);
-		for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
+		try
 		{
-			try
-			{
-				CStr File = Files[iFile];
-				DConOut("Touching: {}" DNewLine, File);
-				NFile::CFile Temp;
-				Temp.f_Open(File, EFileOpen_ShareAll | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs);
-				Temp.f_SetWriteTime(_Time);
-			}
-			catch (NFile::CExceptionFile)
-			{
-			}
+			CStr File = Files[iFile];
+			DConOut("Touching: {}" DNewLine, File);
+			NFile::CFile Temp;
+			Temp.f_Open(File, EFileOpen_ShareAll | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs);
+			Temp.f_SetWriteTime(_Time);
+		}
+		catch (NFile::CExceptionFile)
+		{
 		}
 	}
+}
 
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		CStr Pattern = _Params.f_GetValue("0", "NotExist");
-		CStr Dir = NFile::CFile::fs_GetPath(Pattern);
-		Pattern = NFile::CFile::fs_GetFile(Pattern);
-		bool bRecursive = false;
-		if (_Params.f_GetValue("1", "NotExist").f_CmpNoCase("-R") == 0)
-			bRecursive = true;
+aint CTool_Touch::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr Pattern = _Params.f_GetValue("0", "NotExist");
+	CStr Dir = NFile::CFile::fs_GetPath(Pattern);
+	Pattern = NFile::CFile::fs_GetFile(Pattern);
+	bool bRecursive = false;
+	if (_Params.f_GetValue("1", "NotExist").f_CmpNoCase("-R") == 0)
+		bRecursive = true;
 
-		NTime::CTime Now = NTime::CTime::fs_NowUTC();
+	NTime::CTime Now = NTime::CTime::fs_NowUTC();
 
-		f_Touch(Dir, Pattern, Now, bRecursive);
-		return 0;
-	}
-};
+	f_Touch(Dir, Pattern, Now, bRecursive);
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_Touch);
 
 struct CTool_TouchOrCreate : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		CStr File = _Params.f_GetValue("0", "NotExist");
+	aint f_Run(NContainer::CRegistry &_Params);
+};
 
+aint CTool_TouchOrCreate::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr File = _Params.f_GetValue("0", "NotExist");
+
+	NTime::CTime Now = NTime::CTime::fs_NowUTC();
+
+	CFile::fs_CreateDirectory(CFile::fs_GetPath(File));
+	NFile::CFile Temp;
+	Temp.f_Open(File, EFileOpen_Read | EFileOpen_Write | EFileOpen_ShareAll | EFileOpen_DontTruncate);
+	Temp.f_SetWriteTime(Now);
+
+	return 0;
+}
+
+DMibRuntimeClass(CTool, CTool_TouchOrCreate);
+
+struct CTool_CreateFile : public CTool
+{
+	aint f_Run(NContainer::CRegistry &_Params);
+};
+
+aint CTool_CreateFile::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr File = _Params.f_GetValue("0", "NotExist");
+
+	if (!CFile::fs_FileExists(File))
+	{
 		NTime::CTime Now = NTime::CTime::fs_NowUTC();
 
 		CFile::fs_CreateDirectory(CFile::fs_GetPath(File));
 		NFile::CFile Temp;
 		Temp.f_Open(File, EFileOpen_Read | EFileOpen_Write | EFileOpen_ShareAll | EFileOpen_DontTruncate);
 		Temp.f_SetWriteTime(Now);
-
-		return 0;
 	}
-};
 
-DMibRuntimeClass(CTool, CTool_TouchOrCreate);
-
-struct CTool_CreateFile : public CTool
-{
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		CStr File = _Params.f_GetValue("0", "NotExist");
-
-		if (!CFile::fs_FileExists(File))
-		{
-			NTime::CTime Now = NTime::CTime::fs_NowUTC();
-
-			CFile::fs_CreateDirectory(CFile::fs_GetPath(File));
-			NFile::CFile Temp;
-			Temp.f_Open(File, EFileOpen_Read | EFileOpen_Write | EFileOpen_ShareAll | EFileOpen_DontTruncate);
-			Temp.f_SetWriteTime(Now);
-		}
-
-		return 0;
-	}
-};
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_CreateFile);
 
 struct CTool_CopyWriteTime : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
-		CStr DestFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
-
-		try
-		{
-			auto SourceTime = NFile::CFile::fs_GetWriteTime(SourceFile);
-			CStr NewestSourceFile = SourceFile;
-
-			// Check additional source files (params 2, 3, 4, ...)
-			for (umint iParam = 2;; ++iParam)
-			{
-				using namespace NMib::NStr;
-				CStr ExtraSource = _Params.f_GetValue("{}"_f << iParam, "");
-				if (ExtraSource.f_IsEmpty())
-					break;
-				ExtraSource = CFile::fs_GetExpandedPath(ExtraSource);
-				auto ExtraTime = NFile::CFile::fs_GetWriteTime(ExtraSource);
-				if (ExtraTime > SourceTime)
-				{
-					SourceTime = ExtraTime;
-					NewestSourceFile = ExtraSource;
-				}
-			}
-
-			if (NFile::CFile::fs_FileExists(DestFile))
-			{
-				auto DestTime = NFile::CFile::fs_GetWriteTime(DestFile);
-				if (DestTime != SourceTime)
-				{
-					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime, DestTime, NewestSourceFile, DestFile);
-					CFile::fs_SetWriteTime(DestFile, SourceTime);
-				}
-			}
-			else
-			{
-				NFile::CFile TempDst;
-				TempDst.f_Open(DestFile, EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_Read | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs | EFileOpen_DontTruncate);
-				DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile, DestFile);
-				TempDst.f_SetWriteTime(SourceTime);
-			}
-		}
-		catch (NFile::CExceptionFile const &_Error)
-		{
-			DConErrOut("Copy new write failed: {}: {}{\n}", DestFile, _Error);
-			return 1;
-		}
-		return 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_CopyWriteTime::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
+	CStr DestFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
+
+	try
+	{
+		auto SourceTime = NFile::CFile::fs_GetWriteTime(SourceFile);
+		CStr NewestSourceFile = SourceFile;
+
+		// Check additional source files (params 2, 3, 4, ...)
+		for (umint iParam = 2;; ++iParam)
+		{
+			using namespace NMib::NStr;
+			CStr ExtraSource = _Params.f_GetValue("{}"_f << iParam, "");
+			if (ExtraSource.f_IsEmpty())
+				break;
+			ExtraSource = CFile::fs_GetExpandedPath(ExtraSource);
+			auto ExtraTime = NFile::CFile::fs_GetWriteTime(ExtraSource);
+			if (ExtraTime > SourceTime)
+			{
+				SourceTime = ExtraTime;
+				NewestSourceFile = ExtraSource;
+			}
+		}
+
+		if (NFile::CFile::fs_FileExists(DestFile))
+		{
+			auto DestTime = NFile::CFile::fs_GetWriteTime(DestFile);
+			if (DestTime != SourceTime)
+			{
+				DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime, DestTime, NewestSourceFile, DestFile);
+				CFile::fs_SetWriteTime(DestFile, SourceTime);
+			}
+		}
+		else
+		{
+			NFile::CFile TempDst;
+			TempDst.f_Open(DestFile, EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_Read | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs | EFileOpen_DontTruncate);
+			DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile, DestFile);
+			TempDst.f_SetWriteTime(SourceTime);
+		}
+	}
+	catch (NFile::CExceptionFile const &_Error)
+	{
+		DConErrOut("Copy new write failed: {}: {}{\n}", DestFile, _Error);
+		return 1;
+	}
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_CopyWriteTime);
 
 struct CTool_CopyWriteTimeIfNewer : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
-		CStr DestFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
-
-		try
-		{
-			auto SourceTime = NFile::CFile::fs_GetWriteTime(SourceFile);
-			CStr NewestSourceFile = SourceFile;
-
-			// Check additional source files (params 2, 3, 4, ...)
-			for (umint iParam = 2;; ++iParam)
-			{
-				using namespace NMib::NStr;
-				CStr ExtraSource = _Params.f_GetValue("{}"_f << iParam, "");
-				if (ExtraSource.f_IsEmpty())
-					break;
-				ExtraSource = CFile::fs_GetExpandedPath(ExtraSource);
-				auto ExtraTime = NFile::CFile::fs_GetWriteTime(ExtraSource);
-				if (ExtraTime > SourceTime)
-				{
-					SourceTime = ExtraTime;
-					NewestSourceFile = ExtraSource;
-				}
-			}
-
-			if (NFile::CFile::fs_FileExists(DestFile))
-			{
-				auto DestTime = NFile::CFile::fs_GetWriteTime(DestFile);
-				if (DestTime < SourceTime)
-				{
-					DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime, DestTime, NewestSourceFile, DestFile);
-					CFile::fs_SetWriteTime(DestFile, SourceTime);
-				}
-			}
-			else
-			{
-				NFile::CFile TempDst;
-				TempDst.f_Open(DestFile, EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_Read | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs | EFileOpen_DontTruncate);
-				DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile, DestFile);
-				TempDst.f_SetWriteTime(SourceTime);
-			}
-		}
-		catch (NFile::CExceptionFile const &_Error)
-		{
-			DConErrOut("Copy new write failed: {}: {}{\n}", DestFile, _Error);
-			return 1;
-		}
-		return 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_CopyWriteTimeIfNewer::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr SourceFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
+	CStr DestFile = CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
+
+	try
+	{
+		auto SourceTime = NFile::CFile::fs_GetWriteTime(SourceFile);
+		CStr NewestSourceFile = SourceFile;
+
+		// Check additional source files (params 2, 3, 4, ...)
+		for (umint iParam = 2;; ++iParam)
+		{
+			using namespace NMib::NStr;
+			CStr ExtraSource = _Params.f_GetValue("{}"_f << iParam, "");
+			if (ExtraSource.f_IsEmpty())
+				break;
+			ExtraSource = CFile::fs_GetExpandedPath(ExtraSource);
+			auto ExtraTime = NFile::CFile::fs_GetWriteTime(ExtraSource);
+			if (ExtraTime > SourceTime)
+			{
+				SourceTime = ExtraTime;
+				NewestSourceFile = ExtraSource;
+			}
+		}
+
+		if (NFile::CFile::fs_FileExists(DestFile))
+		{
+			auto DestTime = NFile::CFile::fs_GetWriteTime(DestFile);
+			if (DestTime < SourceTime)
+			{
+				DConErrOut("Copy write time ({} != {}): {} -> {}{\n}", SourceTime, DestTime, NewestSourceFile, DestFile);
+				CFile::fs_SetWriteTime(DestFile, SourceTime);
+			}
+		}
+		else
+		{
+			NFile::CFile TempDst;
+			TempDst.f_Open(DestFile, EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_Read | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs | EFileOpen_DontTruncate);
+			DConErrOut("Copy new write time: {} -> {}{\n}", NewestSourceFile, DestFile);
+			TempDst.f_SetWriteTime(SourceTime);
+		}
+	}
+	catch (NFile::CExceptionFile const &_Error)
+	{
+		DConErrOut("Copy new write failed: {}: {}{\n}", DestFile, _Error);
+		return 1;
+	}
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_CopyWriteTimeIfNewer);
 
@@ -228,186 +241,190 @@ void fg_LogVerbose(CFile::EDiffCopyChange _Change, CStr const &_Source, CStr con
 
 struct CTool_DiffCopy : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
+	aint f_Run(NContainer::CRegistry &_Params);
+};
+
+aint CTool_DiffCopy::f_Run(NContainer::CRegistry &_Params)
+{
+	DScopeConOutTimeMeasure("DiffCopy");
+	CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
+	CStr SourceDir = NFile::CFile::fs_GetPath(SourcePattern);
+	CStr DestPath = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
+	CStr Touch = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("2", ""));
+	bool bRecursive = _Params.f_GetValue("3", "1").f_ToInt() != 0;
+	bool bQuiet = _Params.f_GetValue("4", "0").f_ToInt() != 0;
+	bool bDirectory = _Params.f_GetValue("5", "0").f_ToInt() != 0;
+	bool bDestinationIsFile = _Params.f_GetValue("6", "0").f_ToInt() != 0;
+	bool bCopied = false;
+	bool bVerbose = false;
+
+	NContainer::TCVector<NStr::CStr> ExcludePatterns = fg_GetSys()->f_GetEnvironmentVariable("MalterlibDiffCopyExcludePatterns").f_Split(";");
+
+	if (NFile::CFile::fs_FileExists(SourcePattern, EFileAttrib_Directory))
 	{
-		DScopeConOutTimeMeasure("DiffCopy");
-		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
-		CStr SourceDir = NFile::CFile::fs_GetPath(SourcePattern);
-		CStr DestPath = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("1", "NotExist"));
-		CStr Touch = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("2", ""));
-		bool bRecursive = _Params.f_GetValue("3", "1").f_ToInt() != 0;
-		bool bQuiet = _Params.f_GetValue("4", "0").f_ToInt() != 0;
-		bool bDirectory = _Params.f_GetValue("5", "0").f_ToInt() != 0;
-		bool bDestinationIsFile = _Params.f_GetValue("6", "0").f_ToInt() != 0;
-		bool bCopied = false;
-		bool bVerbose = false;
+		CStr FullDestPath;
+		if (bDestinationIsFile)
+			FullDestPath = DestPath;
+		else
+			FullDestPath = CFile::fs_AppendPath(DestPath, CFile::fs_GetFile(SourcePattern));
 
-		NContainer::TCVector<NStr::CStr> ExcludePatterns = fg_GetSys()->f_GetEnvironmentVariable("MalterlibDiffCopyExcludePatterns").f_Split(";");
-
-		if (NFile::CFile::fs_FileExists(SourcePattern, EFileAttrib_Directory))
-		{
-			CStr FullDestPath;
-			if (bDestinationIsFile)
-				FullDestPath = DestPath;
-			else
-				FullDestPath = CFile::fs_AppendPath(DestPath, CFile::fs_GetFile(SourcePattern));
-
-			if
+		if
+		(
+			CFile::fs_DiffCopyFileOrDirectory
 			(
-				CFile::fs_DiffCopyFileOrDirectory
-				(
-					SourcePattern
-					, FullDestPath
-					, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
-					{
-						if (bVerbose)
-							fg_LogVerbose(_Change, _Source, _Destination, _Link);
-						return CFile::EDiffCopyChangeAction_Perform;
-					}
-					, ExcludePatterns
-				)
+				SourcePattern
+				, FullDestPath
+				, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
+				{
+					if (bVerbose)
+						fg_LogVerbose(_Change, _Source, _Destination, _Link);
+					return CFile::EDiffCopyChangeAction_Perform;
+				}
+				, ExcludePatterns
 			)
-			{
-				if (!bQuiet)
-					DConOut("{} -> {}" DNewLine, SourcePattern, FullDestPath);
-				bCopied = true;
-			}
-			return 0;
-		}
-
-		EFileAttrib Attribs = EFileAttrib_File | EFileAttrib_Link;
-		if (bDirectory)
-			Attribs = EFileAttrib_Directory;
-
-		NFile::CFile::CFindFilesOptions FindOptions(SourcePattern, bRecursive);
-		FindOptions.m_AttribMask = Attribs;
-		FindOptions.m_ExcludePatterns = ExcludePatterns;
-
-		TCVector<CFile::CFoundFile> Files = NFile::CFile::fs_FindFiles(FindOptions);
-
-		umint nFiles = Files.f_GetLen();
-		for (auto &File : Files)
+		)
 		{
-			auto &FilePath = File.m_Path;
-			CStr RelativePath = FilePath.f_Extract(SourceDir.f_GetLen() + 1);
-			CStr FileDest;
-			if (bDestinationIsFile)
-				FileDest = DestPath;
-			else
-				FileDest = NFile::CFile::fs_AppendPath(DestPath, RelativePath);
-
-			if
-			(
-				CFile::fs_DiffCopyFileOrDirectory
-				(
-					FilePath
-					, FileDest
-					, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
-					{
-						if (bVerbose)
-							fg_LogVerbose(_Change, _Source, _Destination, _Link);
-						return CFile::EDiffCopyChangeAction_Perform;
-					}
-				)
-			)
-			{
-				if (!bQuiet)
-					DConOut("{} -> {}" DNewLine, FilePath, FileDest);
-				bCopied = true;
-			}
+			if (!bQuiet)
+				DConOut("{} -> {}" DNewLine, SourcePattern, FullDestPath);
+			bCopied = true;
 		}
-
-		if (bCopied && !Touch.f_IsEmpty())
-		{
-			NFile::CFile Temp;
-			NFile::CFile::fs_CreateDirectory(CFile::fs_GetPath(Touch));
-			EFileOpen OpenFlags = EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_DontTruncate;
-			if (CFile::fs_FileExists(Touch))
-				OpenFlags = EFileOpen_ShareAll | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs;
-			Temp.f_Open(Touch, OpenFlags);
-			Temp.f_SetWriteTime(NTime::CTime::fs_NowUTC());
-		}
-
-		if (nFiles == 0)
-			DError(CStr::CFormat("No files found for pattern: {}") << SourcePattern);
-
 		return 0;
 	}
-};
+
+	EFileAttrib Attribs = EFileAttrib_File | EFileAttrib_Link;
+	if (bDirectory)
+		Attribs = EFileAttrib_Directory;
+
+	NFile::CFile::CFindFilesOptions FindOptions(SourcePattern, bRecursive);
+	FindOptions.m_AttribMask = Attribs;
+	FindOptions.m_ExcludePatterns = ExcludePatterns;
+
+	TCVector<CFile::CFoundFile> Files = NFile::CFile::fs_FindFiles(FindOptions);
+
+	umint nFiles = Files.f_GetLen();
+	for (auto &File : Files)
+	{
+		auto &FilePath = File.m_Path;
+		CStr RelativePath = FilePath.f_Extract(SourceDir.f_GetLen() + 1);
+		CStr FileDest;
+		if (bDestinationIsFile)
+			FileDest = DestPath;
+		else
+			FileDest = NFile::CFile::fs_AppendPath(DestPath, RelativePath);
+
+		if
+		(
+			CFile::fs_DiffCopyFileOrDirectory
+			(
+				FilePath
+				, FileDest
+				, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
+				{
+					if (bVerbose)
+						fg_LogVerbose(_Change, _Source, _Destination, _Link);
+					return CFile::EDiffCopyChangeAction_Perform;
+				}
+			)
+		)
+		{
+			if (!bQuiet)
+				DConOut("{} -> {}" DNewLine, FilePath, FileDest);
+			bCopied = true;
+		}
+	}
+
+	if (bCopied && !Touch.f_IsEmpty())
+	{
+		NFile::CFile Temp;
+		NFile::CFile::fs_CreateDirectory(CFile::fs_GetPath(Touch));
+		EFileOpen OpenFlags = EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_DontTruncate;
+		if (CFile::fs_FileExists(Touch))
+			OpenFlags = EFileOpen_ShareAll | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs;
+		Temp.f_Open(Touch, OpenFlags);
+		Temp.f_SetWriteTime(NTime::CTime::fs_NowUTC());
+	}
+
+	if (nFiles == 0)
+		DError(CStr::CFormat("No files found for pattern: {}") << SourcePattern);
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_DiffCopy);
 
 struct CTool_DiffReplace : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		DScopeConOutTimeMeasure("DiffReplace");
-		CStr Search = _Params.f_GetValue("0", "NotExist");
-		CStr Replace = _Params.f_GetValue("1", "NotExist");
-		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("2", "NotExist"));
-		CStr DestPath = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("3", "NotExist"));
-		CStr Touch = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("4", ""));
-		bool bRecursive = _Params.f_GetValue("5", "0").f_ToInt() != 0;
-		bool bAddBom = _Params.f_GetValue("6", "0").f_ToInt() != 0;
-		bool bQuiet = _Params.f_GetValue("7", "0").f_ToInt() != 0;
-		CStr SourceDir = NFile::CFile::fs_GetPath(SourcePattern);
-
-		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(SourcePattern, EFileAttrib_File, bRecursive);
-
-		umint nFiles = Files.f_GetLen();
-		bool bCopied = false;
-		for (auto &FilePath : Files)
-		{
-			CStr RelativePath = FilePath.f_Extract(SourceDir.f_GetLen() + 1);
-			CStr FileDest = NFile::CFile::fs_AppendPath(DestPath, RelativePath);
-			int32 nTimes = 20 * 30; // 30 seconds
-			while (1)
-			{
-				try
-				{
-					NFile::CFile::fs_CreateDirectory(NFile::CFile::fs_GetPath(FileDest));
-					break;
-				}
-				catch (NException::CException)
-				{
-					if (--nTimes == 0)
-						throw;
-					NSys::fg_Thread_Sleep(NMisc::fg_GetRandomFloat() * 0.100);
-				}
-			}
-
-			CStr SourceData = NFile::CFile::fs_ReadStringFromFile(CStr(FilePath));
-			CStr DestData = SourceData.f_Replace(Search, Replace);
-			CByteVector Data;
-			NFile::CFile::fs_WriteStringToVector(Data, DestData, bAddBom);
-			if (!NFile::CFile::fs_IsFileWritable(FileDest))
-				NFile::CFile::fs_MakeFileWritable(FileDest);
-
-			if (NFile::CFile::fs_CopyFileDiff(Data, FileDest, NTime::CTime::fs_NowUTC()))
-			{
-				if (!bQuiet)
-					DConOut("{} -> {}" DNewLine, FilePath, FileDest);
-				bCopied = true;
-			}
-		}
-
-		if (bCopied && !Touch.f_IsEmpty())
-		{
-			NFile::CFile Temp;
-			NFile::CFile::fs_CreateDirectory(CFile::fs_GetPath(Touch));
-			EFileOpen OpenFlags = EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_DontTruncate;
-			if (CFile::fs_FileExists(Touch))
-				OpenFlags = EFileOpen_ShareAll | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs;
-			Temp.f_Open(Touch, OpenFlags);
-			Temp.f_SetWriteTime(NTime::CTime::fs_NowUTC());
-		}
-
-		if (nFiles == 0)
-			DError(CStr::CFormat("No files found for pattern: {}") << SourcePattern);
-
-		return 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_DiffReplace::f_Run(NContainer::CRegistry &_Params)
+{
+	DScopeConOutTimeMeasure("DiffReplace");
+	CStr Search = _Params.f_GetValue("0", "NotExist");
+	CStr Replace = _Params.f_GetValue("1", "NotExist");
+	CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("2", "NotExist"));
+	CStr DestPath = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("3", "NotExist"));
+	CStr Touch = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("4", ""));
+	bool bRecursive = _Params.f_GetValue("5", "0").f_ToInt() != 0;
+	bool bAddBom = _Params.f_GetValue("6", "0").f_ToInt() != 0;
+	bool bQuiet = _Params.f_GetValue("7", "0").f_ToInt() != 0;
+	CStr SourceDir = NFile::CFile::fs_GetPath(SourcePattern);
+
+	TCVector<CStr> Files = NFile::CFile::fs_FindFiles(SourcePattern, EFileAttrib_File, bRecursive);
+
+	umint nFiles = Files.f_GetLen();
+	bool bCopied = false;
+	for (auto &FilePath : Files)
+	{
+		CStr RelativePath = FilePath.f_Extract(SourceDir.f_GetLen() + 1);
+		CStr FileDest = NFile::CFile::fs_AppendPath(DestPath, RelativePath);
+		int32 nTimes = 20 * 30; // 30 seconds
+		while (1)
+		{
+			try
+			{
+				NFile::CFile::fs_CreateDirectory(NFile::CFile::fs_GetPath(FileDest));
+				break;
+			}
+			catch (NException::CException)
+			{
+				if (--nTimes == 0)
+					throw;
+				NSys::fg_Thread_Sleep(NMisc::fg_GetRandomFloat() * 0.100);
+			}
+		}
+
+		CStr SourceData = NFile::CFile::fs_ReadStringFromFile(CStr(FilePath));
+		CStr DestData = SourceData.f_Replace(Search, Replace);
+		CByteVector Data;
+		NFile::CFile::fs_WriteStringToVector(Data, DestData, bAddBom);
+		if (!NFile::CFile::fs_IsFileWritable(FileDest))
+			NFile::CFile::fs_MakeFileWritable(FileDest);
+
+		if (NFile::CFile::fs_CopyFileDiff(Data, FileDest, NTime::CTime::fs_NowUTC()))
+		{
+			if (!bQuiet)
+				DConOut("{} -> {}" DNewLine, FilePath, FileDest);
+			bCopied = true;
+		}
+	}
+
+	if (bCopied && !Touch.f_IsEmpty())
+	{
+		NFile::CFile Temp;
+		NFile::CFile::fs_CreateDirectory(CFile::fs_GetPath(Touch));
+		EFileOpen OpenFlags = EFileOpen_ShareAll | EFileOpen_Write | EFileOpen_DontTruncate;
+		if (CFile::fs_FileExists(Touch))
+			OpenFlags = EFileOpen_ShareAll | EFileOpen_WriteAttribs | EFileOpen_ReadAttribs;
+		Temp.f_Open(Touch, OpenFlags);
+		Temp.f_SetWriteTime(NTime::CTime::fs_NowUTC());
+	}
+
+	if (nFiles == 0)
+		DError(CStr::CFormat("No files found for pattern: {}") << SourcePattern);
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_DiffReplace);
 
@@ -419,68 +436,74 @@ DMibRuntimeClass(CTool, CTool_DiffTouchCopy);
 
 struct CTool_DeleteDirectoryRecursive : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		DScopeConOutTimeMeasure("DeleteDirectoryRecursive");
-		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
-		bool bRemoveWriteProtection = _Params.f_GetValue("1", "1").f_ToInt() != 0;
-
-		if (!CFile::fs_FileExists(SourcePattern, EFileAttrib_Directory))
-			DError(CStr::CFormat("Directory '{}' does not exist") << SourcePattern);
-
-		CFile::fs_DeleteDirectoryRecursive(SourcePattern, bRemoveWriteProtection);
-
-		return 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_DeleteDirectoryRecursive::f_Run(NContainer::CRegistry &_Params)
+{
+	DScopeConOutTimeMeasure("DeleteDirectoryRecursive");
+	CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
+	bool bRemoveWriteProtection = _Params.f_GetValue("1", "1").f_ToInt() != 0;
+
+	if (!CFile::fs_FileExists(SourcePattern, EFileAttrib_Directory))
+		DError(CStr::CFormat("Directory '{}' does not exist") << SourcePattern);
+
+	CFile::fs_DeleteDirectoryRecursive(SourcePattern, bRemoveWriteProtection);
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_DeleteDirectoryRecursive);
 
 struct CTool_DeleteRecursive : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		DScopeConOutTimeMeasure("DeleteRecursive");
-		CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
-
-		CStr Pattern = CFile::fs_GetFile(SourcePattern);
-		TCVector<CFile::CFoundFile> Files = NFile::CFile::fs_FindFilesEx(SourcePattern, EFileAttrib_File | EFileAttrib_Directory, true, false);
-
-		for (auto iFile = Files.f_GetIterator(); iFile; ++iFile)
-		{
-			if
-			(
-				CFile::fs_FileExists(iFile->m_Path)
-				&& fg_StrMatchWildcard(CFile::fs_GetFile(CStr(iFile->m_Path)).f_GetStr(), Pattern.f_GetStr()) == EMatchWildcardResult_WholeStringMatchedAndPatternExhausted
-			)
-			{
-				DConOut("Deleted: '{}'" DNewLine, iFile->m_Path);
-				CFile::fs_DeleteDirectoryRecursive(iFile->m_Path, true);
-			}
-		}
-
-		return 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_DeleteRecursive::f_Run(NContainer::CRegistry &_Params)
+{
+	DScopeConOutTimeMeasure("DeleteRecursive");
+	CStr SourcePattern = NFile::CFile::fs_GetExpandedPath(_Params.f_GetValue("0", "NotExist"));
+
+	CStr Pattern = CFile::fs_GetFile(SourcePattern);
+	TCVector<CFile::CFoundFile> Files = NFile::CFile::fs_FindFilesEx(SourcePattern, EFileAttrib_File | EFileAttrib_Directory, true, false);
+
+	for (auto iFile = Files.f_GetIterator(); iFile; ++iFile)
+	{
+		if
+		(
+			CFile::fs_FileExists(iFile->m_Path)
+			&& fg_StrMatchWildcard(CFile::fs_GetFile(CStr(iFile->m_Path)).f_GetStr(), Pattern.f_GetStr()) == EMatchWildcardResult_WholeStringMatchedAndPatternExhausted
+		)
+		{
+			DConOut("Deleted: '{}'" DNewLine, iFile->m_Path);
+			CFile::fs_DeleteDirectoryRecursive(iFile->m_Path, true);
+		}
+	}
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_DeleteRecursive);
 
 struct CTool_TestOutput : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		CStr Test = NMib::NCryptography::fg_GetRandomUuidString();
-		DConOut("*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯{\n}");
-		for (int iOutput = 0; iOutput < 16; ++iOutput)
-		{
-			NMib::NSys::fg_Thread_Sleep(0.001f);
-			DConOut("Out: {}{\n}", Test);
-			DConErrOut("Err: {}{\n}", Test);
-		}
-
-		return 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_TestOutput::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr Test = NMib::NCryptography::fg_GetRandomUuidString();
+	DConOut("*¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯{\n}");
+	for (int iOutput = 0; iOutput < 16; ++iOutput)
+	{
+		NMib::NSys::fg_Thread_Sleep(0.001f);
+		DConOut("Out: {}{\n}", Test);
+		DConErrOut("Err: {}{\n}", Test);
+	}
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_TestOutput);
 

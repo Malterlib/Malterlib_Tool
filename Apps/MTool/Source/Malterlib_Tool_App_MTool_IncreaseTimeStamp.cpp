@@ -21,223 +21,227 @@ struct CV_INFO_PDB70
 
 struct CTool_IncreaseTimeStamp : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
+	aint f_Run(NContainer::CRegistry &_Params);
+};
+
+aint CTool_IncreaseTimeStamp::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr FileName = _Params.f_GetValue("0", "NotExist.file");
+	if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
+		DError("File does not exist");
+
+	CByteVector Mem;
+	CFilePos FileLength;
 	{
-		CStr FileName = _Params.f_GetValue("0", "NotExist.file");
-		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
-			DError("File does not exist");
+		NFile::CFile File;
+		DConOut("Changing Timestamp: {}" DNewLine, FileName);
 
-		CByteVector Mem;
-		CFilePos FileLength;
+		File.f_Open(FileName, EFileOpen_Read | EFileOpen_ShareAll);
+		FileLength = File.f_GetLength();
+		Mem.f_SetLen(FileLength);
+		File.f_Read(Mem.f_GetArray(), FileLength);
+	}
+
+	// Look for header information
+	IMAGE_NT_HEADERS *pHeader = nullptr;
+	uint32 *pData = (uint32 *)Mem.f_GetArray();
+	uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
+	for (int iOffset = 0; iOffset < FileLength; iOffset += 4, pData += 1)
+	{
+		if (*pData == Find)
 		{
-			NFile::CFile File;
-			DConOut("Changing Timestamp: {}" DNewLine, FileName);
-
-			File.f_Open(FileName, EFileOpen_Read | EFileOpen_ShareAll);
-			FileLength = File.f_GetLength();
-			Mem.f_SetLen(FileLength);
-			File.f_Read(Mem.f_GetArray(), FileLength);
+			pHeader = (IMAGE_NT_HEADERS *)pData;
+			break;
 		}
+	}
 
-		// Look for header information
-		IMAGE_NT_HEADERS *pHeader = nullptr;
-		uint32 *pData = (uint32 *)Mem.f_GetArray();
-		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
-		for (int iOffset = 0; iOffset < FileLength; iOffset += 4, pData += 1)
+	IMAGE_NT_HEADERS *pHeader2 = pHeader;
+	if (pHeader)
+	{
+		if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 || pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_IA64)
 		{
-			if (*pData == Find)
+			IMAGE_NT_HEADERS64 *pHeader = (IMAGE_NT_HEADERS64 *)pHeader2;
+
+			NTime::CTime RefTime = NTime::CTimeConvert::fs_CreateTime(1970);
+			NTime::CTime OldTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
+			DConOut("Old timestamp: {}" DNewLine, OldTime.f_ToLocal());
+			++pHeader->FileHeader.TimeDateStamp;
+			NTime::CTime NewTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
+			DConOut("New timestamp: {}" DNewLine, NewTime.f_ToLocal());
 			{
-				pHeader = (IMAGE_NT_HEADERS *)pData;
-				break;
+				NFile::CFile File;
+				DConOut("Writing File: {}" DNewLine, FileName);
+
+				File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
+				File.f_Write(Mem.f_GetArray(), FileLength);
 			}
 		}
-
-		IMAGE_NT_HEADERS *pHeader2 = pHeader;
-		if (pHeader)
+		else if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_I386)
 		{
-			if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 || pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_IA64)
+			IMAGE_NT_HEADERS32 *pHeader = (IMAGE_NT_HEADERS32 *)pHeader2;
+
+			NTime::CTime RefTime = NTime::CTimeConvert::fs_CreateTime(1970);
+			NTime::CTime OldTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
+			DConOut("Old timestamp: {}" DNewLine, OldTime.f_ToLocal());
+			++pHeader->FileHeader.TimeDateStamp;
+			NTime::CTime NewTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
+			DConOut("New timestamp: {}" DNewLine, NewTime.f_ToLocal());
 			{
-				IMAGE_NT_HEADERS64 *pHeader = (IMAGE_NT_HEADERS64 *)pHeader2;
+				NFile::CFile File;
+				DConOut("Writing File: {}" DNewLine, FileName);
 
-				NTime::CTime RefTime = NTime::CTimeConvert::fs_CreateTime(1970);
-				NTime::CTime OldTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
-				DConOut("Old timestamp: {}" DNewLine, OldTime.f_ToLocal());
-				++pHeader->FileHeader.TimeDateStamp;
-				NTime::CTime NewTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
-				DConOut("New timestamp: {}" DNewLine, NewTime.f_ToLocal());
-				{
-					NFile::CFile File;
-					DConOut("Writing File: {}" DNewLine, FileName);
-
-					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
-					File.f_Write(Mem.f_GetArray(), FileLength);
-				}
+				File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
+				File.f_Write(Mem.f_GetArray(), FileLength);
 			}
-			else if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_I386)
-			{
-				IMAGE_NT_HEADERS32 *pHeader = (IMAGE_NT_HEADERS32 *)pHeader2;
-
-				NTime::CTime RefTime = NTime::CTimeConvert::fs_CreateTime(1970);
-				NTime::CTime OldTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
-				DConOut("Old timestamp: {}" DNewLine, OldTime.f_ToLocal());
-				++pHeader->FileHeader.TimeDateStamp;
-				NTime::CTime NewTime = RefTime + NTime::CTimeSpanConvert::fs_CreateSecondSpan(pHeader->FileHeader.TimeDateStamp);
-				DConOut("New timestamp: {}" DNewLine, NewTime.f_ToLocal());
-				{
-					NFile::CFile File;
-					DConOut("Writing File: {}" DNewLine, FileName);
-
-					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
-					File.f_Write(Mem.f_GetArray(), FileLength);
-				}
-			}
-			else
-				DError("Unrecognized Machine");
 		}
 		else
-			DError("Could not find PE headers");
-
-		return 0;
+			DError("Unrecognized Machine");
 	}
-};
+	else
+		DError("Could not find PE headers");
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_IncreaseTimeStamp);
 
 struct CTool_SetImageOsVersion : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
+	aint f_Run(NContainer::CRegistry &_Params);
+};
+
+aint CTool_SetImageOsVersion::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr FileName = _Params.f_GetValue("0", "NotExist.file");
+	if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
+		DError("File does not exist");
+
+	CStr VersionStr = _Params.f_GetValue("1", "NoVersion");
+
+	int32 MajorVersion = -1;
+	int32 MinorVersion = -1;
+
+	(CStr::CParse("{}.{}") >> MajorVersion >> MinorVersion).f_Parse(VersionStr);
+	if (MajorVersion < 0 || MinorVersion < 0)
+		DError("No or incorrect version specified");
+
+	CByteVector Mem;
+	CFilePos FileLength;
 	{
-		CStr FileName = _Params.f_GetValue("0", "NotExist.file");
-		if (!NFile::CFile::fs_FileExists(FileName, EFileAttrib_File))
-			DError("File does not exist");
-
-		CStr VersionStr = _Params.f_GetValue("1", "NoVersion");
-
-		int32 MajorVersion = -1;
-		int32 MinorVersion = -1;
-
-		(CStr::CParse("{}.{}") >> MajorVersion >> MinorVersion).f_Parse(VersionStr);
-		if (MajorVersion < 0 || MinorVersion < 0)
-			DError("No or incorrect version specified");
-
-		CByteVector Mem;
-		CFilePos FileLength;
-		{
-			NFile::CFile File;
+		NFile::CFile File;
 #ifdef DMibDebug
-			DConOut("Changing operating system version: {}" DNewLine, FileName);
+		DConOut("Changing operating system version: {}" DNewLine, FileName);
 #endif
 
-			File.f_Open(FileName, EFileOpen_Read | EFileOpen_ShareAll);
-			FileLength = File.f_GetLength();
-			Mem.f_SetLen(FileLength);
-			File.f_Read(Mem.f_GetArray(), FileLength);
+		File.f_Open(FileName, EFileOpen_Read | EFileOpen_ShareAll);
+		FileLength = File.f_GetLength();
+		Mem.f_SetLen(FileLength);
+		File.f_Read(Mem.f_GetArray(), FileLength);
+	}
+
+	// Look for header information
+	IMAGE_NT_HEADERS *pHeader = nullptr;
+	uint32 *pData = (uint32 *)Mem.f_GetArray();
+	uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
+	for (int iOffset = 0; iOffset < FileLength; iOffset += 4, pData += 1)
+	{
+		if (*pData == Find)
+		{
+			pHeader = (IMAGE_NT_HEADERS *)pData;
+			break;
 		}
+	}
 
-		// Look for header information
-		IMAGE_NT_HEADERS *pHeader = nullptr;
-		uint32 *pData = (uint32 *)Mem.f_GetArray();
-		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
-		for (int iOffset = 0; iOffset < FileLength; iOffset += 4, pData += 1)
+	IMAGE_NT_HEADERS *pHeader2 = pHeader;
+	if (pHeader)
+	{
+		if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 || pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_IA64)
 		{
-			if (*pData == Find)
+			IMAGE_NT_HEADERS64 *pHeader = (IMAGE_NT_HEADERS64 *)pHeader2;
+
+#ifdef DMibDebug
+			DConOut
+				(
+					"Old version: {}.{} ({}.{})" DNewLine
+					, pHeader->OptionalHeader.MajorOperatingSystemVersion
+					, pHeader->OptionalHeader.MinorOperatingSystemVersion
+					, pHeader->OptionalHeader.MajorSubsystemVersion
+					, pHeader->OptionalHeader.MinorSubsystemVersion
+				)
+			;
+#endif
+			pHeader->OptionalHeader.MajorOperatingSystemVersion = MajorVersion;
+			pHeader->OptionalHeader.MinorOperatingSystemVersion = MinorVersion;
+			pHeader->OptionalHeader.MajorSubsystemVersion = MajorVersion;
+			pHeader->OptionalHeader.MinorSubsystemVersion = MinorVersion;
+#ifdef DMibDebug
+			DConOut
+				(
+					"New version: {}.{} ({}.{})" DNewLine
+					, pHeader->OptionalHeader.MajorOperatingSystemVersion
+					, pHeader->OptionalHeader.MinorOperatingSystemVersion
+					, pHeader->OptionalHeader.MajorSubsystemVersion
+					, pHeader->OptionalHeader.MinorSubsystemVersion
+				)
+			;
+#endif
 			{
-				pHeader = (IMAGE_NT_HEADERS *)pData;
-				break;
+				NFile::CFile File;
+				DConOut("Writing File: {}" DNewLine, FileName);
+
+				File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
+				File.f_Write(Mem.f_GetArray(), FileLength);
 			}
 		}
-
-		IMAGE_NT_HEADERS *pHeader2 = pHeader;
-		if (pHeader)
+		else if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_I386)
 		{
-			if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64 || pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_IA64)
+			IMAGE_NT_HEADERS32 *pHeader = (IMAGE_NT_HEADERS32 *)pHeader2;
+
+#ifdef DMibDebug
+			DConOut
+				(
+					"Old version: {}.{} ({}.{})" DNewLine
+					, pHeader->OptionalHeader.MajorOperatingSystemVersion
+					, pHeader->OptionalHeader.MinorOperatingSystemVersion
+					, pHeader->OptionalHeader.MajorSubsystemVersion
+					, pHeader->OptionalHeader.MinorSubsystemVersion
+				)
+			;
+#endif
+			pHeader->OptionalHeader.MajorOperatingSystemVersion = MajorVersion;
+			pHeader->OptionalHeader.MinorOperatingSystemVersion = MinorVersion;
+			pHeader->OptionalHeader.MajorSubsystemVersion = MajorVersion;
+			pHeader->OptionalHeader.MinorSubsystemVersion = MinorVersion;
+#ifdef DMibDebug
+			DConOut
+				(
+					"New version: {}.{} ({}.{})" DNewLine
+					, pHeader->OptionalHeader.MajorOperatingSystemVersion
+					, pHeader->OptionalHeader.MinorOperatingSystemVersion
+					, pHeader->OptionalHeader.MajorSubsystemVersion
+					, pHeader->OptionalHeader.MinorSubsystemVersion
+				)
+			;
+#endif
+
 			{
-				IMAGE_NT_HEADERS64 *pHeader = (IMAGE_NT_HEADERS64 *)pHeader2;
-
+				NFile::CFile File;
 #ifdef DMibDebug
-				DConOut
-					(
-						"Old version: {}.{} ({}.{})" DNewLine
-						, pHeader->OptionalHeader.MajorOperatingSystemVersion
-						, pHeader->OptionalHeader.MinorOperatingSystemVersion
-						, pHeader->OptionalHeader.MajorSubsystemVersion
-						, pHeader->OptionalHeader.MinorSubsystemVersion
-					)
-				;
+				DConOut("Writing File: {}" DNewLine, FileName);
 #endif
-				pHeader->OptionalHeader.MajorOperatingSystemVersion = MajorVersion;
-				pHeader->OptionalHeader.MinorOperatingSystemVersion = MinorVersion;
-				pHeader->OptionalHeader.MajorSubsystemVersion = MajorVersion;
-				pHeader->OptionalHeader.MinorSubsystemVersion = MinorVersion;
-#ifdef DMibDebug
-				DConOut
-					(
-						"New version: {}.{} ({}.{})" DNewLine
-						, pHeader->OptionalHeader.MajorOperatingSystemVersion
-						, pHeader->OptionalHeader.MinorOperatingSystemVersion
-						, pHeader->OptionalHeader.MajorSubsystemVersion
-						, pHeader->OptionalHeader.MinorSubsystemVersion
-					)
-				;
-#endif
-				{
-					NFile::CFile File;
-					DConOut("Writing File: {}" DNewLine, FileName);
 
-					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
-					File.f_Write(Mem.f_GetArray(), FileLength);
-				}
+				File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
+				File.f_Write(Mem.f_GetArray(), FileLength);
 			}
-			else if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_I386)
-			{
-				IMAGE_NT_HEADERS32 *pHeader = (IMAGE_NT_HEADERS32 *)pHeader2;
-
-#ifdef DMibDebug
-				DConOut
-					(
-						"Old version: {}.{} ({}.{})" DNewLine
-						, pHeader->OptionalHeader.MajorOperatingSystemVersion
-						, pHeader->OptionalHeader.MinorOperatingSystemVersion
-						, pHeader->OptionalHeader.MajorSubsystemVersion
-						, pHeader->OptionalHeader.MinorSubsystemVersion
-					)
-				;
-#endif
-				pHeader->OptionalHeader.MajorOperatingSystemVersion = MajorVersion;
-				pHeader->OptionalHeader.MinorOperatingSystemVersion = MinorVersion;
-				pHeader->OptionalHeader.MajorSubsystemVersion = MajorVersion;
-				pHeader->OptionalHeader.MinorSubsystemVersion = MinorVersion;
-#ifdef DMibDebug
-				DConOut
-					(
-						"New version: {}.{} ({}.{})" DNewLine
-						, pHeader->OptionalHeader.MajorOperatingSystemVersion
-						, pHeader->OptionalHeader.MinorOperatingSystemVersion
-						, pHeader->OptionalHeader.MajorSubsystemVersion
-						, pHeader->OptionalHeader.MinorSubsystemVersion
-					)
-				;
-#endif
-
-				{
-					NFile::CFile File;
-#ifdef DMibDebug
-					DConOut("Writing File: {}" DNewLine, FileName);
-#endif
-
-					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
-					File.f_Write(Mem.f_GetArray(), FileLength);
-				}
-			}
-			else
-				DError("Unrecognized Machine");
 		}
 		else
-			DError("Could not find PE headers");
-
-		return 0;
+			DError("Unrecognized Machine");
 	}
-};
+	else
+		DError("Could not find PE headers");
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_SetImageOsVersion);
 

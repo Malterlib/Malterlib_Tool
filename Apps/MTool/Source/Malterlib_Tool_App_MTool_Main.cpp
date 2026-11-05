@@ -138,29 +138,31 @@ aint CTool2::f_Run(NContainer::CRegistry &_Params)
 
 struct CToolApp : public NMib::CApplication
 {
-	aint f_Main()
-	{
-		// The low priority work of a short lived interactive tool is the build actions the user is waiting for
-		fg_SetConcurrencyManagerDefaultExecutionPriority(EPriority_Low, EExecutionPriority_Normal);
-
-		return fg_RunApp
-			(
-				[]
-				{
-					// Commands run in the process that starts them, so many MTool processes, such as LFS transfer agents, can start
-					// at once without listeners of their own
-					auto Settings = CDistributedToolSettings("MTool").f_RootDirectory(fg_GetToolRootDirectory()).f_InProcessCommandLineOnly(true);
-
-					if (fg_IsCMake())
-						fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_None);
-					else
-						fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_AllNoDistributedComputing);
-
-					return fg_ConstructActor<CDistributedToolAppActor>(fg_Move(Settings));
-				}
-			)
-		;
-	}
+	aint f_Main();
 };
+
+aint CToolApp::f_Main()
+{
+	// The low priority work of a short lived interactive tool is the build actions the user is waiting for
+	fg_SetConcurrencyManagerDefaultExecutionPriority(EPriority_Low, EExecutionPriority_Normal);
+
+	return fg_RunApp
+		(
+			[]
+			{
+				// Commands run in the process that starts them, so many MTool processes, such as LFS transfer agents, can start
+				// at once without listeners of their own
+				auto Settings = CDistributedToolSettings("MTool").f_RootDirectory(fg_GetToolRootDirectory()).f_InProcessCommandLineOnly(true);
+
+				if (fg_IsCMake())
+					fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_None);
+				else
+					fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_AllNoDistributedComputing);
+
+				return fg_ConstructActor<CDistributedToolAppActor>(fg_Move(Settings));
+			}
+		)
+	;
+}
 
 DMibAppImplement(CToolApp);

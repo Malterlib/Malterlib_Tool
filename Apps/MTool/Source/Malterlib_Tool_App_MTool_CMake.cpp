@@ -19,46 +19,55 @@ struct CTool_CMake : public CDistributedTool
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
 		)
-	{
-		if (!fg_IsCMake())
-			return;
-
-		auto CmakeCommand = o_ToolsSection.f_RegisterDirectCommand
-			(
-				{
-					"Names"_o= _o["CMake"]
-					, "Description"_o= "Runs cmake command line.\n"
-					, "Parameters"_o=
-					{
-						"Params...?"_o=
-						{
-							"Type"_o= _o[""]
-							, "Description"_o= "The cmake params."
-						}
-					}
-					, "ErrorOnCommandAsParameter"_o= false
-					, "ErrorOnOptionAsParameter"_o= false
-					, "GreedyDefaultCommand"_o= true
-				}
-				, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
-				{
-					TCVector<CStr> Commands;
-					TCVector<ch8 const *> ArgV;
-					ArgV.f_Insert(Commands.f_Insert(CFile::fs_GetProgramPath()).f_GetStr());
-					if (auto pParams = _Params.f_GetMember("Params"))
-					{
-						for (auto &Param : pParams->f_Array())
-							ArgV.f_Insert(Commands.f_Insert(Param.f_String()).f_GetStr());
-					}
-
-					return cmake_main(ArgV.f_GetLen(), ArgV.f_GetArray());
-				}
-			)
-		;
-
-		o_CommandLine.f_SetDefaultCommand(CmakeCommand);
-	}
+	;
 };
+
+void CTool_CMake::f_Register
+	(
+		TCActor<CDistributedToolAppActor> const &_ToolActor
+		, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+		, CDistributedAppCommandLineSpecification &o_CommandLine
+		, NStr::CStr const &_ClassName
+	)
+{
+	if (!fg_IsCMake())
+		return;
+
+	auto CmakeCommand = o_ToolsSection.f_RegisterDirectCommand
+		(
+			{
+				"Names"_o= _o["CMake"]
+				, "Description"_o= "Runs cmake command line.\n"
+				, "Parameters"_o=
+				{
+					"Params...?"_o=
+					{
+						"Type"_o= _o[""]
+						, "Description"_o= "The cmake params."
+					}
+				}
+				, "ErrorOnCommandAsParameter"_o= false
+				, "ErrorOnOptionAsParameter"_o= false
+				, "GreedyDefaultCommand"_o= true
+			}
+			, [](NEncoding::CEJsonSorted const &_Params, CDistributedAppCommandLineClient &_CommandLineClient) -> uint32
+			{
+				TCVector<CStr> Commands;
+				TCVector<ch8 const *> ArgV;
+				ArgV.f_Insert(Commands.f_Insert(CFile::fs_GetProgramPath()).f_GetStr());
+				if (auto pParams = _Params.f_GetMember("Params"))
+				{
+					for (auto &Param : pParams->f_Array())
+						ArgV.f_Insert(Commands.f_Insert(Param.f_String()).f_GetStr());
+				}
+
+				return cmake_main(ArgV.f_GetLen(), ArgV.f_GetArray());
+			}
+		)
+	;
+
+	o_CommandLine.f_SetDefaultCommand(CmakeCommand);
+}
 
 DMibRuntimeClass(NMib::NConcurrency::CDistributedTool, CTool_CMake);
 

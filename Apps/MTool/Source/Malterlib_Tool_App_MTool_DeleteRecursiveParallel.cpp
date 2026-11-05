@@ -98,28 +98,33 @@ namespace NDeleteRecursive
 	struct CFileToDelete
 	{
 		template <typename tf_CStr>
-		void f_Format(tf_CStr &o_Str) const
-		{
-			o_Str += m_Path;
-		}
+		void f_Format(tf_CStr &o_Str) const;
 
 		CStr m_Path;
 		bool m_bReadOnly = false;
 	};
 
+	template <typename tf_CStr>
+	void CFileToDelete::f_Format(tf_CStr &o_Str) const
+	{
+		o_Str += m_Path;
+	}
+
 	struct CFoundFiles
 	{
-		CFoundFiles &operator += (CFoundFiles &&_Other)
-		{
-			m_FilesOrLinks.f_Insert(fg_Move(_Other.m_FilesOrLinks));
-			m_Directories.f_Insert(fg_Move(_Other.m_Directories));
-
-			return *this;
-		}
+		CFoundFiles &operator += (CFoundFiles &&_Other);
 
 		TCVector<CFileToDelete> m_FilesOrLinks;
 		TCVector<CStr> m_Directories;
 	};
+
+	CFoundFiles &CFoundFiles::operator += (CFoundFiles &&_Other)
+	{
+		m_FilesOrLinks.f_Insert(fg_Move(_Other.m_FilesOrLinks));
+		m_Directories.f_Insert(fg_Move(_Other.m_Directories));
+
+		return *this;
+	}
 
 	TCUnsafeFuture<CFoundFiles> fg_FindFilesRecursiveParallel(CStr const &_Path, umint _MaxConcurrency)
 	{
@@ -183,210 +188,269 @@ struct CTool_DeleteRecursiveParallel : public CDistributedTool, public CAllowUns
 			, CDistributedAppCommandLineSpecification &o_CommandLine
 			, NStr::CStr const &_ClassName
 		)
-	{
-		if (fg_IsMalterlib())
-			return;
+	;
+};
 
-		o_ToolsSection.f_RegisterCommand
-			(
+void CTool_DeleteRecursiveParallel::f_Register
+	(
+		TCActor<CDistributedToolAppActor> const &_ToolActor
+		, CDistributedAppCommandLineSpecification::CSection &o_ToolsSection
+		, CDistributedAppCommandLineSpecification &o_CommandLine
+		, NStr::CStr const &_ClassName
+	)
+{
+	if (fg_IsMalterlib())
+		return;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["DeleteRecursiveParallel"]
+				, "Description"_o= "Delete files or directories recursively.\n"
+				, "Category"_o= "Legacy"
+				, "Options"_o=
 				{
-					"Names"_o= _o["DeleteRecursiveParallel"]
-					, "Description"_o= "Delete files or directories recursively.\n"
-					, "Category"_o= "Legacy"
-					, "Options"_o=
+					"Verbose?"_o=
 					{
-						"Verbose?"_o=
-						{
-							"Names"_o= _o["--verbose", "-v"]
-							, "Default"_o= false
-							, "Description"_o= "Show which files are deleted.\n"
-						}
-						, "ShowProgress?"_o=
-						{
-							"Names"_o= _o["--show-progress"]
-							, "Default"_o= false
-							, "Description"_o= "Log progress of deleted items every second.\n"
-						}
-						, "ShowSummary?"_o=
-						{
-							"Names"_o= _o["--show-summary"]
-							, "Default"_o= true
-							, "Description"_o= "Log summary of what is going to be deleted and time to finish.\n"
-						}
-						, "MaxConcurrency?"_o=
-						{
-							"Names"_o= _o["--max-concurrency"]
-							, "Default"_o= 64
-							, "Description"_o= "The maximum number of simultaneous operations that should be done in parallel.\n"
-						}
-						, "ItemChunkSize?"_o=
-						{
-							"Names"_o= _o["--item-chunk-size"]
-							, "Default"_o= 100
-							, "Description"_o= "The smallest number of items to schedule in one concurrent operation.\n"
-							"Decreasing will improve load balancing, while increasing processing overhead.\n"
-						}
+						"Names"_o= _o["--verbose", "-v"]
+						, "Default"_o= false
+						, "Description"_o= "Show which files are deleted.\n"
 					}
-					, "Parameters"_o=
+					, "ShowProgress?"_o=
 					{
-						"Destinations..."_o=
-						{
-							"Type"_o= _o[""]
-							, "Description"_o= "The destinations to delete.\n"
-						}
+						"Names"_o= _o["--show-progress"]
+						, "Default"_o= false
+						, "Description"_o= "Log progress of deleted items every second.\n"
+					}
+					, "ShowSummary?"_o=
+					{
+						"Names"_o= _o["--show-summary"]
+						, "Default"_o= true
+						, "Description"_o= "Log summary of what is going to be deleted and time to finish.\n"
+					}
+					, "MaxConcurrency?"_o=
+					{
+						"Names"_o= _o["--max-concurrency"]
+						, "Default"_o= 64
+						, "Description"_o= "The maximum number of simultaneous operations that should be done in parallel.\n"
+					}
+					, "ItemChunkSize?"_o=
+					{
+						"Names"_o= _o["--item-chunk-size"]
+						, "Default"_o= 100
+						, "Description"_o= "The smallest number of items to schedule in one concurrent operation.\n"
+						"Decreasing will improve load balancing, while increasing processing overhead.\n"
 					}
 				}
-				, [=](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+				, "Parameters"_o=
 				{
-					co_await ECoroutineFlag_CaptureExceptions;
-
-					auto Destinations = _Params["Destinations"].f_StringArray();
-
-					bool bVerbose = _Params["Verbose"].f_Boolean();
-					bool bShowProgress = _Params["ShowProgress"].f_Boolean();
-					bool bShowSummary = _Params["ShowSummary"].f_Boolean();
-					umint MaxConcurrency = _Params["MaxConcurrency"].f_Integer();
-					umint ItemChunkSize = _Params["ItemChunkSize"].f_Integer();
-
-					CStopwatch TotalStopwatch{true};
-
-					if (bShowSummary)
-						*_pCommandLine %= "Deleting with concurrency {}: {vs}\n"_f << MaxConcurrency << Destinations;
-
-					// Shared with the deletion on the blocking actor, which can outlive this frame if the command is aborted
-					struct CProgress
+					"Destinations..."_o=
 					{
-						NAtomic::TCAtomic<umint> m_nItemsDeleted = 0;
-						NAtomic::TCAtomic<int64> m_ClockStartTime;
-						NAtomic::TCAtomic<umint> m_nTotalItems = 0;
-					};
+						"Type"_o= _o[""]
+						, "Description"_o= "The destinations to delete.\n"
+					}
+				}
+			}
+			, [=](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
 
-					TCSharedPointer<CProgress> pProgress = fg_Construct();
-					pProgress->m_ClockStartTime = TotalStopwatch.f_GetStartTicks();
+				auto Destinations = _Params["Destinations"].f_StringArray();
 
-					auto fLogProgress = [pProgress, TotalStopwatch, _pCommandLine](bool _bForce = false)
+				bool bVerbose = _Params["Verbose"].f_Boolean();
+				bool bShowProgress = _Params["ShowProgress"].f_Boolean();
+				bool bShowSummary = _Params["ShowSummary"].f_Boolean();
+				umint MaxConcurrency = _Params["MaxConcurrency"].f_Integer();
+				umint ItemChunkSize = _Params["ItemChunkSize"].f_Integer();
+
+				CStopwatch TotalStopwatch{true};
+
+				if (bShowSummary)
+					*_pCommandLine %= "Deleting with concurrency {}: {vs}\n"_f << MaxConcurrency << Destinations;
+
+				// Shared with the deletion on the blocking actor, which can outlive this frame if the command is aborted
+				struct CProgress
+				{
+					NAtomic::TCAtomic<umint> m_nItemsDeleted = 0;
+					NAtomic::TCAtomic<int64> m_ClockStartTime;
+					NAtomic::TCAtomic<umint> m_nTotalItems = 0;
+				};
+
+				TCSharedPointer<CProgress> pProgress = fg_Construct();
+				pProgress->m_ClockStartTime = TotalStopwatch.f_GetStartTicks();
+
+				auto fLogProgress = [pProgress, TotalStopwatch, _pCommandLine](bool _bForce = false)
+					{
+						auto &ClockStartTime = pProgress->m_ClockStartTime;
+						if (!_bForce)
 						{
-							auto &ClockStartTime = pProgress->m_ClockStartTime;
-							if (!_bForce)
-							{
-								CStopwatch Stopwatch = CStopwatch::fs_CreateFromStartTicks(ClockStartTime.f_Load());
+							CStopwatch Stopwatch = CStopwatch::fs_CreateFromStartTicks(ClockStartTime.f_Load());
 
-								auto StartTime = Stopwatch.f_GetStartTicks();
+							auto StartTime = Stopwatch.f_GetStartTicks();
 
-								if (Stopwatch.f_GetTime() <= 1.0)
-									return;
+							if (Stopwatch.f_GetTime() <= 1.0)
+								return;
 
-								Stopwatch.f_AddOffset(1.0);
+							Stopwatch.f_AddOffset(1.0);
 
-								if (!ClockStartTime.f_CompareExchangeStrong(StartTime, Stopwatch.f_GetStartTicks()))
-									return;
-							}
-
-							auto CurrentItems = pProgress->m_nItemsDeleted.f_Load();
-
-							auto EllapsedTime = fg_SecondsDurationToHumanReadable(TotalStopwatch.f_GetTime());
-							auto PercentDone = (fp64(CurrentItems) / fp64(pProgress->m_nTotalItems.f_Load())) * 100.0;
-
-							CUStr ToOutput = CStr("  {} items deleted. {fe0}% done in {}"_f << CurrentItems << PercentDone << EllapsedTime);
-							*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
+							if (!ClockStartTime.f_CompareExchangeStrong(StartTime, Stopwatch.f_GetStartTicks()))
+								return;
 						}
-					;
 
-					bool bSuccess = true;
-					{
-						auto BlockingActorCheckout = fg_BlockingActor();
-						bSuccess = co_await
-							(
-								g_Dispatch(BlockingActorCheckout)
-								/ [Destinations, MaxConcurrency, ItemChunkSize, pCommandLine = _pCommandLine, bShowProgress, bShowSummary, bVerbose, TotalStopwatch, pProgress, fLogProgress]
-								() -> TCFuture<bool>
+						auto CurrentItems = pProgress->m_nItemsDeleted.f_Load();
+
+						auto EllapsedTime = fg_SecondsDurationToHumanReadable(TotalStopwatch.f_GetTime());
+						auto PercentDone = (fp64(CurrentItems) / fp64(pProgress->m_nTotalItems.f_Load())) * 100.0;
+
+						CUStr ToOutput = CStr("  {} items deleted. {fe0}% done in {}"_f << CurrentItems << PercentDone << EllapsedTime);
+						*_pCommandLine %= "{}\x1B[{}D"_f << ToOutput << ToOutput.f_GetLen();
+					}
+				;
+
+				bool bSuccess = true;
+				{
+					auto BlockingActorCheckout = fg_BlockingActor();
+					bSuccess = co_await
+						(
+							g_Dispatch(BlockingActorCheckout)
+							/ [Destinations, MaxConcurrency, ItemChunkSize, pCommandLine = _pCommandLine, bShowProgress, bShowSummary, bVerbose, TotalStopwatch, pProgress, fLogProgress]
+							() -> TCFuture<bool>
+							{
+								co_await ECoroutineFlag_CaptureExceptions;
+
+								CFoundFiles Files;
+
+								TCVector<CStr> RootDirectories;
+
+								for (auto &Destination : Destinations)
 								{
-									co_await ECoroutineFlag_CaptureExceptions;
+									if (!CFile::fs_FileExists(Destination))
+										continue;
 
-									CFoundFiles Files;
+									auto Attribs = CFile::fs_GetAttributes(Destination);
 
-									TCVector<CStr> RootDirectories;
+									if (!((Attribs & EFileAttrib_Directory) && !(Attribs & EFileAttrib_Link)))
+										Files.m_FilesOrLinks.f_Insert(CFileToDelete{.m_Path = Destination}).m_bReadOnly = !!(Attribs & EFileAttrib_ReadOnly);
+									else
+										RootDirectories.f_Insert(Destination);
+								}
 
-									for (auto &Destination : Destinations)
-									{
-										if (!CFile::fs_FileExists(Destination))
-											continue;
+								if (RootDirectories.f_IsEmpty() && Files.m_FilesOrLinks.f_IsEmpty())
+									co_return true;
 
-										auto Attribs = CFile::fs_GetAttributes(Destination);
-
-										if (!((Attribs & EFileAttrib_Directory) && !(Attribs & EFileAttrib_Link)))
-											Files.m_FilesOrLinks.f_Insert(CFileToDelete{.m_Path = Destination}).m_bReadOnly = !!(Attribs & EFileAttrib_ReadOnly);
-										else
-											RootDirectories.f_Insert(Destination);
-									}
-
-									if (RootDirectories.f_IsEmpty() && Files.m_FilesOrLinks.f_IsEmpty())
-										co_return true;
-
-									TCAtomic<bool> bSuccess = true;
-									{
-										auto AllFoundFiles = co_await fg_ParallelForEachBlocking<CFoundFiles>
-											(
-												RootDirectories
-												, [&](CStr const &_Destination) -> TCUnsafeFuture<CFoundFiles>
-												{
-													co_return co_await fg_FindFilesRecursiveParallel(_Destination, MaxConcurrency);
-												}
-												, MaxConcurrency
-											)
-										;
-
-										for (auto &FoundFiles : AllFoundFiles)
-											Files += fg_Move(FoundFiles);
-									}
-
-									auto FindTime = TotalStopwatch.f_GetTime();
-
-									pProgress->m_nTotalItems = Files.m_FilesOrLinks.f_GetLen() + Files.m_Directories.f_GetLen();
-
-									if (bVerbose)
-										*pCommandLine %= "Deleting files: \n{}\n Deleting directories:\n{}\n"_f << Files.m_FilesOrLinks << Files.m_Directories;
-
-									if (bShowSummary)
-									{
-										*pCommandLine %= "Finding what to delete took {}\n"_f << fg_SecondsDurationToHumanReadable(FindTime);
-										*pCommandLine %= "Deleting {ns } files and {ns } directories\n"_f << Files.m_FilesOrLinks.f_GetLen() << Files.m_Directories.f_GetLen();
-									}
-
-									Files.m_FilesOrLinks.f_Sort
+								TCAtomic<bool> bSuccess = true;
+								{
+									auto AllFoundFiles = co_await fg_ParallelForEachBlocking<CFoundFiles>
 										(
-											[](CFileToDelete const &_Left, CFileToDelete const &_Right)
+											RootDirectories
+											, [&](CStr const &_Destination) -> TCUnsafeFuture<CFoundFiles>
 											{
-												return _Left.m_Path <=> _Right.m_Path;
+												co_return co_await fg_FindFilesRecursiveParallel(_Destination, MaxConcurrency);
 											}
+											, MaxConcurrency
 										)
 									;
 
-									TCVector<TCVector<CFileToDelete>> FilesChunks;
+									for (auto &FoundFiles : AllFoundFiles)
+										Files += fg_Move(FoundFiles);
+								}
 
-									for
+								auto FindTime = TotalStopwatch.f_GetTime();
+
+								pProgress->m_nTotalItems = Files.m_FilesOrLinks.f_GetLen() + Files.m_Directories.f_GetLen();
+
+								if (bVerbose)
+									*pCommandLine %= "Deleting files: \n{}\n Deleting directories:\n{}\n"_f << Files.m_FilesOrLinks << Files.m_Directories;
+
+								if (bShowSummary)
+								{
+									*pCommandLine %= "Finding what to delete took {}\n"_f << fg_SecondsDurationToHumanReadable(FindTime);
+									*pCommandLine %= "Deleting {ns } files and {ns } directories\n"_f << Files.m_FilesOrLinks.f_GetLen() << Files.m_Directories.f_GetLen();
+								}
+
+								Files.m_FilesOrLinks.f_Sort
 									(
-										auto pFiles = Files.m_FilesOrLinks.f_GetArray()
-										, pFilesEnd = Files.m_FilesOrLinks.f_GetArray() + Files.m_FilesOrLinks.f_GetLen()
-										; pFiles < pFilesEnd
-										; pFiles += ItemChunkSize
+										[](CFileToDelete const &_Left, CFileToDelete const &_Right)
+										{
+											return _Left.m_Path <=> _Right.m_Path;
+										}
 									)
+								;
+
+								TCVector<TCVector<CFileToDelete>> FilesChunks;
+
+								for
+								(
+									auto pFiles = Files.m_FilesOrLinks.f_GetArray()
+									, pFilesEnd = Files.m_FilesOrLinks.f_GetArray() + Files.m_FilesOrLinks.f_GetLen()
+									; pFiles < pFilesEnd
+									; pFiles += ItemChunkSize
+								)
+								{
+									FilesChunks.f_Insert().f_InsertMove(pFiles, fg_Min(ItemChunkSize, umint(pFilesEnd - pFiles)));
+								}
+
+								co_await fg_ParallelForEachBlocking<void>
+									(
+										FilesChunks
+										, [&](TCVector<CFileToDelete> const &_Files) -> TCUnsafeFuture<void>
+										{
+											for (auto &File : _Files)
+											{
+												try
+												{
+													if (File.m_bReadOnly)
+														CFile::fs_MakeFileWritable(File.m_Path);
+													CFile::fs_DeleteFile(File.m_Path);
+
+													if (bShowProgress && ((++pProgress->m_nItemsDeleted) % 1000) == 0)
+														fLogProgress();
+												}
+												catch (CExceptionFile const &_Exception)
+												{
+													bSuccess.f_Store(false);
+													*pCommandLine %= "{}\n"_f << _Exception.f_GetErrorStr();
+												}
+											}
+
+											co_return {};
+										}
+										, MaxConcurrency
+									)
+								;
+
+								TCMap<umint, TCVector<TCVector<CStr>>> DirectoriesDepth;
+
+								for (auto &Directory : Files.m_Directories)
+								{
+									auto pParse = Directory.f_GetStr();
+									umint Depth = 0;
+									while (*pParse)
 									{
-										FilesChunks.f_Insert().f_InsertMove(pFiles, fg_Min(ItemChunkSize, umint(pFilesEnd - pFiles)));
+										if (*pParse == '/')
+											++Depth;
+										++pParse;
 									}
 
+									auto &Vectors = DirectoriesDepth[Depth];
+									if (Vectors.f_IsEmpty() || Vectors.f_GetLast().f_GetLen() >= ItemChunkSize)
+										Vectors.f_Insert().f_Reserve(ItemChunkSize);
+
+									Vectors.f_GetLast().f_Insert(fg_Move(Directory));
+								}
+
+								for (auto &Directories : DirectoriesDepth.f_GetIteratorReverse())
+								{
 									co_await fg_ParallelForEachBlocking<void>
 										(
-											FilesChunks
-											, [&](TCVector<CFileToDelete> const &_Files) -> TCUnsafeFuture<void>
+											Directories
+											, [&](TCVector<CStr> const &_Directories) -> TCUnsafeFuture<void>
 											{
-												for (auto &File : _Files)
+												for (auto &Directory : _Directories)
 												{
 													try
 													{
-														if (File.m_bReadOnly)
-															CFile::fs_MakeFileWritable(File.m_Path);
-														CFile::fs_DeleteFile(File.m_Path);
+														CFile::fs_DeleteDirectory(Directory);
 
 														if (bShowProgress && ((++pProgress->m_nItemsDeleted) % 1000) == 0)
 															fLogProgress();
@@ -403,222 +467,172 @@ struct CTool_DeleteRecursiveParallel : public CDistributedTool, public CAllowUns
 											, MaxConcurrency
 										)
 									;
-
-									TCMap<umint, TCVector<TCVector<CStr>>> DirectoriesDepth;
-
-									for (auto &Directory : Files.m_Directories)
-									{
-										auto pParse = Directory.f_GetStr();
-										umint Depth = 0;
-										while (*pParse)
-										{
-											if (*pParse == '/')
-												++Depth;
-											++pParse;
-										}
-
-										auto &Vectors = DirectoriesDepth[Depth];
-										if (Vectors.f_IsEmpty() || Vectors.f_GetLast().f_GetLen() >= ItemChunkSize)
-											Vectors.f_Insert().f_Reserve(ItemChunkSize);
-
-										Vectors.f_GetLast().f_Insert(fg_Move(Directory));
-									}
-
-									for (auto &Directories : DirectoriesDepth.f_GetIteratorReverse())
-									{
-										co_await fg_ParallelForEachBlocking<void>
-											(
-												Directories
-												, [&](TCVector<CStr> const &_Directories) -> TCUnsafeFuture<void>
-												{
-													for (auto &Directory : _Directories)
-													{
-														try
-														{
-															CFile::fs_DeleteDirectory(Directory);
-
-															if (bShowProgress && ((++pProgress->m_nItemsDeleted) % 1000) == 0)
-																fLogProgress();
-														}
-														catch (CExceptionFile const &_Exception)
-														{
-															bSuccess.f_Store(false);
-															*pCommandLine %= "{}\n"_f << _Exception.f_GetErrorStr();
-														}
-													}
-
-													co_return {};
-												}
-												, MaxConcurrency
-											)
-										;
-									}
-
-									for (auto &RootDirectory : RootDirectories)
-									{
-										try
-										{
-											CFile::fs_DeleteDirectory(RootDirectory);
-										}
-										catch (CExceptionFile const &_Exception)
-										{
-											*pCommandLine %= "{}\n"_f << _Exception.f_GetErrorStr();
-											co_return false;
-										}
-									}
-
-									co_return bSuccess.f_Load();
 								}
-							)
-						;
-					}
 
-					if (bShowProgress)
-					{
-						fLogProgress(true);
-						*_pCommandLine %= "\n";
-					}
-
-					if (bShowSummary)
-						*_pCommandLine %= "Finished in {}\n"_f << fg_SecondsDurationToHumanReadable(TotalStopwatch.f_GetTime());
-
-					co_return bSuccess ? 0 : 1;
-				}
-			)
-		;
-
-		o_ToolsSection.f_RegisterCommand
-			(
-				{
-					"Names"_o= _o["CreateDirectoryTree"]
-					, "Description"_o= "Create directory tree.\n"
-					, "Category"_o= "Legacy"
-					, "Options"_o=
-					{
-						"NumFiles?"_o=
-						{
-							"Names"_o= _o["--files"]
-							, "Default"_o= 1'000'000
-							, "Description"_o= "The number of files to create.\n"
-						}
-						, "NumDirectories?"_o=
-						{
-							"Names"_o= _o["--directories"]
-							, "Default"_o= 100'000
-							, "Description"_o= "The number of directories to create.\n"
-						}
-						, "FanOut?"_o=
-						{
-							"Names"_o= _o["--fan-out"]
-							, "Default"_o= 8
-							, "Description"_o= "How many directories that should be created in each directory.\n"
-						}
-						, "FileSize?"_o=
-						{
-							"Names"_o= _o["--file-size"]
-							, "Default"_o= 1024
-							, "Description"_o= "How big each file should be.\n"
-						}
-					}
-					, "Parameters"_o=
-					{
-						"Destination"_o=
-						{
-							"Type"_o= ""
-							, "Description"_o= "The destination path where the directory tree should be created.\n"
-						}
-					}
-				}
-				, [=](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
-				{
-					co_await ECoroutineFlag_CaptureExceptions;
-
-					auto Destination = _Params["Destination"].f_String();
-					umint NumFiles = _Params["NumFiles"].f_Integer();
-					umint NumDirectories = _Params["NumDirectories"].f_Integer();
-					umint FanOut = _Params["FanOut"].f_Integer();
-					umint FileSize = _Params["FileSize"].f_Integer();
-
-					CStr FileContents;
-					CStr FileLine = gc_Str<"0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789\n">;
-					while (umint(FileContents.f_GetLen()) < FileSize)
-						FileContents += FileLine.f_Left(fg_Min(umint(FileLine.f_GetLen()), FileSize - FileContents.f_GetLen()));
-
-					{
-						auto BlockingActorCheckout = fg_BlockingActor();
-						co_await
-							(
-								g_Dispatch(BlockingActorCheckout) / [=]() -> TCFuture<void>
+								for (auto &RootDirectory : RootDirectories)
 								{
-									co_await ECoroutineFlag_CaptureExceptions;
+									try
+									{
+										CFile::fs_DeleteDirectory(RootDirectory);
+									}
+									catch (CExceptionFile const &_Exception)
+									{
+										*pCommandLine %= "{}\n"_f << _Exception.f_GetErrorStr();
+										co_return false;
+									}
+								}
 
-									auto nLeftToCreate = NumDirectories;
+								co_return bSuccess.f_Load();
+							}
+						)
+					;
+				}
 
-									auto fCreateDirectories = [&](CStr const &_Path)
+				if (bShowProgress)
+				{
+					fLogProgress(true);
+					*_pCommandLine %= "\n";
+				}
+
+				if (bShowSummary)
+					*_pCommandLine %= "Finished in {}\n"_f << fg_SecondsDurationToHumanReadable(TotalStopwatch.f_GetTime());
+
+				co_return bSuccess ? 0 : 1;
+			}
+		)
+	;
+
+	o_ToolsSection.f_RegisterCommand
+		(
+			{
+				"Names"_o= _o["CreateDirectoryTree"]
+				, "Description"_o= "Create directory tree.\n"
+				, "Category"_o= "Legacy"
+				, "Options"_o=
+				{
+					"NumFiles?"_o=
+					{
+						"Names"_o= _o["--files"]
+						, "Default"_o= 1'000'000
+						, "Description"_o= "The number of files to create.\n"
+					}
+					, "NumDirectories?"_o=
+					{
+						"Names"_o= _o["--directories"]
+						, "Default"_o= 100'000
+						, "Description"_o= "The number of directories to create.\n"
+					}
+					, "FanOut?"_o=
+					{
+						"Names"_o= _o["--fan-out"]
+						, "Default"_o= 8
+						, "Description"_o= "How many directories that should be created in each directory.\n"
+					}
+					, "FileSize?"_o=
+					{
+						"Names"_o= _o["--file-size"]
+						, "Default"_o= 1024
+						, "Description"_o= "How big each file should be.\n"
+					}
+				}
+				, "Parameters"_o=
+				{
+					"Destination"_o=
+					{
+						"Type"_o= ""
+						, "Description"_o= "The destination path where the directory tree should be created.\n"
+					}
+				}
+			}
+			, [=](NEncoding::CEJsonSorted const _Params, NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine) -> TCFuture<uint32>
+			{
+				co_await ECoroutineFlag_CaptureExceptions;
+
+				auto Destination = _Params["Destination"].f_String();
+				umint NumFiles = _Params["NumFiles"].f_Integer();
+				umint NumDirectories = _Params["NumDirectories"].f_Integer();
+				umint FanOut = _Params["FanOut"].f_Integer();
+				umint FileSize = _Params["FileSize"].f_Integer();
+
+				CStr FileContents;
+				CStr FileLine = gc_Str<"0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789 0123456789\n">;
+				while (umint(FileContents.f_GetLen()) < FileSize)
+					FileContents += FileLine.f_Left(fg_Min(umint(FileLine.f_GetLen()), FileSize - FileContents.f_GetLen()));
+
+				{
+					auto BlockingActorCheckout = fg_BlockingActor();
+					co_await
+						(
+							g_Dispatch(BlockingActorCheckout) / [=]() -> TCFuture<void>
+							{
+								co_await ECoroutineFlag_CaptureExceptions;
+
+								auto nLeftToCreate = NumDirectories;
+
+								auto fCreateDirectories = [&](CStr const &_Path)
+									{
+										TCVector<CStr> Directories;
+										for (umint iDirectory = 0; iDirectory < FanOut; ++iDirectory)
 										{
-											TCVector<CStr> Directories;
-											for (umint iDirectory = 0; iDirectory < FanOut; ++iDirectory)
-											{
-												if (nLeftToCreate == 0)
-													return Directories;
+											if (nLeftToCreate == 0)
+												return Directories;
 
-												--nLeftToCreate;
-												CStr DirName = _Path / ("Dir{}"_f << iDirectory);
-												CFile::fs_CreateDirectory(DirName);
-												Directories.f_Insert(fg_Move(DirName));
-											}
-
-											return Directories;
+											--nLeftToCreate;
+											CStr DirName = _Path / ("Dir{}"_f << iDirectory);
+											CFile::fs_CreateDirectory(DirName);
+											Directories.f_Insert(fg_Move(DirName));
 										}
-									;
 
-									auto fCreateDirectoriesRecurse = [&](this auto &_fThis, CStr const &_Path)
+										return Directories;
+									}
+								;
+
+								auto fCreateDirectoriesRecurse = [&](this auto &_fThis, CStr const &_Path)
+									{
+										auto LeafDirectories = fCreateDirectories(_Path);
+
+										TCVector<CStr> AllDirectories;
+
+										while (nLeftToCreate)
 										{
-											auto LeafDirectories = fCreateDirectories(_Path);
-
-											TCVector<CStr> AllDirectories;
-
-											while (nLeftToCreate)
-											{
-												TCVector<CStr> NewLeafDirectories;
-												for (auto &LeafDirectory : LeafDirectories)
-													NewLeafDirectories.f_Insert(fCreateDirectories(LeafDirectory));
-
-												AllDirectories.f_Insert(fg_Move(LeafDirectories));
-
-												LeafDirectories = fg_Move(NewLeafDirectories);
-											}
+											TCVector<CStr> NewLeafDirectories;
+											for (auto &LeafDirectory : LeafDirectories)
+												NewLeafDirectories.f_Insert(fCreateDirectories(LeafDirectory));
 
 											AllDirectories.f_Insert(fg_Move(LeafDirectories));
 
-											return AllDirectories;
+											LeafDirectories = fg_Move(NewLeafDirectories);
 										}
-									;
 
-									TCVector<CStr> Directories = fCreateDirectoriesRecurse(Destination);
+										AllDirectories.f_Insert(fg_Move(LeafDirectories));
 
-									umint iDirectory = 0;
-									for (umint iFile = 0; iFile < NumFiles; ++iFile)
-									{
-										CStr Path = Directories[iDirectory] / ("File{}.txt"_f << iFile);
-										CFile::fs_WriteStringToFile(Path, FileContents, false);
-
-										++iDirectory;
-										if (iDirectory == NumDirectories)
-											iDirectory = 0;
+										return AllDirectories;
 									}
+								;
 
-									co_return {};
+								TCVector<CStr> Directories = fCreateDirectoriesRecurse(Destination);
+
+								umint iDirectory = 0;
+								for (umint iFile = 0; iFile < NumFiles; ++iFile)
+								{
+									CStr Path = Directories[iDirectory] / ("File{}.txt"_f << iFile);
+									CFile::fs_WriteStringToFile(Path, FileContents, false);
+
+									++iDirectory;
+									if (iDirectory == NumDirectories)
+										iDirectory = 0;
 								}
-							)
-						;
-					}
 
-					co_return {};
+								co_return {};
+							}
+						)
+					;
 				}
-			)
-		;
-	}
-};
+
+				co_return {};
+			}
+		)
+	;
+}
 
 DMibRuntimeClass(CTool, CTool_DeleteRecursiveParallel);
