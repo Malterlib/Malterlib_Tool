@@ -63,6 +63,22 @@ LLVMCleanupDuringBuild="${LLVMCleanupDuringBuild:-$LLVMCIDefault}" # delete thro
 LLVMEnableASan="${LLVMEnableASan:-false}"                # diagnostic final-stage AddressSanitizer build
 LLVMBuildStage="${LLVMBuildStage:-all}"
 
+# `debug` builds the final stage without a PGO profile, like `BuildLLVMDistribution.sh debug` builds without PGO and
+# LTO, for iterating on LLVM. It uses a build tree of its own, so it neither needs nor disturbs the tree of a release
+# build. With BuildIncremental=true it rebuilds only the final stage once stage0 exists.
+LLVMBuildDebug=false
+case "${1:-}" in
+	"")
+		;;
+	debug)
+		LLVMBuildDebug=true
+		;;
+	*)
+		echo "Unsupported argument: $1 (the only argument is debug)" >&2
+		exit 1
+		;;
+esac
+
 ExtraCMake="-G Ninja"
 RootDir="${MalterlibLLVMBuildRoot:-$ScriptDir}"
 RootOutputDir="$RootDir"
@@ -84,6 +100,9 @@ elif ! command -v perl >/dev/null 2>&1; then
 fi
 
 BuildDir="$RootOutputDir/build"
+if [[ "$LLVMBuildDebug" == "true" ]]; then
+	BuildDir="$RootOutputDir/build_debug"
+fi
 LLVMPackageDir="$BuildDir/llvm_package_$LLVMVersion"
 LLVMInstallDir="$LLVMPackageDir/install"
 LLVMReleaseBat="$MalterlibRoot/External/llvm-project/llvm/utils/release/build_llvm_release.bat"
@@ -107,6 +126,7 @@ echo "LLDBPDCursesSourceDir: $LLDBPDCursesSourceDir"
 echo "LLDBPDCursesTarget: $LLDBPDCursesTarget"
 echo "LLVM_BSDTAR: $LLVM_BSDTAR"
 echo "LLVMBuildStage: $LLVMBuildStage"
+echo "Debug (no PGO): $LLVMBuildDebug"
 echo "Optimizations -> DisableSymbols: $LLVMDisableSymbols  CleanupDuringBuild: $LLVMCleanupDuringBuild  EnableASan: $LLVMEnableASan"
 
 pushd "$ScriptDir"
@@ -124,6 +144,11 @@ case "$LLVMBuildStage" in
 		exit 1
 		;;
 esac
+
+if [[ "$LLVMBuildDebug" == "true" && "$LLVMBuildStage" == "pgo" ]]; then
+	echo "LLVMBuildStage=pgo is not used by debug builds, which have no PGO profile" >&2
+	exit 1
+fi
 
 fg_GetLLVMStage0Dir()
 {
@@ -322,7 +347,25 @@ pushd "$BuildDir"
 	if [[ "$LLVMCleanupDuringBuild" == "true" ]]; then
 		BuildArgs="$BuildArgs --cleanup"
 	fi
-	if [[ "$BuildIncremental" == "true" && ( "$LLVMBuildStage" == "all" || "$LLVMBuildStage" == "final" ) ]]; then
+	if [[ "$LLVMBuildDebug" == "true" ]]; then
+		BuildArgs="$BuildArgs --no-pgo"
+	fi
+	if [[ "$LLVMBuildDebug" == "true" ]] && [[ ( "$BuildIncremental" == "true" && "$LLVMBuildStage" == "all" ) || "$LLVMBuildStage" == "final" ]]; then
+		# Without PGO the final stage needs only stage0, which --final-stage-only doesn't take since it asks for a profile.
+		if fg_LLVMStage0Ready; then
+			echo "Debug: stage0 found; rebuilding only the final LLVM stage, without PGO"
+			BuildArgs="$BuildArgs --skip-stage0"
+		elif [[ "$LLVMBuildStage" == "final" ]]; then
+			echo "LLVMBuildStage=final needs stage0, which is missing from: `fg_GetLLVMStage0Dir`" >&2
+			exit 1
+		else
+			echo "BuildIncremental=true: stage0 compiler/dependencies are missing; building stage0 before the final LLVM stage"
+		fi
+	elif [[ "$LLVMBuildDebug" == "true" ]]; then
+		if [[ "$LLVMBuildStage" == "stage0" ]]; then
+			BuildArgs="$BuildArgs --stage0-only"
+		fi
+	elif [[ "$BuildIncremental" == "true" && ( "$LLVMBuildStage" == "all" || "$LLVMBuildStage" == "final" ) ]]; then
 		if fg_LLVMStage0Ready; then
 			if fg_LLVMProfileReady; then
 				echo "BuildIncremental=true: stage0 and PGO profile found; rebuilding only the final LLVM stage"
