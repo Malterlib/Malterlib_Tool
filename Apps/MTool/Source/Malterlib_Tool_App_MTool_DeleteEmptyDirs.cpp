@@ -5,32 +5,35 @@
 
 struct CTool_DeleteEmptyDirs : public CTool
 {
-	void f_DeleteEmptyDirs(CStr const &_Path)
-	{
-		TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
-
-		for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
-			f_DeleteEmptyDirs(Files[iFile]);
-
-		Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory | EFileAttrib_File, false);
-		if (Files.f_GetLen() == 0)
-		{
-			NFile::CFile::fs_DeleteDirectory(_Path);
-			DConOut("Deleting empty dir: {}" DNewLine, _Path);
-			return;
-		}
-	}
-
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		CStr Dir = _Params.f_GetValue("0", "NotExist");
-		if (!NFile::CFile::fs_FileExists(Dir, EFileAttrib_Directory))
-			DError("Directory does not exist");
-
-		f_DeleteEmptyDirs(Dir);
-
-		return 0;
-	}
+	void f_DeleteEmptyDirs(CStr const &_Path);
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+void CTool_DeleteEmptyDirs::f_DeleteEmptyDirs(CStr const &_Path)
+{
+	TCVector<CStr> Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory, false);
+
+	for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
+		f_DeleteEmptyDirs(Files[iFile]);
+
+	Files = NFile::CFile::fs_FindFiles(_Path + "/*", EFileAttrib_Directory | EFileAttrib_File, false);
+	if (Files.f_GetLen() == 0)
+	{
+		NFile::CFile::fs_DeleteDirectory(_Path);
+		DConOut("Deleting empty dir: {}" DNewLine, _Path);
+		return;
+	}
+}
+
+aint CTool_DeleteEmptyDirs::f_Run(NContainer::CRegistry &_Params)
+{
+	CStr Dir = _Params.f_GetValue("0", "NotExist");
+	if (!NFile::CFile::fs_FileExists(Dir, EFileAttrib_Directory))
+		DError("Directory does not exist");
+
+	f_DeleteEmptyDirs(Dir);
+
+	return 0;
+}
 
 DMibRuntimeClass(CTool, CTool_DeleteEmptyDirs);

@@ -5,30 +5,32 @@
 
 struct CTool_DetectVM : public CTool
 {
-	aint f_Run(NContainer::CRegistry &_Params)
-	{
-		bool bSilent = false;
-
-		CStr Arg0 = _Params.f_GetValue("0", "");
-		bSilent = (Arg0 == "-s") || (Arg0 == "--silent");
-
-		if (!bSilent)
-			DConOutRaw("Detecting VM...");
-
-		NMib::CVirtualMachineInfo const &VMInfo = fg_GetSys()->f_GetVirtualMachineInfo();
-
-		// NSys::fg_HW_GetVirtualMachineInfo(VMInfo);
-
-		if (!bSilent)
-		{
-			DConOutRaw("Done.\n");
-
-			DConOut("Detected VM: {}\n", (VMInfo.m_bDetected ? true : false));
-			DConOut("VM: {}\n", (VMInfo.m_pName ? VMInfo.m_pName : "none"));
-		}
-
-		return VMInfo.m_bDetected ? 1 : 0;
-	}
+	aint f_Run(NContainer::CRegistry &_Params);
 };
+
+aint CTool_DetectVM::f_Run(NContainer::CRegistry &_Params)
+{
+	bool bSilent = false;
+
+	CStr Arg0 = _Params.f_GetValue("0", "");
+	bSilent = (Arg0 == "-s") || (Arg0 == "--silent");
+
+	if (!bSilent)
+		DConOutRaw("Detecting VM...");
+
+	NMib::CVirtualMachineInfo const &VMInfo = fg_GetSys()->f_GetVirtualMachineInfo();
+
+	// NSys::fg_HW_GetVirtualMachineInfo(VMInfo);
+
+	if (!bSilent)
+	{
+		DConOutRaw("Done.\n");
+
+		DConOut("Detected VM: {}\n", (VMInfo.m_bDetected ? true : false));
+		DConOut("VM: {}\n", (VMInfo.m_pName ? VMInfo.m_pName : "none"));
+	}
+
+	return VMInfo.m_bDetected ? 1 : 0;
+}
 
 DMibRuntimeClass(CTool, CTool_DetectVM);

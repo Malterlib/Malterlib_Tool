@@ -19,6 +19,9 @@ namespace NMib::NTool
 
 	struct CNTImageFileHeader
 	{
+		bool f_Is64Bit();
+		bool f_Is32Bit();
+
 		EPEImageFileMachine m_Machine;
 		uint16 m_NumberOfSections;
 		uint32 m_TimeDateStamp;
@@ -26,9 +29,6 @@ namespace NMib::NTool
 		uint32 m_NumberOfSymbols;
 		uint16 m_SizeOfOptionalHeader;
 		uint16 m_Characteristics;
-
-		bool f_Is64Bit();
-		bool f_Is32Bit();
 	};
 
 	struct CPEImageDataDirectory

@@ -48,19 +48,21 @@ namespace
 
 	struct CAgentIncludes
 	{
-		void f_Add(CStr const &_Path, CStr const &_Parent)
-		{
-			auto Absolute = CFile::fs_GetExpandedPath(_Path, _Parent);
-			if (m_Seen.f_FindEqual(Absolute))
-				return;
-
-			m_Seen[Absolute];
-			m_Order.f_Insert(fg_Move(Absolute));
-		}
+		void f_Add(CStr const &_Path, CStr const &_Parent);
 
 		TCVector<CStr> m_Order;
 		TCSet<CStr> m_Seen;
 	};
+
+	void CAgentIncludes::f_Add(CStr const &_Path, CStr const &_Parent)
+	{
+		auto Absolute = CFile::fs_GetExpandedPath(_Path, _Parent);
+		if (m_Seen.f_FindEqual(Absolute))
+			return;
+
+		m_Seen[Absolute];
+		m_Order.f_Insert(fg_Move(Absolute));
+	}
 
 	CStr fg_AnnotateInline(CStr const &_Line, CStr const &_Parent, CAgentIncludes &o_Includes, bool _bCode)
 	{
@@ -99,77 +101,80 @@ namespace
 
 	struct CAgentGenerator
 	{
-		CStr f_Relative(CStr const &_Path) const
-		{
-			return CFile::fs_MakePathRelative(_Path, m_Root).f_Replace("\\", "/");
-		}
-
-		void f_Expand(CStr const &_Path)
-		{
-			auto Relative = f_Relative(_Path);
-			if (m_Stack.f_Contains(_Path) >= 0)
-			{
-				m_Output += "<!-- Cyclic include detected: ";
-				for (auto const &Path : m_Stack)
-					m_Output += Path + " -> ";
-
-				m_Output += _Path + " -->\n";
-				return;
-			}
-			if (m_Visited.f_FindEqual(_Path))
-			{
-				m_Output += "<!-- Duplicate include skipped: " + Relative + " -->\n";
-				return;
-			}
-			if (!CFile::fs_FileExists(_Path))
-			{
-				m_Output += "<!-- Missing include: " + Relative + " (resolved to " + _Path + ") -->\n";
-				return;
-			}
-
-			auto Text = CFile::fs_ReadStringFromFile(_Path, true);
-			auto Lines = Text.f_SplitLine();
-			auto Parent = CFile::fs_GetPath(_Path);
-			CAgentIncludes WholeLines;
-			CAgentIncludes Inline;
-			m_Stack.f_Insert(_Path);
-			m_Output += "<!-- Begin include: " + Relative + " -->\n";
-
-			for (umint iLine = 0; iLine < Lines.f_GetLen(); ++iLine)
-			{
-				auto const &Line = Lines[iLine];
-				auto Include = fg_WholeLineInclude(Line);
-				if (Include)
-				{
-					WholeLines.f_Add(Include, Parent);
-					m_Output += Line + "  (see below)\n";
-					continue;
-				}
-
-				auto Annotated = fg_AnnotateInline(Line, Parent, Inline, true);
-				m_Output += fg_AnnotateInline(Annotated, Parent, Inline, false);
-				if (iLine + 1 < Lines.f_GetLen())
-					m_Output += "\n";
-			}
-
-			for (auto const &Path : WholeLines.m_Order)
-				f_Expand(Path);
-			for (auto const &Path : Inline.m_Order)
-			{
-				if (!WholeLines.m_Seen.f_FindEqual(Path))
-					f_Expand(Path);
-			}
-
-			m_Stack.f_SetLen(m_Stack.f_GetLen() - 1);
-			m_Visited[_Path];
-			m_Output += "\n<!-- End include: " + Relative + " -->\n";
-		}
+		CStr f_Relative(CStr const &_Path) const;
+		void f_Expand(CStr const &_Path);
 
 		CStr m_Root;
 		CStr m_Output;
 		TCVector<CStr> m_Stack;
 		TCSet<CStr> m_Visited;
 	};
+
+	CStr CAgentGenerator::f_Relative(CStr const &_Path) const
+	{
+		return CFile::fs_MakePathRelative(_Path, m_Root).f_Replace("\\", "/");
+	}
+
+	void CAgentGenerator::f_Expand(CStr const &_Path)
+	{
+		auto Relative = f_Relative(_Path);
+		if (m_Stack.f_Contains(_Path) >= 0)
+		{
+			m_Output += "<!-- Cyclic include detected: ";
+			for (auto const &Path : m_Stack)
+				m_Output += Path + " -> ";
+
+			m_Output += _Path + " -->\n";
+			return;
+		}
+		if (m_Visited.f_FindEqual(_Path))
+		{
+			m_Output += "<!-- Duplicate include skipped: " + Relative + " -->\n";
+			return;
+		}
+		if (!CFile::fs_FileExists(_Path))
+		{
+			m_Output += "<!-- Missing include: " + Relative + " (resolved to " + _Path + ") -->\n";
+			return;
+		}
+
+		auto Text = CFile::fs_ReadStringFromFile(_Path, true);
+		auto Lines = Text.f_SplitLine();
+		auto Parent = CFile::fs_GetPath(_Path);
+		CAgentIncludes WholeLines;
+		CAgentIncludes Inline;
+		m_Stack.f_Insert(_Path);
+		m_Output += "<!-- Begin include: " + Relative + " -->\n";
+
+		for (umint iLine = 0; iLine < Lines.f_GetLen(); ++iLine)
+		{
+			auto const &Line = Lines[iLine];
+			auto Include = fg_WholeLineInclude(Line);
+			if (Include)
+			{
+				WholeLines.f_Add(Include, Parent);
+				m_Output += Line + "  (see below)\n";
+				continue;
+			}
+
+			auto Annotated = fg_AnnotateInline(Line, Parent, Inline, true);
+			m_Output += fg_AnnotateInline(Annotated, Parent, Inline, false);
+			if (iLine + 1 < Lines.f_GetLen())
+				m_Output += "\n";
+		}
+
+		for (auto const &Path : WholeLines.m_Order)
+			f_Expand(Path);
+		for (auto const &Path : Inline.m_Order)
+		{
+			if (!WholeLines.m_Seen.f_FindEqual(Path))
+				f_Expand(Path);
+		}
+
+		m_Stack.f_SetLen(m_Stack.f_GetLen() - 1);
+		m_Visited[_Path];
+		m_Output += "\n<!-- End include: " + Relative + " -->\n";
+	}
 }
 
 void CTool_Malterlib::f_Register_UpdateAgents(CDistributedAppCommandLineSpecification::CSection &o_UtilitiesSection)
