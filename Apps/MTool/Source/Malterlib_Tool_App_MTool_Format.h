@@ -10,6 +10,7 @@
 #include <Mib/Develop/EditorConfig>
 #include <Mib/Function/Function>
 #include <Mib/Git/Ignore>
+#include <Mib/Perforce/Ignore>
 
 namespace NMib::NTool::NFormat
 {
@@ -289,8 +290,10 @@ namespace NMib::NTool::NFormat
 		NContainer::TCVector<NStr::CStr> m_Files;
 		NContainer::TCVector<NStr::CStr> m_Patterns;
 		bool m_bRecursive = false;
-		bool m_bNestedRepositories = false; // A recursive walk also enters the repositories checked out where the one around them ignores them.
-		bool m_bOwnRepository = false;      // A recursive walk enters no repository below the one it starts in, ignored or not.
+		bool m_bNestedRepositories = false;                                      // A recursive walk also enters the repositories checked out where the one around them ignores them.
+		bool m_bOwnRepository = false;                                           // A recursive walk enters no repository below the one it starts in, ignored or not.
+		NStorage::TCSharedPointer<NPerforce::CPerforceIgnore> m_pPerforceIgnore; // Of the working directory when it is a Perforce root, whose P4IGNORE a walk follows
+		NContainer::TCSet<NStr::CStr> m_ExcludedDirectories;                     // A recursive walk enters none of them.
 	};
 
 	// One run over every selection: the trees are walked in parallel, a selection's files

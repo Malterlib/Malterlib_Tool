@@ -489,7 +489,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			{
 				"Names"_o= _o["format"]
 				, "Description"_o= "Format the sources of every repository that sets Repository.Format, as MTool Format does for one: "
-				"the files that opt in with malterlib_format = malterlib, malterlib-c or malterlib-buildsystem in .editorconfig, found under the repository root.\n"
+				"the files that opt in with malterlib_format = malterlib, malterlib-c or malterlib-buildsystem in .editorconfig, found under the repository root. "
+				"A Perforce root, which has no %Repository, is formatted when PerforceRoot.Format is set, without what its P4IGNORE files exclude.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
 				{
@@ -560,6 +561,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 				RepoFilter.m_bFormat = true;
+				RepoFilter.m_bIncludePerforceRoot = true;
 
 				// One run formats every repository at once, so the walks and the formatting
 				// spread over the cores together; a violation is not an error of the build
@@ -571,8 +573,16 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
 							TCVector<CStr> Locations;
-							if (auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations(GenerateOptions, RepoFilter, Locations); Retry != CBuildSystem::ERetry_None)
+							TCVector<CStr> AllLocations;
+							CStr PerforceRoot;
+							if
+							(
+								auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations(GenerateOptions, RepoFilter, Locations, &AllLocations, nullptr, &PerforceRoot)
+								; Retry != CBuildSystem::ERetry_None
+							)
+							{
 								co_return Retry;
+							}
 
 							if (Locations.f_IsEmpty())
 							{
@@ -585,6 +595,17 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							for (auto &Location : Locations)
 							{
 								auto &Selection = Selections.f_Insert();
+								if (Location == PerforceRoot)
+								{
+									Selection.m_pPerforceIgnore = fg_Construct(NPerforce::CPerforceIgnore::fs_GetSettings(Location, _pBuildSystem->f_GetPerforceEnvironment()));
+
+									// The repositories in the root are trees of their own, also before they are cloned.
+									for (auto &Other : AllLocations)
+									{
+										if (Other != Location)
+											Selection.m_ExcludedDirectories[Other];
+									}
+								}
 								Selection.m_WorkingDirectory = fg_Move(Location);
 								Selection.m_Patterns = {"*"};
 								Selection.m_bRecursive = true;
@@ -818,7 +839,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				"generated for their targets. The .clang-tidy files of the sources choose the checks. A file is checked when the deepest repository "
 				"it is in sets Repository.Tidy.Enabled, and its path relative to that repository matches Repository.Tidy.IncludeFiles, if there are "
 				"any, and not Repository.Tidy.ExcludeFiles. A source's compile reports the source and the checked headers of every repository, as "
-				"the checks plugin does in a build: a problem in a template shows where it is instantiated.\n"
+				"the checks plugin does in a build: a problem in a template shows where it is instantiated. A Perforce root, which has no %Repository, "
+				"takes PerforceRoot.Tidy instead, and its files are those its P4IGNORE files do not exclude.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
 				{
@@ -867,13 +889,22 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					{
 						"Names"_o= _o["--staged"]
 						, "Default"_o= false
-						, "Description"_o= "Only check the files changed in each index, and the sources that include them.\n"
+						, "Description"_o= "Only check the files changed in each index, or opened in the workspace of a Perforce root, and the sources that "
+						"include them.\n"
 					}
 					, "Base?"_o=
 					{
 						"Names"_o= _o["--base"]
 						, "Type"_o= ""
-						, "Description"_o= "Only check the files changed from the merge base with this reference to HEAD, and the sources that include them.\n"
+						, "Description"_o= "Only check the files changed from the merge base with this reference to HEAD, and the sources that include them. "
+						"In a Perforce root the reference is a changelist, like @1234, and the files are those submitted after it.\n"
+					}
+					, "PerforceBase?"_o=
+					{
+						"Names"_o= _o["--perforce-base"]
+						, "Type"_o= ""
+						, "Description"_o= "The changelist, like @1234, that the Perforce root's files are changed from, when --base is the git "
+						"repositories' reference. A run over both needs it.\n"
 					}
 					, "Fix?"_o=
 					{
@@ -955,6 +986,18 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					Options.m_Base = pBase->f_String();
 				}
 
+				if (auto pPerforceBase = _Params.f_GetMember("PerforceBase"))
+				{
+					if (Options.m_bStaged || pPerforceBase->f_String().f_IsEmpty())
+					{
+						*_pCommandLine %= Options.m_bStaged ? "--perforce-base and --staged cannot be combined\n" : "--perforce-base requires a nonempty changelist\n";
+
+						co_return 2;
+					}
+
+					Options.m_PerforceBase = pPerforceBase->f_String();
+				}
+
 				if (_Params["Jobs"].f_Integer() < 0)
 				{
 					*_pCommandLine %= "--jobs cannot be negative\n";
@@ -968,6 +1011,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 				RepoFilter.m_bTidy = true;
+				RepoFilter.m_bIncludePerforceRoot = true;
 
 				// A finding is not an error of the build system, so the exit code comes back beside its result.
 				NStorage::TCSharedPointer<NMib::NTool::CFormatOutcome> pOutcome = fg_Construct();
@@ -991,6 +1035,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							// checks its files, as the checks plugin reports in a build.
 							CBuildSystem::CRepoFilter ReportedFilter;
 							ReportedFilter.m_bTidy = true;
+							ReportedFilter.m_bIncludePerforceRoot = true;
 							TCMap<CStr, CBuildSystem::CRepoTidyFiles> TidyFiles;
 							if
 							(
@@ -1001,12 +1046,15 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 									, RunOptions.m_ReportedRepositories
 									, &RunOptions.m_AllRepositories
 									, &TidyFiles
+									, &RunOptions.m_PerforceRoot
 								)
 								; Retry != CBuildSystem::ERetry_None
 							)
 							{
 								co_return Retry;
 							}
+
+							RunOptions.m_PerforceEnvironment = _pBuildSystem->f_GetPerforceEnvironment();
 
 							for (auto iFiles = TidyFiles.f_GetIterator(); iFiles; ++iFiles)
 							{

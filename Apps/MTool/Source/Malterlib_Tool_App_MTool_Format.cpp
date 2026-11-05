@@ -6,6 +6,7 @@
 
 #include <Mib/Git/Helpers/Launch>
 #include <Mib/Git/Ignore>
+#include <Mib/Perforce/Ignore>
 #include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Container/Map>
 #include <Mib/Container/Set>
@@ -1250,6 +1251,7 @@ namespace NMib::NTool::NFormat
 		TCVector<CFile::CFoundFile> m_Entries;
 		TCVector<uint64> m_Sizes;            // Per entry, the size of a file the walk's patterns match, or zero.
 		TCVector<bool> m_HoldsRepository;    // Per entry, a directory holding a '.git' entry.
+		TCVector<bool> m_PerforceIgnored;    // Per entry, excluded by the P4IGNORE of the Perforce root the walk starts in
 		bool m_bRepository = false;          // The directory holds a '.git' entry.
 		TCOptional<CStr> m_Rules;            // The directory's own .gitignore.
 		TCOptional<CStr> m_GlobalExcludes;   // The file core.excludesFile names, at a repository's root.
@@ -1305,6 +1307,8 @@ namespace NMib::NTool::NFormat
 				, bool _bRecursive
 				, bool _bNestedRepositories
 				, bool _bOwnRepository
+				, TCSharedPointer<NPerforce::CPerforceIgnore> const &_pPerforceIgnore
+				, TCSet<CStr> const &_ExcludedDirectories
 				, bool _bLineLength
 				, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors
 			)
@@ -1327,16 +1331,18 @@ namespace NMib::NTool::NFormat
 		bool fp_MatchesName(CStr const &_Name) const;
 
 		CStr mp_Directory;
-		TCVector<CStr> mp_Wildcards;                                  // Upper case, matched the way the platform matches a find pattern.
+		TCVector<CStr> mp_Wildcards;                                    // Upper case, matched the way the platform matches a find pattern.
 		bool mp_bMatchAll = false;
 		bool mp_bRecursive = false;
 		bool mp_bNestedRepositories = false;
 		bool mp_bOwnRepository = false;
-		bool mp_bLineLength = false;                                  // A max_line_length below keeps a directory open too.
-		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pReaders; // The run's, shared with the other walks and the resolvers.
+		TCSet<CStr> mp_ExcludedDirectories;
+		bool mp_bLineLength = false;                                    // A max_line_length below keeps a directory open too.
+		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pReaders;   // The run's, shared with the other walks and the resolvers.
 		TCVector<CFormatWalkRepository> mp_Repositories;
-		TCSet<CStr> mp_TrackedOnly;                                   // Directories git ignores, entered for the paths in them it tracks.
+		TCSet<CStr> mp_TrackedOnly;                                     // Directories git ignores, entered for the paths in them it tracks.
 		NGit::CGitEnvironment mp_GitEnvironment;
+		TCSharedPointer<NPerforce::CPerforceIgnore> mp_pPerforceIgnore; // Of the Perforce root the walk starts in
 	};
 
 	CFormatWalk::CFormatWalk
@@ -1348,6 +1354,8 @@ namespace NMib::NTool::NFormat
 			, bool _bRecursive
 			, bool _bNestedRepositories
 			, bool _bOwnRepository
+			, TCSharedPointer<NPerforce::CPerforceIgnore> const &_pPerforceIgnore
+			, TCSet<CStr> const &_ExcludedDirectories
 			, bool _bLineLength
 			, TCSharedPointer<CSharedRoundRobinBlockingActors> const &_pBlockingActors
 		)
@@ -1355,6 +1363,7 @@ namespace NMib::NTool::NFormat
 		, mp_bRecursive(_bRecursive)
 		, mp_bNestedRepositories(_bNestedRepositories)
 		, mp_bOwnRepository(_bOwnRepository)
+		, mp_ExcludedDirectories(_ExcludedDirectories)
 		, mp_bLineLength(_bLineLength)
 		, mp_pReaders(_pBlockingActors)
 	{
@@ -1366,6 +1375,9 @@ namespace NMib::NTool::NFormat
 
 		mp_GitEnvironment = NGit::CGitEnvironment::fs_FromProcess();
 		fp_AddRepository(_Root, _bGit);
+
+		if (!_bGit)
+			mp_pPerforceIgnore = _pPerforceIgnore;
 	}
 
 	umint CFormatWalk::fp_AddRepository(CStr const &_Root, bool _bGit)
@@ -1439,10 +1451,16 @@ namespace NMib::NTool::NFormat
 
 	TCFuture<CFormatListing> CFormatWalk::fp_List(umint _iRepository, CStr _Directory)
 	{
+		// Only the walk's own root is a Perforce root.
+		TCSharedPointer<NPerforce::CPerforceIgnore> pPerforceIgnore;
+		if (_iRepository == 0)
+			pPerforceIgnore = mp_pPerforceIgnore;
+
 		co_return co_await
 			(
 				g_Dispatch(mp_pReaders->f_Next())
-				/ [iRepository = _iRepository, Directory = fg_Move(_Directory), Environment = mp_GitEnvironment, Wildcards = mp_Wildcards, bMatchAll = mp_bMatchAll]() -> CFormatListing
+				/ [iRepository = _iRepository, Directory = fg_Move(_Directory), Environment = mp_GitEnvironment, Wildcards = mp_Wildcards, bMatchAll = mp_bMatchAll, pPerforceIgnore]
+				() -> CFormatListing
 				{
 					CFormatListing Listing;
 					Listing.m_iRepository = iRepository;
@@ -1454,6 +1472,7 @@ namespace NMib::NTool::NFormat
 					Listing.m_Entries = CFile::fs_FindFilesEx(Directory / "*", EFileAttrib_File | EFileAttrib_Directory, false, false);
 					Listing.m_Sizes.f_SetLen(Listing.m_Entries.f_GetLen());
 					Listing.m_HoldsRepository.f_SetLen(Listing.m_Entries.f_GetLen());
+					Listing.m_PerforceIgnored.f_SetLen(Listing.m_Entries.f_GetLen());
 
 					for (umint iEntry = 0; iEntry < Listing.m_Entries.f_GetLen(); ++iEntry)
 					{
@@ -1490,6 +1509,17 @@ namespace NMib::NTool::NFormat
 							Listing.m_Rules = CFile::fs_ReadStringFromFile(Entry.m_Path, true);
 						else if (Name == ".gitattributes" && (Entry.m_Attribs & EFileAttrib_File) && !(Entry.m_Attribs & EFileAttrib_Link))
 							Listing.m_Attributes = CFile::fs_ReadStringFromFile(Entry.m_Path, true);
+					}
+
+					for (umint iEntry = 0; iEntry < Listing.m_Entries.f_GetLen(); ++iEntry)
+					{
+						auto const &Entry = Listing.m_Entries[iEntry];
+						Listing.m_PerforceIgnored[iEntry]
+							= pPerforceIgnore
+							&& !Listing.m_bRepository
+							&& !(Entry.m_Attribs & EFileAttrib_Link)
+							&& pPerforceIgnore->f_IsIgnored(Entry.m_Path, (Entry.m_Attribs & EFileAttrib_Directory) != 0)
+						;
 					}
 
 					return Listing;
@@ -1740,6 +1770,9 @@ namespace NMib::NTool::NFormat
 				if (Name == ".git")
 					continue;
 
+				if (Listing.m_PerforceIgnored[umint(&Entry - Listing.m_Entries.f_GetArray())])
+					continue;
+
 				// A FIFO, socket or device is listed as a file and read as one, which blocks on a FIFO. Out of scope by decision:
 				// the framework reports no file type that tells them apart, and the trees formatted hold none.
 				bool bDirectory = (Entry.m_Attribs & EFileAttrib_Directory) != 0;
@@ -1756,7 +1789,7 @@ namespace NMib::NTool::NFormat
 						continue;
 				}
 
-				if (bDirectory && mp_bOwnRepository && bHoldsRepository)
+				if (bDirectory && ((mp_bOwnRepository && bHoldsRepository) || mp_ExcludedDirectories.f_FindEqual(Entry.m_Path)))
 					continue;
 
 				if (!bDirectory)
@@ -2156,7 +2189,10 @@ namespace NMib::NTool::NFormat
 			if (!bFile)
 				co_return DMibErrorInstance("'{}' is not an existing regular file"_f << Path);
 
-			auto Root = co_await mp_RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Path));
+			// A git checkout around a Perforce root neither bounds nor ignores it.
+			CStr Root;
+			if (!_Selection.m_pPerforceIgnore)
+				Root = co_await mp_RootResolver(&CFormatRootResolver::f_Resolve, CFile::fs_GetPath(Path));
 			auto Boundary = Root ? Root : fg_GetFormatBoundary(WorkingDirectory, CFile::fs_GetPath(Path));
 
 			// A file reached through a linked directory lies outside the tree whose configuration it would be formatted by.
@@ -2182,7 +2218,10 @@ namespace NMib::NTool::NFormat
 		for (auto &DirectoryWildcards : Wildcards)
 		{
 			auto const &Directory = Wildcards.fs_GetKey(DirectoryWildcards);
-			auto Root = co_await mp_RootResolver(&CFormatRootResolver::f_Resolve, Directory);
+			// A git checkout around a Perforce root neither bounds nor ignores it.
+			CStr Root;
+			if (!_Selection.m_pPerforceIgnore)
+				Root = co_await mp_RootResolver(&CFormatRootResolver::f_Resolve, Directory);
 
 			// The walk follows no symbolic link, the directories a pattern names to start in included.
 			auto Boundary = Root ? Root : fg_GetFormatBoundary(WorkingDirectory, Directory);
@@ -2198,6 +2237,8 @@ namespace NMib::NTool::NFormat
 					, _Selection.m_bRecursive
 					, _Selection.m_bNestedRepositories
 					, _Selection.m_bOwnRepository
+					, _Selection.m_pPerforceIgnore
+					, _Selection.m_ExcludedDirectories
 					, mp_Options.m_bValidateLineLength
 					, mp_pBlockingActors
 				)
