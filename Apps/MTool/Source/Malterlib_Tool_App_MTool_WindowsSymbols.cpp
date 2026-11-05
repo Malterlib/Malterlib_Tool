@@ -41,11 +41,11 @@ namespace NMib::NTool
 		CByteVector Mem;
 		NFile::CFile File;
 		File.f_Open(_Path, EFileOpen_Read | EFileOpen_ShareAll);
-		CFilePos FLen;
+		CFilePos HeaderLength;
 		{
-			FLen = fg_Min(File.f_GetLength(), 128 * 1024);
-			Mem.f_SetLen(FLen);
-			File.f_Read(Mem.f_GetArray(), FLen);
+			HeaderLength = fg_Min(File.f_GetLength(), 128 * 1024);
+			Mem.f_SetLen(HeaderLength);
+			File.f_Read(Mem.f_GetArray(), HeaderLength);
 		}
 
 		auto fReadData = [&](CFilePos _Position, void *_pDest, umint _Length)
@@ -60,7 +60,7 @@ namespace NMib::NTool
 		uint32 *pData = (uint32 *)Mem.f_GetArray();
 		umint HeadersStart = 0;
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
-		for (int iOffset = 0; iOffset < FLen; iOffset += 4, pData += 1)
+		for (int iOffset = 0; iOffset < HeaderLength; iOffset += 4, pData += 1)
 		{
 			if (*pData == Find)
 			{

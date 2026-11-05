@@ -10,7 +10,7 @@
 #include <process.h>
 #include <wchar.h>
 
-extern "C" __declspec(dllimport) unsigned long __stdcall GetModuleFileNameW(void *_hModule, wchar_t *_pFileName, unsigned long _Size);
+extern "C" __declspec(dllimport) unsigned long __stdcall GetModuleFileNameW(void *_pModule, wchar_t *_pFileName, unsigned long _Size);
 
 namespace
 {

@@ -28,22 +28,22 @@ struct CTool_IncreaseTimeStamp : public CTool
 			DError("File does not exist");
 
 		CByteVector Mem;
-		CFilePos FLen;
+		CFilePos FileLength;
 		{
 			NFile::CFile File;
 			DConOut("Changing Timestamp: {}" DNewLine, FileName);
 
 			File.f_Open(FileName, EFileOpen_Read | EFileOpen_ShareAll);
-			FLen = File.f_GetLength();
-			Mem.f_SetLen(FLen);
-			File.f_Read(Mem.f_GetArray(), FLen);
+			FileLength = File.f_GetLength();
+			Mem.f_SetLen(FileLength);
+			File.f_Read(Mem.f_GetArray(), FileLength);
 		}
 
 		// Look for header information
 		IMAGE_NT_HEADERS *pHeader = nullptr;
 		uint32 *pData = (uint32 *)Mem.f_GetArray();
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
-		for (int iOffset = 0; iOffset < FLen; iOffset += 4, pData += 1)
+		for (int iOffset = 0; iOffset < FileLength; iOffset += 4, pData += 1)
 		{
 			if (*pData == Find)
 			{
@@ -70,7 +70,7 @@ struct CTool_IncreaseTimeStamp : public CTool
 					DConOut("Writing File: {}" DNewLine, FileName);
 
 					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
-					File.f_Write(Mem.f_GetArray(), FLen);
+					File.f_Write(Mem.f_GetArray(), FileLength);
 				}
 			}
 			else if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_I386)
@@ -88,7 +88,7 @@ struct CTool_IncreaseTimeStamp : public CTool
 					DConOut("Writing File: {}" DNewLine, FileName);
 
 					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
-					File.f_Write(Mem.f_GetArray(), FLen);
+					File.f_Write(Mem.f_GetArray(), FileLength);
 				}
 			}
 			else
@@ -121,7 +121,7 @@ struct CTool_SetImageOsVersion : public CTool
 			DError("No or incorrect version specified");
 
 		CByteVector Mem;
-		CFilePos FLen;
+		CFilePos FileLength;
 		{
 			NFile::CFile File;
 #ifdef DMibDebug
@@ -129,16 +129,16 @@ struct CTool_SetImageOsVersion : public CTool
 #endif
 
 			File.f_Open(FileName, EFileOpen_Read | EFileOpen_ShareAll);
-			FLen = File.f_GetLength();
-			Mem.f_SetLen(FLen);
-			File.f_Read(Mem.f_GetArray(), FLen);
+			FileLength = File.f_GetLength();
+			Mem.f_SetLen(FileLength);
+			File.f_Read(Mem.f_GetArray(), FileLength);
 		}
 
 		// Look for header information
 		IMAGE_NT_HEADERS *pHeader = nullptr;
 		uint32 *pData = (uint32 *)Mem.f_GetArray();
 		uint32 Find = 'P' + ('E' << 8) + ('\0' << 16) + ('\0' << 24);
-		for (int iOffset = 0; iOffset < FLen; iOffset += 4, pData += 1)
+		for (int iOffset = 0; iOffset < FileLength; iOffset += 4, pData += 1)
 		{
 			if (*pData == Find)
 			{
@@ -185,7 +185,7 @@ struct CTool_SetImageOsVersion : public CTool
 					DConOut("Writing File: {}" DNewLine, FileName);
 
 					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
-					File.f_Write(Mem.f_GetArray(), FLen);
+					File.f_Write(Mem.f_GetArray(), FileLength);
 				}
 			}
 			else if (pHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_I386)
@@ -226,7 +226,7 @@ struct CTool_SetImageOsVersion : public CTool
 #endif
 
 					File.f_Open(FileName, EFileOpen_Write | EFileOpen_ShareAll);
-					File.f_Write(Mem.f_GetArray(), FLen);
+					File.f_Write(Mem.f_GetArray(), FileLength);
 				}
 			}
 			else
