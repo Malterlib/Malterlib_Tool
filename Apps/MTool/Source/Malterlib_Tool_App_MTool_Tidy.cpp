@@ -9,6 +9,8 @@
 #include <Mib/Container/Set>
 #include <Mib/Cryptography/UUID>
 #include <Mib/Git/Helpers/Launch>
+#include <Mib/Perforce/Ignore>
+#include <Mib/Perforce/Wrapper>
 #include <Mib/Process/ProcessLaunchActor>
 
 // Actor call arguments and results need externally nameable types, so the command's helpers live in a named
@@ -162,6 +164,9 @@ namespace NMib::NTool::NTidy
 	{
 		CStr Repository = fg_GetTidyRepository(_Path, _Options.m_AllRepositories);
 		if (!Repository || _Options.m_ReportedRepositories.f_Contains(Repository) < 0)
+			return false;
+
+		if (Repository == _Options.m_PerforceRoot && _Options.m_pPerforceRootFiles && !_Options.m_pPerforceRootFiles->f_Contains(_Path))
 			return false;
 
 		auto *pFiles = _Options.m_RepositoryFiles.f_FindEqual(Repository);
@@ -1020,6 +1025,53 @@ namespace NMib::NTool::NTidy
 		co_return Files;
 	}
 
+	// The files of the root opened in the workspace, in any pending changelist, or with _Base, a changelist with or without its
+	// '@', those submitted after it. The workspace is the one of the root's settings, and a file of a repository in the root is
+	// that repository's.
+	TCFuture<TCVector<CStr>> fg_GetTidyPerforceChangedFiles(CStr _Root, CStr _Base, TCSharedPointer<NPerforce::CPerforceRootFiles> _pRootFiles)
+	{
+		auto CaptureScope = co_await (g_CaptureExceptions % ("Finding the changed files of '{}'"_f << _Root));
+
+		TCVector<CStr> Arguments = {"-Ro"};
+		if (_Base)
+		{
+			// 64-bit on a server that allows it. The largest has no changelist after it.
+			CStr Changelist = _Base.f_StartsWith("@") ? _Base.f_Extract(1) : _Base;
+			int64 Number = Changelist.f_ToInt(int64(-1));
+			if (Changelist.f_IsEmpty() || Number < 0 || Number == TCLimitsInt<int64>::mc_Max || CStr::fs_ToStr(Number) != Changelist)
+				co_return DMibErrorInstance("'{}' is a Perforce root, whose base is a changelist, like @1234, which '{}' is not"_f << _Root << _Base);
+
+			Arguments = {"-c", CStr::fs_ToStr(Number + 1)};
+		}
+		Arguments.f_Insert(NPerforce::CPerforceClient::fs_EscapeFileName(_Root) / "...");
+
+		co_return co_await
+			(
+				g_Dispatch(fg_BlockingActor()) / [_Root, Arguments, _pRootFiles]() -> TCVector<CStr>
+				{
+					// As p4 run in the root, whatever the current directory, with its P4CONFIG and enviro file.
+					auto const &Settings = _pRootFiles->f_GetSettings();
+					auto ConnectionInfo = NPerforce::CPerforceClient::fs_GetConnectionInfo(_Root);
+					ConnectionInfo.m_ConfigName = Settings.f_GetText(Settings.m_ConfigName);
+					ConnectionInfo.m_EnviroFile = Settings.m_EnviroFile;
+					NPerforce::CPerforceClientThrow Client(ConnectionInfo);
+					Client.f_Login(CStr(), _Root);
+
+					// Spelled as the compile commands are.
+					TCVector<CStr> Files;
+					for (auto &File : Client.f_GetFileStatFilesUnder(_Root, Arguments))
+					{
+						CStr Path = CFile::fs_CondensePath(File);
+						if (_pRootFiles->f_Contains(Path))
+							Files.f_Insert(Path);
+					}
+
+					return Files;
+				}
+			)
+		;
+	}
+
 	// The directories of a repository that hold the configuration nearest above a checked file, a file git does not ignore,
 	// added or not, and not deleted from the working tree. Verified there, the configuration is read with the ones it
 	// inherits, and one no checked file starts from is verified only where one inherits it.
@@ -1027,20 +1079,39 @@ namespace NMib::NTool::NTidy
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % ("Finding the clang-tidy configurations of '{}'"_f << _Repository));
 
-		auto Output = co_await NGit::fg_LaunchGit({"-c", "core.quotePath=true", "ls-files", "--cached", "--others", "--exclude-standard"}, _Repository);
-		auto Deleted = co_await NGit::fg_LaunchGit({"-c", "core.quotePath=true", "ls-files", "--deleted"}, _Repository);
-		TCSet<CStr> DeletedNames;
-		for (auto const &Name : Deleted.f_SplitLine<true>())
-			DeletedNames[Name];
+		// Relative to the repository.
+		TCVector<CStr> Names;
+		if (_Repository == _Options.m_PerforceRoot)
+		{
+			Names = co_await
+				(
+					g_Dispatch(fg_BlockingActor()) / [pRootFiles = _Options.m_pPerforceRootFiles]() -> TCVector<CStr>
+					{
+						return pRootFiles->f_List();
+					}
+				)
+			;
+		}
+		else
+		{
+			auto Output = co_await NGit::fg_LaunchGit({"-c", "core.quotePath=true", "ls-files", "--cached", "--others", "--exclude-standard"}, _Repository);
+			auto Deleted = co_await NGit::fg_LaunchGit({"-c", "core.quotePath=true", "ls-files", "--deleted"}, _Repository);
+			TCSet<CStr> DeletedNames;
+			for (auto const &Name : Deleted.f_SplitLine<true>())
+				DeletedNames[Name];
+
+			for (auto const &Name : Output.f_SplitLine<true>())
+			{
+				if (!DeletedNames.f_FindEqual(Name))
+					Names.f_Insert(NValidate::fg_UnquoteGitPath(Name));
+			}
+		}
 
 		TCSet<CStr> Configurations;
 		TCVector<CStr> CheckedFiles;
-		for (auto const &Name : Output.f_SplitLine<true>())
+		for (auto const &Name : Names)
 		{
-			if (DeletedNames.f_FindEqual(Name))
-				continue;
-
-			auto File = CFile::fs_CondensePath(_Repository / NValidate::fg_UnquoteGitPath(Name));
+			auto File = CFile::fs_CondensePath(_Repository / Name);
 			if (CFile::fs_GetFile(File) == ".clang-tidy")
 				Configurations[CFile::fs_GetPath(File)];
 			else if (fg_IsTidyCodeFile(File) && fg_IsTidyChecked(File, _Options))
@@ -1726,6 +1797,53 @@ namespace NMib::NTool::NTidy
 			_Options.m_RepositoryFiles = fg_Move(RepositoryFiles);
 		}
 
+		if (_Options.m_PerforceRoot)
+		{
+			_Options.m_PerforceRoot = fCondenseLocation(_Options.m_PerforceRoot);
+
+			TCSet<CStr> OtherRepositories;
+			for (auto &Location : _Options.m_AllRepositories)
+			{
+				if (Location != _Options.m_PerforceRoot)
+					OtherRepositories[Location];
+			}
+
+			_Options.m_pPerforceRootFiles = co_await
+				(
+					g_Dispatch(fg_BlockingActor()) / [Root = _Options.m_PerforceRoot, OtherRepositories = fg_Move(OtherRepositories), Environment = _Options.m_PerforceEnvironment]
+					() -> TCSharedPointer<NPerforce::CPerforceRootFiles>
+					{
+						return fg_Construct(Root, OtherRepositories, NPerforce::CPerforceIgnore::fs_GetSettings(Root, Environment));
+					}
+				)
+			;
+		}
+
+		// The Perforce root's files can be reported although the filters don't select the root.
+		bool bPerforceRootCompiled = _Options.m_PerforceRoot && _Options.m_CheckedRepositories.f_Contains(_Options.m_PerforceRoot) >= 0;
+		if (!bPerforceRootCompiled && _Options.m_PerforceBase)
+			co_return DMibErrorInstance("--perforce-base gives the base of a Perforce root, and none is checked");
+
+		// One base can't be both: a Perforce root's is a changelist and a git repository's a reference, which can look like a
+		// changelist.
+		bool bGitRepositories = false;
+		for (auto &Repository : _Options.m_CheckedRepositories)
+			bGitRepositories = bGitRepositories || Repository != _Options.m_PerforceRoot;
+
+		if (bGitRepositories && _Options.m_PerforceBase && !_Options.m_Base)
+			co_return DMibErrorInstance("--perforce-base gives the base of the Perforce root only: give the git repositories' reference with --base");
+
+		if (bGitRepositories && bPerforceRootCompiled && _Options.m_Base && !_Options.m_PerforceBase)
+		{
+			co_return DMibErrorInstance
+				(
+					"--base '{}' cannot be the base of both the git repositories and the Perforce root: give the Perforce root's changelist with "
+					"--perforce-base, and the git repositories' reference with --base"_f
+					<< _Options.m_Base
+				)
+			;
+		}
+
 		bool bHasClangTidy = co_await
 			(
 				g_Dispatch(fg_BlockingActor()) / [ClangTidy = _Options.m_ClangTidy]() -> bool
@@ -1764,11 +1882,16 @@ namespace NMib::NTool::NTidy
 		}
 
 		TCOptional<TCSet<CStr>> Changed;
-		if (_Options.m_bStaged || _Options.m_Base)
+		if (_Options.m_bStaged || _Options.m_Base || _Options.m_PerforceBase)
 		{
 			TCFutureVector<TCVector<CStr>> Pending;
 			for (auto &Repository : _Options.m_CheckedRepositories)
-				fg_GetTidyChangedFiles(Repository, _Options.m_Base) > Pending;
+			{
+				if (Repository == _Options.m_PerforceRoot)
+					fg_GetTidyPerforceChangedFiles(Repository, _Options.m_PerforceBase ? _Options.m_PerforceBase : _Options.m_Base, _Options.m_pPerforceRootFiles) > Pending;
+				else
+					fg_GetTidyChangedFiles(Repository, _Options.m_Base) > Pending;
+			}
 
 			Changed = TCSet<CStr>();
 			auto &ChangedFiles = *Changed;

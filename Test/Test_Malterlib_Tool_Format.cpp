@@ -3,6 +3,8 @@
 
 #include "Malterlib_Tool_TestHelpers.h"
 
+#include <Mib/String/Appender>
+
 namespace NMib::NTool
 {
 	using namespace NTestHelpers;
@@ -1028,6 +1030,170 @@ namespace NMib::NTool
 
 					co_return {};
 				};
+
+				co_return {};
+			};
+
+			DMibTestSuite("PerforceRoot") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Testing mib format in a Perforce root");
+
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+				Repo.f_MakePerforceRoot("P4CLIENT=Offline\n");
+				Repo.f_Write(".editorconfig", g_FormatConfiguration);
+				Repo.f_Write(".p4ignore", "/Ignored/\n*.generated.cpp\n.gitignore\n.gitattributes\n");
+#ifndef DPlatformFamily_Windows
+				// Git's rule files mean nothing in a Perforce root and aren't read: unreadable ones don't fail the format.
+				for (auto pName : {".gitignore", ".gitattributes"})
+				{
+					Repo.f_Write(pName, "*.cpp\n");
+					CFile::fs_SetAttributes(Repo.m_Path / pName, EFileAttrib_UnixAttributesValid | EFileAttrib_UserWrite);
+				}
+#endif
+				Repo.f_Write("Source.cpp", gc_Unformatted);
+				Repo.f_Write("Formatted.cpp", gc_Formatted);
+				Repo.f_Write("Source.generated.cpp", gc_Unformatted);
+				Repo.f_Write("Ignored/Ignored.cpp", gc_Unformatted);
+				Repo.f_Write("Lib/Lib.cpp", gc_Unformatted);
+				Repo.f_Write("Unknown/Unknown.cpp", gc_Unformatted);
+				for (auto pRepository : {"Lib", "Unknown"})
+				{
+					DMibTestPath(pRepository);
+					auto Init = co_await Repo.f_Run("git", {"init", "-q", "-b", "main", Repo.m_Path / pRepository}, Repo.m_Path);
+					DMibAssert(Init.m_ExitCode, ==, 0u);
+				}
+
+				auto fConfigure = [&](CStr const &_PerforceRoot)
+					{
+						CStr Configuration;
+						{
+							CStr::CAppender Appender(Configuration);
+							Appender += "Property\n{\n\tPerforceRoot ";
+							Appender += _PerforceRoot;
+							Appender += "\n}\n%Repository \"Lib\"\n{\n\tRepository\n\t{\n\t\tType \"Root\"\n\t\tDefaultBranch \"main\"\n";
+							Appender += "\t\tURL \"https://example.invalid/format-fixture.git\"\n\t\tLocation ";
+							Appender += CEJsonSorted(Repo.m_Path / "Lib").f_ToString();
+							Appender += "\n\t}\n}\n";
+						}
+						Repo.f_Write("Test.MBuildSystem", Configuration);
+					}
+				;
+
+				auto fFormat = [&](TCVector<CStr> const &_Extra)
+					{
+						TCVector<CStr> Params =
+							{
+								"format"
+								, "--skip-update"
+								, "--no-color"
+								, "--build-system"
+								, Repo.m_Path / "Test.MBuildSystem"
+								, "--output-directory"
+								, Repo.m_Root / "output"
+								, "--no-use-user-settings"
+								, "--no-use-cached-environment"
+							}
+						;
+						Params.f_Insert(_Extra);
+
+						return Repo.f_Tool(fg_Move(Params), true);
+					}
+				;
+
+				fConfigure("{Format: true}");
+
+				{
+					DMibTestPath("Check");
+					auto Result = co_await fFormat({"--check"});
+					DMibExpect(Result.m_ExitCode, ==, 1u);
+					CStr Output = Result.f_GetCombinedOut();
+					DMibExpect(Output.f_Find(" 1 unchanged, 1 would change"), >=, 0);
+					DMibExpect(Output.f_Find("Source.cpp"), >=, 0);
+					DMibExpect(Output.f_Find("generated"), <, 0);
+					DMibExpect(Output.f_Find("Ignored"), <, 0);
+					DMibExpect(Output.f_Find("Lib"), <, 0);
+					DMibExpect(Output.f_Find("Unknown"), <, 0);
+				}
+
+				{
+					DMibTestPath("Diff");
+					auto Result = co_await fFormat({"--diff"});
+					CStr Output = Result.f_GetCombinedOut();
+					DMibExpect(Output.f_Find("+++ b/Source.cpp"), >=, 0);
+					DMibExpect(Output.f_Find("Ignored"), <, 0);
+					DMibExpect(Output.f_Find("Unknown"), <, 0);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, gc_Unformatted);
+				}
+
+				{
+					DMibTestPath("Format");
+					auto Result = co_await fFormat({});
+					DMibExpect(Result.m_ExitCode, ==, 0u);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, gc_Formatted);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Ignored/Ignored.cpp", true), ==, gc_Unformatted);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Unknown/Unknown.cpp", true), ==, gc_Unformatted);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Lib/Lib.cpp", true), ==, gc_Unformatted);
+				}
+
+				{
+					// A repository of the build system is not the root's before it is cloned either.
+					DMibTestPath("RepositoryWithoutGit");
+					CFile::fs_DeleteDirectoryRecursive(Repo.m_Path / "Lib/.git");
+					auto Result = co_await fFormat({});
+					DMibExpect(Result.m_ExitCode, ==, 0u);
+					DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Lib/Lib.cpp", true), ==, gc_Unformatted);
+				}
+
+				{
+					DMibTestPath("NotOptedIn");
+					fConfigure("{Format: false}");
+					auto Result = co_await fFormat({"--check"});
+					DMibExpect(Result.m_ExitCode, ==, 0u);
+					DMibExpect(Result.f_GetCombinedOut().f_Find("No repository sets Repository.Format"), >=, 0);
+				}
+
+				co_return {};
+			};
+
+			// The git checkout around a Perforce root neither bounds its walk nor ignores it.
+			DMibTestSuite("PerforceRootInGitCheckout") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Testing mib format in a Perforce root inside a git checkout");
+
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+				Repo.f_SetPerforceEnvironment();
+				Repo.f_Write(".gitignore", "/Project/\n");
+				Repo.f_Write("Project/MToolFixture.p4config", "P4CLIENT=Offline\n");
+				Repo.f_Write("Project/.editorconfig", g_FormatConfiguration);
+				Repo.f_Write("Project/.p4ignore", "/Ignored/\n");
+				Repo.f_Write("Project/Source.cpp", gc_Unformatted);
+				Repo.f_Write("Project/Ignored/Ignored.cpp", gc_Unformatted);
+				Repo.f_Write("Project/Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+				auto Result = co_await Repo.f_Tool
+					(
+						{
+							"format"
+							, "--skip-update"
+							, "--no-color"
+							, "--build-system"
+							, Repo.m_Path / "Project/Test.MBuildSystem"
+							, "--output-directory"
+							, Repo.m_Root / "output"
+							, "--no-use-user-settings"
+							, "--no-use-cached-environment"
+							, "--check"
+						}
+						, true
+					)
+				;
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("Source.cpp"), >=, 0);
+				DMibExpect(Output.f_Find("Ignored"), <, 0);
+				DMibExpect(Output.f_Find("0 unchanged, 1 would change"), >=, 0);
 
 				co_return {};
 			};

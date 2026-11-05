@@ -436,6 +436,29 @@ namespace NMib::NTool::NTestHelpers
 		co_return co_await f_GitIn(_Directory, {"rev-parse", "HEAD"});
 	}
 
+	// Removes the git repository and writes a P4CONFIG file with _Config.
+	void CRepositoryFixture::f_MakePerforceRoot(CStr const &_Config)
+	{
+		if (CFile::fs_FileExists(m_Path / ".git"))
+			CFile::fs_DeleteDirectoryRecursive(m_Path / ".git");
+
+		f_SetPerforceEnvironment();
+		f_Write("MToolFixture.p4config", _Config);
+	}
+
+	// The tools the fixture runs ignore the user's P4 settings and enviro file. P4CONFIG is a name of the fixture's, so no P4CONFIG
+	// file above the fixture, like a user's .p4config, gives settings.
+	void CRepositoryFixture::f_SetPerforceEnvironment()
+	{
+		for (auto pName : {"P4PORT", "P4USER", "P4CLIENT", "P4PASSWD", "P4HOST", "P4CHARSET"})
+			m_Environment.f_Remove(pName);
+
+		m_Environment["P4CONFIG"] = "MToolFixture.p4config";
+		m_Environment["P4IGNORE"] = ".p4ignore";
+		m_Environment["P4ENVIRO"] = m_Root / "p4enviro";
+		m_Environment["P4TICKETS"] = m_Root / "p4tickets";
+	}
+
 	bool CRepositoryFixture::f_HasTemporaryAttributes() const
 	{
 		// The fixture points MToolRootDirectory at m_Root / "mtool".

@@ -694,6 +694,8 @@ Property
 			}
 		}
 	]
+	// The Perforce root tests run a p4d
+	MalterlibTestDependencies_Malterlib_Tool =+ ["Lib_Malterlib_Perforce"]
 	MalterlibTestDependencies_Malterlib_Tool =+ [
 		{
 			Name: "Com_TestShellShim"
