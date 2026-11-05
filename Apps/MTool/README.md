@@ -278,10 +278,13 @@ runs compare. The command exits with 1 when any check reports.
 
 `--mode` selects the compile commands:
 
-- `file`, the default, checks each source once, with the command of the best
-  target and configuration: the targets of `--target` first, then those of
+- `file`, the default, checks each source with the command of the best target
+  and configuration: the targets of `--target` first, then those of
   `--workspace`, then any other; the configuration by name first, then by base
-  name, so `Release Testing` matches `Release Testing (Tests)`, then any.
+  name, so `Release Testing` matches `Release Testing (Tests)`, then any. Other
+  targets of that workspace and configuration that compile the source with
+  another command are checked with theirs too, as their defines can compile
+  code the best command leaves out.
 - `target` checks every source of the targets of `--target`, each with its
   database in `--workspace`, or else in its highest priority workspace.
 - `all` checks every source of every target, once per distinct command, so each

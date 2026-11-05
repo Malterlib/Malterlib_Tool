@@ -9,14 +9,15 @@ namespace NMib::NTool
 
 	namespace
 	{
-		// Stands in for clang-tidy: logs its arguments, one run per line, and reports a diagnostic in the source,
-		// one in a header every source includes, and one in a header of the repository in Lib, when there is one.
+		// Stands in for clang-tidy: logs its arguments and the checked command's defines, and reports a diagnostic in the source,
+		// in Shared.h and in Lib/Other.h when it exists.
 		CStr const g_FakeClangTidy =
 			"#!/bin/sh\n"
 			"if [ \"$1\" = --verify-config ]; then echo 'No config errors detected.'; exit 0; fi\n"
 			"for Last; do :; done\n"
 			"if [ \"$(basename \"$Last\")\" = Unchecked.cpp ]; then echo 'Error: no checks enabled.' >&2; exit 1; fi\n"
 			"printf '%s\\n' \"$*\" >> \"$(dirname \"$0\")/tidy.log\"\n"
+			"if [ \"$1\" = -p ]; then grep -o -- '-D[A-Z]*' \"$2/compile_commands.json\" >> \"$(dirname \"$0\")/defines.log\" 2> /dev/null; fi\n"
 			"printf '%s:1:2: warning: in source [fake-check]\\n    1 | x\\n      | ^\\n' \"$Last\"\n"
 			"printf '%s/Shared.h:3:4: warning: in header [fake-check]\\n' \"$(dirname \"$Last\")\"\n"
 			"if [ -e \"$(dirname \"$Last\")/Lib/Other.h\" ]; then\n"
@@ -278,6 +279,15 @@ namespace NMib::NTool
 					}
 
 					{
+						// File mode falls back to other configurations per source, not for one that no database has.
+						DMibTestPath("UnknownConfigurationInFileMode");
+						auto Result = co_await Tidy.f_Run({"--config", "Windows x64 Debug"});
+						DMibExpect(Result.m_ExitCode, !=, 0u);
+						DMibExpect(Result.f_GetCombinedOut().f_Find("No compile database has the configuration 'Windows x64 Debug'"), >=, 0);
+						DMibExpect(Tidy.f_Checked(), ==, TCVector<CStr>{});
+					}
+
+					{
 						// A repository that does not opt in is not checked, and none is no error.
 						DMibTestPath("NotOptedIn");
 						Tidy.f_Configure("");
@@ -285,6 +295,54 @@ namespace NMib::NTool
 						DMibExpect(Result.m_ExitCode, ==, 0u);
 						DMibExpect(Result.f_GetCombinedOut().f_Find("No repository sets Repository.Tidy"), >=, 0);
 						DMibExpect(Tidy.f_Checked(), ==, TCVector<CStr>{});
+					}
+
+					co_return {};
+				};
+
+				// Like the system overrides of the malloc library, compiled by both the executable's and the shared library's targets.
+				DMibTestCategory("OtherTargetsOfTheBuild") -> TCFuture<void>
+				{
+					auto Capture = co_await (g_CaptureExceptions % "OtherTargetsOfTheBuild");
+
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write("A.cpp", "");
+					Repo.f_Write("Shared.h", "");
+					CTidyFixture Tidy(Repo);
+					Tidy.f_Configure("{Enabled: true}");
+
+					Tidy.f_AddDatabase("Main", 200, "Lib_Dll", "Debug", 101, {"A.cpp"}, "DLL");
+					Tidy.f_AddDatabase("Main", 200, "Lib_Executable", "Debug", 101, {"A.cpp"}, "OVERRIDE");
+					Tidy.f_AddDatabase("Main", 200, "Lib_Executable", "Release", 100, {"A.cpp"}, "RELEASE");
+					Tidy.f_AddDatabase("Other", 100, "Lib_Other", "Debug", 101, {"A.cpp"}, "OTHER");
+
+					auto Result = co_await Tidy.f_Run({"--sorted"});
+					DMibExpect(Result.m_ExitCode, ==, 1u);
+					DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"A.cpp", "A.cpp"}));
+
+					CStr Log = CFile::fs_ReadStringFromFile(Repo.m_Root / "bin/defines.log", true);
+					DMibExpect(Log.f_Find("-DDLL"), >=, 0);
+					DMibExpect(Log.f_Find("-DOVERRIDE"), >=, 0);
+					DMibExpect(Log.f_Find("-DRELEASE"), <, 0);
+					DMibExpect(Log.f_Find("-DOTHER"), <, 0);
+
+					{
+						// Only the other workspace's equal executable command has a dependency file.
+						DMibTestPath("EquivalentOfOtherTarget");
+						Tidy.f_AddDatabase("Other", 100, "Lib_OtherExecutable", "Debug", 101, {"A.cpp"}, "OVERRIDE");
+						CFile::fs_DeleteFile(Repo.m_Root / "output/Lib_Executable/A.cpp.o.d");
+						co_await Repo.f_Commit();
+						Repo.f_Write("Shared.h", "int y;\n");
+						co_await Repo.f_Stage();
+						CFile::fs_DeleteFile(Repo.m_Root / "bin/defines.log");
+
+						auto StagedResult = co_await Tidy.f_Run({"--sorted", "--staged"});
+						DMibExpect(StagedResult.m_ExitCode, ==, 1u);
+						DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"A.cpp", "A.cpp"}));
+						CStr StagedLog = CFile::fs_ReadStringFromFile(Repo.m_Root / "bin/defines.log", true);
+						DMibExpect(StagedLog.f_Find("-DDLL"), >=, 0);
+						DMibExpect(StagedLog.f_Find("-DOVERRIDE"), >=, 0);
 					}
 
 					co_return {};
@@ -312,6 +370,17 @@ namespace NMib::NTool
 						DMibTestPath("OtherRepository");
 						Tidy.f_Configure("{Enabled: true}", "{Enabled: true}");
 						auto Result = co_await Tidy.f_Run({"--sorted"});
+						DMibExpect(Result.m_ExitCode, ==, 1u);
+						CStr Output = Result.f_GetCombinedOut();
+						DMibExpect(Output.f_Find(Repo.m_Path / "Lib/Other.h:5:6: warning: in other repository [fake-check]"), >=, 0);
+						DMibExpect(Output.f_Find("Checked 2 files with 2 commands: 4 warnings, 0 errors"), >=, 0);
+					}
+
+					{
+						// The repository filters select the sources compiled, not what their compiles report.
+						DMibTestPath("FilteredRunReportsOtherRepository");
+						Tidy.f_Configure("{Enabled: true}", "{Enabled: true}");
+						auto Result = co_await Tidy.f_Run({"--sorted", "-n", "."});
 						DMibExpect(Result.m_ExitCode, ==, 1u);
 						CStr Output = Result.f_GetCombinedOut();
 						DMibExpect(Output.f_Find(Repo.m_Path / "Lib/Other.h:5:6: warning: in other repository [fake-check]"), >=, 0);
@@ -350,6 +419,19 @@ namespace NMib::NTool
 						DMibExpect(Output.f_Find("in header"), <, 0);
 						DMibExpect(Output.f_Find(Repo.m_Path / "Lib/Other.h:5:6: warning: in other repository [fake-check]"), >=, 0);
 						DMibExpect(Output.f_Find("Checked 1 file with 1 command: 2 warnings, 0 errors"), >=, 0);
+					}
+
+					{
+						// The repositories selected and those reported come from one read of the build system, whose defines would
+						// collide with themselves in a second.
+						DMibTestPath("FilteredRunWithDefine");
+						Tidy.f_Configure("{Enabled: true}", "{Enabled: true}");
+						CStr Configuration = CFile::fs_ReadStringFromFile(Repo.m_Path / "Test.MBuildSystem", true);
+						Repo.f_Write("Test.MBuildSystem", Configuration + "Property\n{\n\tTidyFixtureDefine define bool = false\n}\n");
+						auto Result = co_await Tidy.f_Run({"--sorted", "-n", "."});
+						CStr Output = Result.f_GetCombinedOut();
+						DMibExpect(Output.f_Find("Variable definition collision"), <, 0);
+						DMibExpect(Output.f_Find("Checked 2 files with 2 commands: 4 warnings, 0 errors"), >=, 0);
 					}
 
 					co_return {};
