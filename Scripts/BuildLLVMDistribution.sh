@@ -741,6 +741,53 @@ if [[ "$MalterlibPlatform" == "macOS" ]]; then
 	AddCMakeCacheValue "CMAKE_OSX_DEPLOYMENT_TARGET" "$MACOSX_DEPLOYMENT_TARGET"
 fi
 
+# The macOS x64 distribution can be built on an arm64 host: stage 1 is then a native compiler that also targets x86_64,
+# and it compiles the later stages for x86_64.
+MacOSCrossBuild=false
+if [[ "$MalterlibPlatform" == "macOS" ]] && [[ "$DetectedMalterlibPlatform/$DetectedMalterlibArch" != "macOS/$MalterlibArch" ]]; then
+	if [[ "$DetectedMalterlibPlatform/$DetectedMalterlibArch/$MalterlibArch" != "macOS/arm64/x64" ]]; then
+		echo "The macOS $MalterlibArch distribution can't be built on a $DetectedMalterlibPlatform $DetectedMalterlibArch host" >&2
+		exit 1
+	fi
+
+	MacOSCrossBuild=true
+fi
+
+# Configures the stages after stage 1 to build x86_64 binaries on an arm64 host.
+# Usage: ConfigureMacOSCrossBuild <build directory> <stage 1 build directory name>
+#
+# The stages are not cross compiled in CMake's sense, so they configure as on an x86_64 host and run their checks under
+# Rosetta. Their table generators, which run most often in the build, are the native ones of stage 1.
+ConfigureMacOSCrossBuild()
+{
+	if [[ "$MacOSCrossBuild" != "true" ]]; then
+		return
+	fi
+
+	local BuildDir="$1"
+	local Stage1BuildDirName="$2"
+	local NativeToolDir="$BuildDir/native-tools"
+	local TargetTriple
+	local Tool
+
+	# The triple is fixed when stage 1 is configured, since a different one would rebuild the stages that are already built
+	TargetTriple="$(awk -F= '/^BOOTSTRAP_LLVM_HOST_TRIPLE:[^=]*=/ { print $2; exit }' "$BuildDir/$Stage1BuildDirName/CMakeCache.txt" 2>/dev/null || true)"
+	if [[ -z "$TargetTriple" ]]; then
+		TargetTriple="x86_64-apple-darwin$(uname -r)"
+	fi
+
+	mkdir -p "$NativeToolDir"
+	for Tool in llvm-tblgen llvm-min-tblgen clang-tblgen; do
+		ln -sfn "../$Stage1BuildDirName/bin/$Tool" "$NativeToolDir/$Tool"
+	done
+
+	echo "Building x86_64 stages on arm64: host triple $TargetTriple, native tools in $NativeToolDir"
+	ExtraCMake="$ExtraCMake -DLLVM_TARGETS_TO_BUILD=AArch64;X86"
+	AddBootstrapCMakeCacheValue "CMAKE_OSX_ARCHITECTURES" "x86_64"
+	AddBootstrapCMakeCacheValue "LLVM_HOST_TRIPLE" "$TargetTriple"
+	AddBootstrapCMakeCacheValue "LLVM_NATIVE_TOOL_DIR" "$NativeToolDir"
+}
+
 ConfigureMacOSCommandLineToolsPython()
 {
 	local PythonFrameworkVersions="/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions"
@@ -1242,6 +1289,7 @@ BuildCompilerLTO()
 
 	ConfigureLinuxBootstrapBuildRuntimePath "$BuildDir/dist_temp"
 	ConfigureStageRevisions "$BuildDir/dist_temp" 3
+	ConfigureMacOSCrossBuild "$BuildDir" dist_temp
 
 	ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_PGO=ON"
 	ExtraCMake="$ExtraCMake -DBOOTSTRAP_LLVM_VP_COUNTERS_PER_SITE=3"
@@ -1341,6 +1389,7 @@ BuildCompiler()
 	popd
 	ConfigureLinuxBootstrapBuildRuntimePath "$BuildDir/dist_temp2"
 	ConfigureStageRevisions "$BuildDir/dist_temp2" 2
+	ConfigureMacOSCrossBuild "$BuildDir" dist_temp2
 
 	pushd "$RootDir/build/dist_temp2"
 		ExtraCMake="$ExtraCMake -DBOOTSTRAP_CMAKE_INSTALL_PREFIX=$DistributionDir"
@@ -1377,6 +1426,11 @@ BuildCompiler()
 
 BuildDevCompiler()
 {
+	if [[ "$MacOSCrossBuild" == "true" ]]; then
+		echo "A development compiler is built for the host only: unset MalterlibLLVMArch or set it to $DetectedMalterlibArch" >&2
+		exit 1
+	fi
+
 	BuildType="${BuildType:-Debug}"
 	export StandaloneBuild=true
 	mkdir -p "$RootDir/build/dist_temp2"
