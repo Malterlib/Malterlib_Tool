@@ -788,6 +788,40 @@ ConfigureMacOSCrossBuild()
 	AddBootstrapCMakeCacheValue "LLVM_NATIVE_TOOL_DIR" "$NativeToolDir"
 }
 
+# Records the host that configures a macOS build tree. Usage: WriteMacOSBuildHost <build directory>
+WriteMacOSBuildHost()
+{
+	if [[ "$MalterlibPlatform" != "macOS" ]]; then
+		return
+	fi
+
+	echo "$DetectedMalterlibPlatform/$DetectedMalterlibArch" > "$1/BuildHost"
+}
+
+# Stops a stage that would continue a macOS build tree configured on a host of another architecture, such as one restored
+# from a run that built the x64 distribution on an Intel host. Its stage 1 compiler would then run under Rosetta, and a
+# reconfiguration with this host's settings would rebuild it. A tree without a record was configured on a host of the
+# target's architecture. Usage: CheckMacOSBuildHost <build directory>
+CheckMacOSBuildHost()
+{
+	if [[ "$MalterlibPlatform" != "macOS" ]]; then
+		return
+	fi
+
+	local BuildDir="$1"
+	local BuildHost="$MalterlibPlatform/$MalterlibArch"
+
+	if [[ -f "$BuildDir/BuildHost" ]]; then
+		BuildHost="$(cat "$BuildDir/BuildHost")"
+	fi
+
+	if [[ "$BuildHost" != "$DetectedMalterlibPlatform/$DetectedMalterlibArch" ]]; then
+		echo "The LLVM build tree in $BuildDir was configured on a $BuildHost host, but the $LLVMBuildStage stage runs on a" \
+			"$DetectedMalterlibPlatform/$DetectedMalterlibArch host. Run stage 1 on a host of this architecture first." >&2
+		exit 1
+	fi
+}
+
 ConfigureMacOSCommandLineToolsPython()
 {
 	local PythonFrameworkVersions="/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions"
@@ -1303,6 +1337,7 @@ BuildCompilerLTO()
 		pushd "$BuildDir/dist_temp"
 			echo Configuring LLVM bootstrap build
 
+			WriteMacOSBuildHost "$BuildDir"
 			cmake $ExtraCMake -C "$MalterlibRoot/External/llvm-project/clang/cmake/caches/Release.cmake" "$MalterlibRoot/External/llvm-project/llvm"
 			RunNinja clang-bootstrap-deps
 		popd
@@ -1314,6 +1349,8 @@ BuildCompilerLTO()
 			echo "Run LLVMBuildStage=stage1 first."
 			exit 1
 		fi
+
+		CheckMacOSBuildHost "$BuildDir"
 
 		pushd "$BuildDir/dist_temp"
 			RunNinja stage2-instrumented
@@ -1360,6 +1397,8 @@ BuildCompilerLTO()
 			exit 1
 		fi
 
+		CheckMacOSBuildHost "$BuildDir"
+
 		pushd "$BuildDir/dist_temp"
 			cmake $ExtraCMake -C "$MalterlibRoot/External/llvm-project/clang/cmake/caches/Release.cmake" "$MalterlibRoot/External/llvm-project/llvm"
 			CleanDistributionDir
@@ -1398,6 +1437,7 @@ BuildCompiler()
 		ExtraCMake="$ExtraCMake -DLLVM_RELEASE_ENABLE_BOLTOPT=OFF"
 
 		if [[ "$RequestedStage" == "all" || "$RequestedStage" == "stage1" ]]; then
+			WriteMacOSBuildHost "$BuildDir"
 			cmake $ExtraCMake -C "$MalterlibRoot/External/llvm-project/clang/cmake/caches/Release.cmake" "$MalterlibRoot/External/llvm-project/llvm"
 			RunNinja clang-bootstrap-deps
 		fi
@@ -1408,6 +1448,8 @@ BuildCompiler()
 				echo "Run LLVMBuildStage=stage1 first."
 				exit 1
 			fi
+
+			CheckMacOSBuildHost "$BuildDir"
 
 			cmake $ExtraCMake -C "$MalterlibRoot/External/llvm-project/clang/cmake/caches/Release.cmake" "$MalterlibRoot/External/llvm-project/llvm"
 			CleanDistributionDir
