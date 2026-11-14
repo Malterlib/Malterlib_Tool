@@ -1377,6 +1377,9 @@ BuildCompilerLTO()
 			export MalterlibDisableBuildSystemGeneration=true
 			export PlatformToolsetCompiler="$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins/bin/clang"
 			export MalterlibImportUpdateCache=false
+			# Pebble, the ACME server of the Web tests, is a Go program: building it trains nothing, and it needs a newer Go
+			# than the runners may have
+			export MalterlibWebEnablePebbleTests=false
 
 			./mib generate --no-use-user-settings Tests --reconcile-removed=*:leave
 
