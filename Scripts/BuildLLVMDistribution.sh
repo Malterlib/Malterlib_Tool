@@ -822,6 +822,100 @@ CheckMacOSBuildHost()
 	fi
 }
 
+# Prints what the failed post build steps of a training build left behind and the state of the host, from the log of the
+# build: ninja prints the command of a failed step only, so each post build script the log names failed.
+# Usage: PrintFailedTrainingSteps <log of the build> <build directory>
+PrintFailedTrainingSteps()
+{
+	local Log="$1"
+	local BuildDir="$2"
+	local Script
+	local OutputDir
+	local File
+
+	echo "State of the host after the failed training build:"
+	df -h "$BuildDir" || true
+	if [[ "$DetectedMalterlibPlatform" == "macOS" ]]; then
+		vm_stat || true
+		sysctl kern.num_files kern.maxfiles kern.maxfilesperproc kern.num_vnodes kern.maxvnodes || true
+	fi
+
+	while IFS= read -r Script; do
+		echo "Failed post build script: $Script"
+		tr '\r' '\n' < "$Script" || true
+
+		# The outputs of a target are beside its generated files, under Out instead of Generated
+		OutputDir="$(dirname "${Script/\/Generated\///Out/}")"
+		echo "Outputs of the target: $OutputDir"
+		ls -laR "$OutputDir" | head -n 300 || true
+
+		if [[ "$DetectedMalterlibPlatform" != "macOS" ]]; then
+			continue
+		fi
+
+		xattr -lr "$OutputDir" 2>&1 | head -n 100 || true
+		plutil -lint "$(dirname "$Script")/Info.plist" 2>&1 || true
+		while IFS= read -r File; do
+			echo "Signature of $File:"
+			codesign --display --verbose=4 "$File" 2>&1 || true
+		done < <(find "$OutputDir/Deployed" -type f -perm -u+x 2> /dev/null | head -n 20)
+	done < <(grep -o '"[^"]*/PostBuild\.sh"' "$Log" | tr -d '"' | sort -u)
+
+	if [[ "$DetectedMalterlibPlatform" == "macOS" ]]; then
+		echo "What the system logged for the tools of the post build steps in the last 5 minutes:"
+		log show --last 5m --style compact --predicate \
+			'process == "codesign" OR process == "plutil" OR process == "amfid" OR process == "syspolicyd" OR process == "taskgated"' \
+			2>&1 | tail -n 300 || true
+	fi
+}
+
+# Tells whether every step that failed in a build was the post build step of a target, from the log of the build: ninja
+# prints `FAILED:` with the outputs of a failed step and its command on the next line.
+# Usage: OnlyPostBuildStepsFailed <log of the build>
+OnlyPostBuildStepsFailed()
+{
+	awk '
+		/^FAILED: / {
+			++nFailed
+			if ((getline Command) > 0 && Command ~ /\/PostBuild\.sh"[ \t\r]*$/)
+				++nPostBuild
+		}
+		END {
+			exit !(nFailed > 0 && nFailed == nPostBuild)
+		}
+	' "$1"
+}
+
+# Builds the tests that train the compiler. A post build step of a target (deploying its files, writing the Info.plist
+# of a bundle, signing) can fail on a macOS runner in a way that doesn't recur, and a build continues from what is built,
+# so a build in which only post build steps failed is worth trying again, where one that fails in a compile or a link
+# isn't. Usage: RunTrainingBuild <build directory>
+RunTrainingBuild()
+{
+	local BuildDir="$1"
+	local Log="$BuildDir/TrainingBuild.log"
+	local nTries=3
+	local iTry
+
+	for ((iTry = 1; iTry <= nTries; iTry++)); do
+		if ./mib build Tests 2>&1 | tee "$Log"; then
+			if (( iTry > 1 )); then
+				echo "The training build passed on try $iTry of $nTries"
+			fi
+			return 0
+		fi
+
+		echo "The training build failed on try $iTry of $nTries"
+		PrintFailedTrainingSteps "$Log" "$BuildDir"
+
+		if ! OnlyPostBuildStepsFailed "$Log"; then
+			return 1
+		fi
+	done
+
+	return 1
+}
+
 ConfigureMacOSCommandLineToolsPython()
 {
 	local PythonFrameworkVersions="/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions"
@@ -1385,7 +1479,7 @@ BuildCompilerLTO()
 
 			(source "$MalterlibRoot/BuildSystem/SharedBuildSettings.sh"; rm -rf "$MalterlibCompiledFilesSourceBase/Tests/Int"; rm -rf "$MalterlibCompiledFilesSourceBase/Tests/Out")
 
-			./mib build Tests
+			RunTrainingBuild "$BuildDir"
 
 			(source "$MalterlibRoot/BuildSystem/SharedBuildSettings.sh"; rm -rf "$MalterlibCompiledFilesSourceBase/Tests/Int"; rm -rf "$MalterlibCompiledFilesSourceBase/Tests/Out")
 			rm -rf /opt/Deploy/Tests /Deploy/Tests || true
