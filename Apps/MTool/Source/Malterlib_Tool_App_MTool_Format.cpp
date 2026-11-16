@@ -1459,8 +1459,16 @@ namespace NMib::NTool::NFormat
 
 		co_return co_await
 			(
-				g_Dispatch(mp_pReaders->f_Next())
-				/ [iRepository = _iRepository, Directory = fg_Move(_Directory), Environment = mp_GitEnvironment, Wildcards = mp_Wildcards, bMatchAll = mp_bMatchAll, pPerforceIgnore, bGit = mp_Repositories[_iRepository].m_bGit]
+				g_Dispatch(mp_pReaders->f_Next()) /
+				[
+					iRepository = _iRepository
+					, Directory = fg_Move(_Directory)
+					, Environment = mp_GitEnvironment
+					, Wildcards = mp_Wildcards
+					, bMatchAll = mp_bMatchAll
+					, pPerforceIgnore
+					, bGit = mp_Repositories[_iRepository].m_bGit
+				]
 				() -> CFormatListing
 				{
 					CFormatListing Listing;
