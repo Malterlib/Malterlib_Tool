@@ -77,13 +77,17 @@ namespace NMib::NTool::NFormat
 	// document a file extends is applied under it. Each directory is looked up and each file
 	// read once per run, and a directory without either reads no name as more than C++ does.
 	// The documents a snapshot of a repository holds, by absolute path: a document inside m_Root is read from them, and one
-	// missing from them is missing whatever the working tree holds; one outside it is read from disk.
+	// missing from them is missing whatever the working tree holds; one outside it is read from disk, and so is one in a
+	// repository checked out below m_Root that the snapshot doesn't hold.
 	struct CFormatStyleSnapshot
 	{
 		NStr::CStr m_Root;
 		NContainer::TCMap<NStr::CStr, NStr::CStr> m_Documents;
-		NContainer::TCMap<NStr::CStr, NStr::CStr> m_Blobs; // The snapshot's other regular files, by absolute path, to their blobs, for a document extended.
-		NStr::CStr m_GitDirectory;                         // Where git reads the blobs, with m_GitEnvironment.
+		// Every file and symbolic link of the snapshot, by absolute path, to its blob, for a document another names to
+		// extend; an empty blob for a symbolic link, which no document is read from. A repository the snapshot links to
+		// is no entry: what is below it is that repository's.
+		NContainer::TCMap<NStr::CStr, NStr::CStr> m_Entries;
+		NStr::CStr m_GitDirectory; // Where git reads the blobs, with m_GitEnvironment.
 		NMib::CSystemEnvironment m_GitEnvironment;
 	};
 
@@ -107,7 +111,7 @@ namespace NMib::NTool::NFormat
 		};
 
 		NConcurrency::TCFuture<NStr::CStr> fp_FindDocument(NStr::CStr _Directory, NStr::CStr _Name);
-		NStr::CStr const *fp_FindInSnapshot(NStr::CStr const &_Path, bool &o_bInSnapshot) const;
+		NConcurrency::TCFuture<NContainer::TCVector<bool>> fp_InSnapshot(NContainer::TCVector<NStr::CStr> _Paths);
 		NConcurrency::TCFuture<NStorage::TCSharedPointer<NDevelop::CCodeFormattingStyle const>> fp_Load(NStr::CStr _Path, NContainer::TCVector<NStr::CStr> _Chain);
 		NConcurrency::TCFuture<NStorage::TCSharedPointer<NDevelop::CCodeFormattingStyle const>> fp_Read(NStr::CStr _Path, NContainer::TCVector<NStr::CStr> _Chain);
 
@@ -116,6 +120,7 @@ namespace NMib::NTool::NFormat
 		NContainer::TCMap<NStr::CStr, NStr::CStr> mp_Documents;                   // Directory to the document it takes; empty for none.
 		NContainer::TCMap<NStr::CStr, NStr::CStr> mp_Fallbacks;                   // Directory to the fallback document above it; empty for none.
 		NContainer::TCMap<NStr::CStr, NStorage::TCSharedPointer<CLoad>> mp_Loads; // Document path to its style, loaded or loading.
+		NContainer::TCMap<NStr::CStr, bool> mp_InOtherRepository;                 // Directory below the snapshot's root to whether another repository holds it.
 	};
 
 	// Analyzes on the concurrency manager's high CPU actors, one analysis per actor at a time, each started on an actor that

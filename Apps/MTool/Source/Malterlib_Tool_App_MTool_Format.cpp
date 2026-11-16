@@ -974,13 +974,77 @@ namespace NMib::NTool::NFormat
 	{
 	}
 
-	CStr const *CFormatStyleResolver::fp_FindInSnapshot(CStr const &_Path, bool &o_bInSnapshot) const
+	// Per path, whether the snapshot answers for it: a path the snapshot holds, or one inside the snapshot's root that no
+	// repository checked out below the root holds. The snapshot has none of such a repository's files, so they are read
+	// from disk as in a run without a snapshot.
+	TCFuture<TCVector<bool>> CFormatStyleResolver::fp_InSnapshot(TCVector<CStr> _Paths)
 	{
-		o_bInSnapshot = mp_pSnapshot && _Path.f_StartsWith(mp_pSnapshot->m_Root + "/");
-		if (!o_bInSnapshot)
-			return nullptr;
+		TCVector<bool> InSnapshot;
+		for (umint iPath = 0; iPath < _Paths.f_GetLen(); ++iPath)
+			InSnapshot.f_Insert(false);
 
-		return mp_pSnapshot->m_Documents.f_FindEqual(_Path);
+		if (!mp_pSnapshot)
+			co_return fg_Move(InSnapshot);
+
+		CStr Root = mp_pSnapshot->m_Root;
+		CStr RootPrefix = Root + "/";
+
+		// Per path inside the root, its directory, and those of them whose repository isn't known yet.
+		TCVector<CStr> Directories;
+		TCVector<CStr> Unknown;
+		for (auto const &Path : _Paths)
+		{
+			auto &Directory = Directories.f_Insert();
+			if (!Path.f_StartsWith(RootPrefix))
+				continue;
+
+			// An entry of the snapshot is its own, whatever is checked out around it since, and a path below an entry
+			// that is no directory is none the snapshot can have.
+			bool bEntry = false;
+			for (auto Walk = Path; !bEntry && Walk.f_StartsWith(RootPrefix); Walk = CFile::fs_GetPath(Walk))
+				bEntry = mp_pSnapshot->m_Entries.f_FindEqual(Walk) != nullptr;
+
+			Directory = bEntry ? Root : CFile::fs_GetPath(Path);
+			if (Directory != Root && !mp_InOtherRepository.f_FindEqual(Directory))
+				Unknown.f_Insert(Directory);
+		}
+
+		if (!Unknown.f_IsEmpty())
+		{
+			auto InOtherRepository = co_await
+				(
+					g_Dispatch(mp_pBlockingActors->f_Next()) / [Unknown, RootPrefix]() -> TCVector<bool>
+					{
+						TCVector<bool> InOtherRepository;
+						for (auto const &Directory : Unknown)
+						{
+							bool bOtherRepository = false;
+							for (auto Walk = Directory; !bOtherRepository && Walk.f_StartsWith(RootPrefix); Walk = CFile::fs_GetPath(Walk))
+								bOtherRepository = CFile::fs_FileExists(Walk / ".git");
+
+							InOtherRepository.f_Insert(bOtherRepository);
+						}
+
+						return InOtherRepository;
+					}
+				)
+			;
+
+			for (umint iDirectory = 0; iDirectory < Unknown.f_GetLen(); ++iDirectory)
+				mp_InOtherRepository(Unknown[iDirectory], InOtherRepository[iDirectory]);
+		}
+
+		for (umint iPath = 0; iPath < _Paths.f_GetLen(); ++iPath)
+		{
+			auto const &Directory = Directories[iPath];
+			if (!Directory)
+				continue;
+
+			auto pInOtherRepository = mp_InOtherRepository.f_FindEqual(Directory);
+			InSnapshot[iPath] = Directory == Root || (pInOtherRepository && !*pInOtherRepository);
+		}
+
+		co_return fg_Move(InSnapshot);
 	}
 
 	enum class EFormatDocumentPresence
@@ -1019,15 +1083,19 @@ namespace NMib::NTool::NFormat
 
 		if (!Pending.f_IsEmpty())
 		{
-			// Per directory passed, whether the snapshot holds the document, or that the file system is asked.
 			TCVector<CStr> Candidates;
+			for (auto const &Directory : Pending)
+				Candidates.f_Insert(Directory / _Name);
+
+			auto InSnapshot = co_await fp_InSnapshot(fg_TempCopy(Candidates));
+
+			// Per directory passed, whether the snapshot holds the document, or that the file system is asked.
 			TCVector<EFormatDocumentPresence> Presence;
 			bool bAsk = false;
-			for (auto const &Directory : Pending)
+			for (umint iCandidate = 0; iCandidate < Candidates.f_GetLen(); ++iCandidate)
 			{
-				auto &Candidate = Candidates.f_Insert(Directory / _Name);
-				bool bInSnapshot = false;
-				bool bSnapshotHolds = fp_FindInSnapshot(Candidate, bInSnapshot) != nullptr;
+				bool bInSnapshot = InSnapshot[iCandidate];
+				bool bSnapshotHolds = bInSnapshot && mp_pSnapshot->m_Documents.f_FindEqual(Candidates[iCandidate]) != nullptr;
 				Presence.f_Insert(!bInSnapshot ? EFormatDocumentPresence::mc_Unknown : bSnapshotHolds ? EFormatDocumentPresence::mc_Present : EFormatDocumentPresence::mc_Absent);
 				bAsk = bAsk || !bInSnapshot;
 			}
@@ -1163,15 +1231,18 @@ namespace NMib::NTool::NFormat
 	TCFuture<TCSharedPointer<CCodeFormattingStyle const>> CFormatStyleResolver::fp_Read(CStr _Path, TCVector<CStr> _Chain)
 	{
 		CStr Yaml;
-		bool bInSnapshot = false;
-		if (auto pSnapshot = fp_FindInSnapshot(_Path, bInSnapshot))
-			Yaml = *pSnapshot;
+		bool bInSnapshot = (co_await fp_InSnapshot({_Path}))[0];
+		if (auto pDocument = bInSnapshot ? mp_pSnapshot->m_Documents.f_FindEqual(_Path) : nullptr)
+			Yaml = *pDocument;
 		else if (bInSnapshot)
 		{
 			// A document another names to extend, whatever its name, is read from the snapshot too.
-			auto pBlob = mp_pSnapshot->m_Blobs.f_FindEqual(_Path);
+			auto pBlob = mp_pSnapshot->m_Entries.f_FindEqual(_Path);
 			if (!pBlob)
 				co_return DMibErrorInstance("'{}' is not in the validated snapshot"_f << _Path);
+
+			if (pBlob->f_IsEmpty())
+				co_return DMibErrorInstance("'{}' is not a regular file in the validated snapshot"_f << _Path);
 
 			Yaml = (co_await NGit::fg_LaunchGit({"cat-file", "blob", *pBlob}, mp_pSnapshot->m_GitDirectory, mp_pSnapshot->m_GitEnvironment)).f_RemovePrefix("\xEF\xBB\xBF");
 		}

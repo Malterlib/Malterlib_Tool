@@ -416,15 +416,15 @@ namespace NMib::NTool::NValidate
 			if (!Head && Header != "0")
 				co_return DMibErrorInstance("Cannot validate an unmerged index: {}"_f << (_Directory / Path));
 
+			// A symbolic link is the snapshot's all the same, with no blob a style is read from. What is below a linked
+			// repository is not.
+			if (Mode != "160000")
+				pStyleSnapshot->m_Entries(pStyleSnapshot->m_Root / Path, Mode == "100644" || Mode == "100755" ? Hash : CStr());
+
 			bool bAttributes = CFile::fs_GetFile(Path) == ".gitattributes";
 			bool bStyle = CFile::fs_GetFile(Path) == ".malterlib-format";
 			if (CFile::fs_GetFile(Path) != ".editorconfig" && !bAttributes && !bStyle)
-			{
-				if (Mode == "100644" || Mode == "100755")
-					pStyleSnapshot->m_Blobs(pStyleSnapshot->m_Root / Path, Hash);
-
 				continue;
-			}
 
 			// git reads no .gitattributes through a symbolic link. A style the working tree reaches through one would apply
 			// there and not here, so it is refused as an EditorConfig is.

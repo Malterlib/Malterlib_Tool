@@ -818,6 +818,78 @@ namespace NMib::NTool
 				co_return {};
 			};
 
+			// A staged run validates the root's index, which holds no file of a repository checked out below the root.
+			DMibTestCategory("StagedReadsNestedRepository") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "StagedReadsNestedRepository");
+
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+				Repo.f_Write(".editorconfig", g_FormatConfiguration);
+				Repo.f_Write(".gitignore", "/Malterlib/Core\n");
+				co_await Repo.f_Git({"init", "-q", "Malterlib/Core"});
+				Repo.f_Write("Malterlib/Core/.malterlib-format", Style);
+				Repo.f_Write("Source.cpp", Source);
+				co_await Repo.f_Stage();
+
+				// Without a document of its own the root reads Malterlib/Core's, as a run of the working tree does.
+				auto Fallback = co_await Repo.f_Validate("Fallback", 1);
+				DMibExpect(Fallback.f_Find("Source.cpp:1:"), >=, 0);
+
+				// A document of the root that extends Malterlib/Core's reads it from there.
+				Repo.f_Write(".malterlib-format", "Version: 1\nExtends: Malterlib/Core/.malterlib-format\n");
+				co_await Repo.f_Stage();
+
+				auto Extended = co_await Repo.f_Validate("Extended", 1);
+				DMibExpect(Extended.f_Find("is not in the validated snapshot"), ==, -1);
+				DMibExpect(Extended.f_Find("Source.cpp:1:"), >=, 0);
+
+				// A style the root tracks stays the staged one when a repository is checked out around it afterwards.
+				Repo.f_Write("Vendor/Style.yaml", Style);
+				Repo.f_Write(".malterlib-format", "Version: 1\nExtends: Vendor/Style.yaml\n");
+				co_await Repo.f_Stage();
+				co_await Repo.f_Git({"init", "-q", "Vendor"});
+				Repo.f_Write("Vendor/Style.yaml", "Version: 1\n");
+
+				auto Tracked = co_await Repo.f_Validate("Tracked", 1);
+				DMibExpect(Tracked.f_Find("Source.cpp:1:"), >=, 0);
+
+#ifndef DPlatformFamily_Windows
+				// A symbolic link the root tracks there is no style of the snapshot, and isn't followed on disk either.
+				Repo.f_Write("Vendor/Original.yaml", Style);
+				CFile::fs_CreateSymbolicLink("Original.yaml", Repo.m_Path / "Vendor/Link.yaml", EFileAttrib_File, ESymbolicLinkFlag_Relative);
+				Repo.f_Write(".malterlib-format", "Version: 1\nExtends: Vendor/Link.yaml\n");
+				co_await Repo.f_Git({"-c", "core.hooksPath=/dev/null", "--git-dir", ".git", "add", "-f", "Vendor/Link.yaml", ".malterlib-format"});
+
+				auto Linked = co_await Repo.f_Tool({"Validate", "-C", Repo.m_Path, "--staged", "--no-color"});
+				DMibExpect(Linked.m_ExitCode, !=, 0u);
+				DMibExpect(Linked.f_GetCombinedOut().f_Find("is not a regular file in the validated snapshot"), >=, 0);
+#endif
+
+				// Whatever its name, a file the root tracks there is read from the snapshot.
+				Repo.f_Write("Vendor/.gitattributes", Style);
+				Repo.f_Write(".malterlib-format", "Version: 1\nExtends: Vendor/.gitattributes\n");
+				co_await Repo.f_Git({"--git-dir", ".git", "add", "-f", "Vendor/.gitattributes", ".malterlib-format"});
+				Repo.f_Write("Vendor/.gitattributes", "Version: 1\n");
+
+				auto Named = co_await Repo.f_Validate("Named", 1);
+				DMibExpect(Named.f_Find("Source.cpp:1:"), >=, 0);
+
+				// A path below a file the root tracks is none of the snapshot, whatever is checked out in the file's place.
+				Repo.f_Write("Owned", "A file\n");
+				Repo.f_Write(".malterlib-format", "Version: 1\nExtends: Owned/Style.yaml\n");
+				co_await Repo.f_Git({"--git-dir", ".git", "add", "-f", "Owned", ".malterlib-format"});
+				CFile::fs_DeleteFile(Repo.m_Path / "Owned");
+				co_await Repo.f_Git({"init", "-q", "Owned"});
+				Repo.f_Write("Owned/Style.yaml", Style);
+
+				auto Below = co_await Repo.f_Tool({"Validate", "-C", Repo.m_Path, "--staged", "--no-color"});
+				DMibExpect(Below.m_ExitCode, !=, 0u);
+				DMibExpect(Below.f_GetCombinedOut().f_Find("is not in the validated snapshot"), >=, 0);
+
+				co_return {};
+			};
+
 			DMibTestCategory("InvalidDocumentsFail") -> TCFuture<void>
 			{
 				auto Capture = co_await (g_CaptureExceptions % "InvalidDocumentsFail");
