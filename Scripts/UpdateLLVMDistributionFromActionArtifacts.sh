@@ -74,6 +74,7 @@ fg_Usage()
 	echo "Usage: $0 [--dry-run] [--run-id <id>] [--repo <owner/repo>] [--workflow <file-or-name>] [--host|all|host|Target...]"
 	echo
 	echo "Downloads MalterlibLLVM-* GitHub Actions artifacts and deploys them to Binaries/MalterlibLLVM."
+	echo "Also updates Malterlib/Core/LLVMGenerated/__assertion_handler from the libc++ of the deployed distributions."
 	echo "Targets: Linux/x64, Linux/arm64, Linux/x86, macOS/arm64, macOS/x64, Windows/x64, Windows/arm64"
 	echo
 	echo "If --run-id is omitted, the newest $Workflow run with a successful artifact for each enabled target is used."
@@ -469,6 +470,47 @@ fg_FindRuns()
 	fi
 }
 
+# Malterlib compiles libc++ from External/llvm-project without the CMake build of libc++, which is what generates
+# __assertion_handler, so Malterlib/Core keeps a copy of the generated header. The distributions that have libc++
+# carry the one their build generated, the Windows ones have no libc++.
+AssertionHandler="$MalterlibRoot/Malterlib/Core/LLVMGenerated/__assertion_handler"
+
+fg_UpdateAssertionHandler()
+{
+	local Distribution
+	local Candidate
+	local Source=""
+
+	if [[ ! -d "${AssertionHandler%/*}" ]]; then
+		return 0
+	fi
+
+	for Distribution in "$@"
+	do
+		Candidate="$Distribution/include/c++/v1/__assertion_handler"
+		if [[ ! -f "$Candidate" ]]; then
+			continue
+		fi
+
+		if [[ -z "$Source" ]]; then
+			Source="$Candidate"
+		elif ! cmp -s "$Source" "$Candidate"; then
+			echo "The libc++ assertion handlers of the updated distributions differ: $Source and $Candidate." >&2
+			echo "Left $AssertionHandler as it was." >&2
+			return 1
+		fi
+	done
+
+	if [[ -z "$Source" ]]; then
+		echo "None of the updated distributions has libc++, left $AssertionHandler as it was."
+	elif cmp -s "$Source" "$AssertionHandler"; then
+		echo "$AssertionHandler is the one of the updated distributions."
+	else
+		echo "Updating $AssertionHandler from $Source"
+		cp "$Source" "$AssertionHandler"
+	fi
+}
+
 SupportedTargets=(Linux/x64 Linux/arm64 Linux/x86 macOS/arm64 macOS/x64 Windows/x64 Windows/arm64)
 AllTargets=true
 DryRun=false
@@ -618,7 +660,7 @@ if [[ "$DryRun" == "true" ]]; then
 
 		echo "  $Target: $ArtifactName from run $ArtifactRunId -> $Destination"
 	done
-	echo "Dry run: no artifacts downloaded, no files updated, and LICENSE regeneration skipped."
+	echo "Dry run: no artifacts downloaded, no files updated, and LICENSE regeneration and the update of $AssertionHandler skipped."
 	exit 0
 fi
 
@@ -658,6 +700,7 @@ DownloadArtifacts=()
 DownloadRunIds=()
 DownloadPids=()
 LicenseRepoFilters=()
+UpdatedDistributions=()
 
 fg_DownloadArtifact()
 {
@@ -752,6 +795,7 @@ do
 
 	((++nUpdated))
 	LicenseRepoFilters+=("$LicenseRepoFilter")
+	UpdatedDistributions+=("$Destination")
 done
 
 if [[ "$nUpdated" == "0" ]]; then
@@ -771,3 +815,5 @@ echo "Updated $nUpdated LLVM distribution(s)."
 		./mib check-license -n "$LicenseRepoFilter" --fix
 	done
 )
+
+fg_UpdateAssertionHandler "${UpdatedDistributions[@]}"
