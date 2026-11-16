@@ -472,6 +472,80 @@ CleanDistributionDir()
 	rm -rf "$DistributionDir/"*
 }
 
+# Checks that the distribution directory holds what the build made (VerifyLLVMDistribution.sh), right after the install
+# and before anything else is added to it. On macOS also against a second install of the same build, into a directory
+# beside the build directory, which costs no space there as the install clones the files.
+VerifyDistributionInstall()
+{
+	local FinalStageDir="$1"
+
+	if [[ "$MalterlibPlatform" != "macOS" ]]; then
+		"$ScriptDir/VerifyLLVMDistribution.sh" "$DistributionDir"
+		return
+	fi
+
+	local VerifyRoot="$RootDir/dist_verify"
+	local Result=0
+
+	rm -rf "$VerifyRoot"
+	DESTDIR="$VerifyRoot" cmake --install "$FinalStageDir" > /dev/null || Result="$?"
+	if [[ "$Result" -eq 0 ]]; then
+		"$ScriptDir/VerifyLLVMDistribution.sh" "$DistributionDir" "$VerifyRoot$DistributionDir" || Result="$?"
+	fi
+	rm -rf "$VerifyRoot"
+
+	return "$Result"
+}
+
+# Installs the final stage, which is built in the directory given, into the distribution directory, and checks what was
+# installed.
+#
+# On the macOS runners, files the build had written moments before the install copied them were installed with the right
+# size and all zero bytes: seven Python files of lldb and llvm-mca in the distributions of 2026-11-15. The install copies
+# a file by cloning it where the file system can, as APFS does. Why the copies were empty isn't known, so what the build
+# wrote is flushed to disk before the install, which is checked, and made again when it fails the check, before the
+# stage fails.
+#
+# The install is cmake's own, which only installs. The install target of the build builds first, and each time it does,
+# lldb writes the files of its Python packages again, the seven among them, right before they are copied.
+InstallDistribution()
+{
+	local FinalStageDir="$1"
+	local Attempt
+
+	if [[ ! -f "$FinalStageDir/cmake_install.cmake" ]]; then
+		echo "The final stage is not built: $FinalStageDir"
+		exit 1
+	fi
+
+	for Attempt in 1 2 3; do
+		sync
+		CleanDistributionDir
+		cmake --install "$FinalStageDir"
+		if VerifyDistributionInstall "$FinalStageDir"; then
+			return
+		fi
+		echo "The installed LLVM distribution failed its check (attempt $Attempt of 3)"
+	done
+
+	echo "The LLVM distribution could not be installed as the build made it"
+	exit 1
+}
+
+# Builds the final stage, whose build directory is given, from the bootstrap build that is the current directory, and
+# installs it.
+#
+# The bootstrap builds the stages before it and the final stage, but a final stage it has built once it doesn't look at
+# again, so the final stage is then built in its own directory, which builds what has changed since.
+BuildAndInstallDistribution()
+{
+	local FinalStageDir="$1"
+
+	RunNinja stage2
+	RunNinja -C "$FinalStageDir"
+	InstallDistribution "$FinalStageDir"
+}
+
 FindLLVMDistributionCMakeCacheValue()
 {
 	local Name="$1"
@@ -1498,18 +1572,11 @@ BuildCompilerLTO()
 
 		pushd "$BuildDir/dist_temp"
 			cmake $ExtraCMake -C "$MalterlibRoot/External/llvm-project/clang/cmake/caches/Release.cmake" "$MalterlibRoot/External/llvm-project/llvm"
-			CleanDistributionDir
-
-			if [[ "$BuildIncremental" == "true" ]]; then
-				# With PGO the distribution is installed by the instrumented stage's own bootstrap, so its stamp is the one that
-				# keeps an up to date build from installing into the distribution directory that was just cleaned
-				rm -f "tools/clang/stage2-stamps/stage2-really-install"
-				rm -f "tools/clang/stage2-instrumented-bins/tools/clang/stage2-stamps/stage2-really-install"
-			fi
 
 			InstallLinuxRuntimeLibraryLinksInDir "$BuildDir/dist_temp"
 			InstallLinuxRuntimeLibraryLinksInDir "$BuildDir/dist_temp/tools/clang/stage2-bins"
-			RunNinja stage2-install
+			# With PGO the final stage is the instrumented stage's own bootstrap
+			BuildAndInstallDistribution "$BuildDir/dist_temp/tools/clang/stage2-instrumented-bins/tools/clang/stage2-bins"
 			InstallLinuxRuntimeLibraryLinks
 		popd
 	fi
@@ -1549,15 +1616,10 @@ BuildCompiler()
 			CheckMacOSBuildHost "$BuildDir"
 
 			cmake $ExtraCMake -C "$MalterlibRoot/External/llvm-project/clang/cmake/caches/Release.cmake" "$MalterlibRoot/External/llvm-project/llvm"
-			CleanDistributionDir
-
-			if [[ "$BuildIncremental" == "true" ]]; then
-				rm -f "tools/clang/stage2-stamps/stage2-really-install"
-			fi
 
 			InstallLinuxRuntimeLibraryLinksInDir "$BuildDir/dist_temp2"
 			InstallLinuxRuntimeLibraryLinksInDir "$BuildDir/dist_temp2/tools/clang/stage2-bins"
-			RunNinja stage2-install
+			BuildAndInstallDistribution "$BuildDir/dist_temp2/tools/clang/stage2-bins"
 			InstallLinuxRuntimeLibraryLinks
 		fi
 	popd
