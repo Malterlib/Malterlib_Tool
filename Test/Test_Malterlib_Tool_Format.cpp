@@ -604,6 +604,382 @@ namespace NMib::NTool
 			co_return {};
 		};
 
+		DMibTestSuite("Server") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing MTool Format --server");
+
+			CStr const LongType = "NMib::NCryptography::TCHashImpl<TCHashImpl_BoringSSL<EDigestType_SHA256, 32>>";
+			CStr const SplitType = "NMib::NCryptography::TCHashImpl\n\t<\n\t\tTCHashImpl_BoringSSL<EDigestType_SHA256, 32>\n\t>";
+
+			// The lines as requests: an object that names no request is a fragment, with the columns when it has none.
+			auto fFragments = [](CStr const &_Lines, umint _nMaxColumns) -> CStr
+				{
+					CStr Requests;
+					bool bFirst = true;
+					for (auto const &Line : _Lines.f_Split("\n"))
+					{
+						if (!bFirst)
+							Requests += "\n";
+
+						bFirst = false;
+						if (!Line.f_StartsWith("{"))
+						{
+							Requests += Line;
+
+							continue;
+						}
+
+						auto Json = CEJsonSorted::fs_FromString(Line);
+						if (!Json.f_GetMember("request"))
+						{
+							Json["request"] = "fragment";
+							if (_nMaxColumns && !Json.f_GetMember("maxColumns"))
+								Json["maxColumns"] = _nMaxColumns;
+						}
+
+						Requests += Json.f_ToString(nullptr).f_Trim();
+					}
+
+					return Requests;
+				}
+			;
+
+			DMibTestCategory("KindsAndColumns") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "KindsAndColumns");
+
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+
+				// A name of 60 columns, and one of 61.
+				CStr Fits = "TC" + fg_Repeat("A", 51) + "<int32>";
+				CStr TooLong = "TC" + fg_Repeat("A", 52) + "<int32>";
+
+				TCVector<CStr> Fragments =
+					{
+						"TCMap<CStr, TCVector<int32>> const &"
+						, LongType
+						, "void NMib::NFoo::CBar::f_Baz(CStr const &_Name, TCMap<CStr, TCVector<int32>> const &_Map, int32 _Other)"
+						, "fg_Function(Argument1, fg_Other(Argument2, Argument3), TCVector<int32>{1, 2, 3}.f_GetLen())"
+						, Fits
+						, TooLong
+						, "(some_object.long_member_name + another_object.long_member_name) * long_multiplier"
+						, "SomeReallyLongNameThatIsLong += SomeOtherVeryLongNameThatIsAlsoLong"
+						, "fg_Function(Argument1, Argument2) // note"
+						, "int a; int b"
+						, "fg_Function(R\"(a \" // b; c)\", 1'000)"
+						, "int a; int b;"
+						, "fg_Function(); // note"
+						, "const int a;"
+						, "int a; /* note */"
+						, "fg_Function(ArgumentOne, ArgumentTwo, ArgumentThree, ArgumentFour);"
+					}
+				;
+				TCVector<CStr> Expected =
+					{
+						"TCMap<CStr, TCVector<int32>> const &"
+						, SplitType
+						, "void NMib::NFoo::CBar::f_Baz\n\t(\n\t\tCStr const &_Name\n\t\t, TCMap<CStr, TCVector<int32>> const &_Map\n\t\t, int32 _Other\n\t)"
+						, "fg_Function\n\t(\n\t\tArgument1\n\t\t, fg_Other(Argument2, Argument3)\n\t\t, TCVector<int32>{1, 2, 3}.f_GetLen()\n\t)"
+						, Fits
+						, "TC" + fg_Repeat("A", 52) + "\n\t<\n\t\tint32\n\t>"
+						, "(\n\tsome_object.long_member_name\n\t+ another_object.long_member_name\n)\n* long_multiplier"
+						, "SomeReallyLongNameThatIsLong\n\t+= SomeOtherVeryLongNameThatIsAlsoLong"
+						, "fg_Function\n\t(\n\t\tArgument1\n\t\t, Argument2\n\t) // note"
+						, "int a;\nint b"
+						, "fg_Function(R\"(a \" // b; c)\", 1'000)"
+						, "int a;\nint b;"
+						, "fg_Function(); // note"
+						, "int const a;"
+						, "int a; // note"
+						, "fg_Function\n\t(\n\t\tArgumentOne\n\t\t, ArgumentTwo\n\t\t, ArgumentThree\n\t\t, ArgumentFour\n\t)\n;"
+					}
+				;
+
+				CStr Input;
+				for (auto const &Fragment : Fragments)
+				{
+					CEJsonSorted Json;
+					Json["text"] = Fragment;
+					Input += Json.f_ToString(nullptr).f_Trim();
+					Input += "\n";
+				}
+
+				auto Result = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--server"}, fFragments(Input, 60));
+				DMibExpect(Result.m_ExitCode, ==, 0u);
+
+				TCVector<CStr> Formatted;
+				auto StdOut = Result.f_GetStdOut();
+				for (auto const &Line : StdOut.f_SplitLine())
+				{
+					if (Line)
+						Formatted.f_Insert(CEJsonSorted::fs_FromString(Line)["text"].f_String());
+				}
+
+				DMibExpect(Formatted, ==, Expected);
+
+				co_return {};
+			};
+
+			DMibTestCategory("MembersAndErrors") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "MembersAndErrors");
+
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+
+				CEJsonSorted Wide;
+				Wide["text"] = LongType;
+				Wide["maxColumns"] = 100;
+				CEJsonSorted Typed;
+				Typed["text"] = LongType;
+				Typed["kind"] = "type";
+
+				CStr Input = Wide.f_ToString(nullptr).f_Trim();
+				Input += "\n";
+				Input += Typed.f_ToString(nullptr).f_Trim();
+				Input += "\nnot json\n\n{\"kind\": \"type\"}\n{\"text\": \"int\", \"kind\": \"statement\"}\n";
+				Input += "{\"text\": \"TCVector<\\r\\nint, double>\"}\n{\"text\": \"  \"}\n{\"text\": \"int\\n\"}\n";
+				Input += "{\"text\": \"again: fg_First(); fg_Second();\"}\n{\"text\": \"#define DTest 1\"}\n{\"text\": \"fg_Function(\\\"unterminated)\"}\n";
+				Input += "{\"text\": \"fg_Function(); // note\", \"maxColumns\": 20}\n";
+				Input += "{\"text\": \"int a; /* A long comment ending in a semicolon; */\", \"maxColumns\": 20}\n";
+				Input += "{\"text\": \"fg_Function() // note\", \"maxColumns\": 20}\n";
+				Input += "{\"text\": \"fg_First(); } { fg_Second();\"}\n{\"text\": \"fg_First(a[1)]\"}\n";
+
+				auto Result = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--server"}, fFragments(Input, 60));
+				DMibExpect(Result.m_ExitCode, ==, 0u);
+
+				TCVector<CEJsonSorted> Lines;
+				auto StdOut = Result.f_GetStdOut();
+				for (auto const &Line : StdOut.f_SplitLine())
+				{
+					if (Line)
+						Lines.f_Insert(CEJsonSorted::fs_FromString(Line));
+				}
+
+				// A blank line gets no answer, and a line that is no fragment gets its error where its text would be.
+				DMibExpect(Lines.f_GetLen(), ==, 16u);
+				if (Lines.f_GetLen() == 16)
+				{
+					// Brackets that don't pair would end the block the fragment is formatted in.
+					DMibExpect(Lines[14]["error"].f_String().f_Find("brackets of a fragment pair"), >=, 0);
+					DMibExpect(Lines[15]["error"].f_String().f_Find("brackets of a fragment pair"), >=, 0);
+					// A label stands out of the statement's lines, and a directive or an open literal is no statement.
+					DMibExpectTrue(Lines[8].f_GetMember("error"));
+					DMibExpect(Lines[9]["error"].f_String().f_Find("preprocessor directive"), >=, 0);
+					DMibExpect(Lines[10]["error"].f_String().f_Find("inside a comment or a literal"), >=, 0);
+
+					// A fragment keeps the ';' it ends in, also in front of a comment, and is split within its columns.
+					DMibExpect(Lines[11]["text"].f_String().f_Find("fg_Function();"), >=, 0);
+					DMibExpect(Lines[12]["text"].f_String().f_Find("int a;"), >=, 0);
+					DMibExpect(Lines[13]["text"].f_String().f_Find("\n"), >=, 0);
+					// A fragment on several lines is none, also when the line break ends it, and an empty one stays empty.
+					DMibExpect(Lines[5]["error"].f_String().f_Find("one line of code"), >=, 0);
+					DMibExpect(Lines[6]["text"].f_String(), ==, CStr());
+					DMibExpect(Lines[7]["error"].f_String().f_Find("one line of code"), >=, 0);
+					DMibExpect(Lines[0]["text"].f_String(), ==, LongType);
+					DMibExpect(Lines[1]["text"].f_String(), ==, SplitType);
+					DMibExpectTrue(Lines[2].f_GetMember("error"));
+					DMibExpect(Lines[3]["error"].f_String().f_Find("string member 'text'"), >=, 0);
+					DMibExpect(Lines[4]["error"].f_String().f_Find("Unknown kind 'statement'"), >=, 0);
+				}
+
+				// The indentation of a split fragment is the one asked for.
+				auto Spaced = Typed;
+				Spaced["indentStyle"] = "space";
+				Spaced["indentSize"] = 2;
+				auto Spaces = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--server"}, fFragments(Spaced.f_ToString(nullptr).f_Trim() + "\n", 60));
+				DMibExpect(Spaces.m_ExitCode, ==, 0u);
+				DMibExpect
+					(
+						CEJsonSorted::fs_FromString(Spaces.f_GetStdOut())["text"].f_String()
+						, ==
+						, CStr("NMib::NCryptography::TCHashImpl\n  <\n    TCHashImpl_BoringSSL<EDigestType_SHA256, 32>\n  >")
+					)
+				;
+
+				// A line gives the directory and indentation of its own fragment, asks for the program's path, and is
+				// answered at the end of stdin without a line end. The answer has the request's id.
+				CEJsonSorted Indented;
+				Indented["text"] = LongType;
+				Indented["indentStyle"] = "space";
+				Indented["indentSize"] = 3;
+				Indented["directory"] = Repo.m_Path;
+				auto Own = co_await Repo.f_ToolWithStdIn
+					(
+						{"Format", "--no-color", "-C", Repo.m_Path / "Missing", "--server"}
+						, fFragments
+						(
+							"{\"request\": \"executable\", \"id\": \"first\"}\n"
+							+ Indented.f_ToString(nullptr).f_Trim()
+							+ "\n{\"text\": \"int a\", \"indentSize\": 0, \"id\": 3}\n{\"text\": \"int  b\"}\n{\"request\": \"other\"}\n{\"text\": \"int\", \"id\": []}"
+							, 60
+						)
+					)
+				;
+				DMibExpect(Own.m_ExitCode, ==, 0u);
+
+				TCVector<CEJsonSorted> OwnLines;
+				auto OwnOut = Own.f_GetStdOut();
+				for (auto const &Line : OwnOut.f_SplitLine())
+				{
+					if (Line)
+						OwnLines.f_Insert(CEJsonSorted::fs_FromString(Line));
+				}
+
+				DMibExpect(OwnLines.f_GetLen(), ==, 6u);
+				if (OwnLines.f_GetLen() == 6)
+				{
+					DMibExpect(OwnLines[0]["id"].f_String(), ==, CStr("first"));
+					DMibExpect(OwnLines[2]["id"].f_Integer(), ==, 3);
+					DMibExpectFalse(OwnLines[3].f_GetMember("id"));
+					DMibExpect(OwnLines[4]["error"].f_String().f_Find("Unknown request 'other'"), >=, 0);
+					DMibExpect(OwnLines[5]["error"].f_String().f_Find("'id' is a string or an integer"), >=, 0);
+					DMibExpect(OwnLines[0]["executable"].f_String().f_Find("MTool"), >=, 0);
+					DMibExpect(OwnLines[1]["text"].f_String(), ==, CStr("NMib::NCryptography::TCHashImpl\n   <\n      TCHashImpl_BoringSSL<EDigestType_SHA256, 32>\n   >"));
+					DMibExpect(OwnLines[2]["error"].f_String().f_Find("'indentSize' is a number from 1 to 1000"), >=, 0);
+					DMibExpect(OwnLines[3]["text"].f_String(), ==, CStr("int b"));
+				}
+
+				// A style that can't be read is the error of the fragments of its directory, which is one of the working
+				// directory, and the others are answered.
+				Repo.f_Write("Broken/.malterlib-format", "Version: 100\n");
+				CEJsonSorted Broken;
+				Broken["text"] = "int  a";
+				Broken["directory"] = "Broken";
+				auto Styles = co_await Repo.f_ToolWithStdIn
+					(
+						{"Format", "--no-color", "-C", Repo.m_Path, "--server"}
+						, fFragments("{\"text\": \"int  b\"}\n" + Broken.f_ToString(nullptr).f_Trim() + "\n{\"text\": \"int  c\"}\n", 0)
+					)
+				;
+				DMibExpect(Styles.m_ExitCode, ==, 0u);
+
+				TCVector<CEJsonSorted> StyleLines;
+				auto StylesOut = Styles.f_GetStdOut();
+				for (auto const &Line : StylesOut.f_SplitLine())
+				{
+					if (Line)
+						StyleLines.f_Insert(CEJsonSorted::fs_FromString(Line));
+				}
+
+				DMibExpect(StyleLines.f_GetLen(), ==, 3u);
+				if (StyleLines.f_GetLen() == 3)
+				{
+					DMibExpect(StyleLines[0]["text"].f_String(), ==, CStr("int b"));
+					DMibExpect(StyleLines[1].f_GetMember("error"), !=, nullptr);
+					DMibExpect(StyleLines[2]["text"].f_String(), ==, CStr("int c"));
+				}
+
+				// Without columns every fragment stays on one line, and the other selections don't combine.
+				auto Unlimited = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--server"}, fFragments(Typed.f_ToString(nullptr).f_Trim() + "\n", 0));
+				DMibExpect(Unlimited.m_ExitCode, ==, 0u);
+				DMibExpect(CEJsonSorted::fs_FromString(Unlimited.f_GetStdOut())["text"].f_String(), ==, LongType);
+
+				auto Combined = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--server", "--file", "Source.cpp"}, "");
+				DMibExpect(Combined.m_ExitCode, ==, 2u);
+				DMibExpect(Combined.f_GetCombinedOut().f_Find("--server only combines with"), >=, 0);
+
+				co_return {};
+			};
+
+			DMibTestCategory("Files") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Files");
+
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+				Repo.f_Write(".editorconfig", g_FormatConfiguration);
+				Repo.f_Write("Source.cpp", gc_Formatted);
+
+				CStr Long = "char const *g_p = \"";
+				for (umint iChar = 0; iChar < 200; ++iChar)
+					Long += "x";
+
+				Long += "\";\n";
+
+				auto fFile = [](CStr const &_Path, CStr const &_Source) -> CEJsonSorted
+					{
+						CEJsonSorted Json;
+						Json["request"] = "file";
+						Json["path"] = _Path;
+						Json["source"] = _Source;
+
+						return Json;
+					}
+				;
+
+				// A source is formatted as its file would be, which is neither read nor written; the path is one of the
+				// working directory or a whole one, the file needn't exist, and a range is in the source's bytes.
+				auto Ranged = fFile("Source.cpp", gc_Unformatted);
+				Ranged["offset"] = CStr(gc_Unformatted).f_Find("if(a");
+				Ranged["length"] = 0;
+				Ranged["id"] = 7;
+				auto NoSource = fFile("Source.cpp", "");
+				NoSource.f_RemoveMember("source");
+				auto HalfRange = fFile("Source.cpp", gc_Unformatted);
+				HalfRange["offset"] = 1;
+
+				TCVector<CEJsonSorted> Requests =
+					{
+						fFile("Source.cpp", gc_Unformatted)
+						, fFile(Repo.m_Path / "New.cpp", gc_Formatted)
+						, Ranged
+						, fFile("Long.cpp", Long)
+						, fFile("Notes.md", "Prose\n")
+						, NoSource
+						, HalfRange
+					}
+				;
+				CStr Input;
+				for (auto const &Request : Requests)
+				{
+					Input += Request.f_ToString(nullptr).f_Trim();
+					Input += "\n";
+				}
+
+				// A fragment between files is answered in its place.
+				Input += "{\"request\": \"fragment\", \"text\": \"int  a\"}\n";
+
+				auto Result = co_await Repo.f_ToolWithStdIn({"Format", "--no-color", "-C", Repo.m_Path, "--server"}, Input);
+				DMibExpect(Result.m_ExitCode, ==, 0u);
+				DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, gc_Formatted);
+				DMibExpectFalse(CFile::fs_FileExists(Repo.m_Path / "New.cpp"));
+
+				TCVector<CEJsonSorted> Lines;
+				auto StdOut = Result.f_GetStdOut();
+				for (auto const &Line : StdOut.f_SplitLine())
+				{
+					if (Line)
+						Lines.f_Insert(CEJsonSorted::fs_FromString(Line));
+				}
+
+				DMibExpect(Lines.f_GetLen(), ==, 8u);
+				if (Lines.f_GetLen() == 8)
+				{
+					DMibExpect(Lines[0]["text"].f_String(), ==, CStr(gc_Formatted));
+					DMibExpectFalse(Lines[0].f_GetMember("unresolved"));
+					DMibExpectTrue(Lines[1]["unchanged"].f_Boolean());
+					DMibExpectFalse(Lines[1].f_GetMember("text"));
+					DMibExpect(Lines[2]["text"].f_String(), ==, CStr("void fg_Test()\n{\n\n    int a;   \n\tif (a == 2)\n\t\tfg_Other(a,1);\n}\n"));
+					DMibExpect(Lines[2]["id"].f_Integer(), ==, 7);
+					// Violations without an automatic fix are told with the source, and reported.
+					DMibExpectTrue(Lines[3]["unchanged"].f_Boolean());
+					DMibExpectTrue(Lines[3]["unresolved"].f_Boolean());
+					DMibExpect(Lines[3]["report"].f_String().f_Find("Long.cpp:1:1: line-length:"), >=, 0);
+					// A file that does not opt in is told apart.
+					DMibExpectTrue(Lines[4]["excluded"].f_Boolean());
+					DMibExpect(Lines[5]["error"].f_String().f_Find("string member 'source'"), >=, 0);
+					DMibExpect(Lines[6]["error"].f_String().f_Find("'offset' and 'length' are given together"), >=, 0);
+					DMibExpect(Lines[7]["text"].f_String(), ==, CStr("int a"));
+				}
+
+				co_return {};
+			};
+
+			co_return {};
+		};
+
 		DMibTestSuite("Validation") -> TCFuture<void>
 		{
 			auto Capture = co_await (g_CaptureExceptions % "Testing formatting checks in Validate");

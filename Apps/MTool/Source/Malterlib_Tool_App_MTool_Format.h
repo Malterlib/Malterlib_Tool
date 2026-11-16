@@ -317,7 +317,54 @@ namespace NMib::NTool::NFormat
 		CFormatSummary m_Summary;
 	};
 
-	NConcurrency::TCFuture<CFormatSnapshotResult> fg_FormatSnapshot(NStr::CStr _WorkingDirectory, NStr::CStr _Path, NStr::CStr _Source, CFormatOptions _Options);
+	// The root git gave when it was asked at a directory with a '.git' entry, and what the entry was then.
+	struct CFormatCachedRoot
+	{
+		bool m_bGitDirectory = false;
+		NTime::CTime m_Created;
+		NTime::CTime m_Written; // Of the '.git' file, which names its repository, or of the 'config' in a '.git' directory.
+		CMibFilePos m_nSize = 0;
+		NStr::CStr m_Root;
+	};
+
+	// The roots of a program that formats again and again, by the directories whose '.git' entries git was asked at; empty
+	// for the files with none above them. Git is asked once for the files of a repository, and again when the '.git'
+	// entry is another one.
+	using CFormatRootCache = NContainer::TCMap<NStr::CStr, CFormatCachedRoot>;
+
+	auto fg_FormatSnapshot(NStr::CStr _WorkingDirectory, NStr::CStr _Path, NStr::CStr _Source, CFormatOptions _Options, NStorage::TCSharedPointer<CFormatRootCache> _pRootCache = nullptr)
+		-> NConcurrency::TCFuture<CFormatSnapshotResult>
+	;
+
+	enum class EFormatFragmentKind
+	{
+		mc_Detect      // Told from the text.
+		, mc_Type
+		, mc_Signature // A function's declaration without its ';'.
+		, mc_Expression
+	};
+
+	struct CFormatFragment
+	{
+		NStr::CStr m_Text;
+		EFormatFragmentKind m_Kind = EFormatFragmentKind::mc_Detect;
+		umint m_nMaxColumns = 0; // Zero lays the fragment out on one line.
+	};
+
+	struct CFormatFragmentResult
+	{
+		NStr::CStr m_Text;
+		NStr::CStr m_Error; // Why the fragment could not be formatted, instead of its text.
+	};
+
+	// Formats code that is no file of its own, like a type or a signature a compiler quotes, laid out as a statement of
+	// a file: on one line where it fits the columns, else split, the outermost construct first. The style of the working
+	// directory reads the names, and the settings give the indentation; their columns are those of each fragment. A
+	// fragment is one line of code, and one on several, or one whose formatted lines aren't all a statement's, like one
+	// with a label, gets an error. The results are in the order of the fragments.
+	auto fg_FormatFragments(NStr::CStr _WorkingDirectory, NDevelop::CCodeFormattingSettings _Settings, NContainer::TCVector<CFormatFragment> _Fragments)
+		-> NConcurrency::TCFuture<NContainer::TCVector<CFormatFragmentResult>>
+	;
 
 	// The max_line_length check of one line, appending its diagnostic to the report; false
 	// when the line is over the limit. NUL occupies one column, like space, and is

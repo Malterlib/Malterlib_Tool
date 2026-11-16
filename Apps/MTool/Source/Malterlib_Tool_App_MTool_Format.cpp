@@ -12,6 +12,7 @@
 #include <Mib/Container/Set>
 #include <Mib/Core/OnScopeExitCatch>
 #include <Mib/Cryptography/RandomID>
+#include <Mib/Develop/CodeFormattingLexer>
 #include <Mib/String/Appender>
 #include <Mib/Time/Stopwatch>
 
@@ -2488,7 +2489,15 @@ namespace NMib::NTool::NFormat
 
 	// The snapshot is formatted as the file at the path, so its configuration resolves within the repository the path's
 	// directory belongs to, which has to exist; the file need not.
-	TCFuture<CFormatSnapshotResult> fg_FormatSnapshot(CStr _WorkingDirectory, CStr _Path, CStr _Source, CFormatOptions _Options)
+	TCFuture<CStr> fg_ResolveFormatRoot(TCSharedPointer<CSharedRoundRobinBlockingActors> _pBlockingActors, CStr _Directory)
+	{
+		TCActor<CFormatRootResolver> RootResolver = fg_ConstructActor<CFormatRootResolver>(_pBlockingActors);
+		auto DestroyRootResolver = co_await fg_AsyncDestroy(RootResolver);
+
+		co_return co_await RootResolver(&CFormatRootResolver::f_Resolve, fg_Move(_Directory));
+	}
+
+	TCFuture<CFormatSnapshotResult> fg_FormatSnapshot(CStr _WorkingDirectory, CStr _Path, CStr _Source, CFormatOptions _Options, TCSharedPointer<CFormatRootCache> _pRootCache)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % "Formatting a snapshot");
 
@@ -2496,20 +2505,81 @@ namespace NMib::NTool::NFormat
 		auto Path = fg_NormalizeFormatPath(_Path, WorkingDirectory);
 		auto Directory = CFile::fs_GetPath(Path);
 		TCSharedPointer<CSharedRoundRobinBlockingActors> pBlockingActors = fg_Construct(gc_nFormatBlockingActors);
-		bool bDirectory = co_await
+
+		struct CLocated
+		{
+			bool m_bDirectory = false;
+			CStr m_GitHolder; // The directory the root resolver asks git at: the nearest with a '.git' entry.
+			CFormatCachedRoot m_Git;
+		};
+
+		auto Located = co_await
 			(
-				g_Dispatch(pBlockingActors->f_Next()) / [Directory]() -> bool
+				g_Dispatch(pBlockingActors->f_Next()) / [Directory, bCached = bool(_pRootCache)]() -> CLocated
 				{
-					return CFile::fs_FileExists(Directory, EFileAttrib_Directory);
+					CLocated Located;
+					Located.m_bDirectory = CFile::fs_FileExists(Directory, EFileAttrib_Directory);
+					if (!Located.m_bDirectory || !bCached)
+						return Located;
+
+					for (auto Walk = CFile::fs_CondensePath(Directory);;)
+					{
+						auto Git = Walk / ".git";
+						if (CFile::fs_FileExists(Git))
+						{
+							Located.m_GitHolder = Walk;
+							Located.m_Git.m_bGitDirectory = CFile::fs_FileExists(Git, EFileAttrib_Directory);
+							Located.m_Git.m_Created = CFile::fs_GetCreationTime(Git);
+
+							// A '.git' file names its repository, and a '.git' directory has the configuration that can
+							// place the root elsewhere.
+							auto Decides = Located.m_Git.m_bGitDirectory ? Git / "config" : Git;
+							if (CFile::fs_FileExists(Decides, EFileAttrib_File))
+							{
+								Located.m_Git.m_Written = CFile::fs_GetWriteTime(Decides);
+								Located.m_Git.m_nSize = CFile::fs_GetFileSize(Decides);
+							}
+
+							break;
+						}
+
+						auto Parent = CFile::fs_CondensePath(CFile::fs_GetPath(Walk));
+						if (!Parent || Parent == Walk)
+							break;
+
+						Walk = Parent;
+					}
+
+					return Located;
 				}
 			)
 		;
-		if (!bDirectory)
+		if (!Located.m_bDirectory)
 			co_return DMibErrorInstance("'{}' is not an existing directory"_f << Directory);
 
-		TCActor<CFormatRootResolver> RootResolver = fg_ConstructActor<CFormatRootResolver>(pBlockingActors);
-		auto DestroyRootResolver = co_await fg_AsyncDestroy(RootResolver);
-		auto Root = co_await RootResolver(&CFormatRootResolver::f_Resolve, Directory);
+		CStr Root;
+		auto pCached = _pRootCache ? _pRootCache->f_FindEqual(Located.m_GitHolder) : nullptr;
+		if
+		(
+			pCached
+			&& pCached->m_bGitDirectory == Located.m_Git.m_bGitDirectory
+			&& pCached->m_Created == Located.m_Git.m_Created
+			&& pCached->m_Written == Located.m_Git.m_Written
+			&& pCached->m_nSize == Located.m_Git.m_nSize
+		)
+		{
+			Root = pCached->m_Root;
+		}
+		else
+		{
+			Root = co_await fg_ResolveFormatRoot(pBlockingActors, Directory);
+			if (_pRootCache)
+			{
+				Located.m_Git.m_Root = Root;
+				_pRootCache->f_Remove(Located.m_GitHolder);
+				(*_pRootCache)(Located.m_GitHolder, fg_Move(Located.m_Git));
+			}
+		}
 
 		TCActor<CFormatWorkerPool> Workers = fg_ConstructActor<CFormatWorkerPool>(umint(1), pBlockingActors);
 		auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
@@ -2531,6 +2601,354 @@ namespace NMib::NTool::NFormat
 		fg_AddFormatResult(Snapshot.m_Result, Snapshot.m_Summary);
 
 		co_return fg_Move(Snapshot);
+	}
+
+	// What a fragment is taken for when its kind isn't given. A signature has a parameter list directly behind a name that
+	// something stands in front of, as a return type does. An expression has a call, a literal, or an operator that no
+	// type has outside its brackets, or starts as no type does. Anything else is a type.
+	EFormatFragmentKind fg_DetectFormatFragmentKind(CStr const &_Text)
+	{
+		auto pText = _Text.f_GetStr();
+		while (*pText == ' ' || *pText == '\t')
+			++pText;
+
+		auto First = *pText;
+		bool bExpression = (First >= '0' && First <= '9') || First == '(' || First == '*' || First == '&' || First == '!' || First == '-' || First == '~';
+		bool bSpaceOutside = false;
+		umint nDepth = 0;
+		ch8 Previous = 0;
+		for (auto pParse = pText; *pParse; Previous = *pParse, ++pParse)
+		{
+			auto Char = *pParse;
+			if (Char == '"' || Char == '\'')
+				return EFormatFragmentKind::mc_Expression;
+
+			if (Char == '-' && pParse[1] == '>')
+			{
+				// The arrow closes no template argument list.
+				bExpression = bExpression || !nDepth;
+				++pParse;
+
+				continue;
+			}
+
+			if (Char == '.' && pParse[1] == '.' && pParse[2] == '.')
+			{
+				pParse += 2;
+
+				continue;
+			}
+
+			if (Char == '(' && !nDepth)
+			{
+				bool bName = (Previous >= 'a' && Previous <= 'z') || (Previous >= 'A' && Previous <= 'Z') || (Previous >= '0' && Previous <= '9') || Previous == '_' || Previous == '>';
+				if (bName)
+					return bSpaceOutside && !bExpression ? EFormatFragmentKind::mc_Signature : EFormatFragmentKind::mc_Expression;
+			}
+
+			if (Char == '(' || Char == '[' || Char == '{' || Char == '<')
+				++nDepth;
+			else if ((Char == ')' || Char == ']' || Char == '}' || Char == '>') && nDepth)
+				--nDepth;
+			else if (!nDepth)
+			{
+				bSpaceOutside = bSpaceOutside || Char == ' ' || Char == '\t';
+				bExpression
+					= bExpression || Char == '=' || Char == '+' || Char == '-' || Char == '/' || Char == '%' || Char == '!' || Char == '?' || Char == '|' || Char == '^' || Char == '.'
+				;
+			}
+		}
+
+		return bExpression ? EFormatFragmentKind::mc_Expression : EFormatFragmentKind::mc_Type;
+	}
+
+	// Why the fragment can't be a statement on a line of the source it is formatted in, or empty, by its tokens. Tells
+	// whether the fragment ends its statement itself: the last of its tokens that is code is a ';'. Brackets that don't
+	// pair would close the block the statement is in, or leave it open.
+	CStr fg_CheckFormatFragment(CStr const &_Text, bool &o_bEndsStatement)
+	{
+		o_bEndsStatement = false;
+
+		CCodeTokenStream Tokens(_Text);
+		if (!Tokens.f_IsComplete())
+			return "A fragment doesn't end inside a comment or a literal";
+
+		TCVector<ch8 const *> Closers;
+		for (auto const &Token : Tokens.f_GetTokens())
+		{
+			// What the lines of a token hold, like those of a raw string, isn't told from the indentation they are given.
+			if (Token.m_bMultiLine)
+				return "A fragment is one line of code";
+
+			switch (Token.m_Kind)
+			{
+			case ECodeTokenKind::mc_Newline:
+			case ECodeTokenKind::mc_LineSplice:
+				return "A fragment is one line of code";
+			case ECodeTokenKind::mc_Preprocessor: return "A fragment is no preprocessor directive";
+			case ECodeTokenKind::mc_ByteOrderMark:
+			case ECodeTokenKind::mc_Whitespace:
+			case ECodeTokenKind::mc_LineComment:
+			case ECodeTokenKind::mc_BlockComment:
+				break;
+			case ECodeTokenKind::mc_Identifier:
+			case ECodeTokenKind::mc_Number:
+			case ECodeTokenKind::mc_CharLiteral:
+			case ECodeTokenKind::mc_StringLiteral:
+			case ECodeTokenKind::mc_Unknown:
+				o_bEndsStatement = false;
+
+				break;
+			case ECodeTokenKind::mc_Punctuator:
+				o_bEndsStatement = Tokens.f_IsText(Token, ";");
+				if (Tokens.f_IsText(Token, "("))
+					Closers.f_Insert(")");
+				else if (Tokens.f_IsText(Token, "["))
+					Closers.f_Insert("]");
+				else if (Tokens.f_IsText(Token, "{"))
+					Closers.f_Insert("}");
+				else if (Tokens.f_IsText(Token, ")") || Tokens.f_IsText(Token, "]") || Tokens.f_IsText(Token, "}"))
+				{
+					if (Closers.f_IsEmpty() || !Tokens.f_IsText(Token, Closers.f_GetLast()))
+						return "The brackets of a fragment pair";
+
+					Closers.f_SetLen(Closers.f_GetLen() - 1);
+				}
+
+				break;
+			}
+		}
+
+		if (!Closers.f_IsEmpty())
+			return "The brackets of a fragment pair";
+
+		return {};
+	}
+
+	// The lines in front of a fragment in the source it is formatted in. A type or an expression is a statement of a
+	// block in a function, and a signature a declaration in a namespace, both two indentations in.
+	TCVector<CStr> fg_GetFormatFragmentHeader(EFormatFragmentKind _Kind, CStr const &_Indentation)
+	{
+		if (_Kind == EFormatFragmentKind::mc_Signature)
+			return {"namespace NFragment", "{", _Indentation + "namespace NFragment", _Indentation + "{"};
+
+		return {"void fg_Fragment()", "{", _Indentation + "{"};
+	}
+
+	// The source a fragment is formatted in: the fragment as a statement of its own, two indentations in, so that it is
+	// laid out as a statement of a file with nothing else on its lines. A fragment that doesn't end its statement gets a
+	// ';' on the next line, where a comment at the fragment's end doesn't hide it; the formatter moves it up behind a
+	// statement on one line.
+	CStr fg_WrapFormatFragment(CStr const &_Text, TCVector<CStr> const &_Header, CStr const &_Indentation, bool _bAddEnd)
+	{
+		CStr Source;
+		for (auto const &Line : _Header)
+			Source += Line + "\n";
+
+		Source += _Indentation + _Indentation + _Text + "\n";
+		if (_bAddEnd)
+			Source += _Indentation + _Indentation + ";\n";
+
+		Source += _Indentation + "}\n}\n";
+
+		return Source;
+	}
+
+	// The fragment out of the formatted source: the lines between those in front of it and the two '}' lines that end
+	// the source, without their two indentations and, where one was added, the ';' that ends the statement. A blank line
+	// between them, as the formatter puts behind a type's definition, is the fragment's. Empty when the lines around
+	// aren't those the source was given, or a line between isn't two indentations in, like a label, which stands
+	// further out.
+	CStr fg_UnwrapFormatFragment(CStr const &_Formatted, TCVector<CStr> const &_Header, CStr const &_Indentation, bool _bAddedEnd)
+	{
+		CStr Levels = _Indentation + _Indentation;
+		CStr Footer = _Indentation + "}";
+		TCVector<CStr> Lines;
+		umint iLine = 0;
+		umint nBlank = 0;
+		umint nFooter = 0;
+		for (auto const &Line : _Formatted.f_SplitLine())
+		{
+			if (iLine < _Header.f_GetLen())
+			{
+				if (Line != _Header[iLine])
+					return {};
+
+				++iLine;
+
+				continue;
+			}
+
+			// Behind the '}' of the block only the '}' that ends the source follows, and the end of its line.
+			if (nFooter)
+			{
+				if (nFooter == 1 && Line == "}")
+					++nFooter;
+				else if (nFooter == 1 || Line)
+					return {};
+
+				continue;
+			}
+
+			if (Line == Footer)
+			{
+				nFooter = 1;
+
+				continue;
+			}
+
+			if (Line.f_StartsWith(Levels))
+			{
+				for (; nBlank && !Lines.f_IsEmpty(); --nBlank)
+					Lines.f_Insert(CStr());
+
+				nBlank = 0;
+				Lines.f_Insert(Line.f_Extract(Levels.f_GetLen()));
+			}
+			else if (CStr(Line.f_Trim()).f_IsEmpty())
+				++nBlank;
+			else
+				return {};
+		}
+
+		if (nFooter != 2 || Lines.f_IsEmpty())
+			return {};
+
+		if (_bAddedEnd)
+		{
+			// The added ';' is on a line of its own behind a statement that is split, and at the end of the last line
+			// otherwise. Behind a fragment that ends in a block, like a function with its body, it is an empty statement,
+			// which the formatter takes out.
+			auto &Last = Lines.f_GetLast();
+			if (Last == ";")
+				Lines.f_SetLen(Lines.f_GetLen() - 1);
+			else
+				Last = CStr(Last.f_RemoveSuffix(";"));
+		}
+
+		CStr Fragment;
+		bool bFirst = true;
+		for (auto const &Line : Lines)
+		{
+			if (!bFirst)
+				Fragment += "\n";
+
+			bFirst = false;
+			Fragment += Line;
+		}
+
+		return Fragment;
+	}
+
+	TCFuture<TCVector<CFormatFragmentResult>> fg_FormatFragments(CStr _WorkingDirectory, CCodeFormattingSettings _Settings, TCVector<CFormatFragment> _Fragments)
+	{
+		auto CaptureScope = co_await (g_CaptureExceptions % "Formatting fragments");
+
+		_Settings.m_Profile = ECodeFormattingProfile::mc_Malterlib;
+		CStr Indentation = "\t";
+		umint nIndentationColumns = _Settings.m_nTabWidth;
+		if (!_Settings.m_bIndentWithTabs)
+		{
+			Indentation.f_Clear();
+			for (umint iSpace = 0; iSpace < _Settings.m_nIndentSize; ++iSpace)
+				Indentation += " ";
+
+			nIndentationColumns = _Settings.m_nIndentSize;
+		}
+
+		auto WorkingDirectory = fg_NormalizeFormatPath(_WorkingDirectory, CFile::fs_GetCurrentDirectory());
+		TCSharedPointer<CSharedRoundRobinBlockingActors> pBlockingActors = fg_Construct(gc_nFormatBlockingActors);
+		TCActor<CFormatWorkerPool> Workers = fg_ConstructActor<CFormatWorkerPool>(umint(1), pBlockingActors);
+		auto DestroyWorkers = co_await fg_AsyncDestroy(Workers);
+
+		// No file is read or written: the path only places the fragments in the working directory, for its style.
+		CStr Path = WorkingDirectory / "Fragment.cpp";
+		CStr ReportPrefix = Path + ": ";
+
+		TCVector<CFormatFragmentResult> Results;
+		for (auto const &Fragment : _Fragments)
+		{
+			CFormatFragmentResult Result;
+			bool bEndsStatement = false;
+			Result.m_Error = fg_CheckFormatFragment(Fragment.m_Text, bEndsStatement);
+			if (Result.m_Error)
+			{
+				Results.f_Insert(fg_Move(Result));
+
+				continue;
+			}
+
+			CStr Text = Fragment.m_Text.f_Trim();
+			if (!Text)
+			{
+				Results.f_Insert();
+
+				continue;
+			}
+
+			auto Kind = Fragment.m_Kind == EFormatFragmentKind::mc_Detect ? fg_DetectFormatFragmentKind(Text) : Fragment.m_Kind;
+
+			// The fragment's lines are two indentations in, so they get the columns of both more than the fragment's own. On
+			// one line an added ';' follows the fragment, so the first pass gives that line a column more, and its result is
+			// the fragment's when that is one line within the columns. Else the fragment is laid out again within the
+			// columns themselves.
+			auto Header = fg_GetFormatFragmentHeader(Kind, Indentation);
+			bool bAddEnd = !bEndsStatement;
+			auto FragmentSettings = _Settings;
+			FragmentSettings.m_nMaxColumns = Fragment.m_nMaxColumns;
+			for (umint iPass = bAddEnd && Fragment.m_nMaxColumns ? 0 : 1; iPass < 2; ++iPass)
+			{
+				CFormatJob Job;
+				Job.m_Path = Path;
+				Job.m_DisplayPath = Path;
+				Job.m_Root = WorkingDirectory;
+				Job.m_Settings = _Settings;
+				// More columns than can be counted are as many as can be.
+				umint nMoreColumns = 2 * nIndentationColumns + (iPass == 0 ? 1 : 0);
+				Job.m_Settings.m_nMaxColumns
+					= !Fragment.m_nMaxColumns ? 0 : Fragment.m_nMaxColumns > TCLimitsInt<umint>::mc_Max - nMoreColumns ? TCLimitsInt<umint>::mc_Max : Fragment.m_nMaxColumns + nMoreColumns
+				;
+				Job.m_Settings.m_bHasExplicitMaxColumns = Fragment.m_nMaxColumns != 0;
+				Job.m_Source = fg_WrapFormatFragment(Text, Header, Indentation, bAddEnd);
+				Job.m_bHasSource = true;
+				Job.m_Mode = EFormatMode::mc_Output;
+
+				// What stops the formatter, like a style of the directory that can't be read, is the fragment's error too.
+				auto Source = Job.m_Source;
+				auto JobResult = co_await Workers(&CFormatWorkerPool::f_Process, fg_Move(Job)).f_Wrap();
+				if (!JobResult)
+				{
+					Result.m_Error = JobResult.f_GetExceptionStr();
+
+					break;
+				}
+
+				if (JobResult->m_Outcome == EFormatOutcome::mc_Failed)
+				{
+					Result.m_Error = CStr(JobResult->m_Report.f_Trim()).f_RemovePrefix(ReportPrefix);
+
+					break;
+				}
+
+				Result.m_Text = fg_UnwrapFormatFragment(JobResult->m_Outcome == EFormatOutcome::mc_Changed ? JobResult->m_Formatted : Source, Header, Indentation, bAddEnd);
+				if (!Result.m_Text)
+				{
+					Result.m_Error
+						= "The fragment is not one {}"_f << (Kind == EFormatFragmentKind::mc_Signature ? "signature" : Kind == EFormatFragmentKind::mc_Type ? "type" : "expression")
+					;
+
+					break;
+				}
+
+				CStr Ignored;
+				if (Result.m_Text.f_Find("\n") < 0 && fg_ValidateLineLength(Result.m_Text, Path, 1, FragmentSettings, Ignored))
+					break;
+			}
+
+			Results.f_Insert(fg_Move(Result));
+		}
+
+		co_return fg_Move(Results);
 	}
 
 	CStr fg_DescribeFormatSummary(CFormatSummary const &_Summary, EFormatMode _Mode, fp64 _Seconds)
