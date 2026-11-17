@@ -780,7 +780,7 @@ void CTool_Validate::f_Register
 		, NStr::CStr const &_ClassName
 	)
 {
-	if (fg_IsMalterlib() || fg_IsCMake() || fg_IsLibTool())
+	if (fg_IsMalterlib() || fg_IsCMake() || fg_IsCTest() || fg_IsLibTool())
 		return;
 
 	o_ToolsSection.f_RegisterCommand

@@ -13,6 +13,12 @@ bool fg_IsCMake()
 	return s_bIsCMake;
 }
 
+bool fg_IsCTest()
+{
+	static bool s_bIsCTest = CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "MToolCTest";
+	return s_bIsCTest;
+}
+
 bool fg_IsLibTool()
 {
 	return CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "libtool";
@@ -44,7 +50,7 @@ void CTool::f_Register
 		, NStr::CStr const &_ClassName
 	)
 {
-	if (fg_IsCMake() || fg_IsMalterlib())
+	if (fg_IsCMake() || fg_IsCTest() || fg_IsMalterlib())
 		return;
 
 	CStr ClassName = _ClassName;
@@ -154,7 +160,7 @@ aint CToolApp::f_Main()
 				// at once without listeners of their own
 				auto Settings = CDistributedToolSettings("MTool").f_RootDirectory(fg_GetToolRootDirectory()).f_InProcessCommandLineOnly(true);
 
-				if (fg_IsCMake())
+				if (fg_IsCMake() || fg_IsCTest())
 					fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_None);
 				else
 					fg_Move(Settings).f_DefaultCommandLineFunctionalies(EDefaultCommandLineFunctionality_AllNoDistributedComputing);
