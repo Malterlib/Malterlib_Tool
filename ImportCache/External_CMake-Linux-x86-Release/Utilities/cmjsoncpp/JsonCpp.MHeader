@@ -6,14 +6,17 @@ Property.CMakeOutputPath_JsonCpp: string = `@('../..'->MakeAbsolute())`->MakeAbs
 		!!Compile.Type "C++"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmjsoncpp/include`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
+			"NDEBUG",
 			"_FILE_OFFSET_BITS=64",
 			"_TIME_BITS=64"
 		]

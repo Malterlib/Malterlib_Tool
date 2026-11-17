@@ -1,12 +1,13 @@
 Property.CMakeOutputPath_CMLIBLZMA: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_CMLIBLZMA_cmliblzma"
 {
+	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/common`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/api`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/check`->MakeAbsolute(),
@@ -17,7 +18,9 @@ Property.CMakeOutputPath_CMLIBLZMA: string = `@('../..'->MakeAbsolute())`->MakeA
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/rangecoder`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Utilities/cmliblzma`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities/cmliblzma`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
@@ -27,6 +30,7 @@ Property.CMakeOutputPath_CMLIBLZMA: string = `@('../..'->MakeAbsolute())`->MakeA
 			"_TIME_BITS=64",
 			"_XOPEN_SOURCE=600"
 		]
+		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -331,6 +335,10 @@ Property.CMakeOutputPath_CMLIBLZMA: string = `@('../..'->MakeAbsolute())`->MakeA
 				%Group "simple"
 				{
 					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/arm.c`
+					{
+						Compile.Type "C"
+					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/arm64.c`
 					{
 						Compile.Type "C"
 					}

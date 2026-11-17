@@ -12,6 +12,7 @@
 
 /* Forward declare test functions. */
 extern int testEncode(int, char*[]);
+extern int testString(int, char*[]);
 
 
 #ifdef __cplusplus
@@ -48,6 +49,10 @@ CM_LOCAL const functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
     "testEncode",
     testEncode
   },
+  {
+    "testString",
+    testString
+  },
 
   { CM_NULL, CM_NULL } /* NOLINT */
 };
@@ -71,7 +76,7 @@ CM_LOCAL char* lowercase(const char* string)
   }
   strcpy(new_string, string);  /* NOLINT */
   for (p = new_string; *p != 0; ++p) {
-    *p = CM_CAST(char, tolower(*p));
+    *p = CM_CAST(char, tolower(CM_CAST(unsigned char, *p)));
   }
   return new_string;
 }
@@ -93,6 +98,7 @@ int main(int ac, char* av[])
 {
   int i;
   int testNum = 0;
+  int show_only;
   int partial_match;
   int run_all;
   char *arg;
@@ -122,13 +128,21 @@ int main(int ac, char* av[])
     ac--;
     av++;
   }
+  show_only = 0;
   partial_match = 0;
   run_all = 0;
   arg = CM_NULL; /* NOLINT */
   /* If partial match or running all tests are requested.  */
   if (testToRun == -1 && ac > 1) {
+    show_only = (strcmp(av[1], "-N") == 0) ? 1 : 0;
     partial_match = (strcmp(av[1], "-R") == 0) ? 1 : 0;
     run_all = (strcmp(av[1], "-A") == 0) ? 1 : 0;
+  }
+  if (show_only == 1) {
+    for (i = 0; i < NumTests; ++i) {
+      printf("%s\n", cmakeGeneratedFunctionMapEntries[i].name);
+    }
+    return 0;
   }
   if (partial_match != 0 && ac < 3) {
     printf("-R needs an additional parameter.\n");

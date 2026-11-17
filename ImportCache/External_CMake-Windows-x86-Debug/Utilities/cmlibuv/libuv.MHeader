@@ -1,26 +1,33 @@
 Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_libuv_cmlibuv"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/include`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
+			"WIN32",
 			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
-			"_WIN32_WINNT=0x0600"
+			"_MBCS",
+			"_WIN32_WINNT=0x0600",
+			"_WINDOWS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -75,10 +82,6 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			{
 				Compile.Disabled true
 			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/thread-common.c`
-			{
-				Compile.Type "C"
-			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/threadpool.c`
 			{
 				Compile.Type "C"
@@ -108,10 +111,6 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/async.c`
 				{
 					Compile.Type "C"
-				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/atomicops-inl.h`
-				{
-					Compile.Disabled true
 				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/core.c`
 				{

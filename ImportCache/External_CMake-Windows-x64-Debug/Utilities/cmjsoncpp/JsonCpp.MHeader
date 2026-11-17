@@ -6,16 +6,21 @@ Property.CMakeOutputPath_JsonCpp: string = `@('../..'->MakeAbsolute())`->MakeAbs
 		!!Compile.Type "C++"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmjsoncpp/include`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
+			"WIN32",
 			"_CRT_NONSTDC_NO_DEPRECATE",
-			"_CRT_SECURE_NO_DEPRECATE"
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_MBCS",
+			"_WINDOWS"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"

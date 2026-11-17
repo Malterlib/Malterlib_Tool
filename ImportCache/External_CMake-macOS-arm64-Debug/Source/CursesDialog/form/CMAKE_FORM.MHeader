@@ -1,19 +1,23 @@
 Property.CMakeOutputPath_CMAKE_FORM: string = `@('../../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_CMAKE_FORM_cmForm"
 {
+	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute(),
 			`@('../../..'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
-			`@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/CursesDialog/form`->MakeAbsolute(),
+			`@('../../../../../../../External/CMake'->MakeAbsolute())/Source/CursesDialog/form`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += []
+		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true

@@ -12,6 +12,7 @@ Import.CMake_CacheExcludePatterns: [
 	*/MalterlibFullRebuildVersion,
 	*/.NoDartCoverage,
 	*/compile_commands.json,
+	*/.ninja_build_lock*,
 	*.tcl,
 	*/Testing/*,
 	*/Tests/*,
@@ -32,6 +33,20 @@ Import.CMake_CacheReplaceContents: [
 		"FilePatterns": [],
 		"Find": ,
 		"Replace": "MToolCMake"
+	},
+	{
+		"ApplyToPaths": false,
+		"ExcludeFilePatterns": [],
+		"FilePatterns": [],
+		"Find": ,
+		"Replace": "MToolCTest"
+	},
+	{
+		"ApplyToPaths": false,
+		"ExcludeFilePatterns": [],
+		"FilePatterns": [],
+		"Find": ,
+		"Replace": "MToolCTest"
 	},
 	{
 		"ApplyToPaths": false,
@@ -122,12 +137,13 @@ Import.CMake_Variables: [
 	OPENSSL_FOUND=TRUE,
 	OpenSSL_FOUND=TRUE,
 	DISABLE_OPENSSL_WINDOWS=TRUE,
-	ARCHIVE_CRYPTO_MD5_OPENSSL=1,
+	OPENSSL_PROVIDED=TRUE,
+	ARCHIVE_CRYPTO_MD5_OPENSSL=0,
 	ARCHIVE_CRYPTO_RMD160_OPENSSL=0,
-	ARCHIVE_CRYPTO_SHA1_OPENSSL=1,
-	ARCHIVE_CRYPTO_SHA256_OPENSSL=1,
-	ARCHIVE_CRYPTO_SHA384_OPENSSL=1,
-	ARCHIVE_CRYPTO_SHA512_OPENSSL=1,
+	ARCHIVE_CRYPTO_SHA1_OPENSSL=0,
+	ARCHIVE_CRYPTO_SHA256_OPENSSL=0,
+	ARCHIVE_CRYPTO_SHA384_OPENSSL=0,
+	ARCHIVE_CRYPTO_SHA512_OPENSSL=0,
 	HAVE_ZLIB_H=1,
 	ZLIB_INCLUDE_DIR=/External/zlib,
 	ZLIB_LIBRARY=lib/libc.so,

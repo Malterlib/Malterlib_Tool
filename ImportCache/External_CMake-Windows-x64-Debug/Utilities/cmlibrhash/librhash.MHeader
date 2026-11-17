@@ -1,22 +1,29 @@
 Property.CMakeOutputPath_librhash: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_librhash_cmlibrhash"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"NO_IMPORT_EXPORT",
+			"WIN32",
 			"_CRT_NONSTDC_NO_DEPRECATE",
-			"_CRT_SECURE_NO_DEPRECATE"
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_MBCS",
+			"_WINDOWS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true

@@ -1,23 +1,31 @@
 Property.CMakeOutputPath_zstd: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_zstd_cmzstd"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib`->MakeAbsolute(),
-			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common`->MakeAbsolute(),
+			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/common`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"DYNAMIC_BMI2=0",
+			"WIN32",
 			"ZSTD_DISABLE_ASM=1",
+			"ZSTD_MULTITHREAD",
 			"_CRT_NONSTDC_NO_DEPRECATE",
-			"_CRT_SECURE_NO_DEPRECATE"
+			"_CRT_SECURE_NO_DEPRECATE",
+			"_MBCS",
+			"_WINDOWS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -77,11 +85,11 @@ Property.CMakeOutputPath_zstd: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 				{
 					Compile.Type "C"
 				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_compress_literals.c`
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_compress.c`
 				{
 					Compile.Type "C"
 				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_compress.c`
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_compress_literals.c`
 				{
 					Compile.Type "C"
 				}
@@ -114,6 +122,10 @@ Property.CMakeOutputPath_zstd: string = `@('../..'->MakeAbsolute())`->MakeAbsolu
 					Compile.Type "C"
 				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_opt.c`
+				{
+					Compile.Type "C"
+				}
+				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmzstd/lib/compress/zstd_preSplit.c`
 				{
 					Compile.Type "C"
 				}

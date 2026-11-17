@@ -6,38 +6,46 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		!!Compile.Type "C++"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/kwsys`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
 			"_SCL_SECURE_NO_DEPRECATE",
-			"_UNICODE"
+			"_UNICODE",
+			"_WINDOWS"
 		]
 	}
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/kwsys`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
 			"_SCL_SECURE_NO_DEPRECATE",
-			"_UNICODE"
+			"_UNICODE",
+			"_WINDOWS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -63,7 +71,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/EncodingC.c`
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines += [
+				Compile.PreprocessorDefines =+ [
 					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
 				]
 			}
@@ -74,16 +82,16 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/System.c`
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines += [
-					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
-					"KWSYS_C_HAS_PTRDIFF_T",
-					"KWSYS_C_HAS_SSIZE_T"
+				Compile.PreprocessorDefines =+ [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC=0",
+					"KWSYS_C_HAS_PTRDIFF_T=1",
+					"KWSYS_C_HAS_SSIZE_T=0"
 				]
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/String.c`
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines += [
+				Compile.PreprocessorDefines =+ [
 					"KWSYS_STRING_C"
 				]
 			}
@@ -94,14 +102,14 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/DynamicLoader.cxx`
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines += [
+				Compile.PreprocessorDefines =+ [
 					"KWSYS_SUPPORTS_SHARED_LIBS=1"
 				]
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/EncodingCXX.cxx`
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines += [
+				Compile.PreprocessorDefines =+ [
 					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
 				]
 			}
@@ -116,7 +124,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/SystemTools.cxx`
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines += [
+				Compile.PreprocessorDefines =+ [
 					"KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=1",
 					"KWSYS_CXX_HAS_SETENV=0",
 					"KWSYS_CXX_HAS_UNSETENV=0",
@@ -137,7 +145,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/SystemInformation.cxx`
 			{
 				Compile.Type "C++"
-				Compile.PreprocessorDefines += [
+				Compile.PreprocessorDefines =+ [
 					"KWSYS_SYS_HAS_PSAPI=1",
 					"SIZEOF_VOID_P=4"
 				]
@@ -238,24 +246,29 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 }
 %Target "Lib_cmsys_cmsys_c"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/kwsys`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
 			"_SCL_SECURE_NO_DEPRECATE",
-			"_UNICODE"
+			"_UNICODE",
+			"_WINDOWS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -281,7 +294,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/EncodingC.c`
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines += [
+				Compile.PreprocessorDefines =+ [
 					"KWSYS_ENCODING_DEFAULT_CODEPAGE=CP_UTF8"
 				]
 			}
@@ -292,16 +305,16 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/System.c`
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines += [
-					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC",
-					"KWSYS_C_HAS_PTRDIFF_T",
-					"KWSYS_C_HAS_SSIZE_T"
+				Compile.PreprocessorDefines =+ [
+					"KWSYS_C_HAS_CLOCK_GETTIME_MONOTONIC=0",
+					"KWSYS_C_HAS_PTRDIFF_T=1",
+					"KWSYS_C_HAS_SSIZE_T=0"
 				]
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/String.c`
 			{
 				Compile.Type "C"
-				Compile.PreprocessorDefines += [
+				Compile.PreprocessorDefines =+ [
 					"KWSYS_STRING_C"
 				]
 			}
@@ -353,24 +366,29 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 }
 %Target "Com_cmsys_cmsysTestsC"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/kwsys`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
 			"_SCL_SECURE_NO_DEPRECATE",
-			"_UNICODE"
+			"_UNICODE",
+			"_WINDOWS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -402,34 +420,46 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 	}
 	%Group "Source"
 	{
-		%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testEncode.c`
+		%Group "kwsys"
 		{
-			Compile.Type "C"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testEncode.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testString.c`
+			{
+				Compile.Type "C"
+			}
 		}
 	}
 	%Dependency "Lib_cmsys_cmsys_c"
 }
 %Target "Dll_cmsys_cmsysTestDynload"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/kwsys`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
 			"_SCL_SECURE_NO_DEPRECATE",
 			"_UNICODE",
+			"_WINDOWS",
 			"cmsysTestDynload_EXPORTS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -450,29 +480,35 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 	%Dependency "Lib_cmsys_cmsys"
 	{
 		Dependency.Link false
+		Dependency.Stage "Compile"
 	}
 }
 %Target "Dll_cmsys_cmsysTestDynloadImpl"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/kwsys`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"BUILDING_TestDynloadImpl",
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
 			"_SCL_SECURE_NO_DEPRECATE",
-			"_UNICODE"
+			"_UNICODE",
+			"_WINDOWS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -493,29 +529,35 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 	%Dependency "Lib_cmsys_cmsys"
 	{
 		Dependency.Link false
+		Dependency.Stage "Compile"
 	}
 }
 %Target "Dll_cmsys_cmsysTestDynloadUse"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/kwsys`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
 			"_SCL_SECURE_NO_DEPRECATE",
 			"_UNICODE",
+			"_WINDOWS",
 			"cmsysTestDynloadUse_EXPORTS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -536,6 +578,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 	%Dependency "Lib_cmsys_cmsys"
 	{
 		Dependency.Link false
+		Dependency.Stage "Compile"
 	}
 	%Dependency "Dll_cmsys_cmsysTestDynloadImpl"
 }
@@ -546,18 +589,21 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		!!Compile.Type "C++"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/kwsys`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
 			"_SCL_SECURE_NO_DEPRECATE",
-			"_UNICODE"
+			"_UNICODE",
+			"_WINDOWS"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -624,7 +670,15 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			{
 				Compile.Type "C++"
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testRegularExpression.cxx`
+			{
+				Compile.Type "C++"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testSystemInformation.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testSystemInformationBaseFrequency.cxx`
 			{
 				Compile.Type "C++"
 			}
@@ -632,30 +686,39 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			{
 				Compile.Type "C++"
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/test.manifest`
+			{
+				Compile.Disabled true
+			}
 		}
 	}
 	%Dependency "Lib_cmsys_cmsys"
 }
 %Target "Com_cmsys_cmsysTestProcess"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source/kwsys`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute()
+			`@(CMakeIntermediateDirectory)/External_CMake/Source/kwsys`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
 			"_SCL_SECURE_NO_DEPRECATE",
-			"_UNICODE"
+			"_UNICODE",
+			"_WINDOWS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true

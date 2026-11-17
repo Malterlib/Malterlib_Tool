@@ -1,14 +1,17 @@
 Property.CMakeOutputPath_librhash: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_librhash_cmlibrhash"
 {
+	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
@@ -17,6 +20,7 @@ Property.CMakeOutputPath_librhash: string = `@('../..'->MakeAbsolute())`->MakeAb
 			"_FILE_OFFSET_BITS=64",
 			"_TIME_BITS=64"
 		]
+		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true

@@ -9,7 +9,9 @@ Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		]
 		PreprocessorDefines += [
 			"NOMINMAX",
-			"_CRT_SECURE_NO_WARNINGS"
+			"WIN32",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_WINDOWS"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -42,7 +44,9 @@ Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		SearchPath += []
 		PreprocessorDefines += [
 			"NOMINMAX",
-			"_CRT_SECURE_NO_WARNINGS"
+			"WIN32",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_WINDOWS"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"
@@ -105,6 +109,10 @@ Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		{
 			Compile.Type "C++"
 		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/explanations.cc`
+		{
+			Compile.Type "C++"
+		}
 		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
 		{
 			Compile.Type "C++"
@@ -114,6 +122,10 @@ Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			Compile.Type "C++"
 		}
 		%File `@('../../../../External/ninja'->MakeAbsolute())/src/jobserver.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/jobserver_pool.cc`
 		{
 			Compile.Type "C++"
 		}
@@ -207,7 +219,9 @@ Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		SearchPath += []
 		PreprocessorDefines += [
 			"NOMINMAX",
-			"_CRT_SECURE_NO_WARNINGS"
+			"WIN32",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_WINDOWS"
 		]
 	}
 	Property.MalterlibTargetNameType "Normal"

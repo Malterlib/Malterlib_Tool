@@ -1,24 +1,29 @@
 Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_libuv_cmlibuv"
 {
+	Target.CLanguage "GNU11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/include`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/unix`->MakeAbsolute(),
 			`@('../..'->MakeAbsolute())/Source`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Source`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
+			"NDEBUG",
 			"_DARWIN_UNLIMITED_SELECT=1",
 			"_DARWIN_USE_64_BIT_INODE=1"
 		]
+		CLanguage "GNU11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true
@@ -72,10 +77,6 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/strtok.h`
 			{
 				Compile.Disabled true
-			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/thread-common.c`
-			{
-				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/threadpool.c`
 			{

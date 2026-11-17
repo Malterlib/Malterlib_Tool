@@ -1,20 +1,28 @@
 Property.CMakeOutputPath_bzip2: string = `@('../..'->MakeAbsolute())`->MakeAbsolute()
 %Target "Lib_bzip2_cmbzip2"
 {
+	Target.CLanguage "C11"
 	Compile
 	{
 		!!Compile.Type "C"
 		SearchPath += [
 			`@('../..'->MakeAbsolute())/Utilities`->MakeAbsolute(),
-			`@(CMakeIntermediateDirectory)/External_CMake`->MakeAbsolute(),
+			`@(CMakeIntermediateDirectory)/External_CMake/Utilities`->MakeAbsolute()
+		]
+		SystemSearchPath += [
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/std`->MakeAbsolute(),
 			`@('../../../../../../External/CMake'->MakeAbsolute())/Utilities`->MakeAbsolute()
 		]
 		PreprocessorDefines += [
+			"NDEBUG",
+			"WIN32",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
-			"_FILE_OFFSET_BITS=64"
+			"_FILE_OFFSET_BITS=64",
+			"_MBCS",
+			"_WINDOWS"
 		]
+		CLanguage "C11"
 	}
 	Property.MalterlibTargetNameType "Normal"
 	Compile.AllowNonExisting true

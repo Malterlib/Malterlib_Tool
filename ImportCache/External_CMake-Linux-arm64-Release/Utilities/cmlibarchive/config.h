@@ -165,16 +165,16 @@
 /* #undef ARCHIVE_XATTR_LINUX */
 
 /* Version number of bsdcpio */
-#define BSDCPIO_VERSION_STRING "3.7.9"
+#define BSDCPIO_VERSION_STRING "3.8.9"
 
 /* Version number of bsdtar */
-#define BSDTAR_VERSION_STRING "3.7.9"
+#define BSDTAR_VERSION_STRING "3.8.9"
 
 /* Version number of bsdcat */
-#define BSDCAT_VERSION_STRING "3.7.9"
+#define BSDCAT_VERSION_STRING "3.8.9"
 
 /* Version number of bsdunzip */
-#define BSDUNZIP_VERSION_STRING "3.7.9"
+#define BSDUNZIP_VERSION_STRING "3.8.9"
 
 /* Define to 1 if you have the `acl_create_entry' function. */
 /* #undef HAVE_ACL_CREATE_ENTRY */
@@ -235,6 +235,12 @@
 
 /* Define to 1 if you have the `chroot' function. */
 #define HAVE_CHROOT 1
+
+/* Define to 1 if you have the `closefrom' function. */
+#define HAVE_CLOSEFROM 1
+
+/* Define to 1 if you have the `close_range' function. */
+#define HAVE_CLOSE_RANGE 1
 
 /* Define to 1 if you have the <copyfile.h> header file. */
 /* #undef HAVE_COPYFILE_H */
@@ -423,6 +429,9 @@
 /* Define to 1 if you have the `getea' function. */
 /* #undef HAVE_GETEA */
 
+/* Define to 1 if you have the `getegid' function. */
+#define HAVE_GETEGID 1
+
 /* Define to 1 if you have the `geteuid' function. */
 #define HAVE_GETEUID 1
 
@@ -444,6 +453,9 @@
 /* Define to 1 if you have the `getpwuid_r' function. */
 #define HAVE_GETPWUID_R 1
 
+/* Define to 1 if you have the `gettimeofday' function. */
+#define HAVE_GETTIMEOFDAY 1
+
 /* Define to 1 if you have the `getvfsbyname' function. */
 /* #undef HAVE_GETVFSBYNAME */
 
@@ -457,10 +469,13 @@
 #define HAVE_GRP_H 1
 
 /* Define to 1 if you have the `iconv' function. */
-/* #undef HAVE_ICONV */
+#define HAVE_ICONV 1
 
 /* Define to 1 if you have the <iconv.h> header file. */
-/* #undef HAVE_ICONV_H */
+#define HAVE_ICONV_H 1
+
+/* Define to 1 if you have the <intsafe.h> header file. */
+/* #undef HAVE_INTSAFE_H */
 
 /* Define to 1 if you have the <io.h> header file. */
 /* #undef HAVE_IO_H */
@@ -513,6 +528,9 @@
 /* Define to 1 if you have the `gcc' library (-lgcc). */
 /* #undef HAVE_LIBGCC */
 
+/* Define to 1 if you have the `iconv' library (-liconv). */
+/* #undef HAVE_LIBICONV */
+
 /* Define to 1 if you have the `lz4' library (-llz4). */
 /* #undef HAVE_LIBLZ4 */
 
@@ -549,6 +567,9 @@
 /* Define to 1 if you have the <libxml/xmlwriter.h> header file. */
 /* #undef HAVE_LIBXML_XMLWRITER_H */
 
+/* Define to 1 if you have the <libxml/xmlversion.h> header file. */
+/* #undef HAVE_LIBXML_XMLVERSION_H */
+
 /* Define to 1 if you have the `z' library (-lz). */
 #define HAVE_LIBZ 1
 
@@ -557,6 +578,9 @@
 
 /* Define to 1 if you have the ZSTD_compressStream function. */
 #define HAVE_ZSTD_compressStream 1
+
+/* Define to 1 if you have the ZSTD_minCLevel function. */
+/* #undef HAVE_ZSTD_minCLevel */
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
@@ -649,6 +673,9 @@
 /* Define to 1 if you have the <mbedtls/pkcs5.h> header file. */
 /* #undef HAVE_MBEDTLS_PKCS5_H */
 
+/* Define to 1 if you have the <mbedtls/pkcs5.h> header file. */
+/* #undef HAVE_MBEDTLS_VERSION_H */
+
 /* Define to 1 if you have the `mbrtowc' function. */
 #define HAVE_MBRTOWC 1
 
@@ -694,6 +721,9 @@
 /* Define to 1 if you have the <nettle/sha.h> header file. */
 /* #undef HAVE_NETTLE_SHA_H */
 
+/* Define to 1 if you have the <nettle/version.h> header file. */
+/* #undef HAVE_NETTLE_VERSION_H */
+
 /* Define to 1 if you have the `nl_langinfo' function. */
 #define HAVE_NL_LANGINFO 1
 
@@ -702,6 +732,9 @@
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
 /* #undef HAVE_OPENSSL_EVP_H */
+
+/* Define to 1 if you have the <openssl/opensslv.h> header file. */
+/* #undef HAVE_OPENSSL_OPENSSLV_H */
 
 /* Define to 1 if you have the <paths.h> header file. */
 #define HAVE_PATHS_H 1
@@ -735,9 +768,6 @@
 
 /* Define to 1 if you have the <pwd.h> header file. */
 #define HAVE_PWD_H 1
-
-/* Define to 1 if you have the `readdir_r' function. */
-#define HAVE_READDIR_R 1
 
 /* Define to 1 if you have the `readlink' function. */
 #define HAVE_READLINK 1
@@ -784,6 +814,12 @@
 
 /* Define to 1 if you have the <stdarg.h> header file. */
 #define HAVE_STDARG_H 1
+
+/* Define to 1 if you have the <stdckdint.h> header file. */
+#define HAVE_STDCKDINT_H 1
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#define HAVE_STDIO_H 1
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
@@ -922,7 +958,6 @@
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
 
-
 /* Define to 1 if you have the <sys/sysmacros.h> header file. */
 #define HAVE_SYS_SYSMACROS_H 1
 
@@ -1046,6 +1081,9 @@
 /* Define to 1 if you have a working FS_IOC_GETFLAGS */
 #define HAVE_WORKING_FS_IOC_GETFLAGS 1
 
+/* Define to 1 if you have the Windows `xmllite' library (-lxmllite). */
+/* #undef HAVE_XMLLITE_H */
+
 /* Define to 1 if you have the <zlib.h> header file. */
 #define HAVE_ZLIB_H 1
 
@@ -1071,13 +1109,13 @@
 /* #undef HAVE__MKGMTIME */
 
 /* Define as const if the declaration of iconv() needs const. */
-#define ICONV_CONST 
+#define ICONV_CONST const
 
 /* Version number of libarchive as a single integer */
-#define LIBARCHIVE_VERSION_NUMBER "3007009"
+#define LIBARCHIVE_VERSION_NUMBER "3008009"
 
 /* Version number of libarchive */
-#define LIBARCHIVE_VERSION_STRING "3.7.9"
+#define LIBARCHIVE_VERSION_STRING "3.8.9"
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
@@ -1102,6 +1140,15 @@
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 /* #undef TIME_WITH_SYS_TIME */
+
+/* Version number of package */
+/* #undef LIBATTR_PKGCONFIG_VERSION */
+
+/* Version number of package */
+/* #undef LIBACL_PKGCONFIG_VERSION */
+
+/* Version number of package */
+/* #undef LIBRICHACL_PKGCONFIG_VERSION */
 
 /*
  * Some platform requires a macro to use extension functions.
@@ -1131,7 +1178,7 @@
 #endif /* SAFE_TO_DEFINE_EXTENSIONS */
 
 /* Version number of package */
-#define VERSION "3.7.9"
+#define VERSION "3.8.9"
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 /* #undef _FILE_OFFSET_BITS */
