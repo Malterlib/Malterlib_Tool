@@ -9,6 +9,7 @@
 #include <Mib/Container/Registry>
 
 bool fg_IsCMake();
+bool fg_IsCTest();
 bool fg_IsLibTool();
 bool fg_IsMalterlib();
 NStr::CStr fg_GetToolRootDirectory();

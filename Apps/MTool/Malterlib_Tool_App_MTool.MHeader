@@ -77,6 +77,7 @@ Property
 			!!MToolEmbedCMake true
 
 			%File "../../../../External/CMake/Source/cmakemain.cxx"
+			%File "../../../../External/CMake/Source/ctest.cxx"
 			%File "../../../../External/CMake/Source/cmcmd.cxx"
 			%File "../../../../External/CMake/Source/cmcmd.h"
 		}
@@ -98,6 +99,10 @@ Property
 	%Dependency "Lib_Malterlib_Git"
 	%Dependency "Lib_Malterlib_Develop"
 	%Dependency "Lib_Malterlib"
+	%Dependency "Lib_CMake_CTestLib"
+	{
+		!!MToolEmbedCMake true
+	}
 
 	%Dependency {
 		Name: "Com_ninja_ninja"
