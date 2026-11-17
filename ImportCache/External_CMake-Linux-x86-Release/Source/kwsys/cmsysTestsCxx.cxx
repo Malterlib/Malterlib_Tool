@@ -19,7 +19,9 @@ extern int testCommandLineArguments1(int, char*[]);
 extern int testDirectory(int, char*[]);
 extern int testEncoding(int, char*[]);
 extern int testFStream(int, char*[]);
+extern int testRegularExpression(int, char*[]);
 extern int testSystemInformation(int, char*[]);
+extern int testSystemInformationBaseFrequency(int, char*[]);
 extern int testDynamicLoader(int, char*[]);
 
 
@@ -86,8 +88,16 @@ CM_LOCAL const functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
     testFStream
   },
   {
+    "testRegularExpression",
+    testRegularExpression
+  },
+  {
     "testSystemInformation",
     testSystemInformation
+  },
+  {
+    "testSystemInformationBaseFrequency",
+    testSystemInformationBaseFrequency
   },
   {
     "testDynamicLoader",

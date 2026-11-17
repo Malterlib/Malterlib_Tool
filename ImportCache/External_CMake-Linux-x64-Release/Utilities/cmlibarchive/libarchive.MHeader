@@ -122,19 +122,15 @@ Property.CMakeOutputPath_libarchive: string = `@('../..'->MakeAbsolute())`->Make
 			{
 				Compile.Type "C"
 			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_getdate.c`
-			{
-				Compile.Type "C"
-			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_getdate.h`
-			{
-				Compile.Disabled true
-			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_hmac.c`
 			{
 				Compile.Type "C"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_hmac_private.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_integer.h`
 			{
 				Compile.Disabled true
 			}
@@ -166,6 +162,10 @@ Property.CMakeOutputPath_libarchive: string = `@('../..'->MakeAbsolute())`->Make
 			{
 				Compile.Type "C"
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_parse_date.c`
+			{
+				Compile.Type "C"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_pathmatch.c`
 			{
 				Compile.Type "C"
@@ -179,6 +179,10 @@ Property.CMakeOutputPath_libarchive: string = `@('../..'->MakeAbsolute())`->Make
 				Compile.Disabled true
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_platform_acl.h`
+			{
+				Compile.Disabled true
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_platform_stat.h`
 			{
 				Compile.Disabled true
 			}
@@ -437,6 +441,14 @@ Property.CMakeOutputPath_libarchive: string = `@('../..'->MakeAbsolute())`->Make
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_string_sprintf.c`
 			{
 				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_time.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_time_private.h`
+			{
+				Compile.Disabled true
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibarchive/libarchive/archive_util.c`
 			{

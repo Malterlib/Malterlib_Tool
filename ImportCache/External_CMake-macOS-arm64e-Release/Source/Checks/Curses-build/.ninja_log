@@ -1,3 +1,3 @@
-# ninja log v5
-0	46	1763416508876025142	CMakeFiles/CheckCurses.dir/CheckCurses.c.o	d6225c8cedf1e392
-47	99	1763416508928632525	CheckCurses	6c6e74bffe0c5b5e
+# ninja log v7
+1	25	1795474941903510558	CMakeFiles/CheckCurses.dir/CheckCurses.c.o	469163f08a2db9b9
+25	67	1795474941927096430	CheckCurses	476d8bf30b643605

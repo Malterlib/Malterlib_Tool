@@ -13,6 +13,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
@@ -32,6 +33,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
@@ -250,6 +252,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
@@ -365,6 +368,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
@@ -402,9 +406,16 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 	}
 	%Group "Source"
 	{
-		%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testEncode.c`
+		%Group "kwsys"
 		{
-			Compile.Type "C"
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testEncode.c`
+			{
+				Compile.Type "C"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testString.c`
+			{
+				Compile.Type "C"
+			}
 		}
 	}
 	%Dependency "Lib_cmsys_cmsys_c"
@@ -423,6 +434,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
@@ -467,6 +479,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			"BUILDING_TestDynloadImpl",
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
@@ -509,6 +522,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
@@ -553,6 +567,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",
@@ -624,13 +639,25 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			{
 				Compile.Type "C++"
 			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testRegularExpression.cxx`
+			{
+				Compile.Type "C++"
+			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testSystemInformation.cxx`
+			{
+				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testSystemInformationBaseFrequency.cxx`
 			{
 				Compile.Type "C++"
 			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/testDynamicLoader.cxx`
 			{
 				Compile.Type "C++"
+			}
+			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Source/kwsys/test.manifest`
+			{
+				Compile.Disabled true
 			}
 		}
 	}
@@ -650,6 +677,7 @@ Property.CMakeOutputPath_cmsys: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 		PreprocessorDefines += [
 			"KWSYS_NAMESPACE=cmsys",
 			"UNICODE",
+			"WIN32_LEAN_AND_MEAN",
 			"_CRT_NONSTDC_NO_DEPRECATE",
 			"_CRT_SECURE_NO_DEPRECATE",
 			"_CRT_SECURE_NO_WARNINGS",

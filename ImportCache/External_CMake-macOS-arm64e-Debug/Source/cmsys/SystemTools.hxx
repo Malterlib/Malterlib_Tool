@@ -6,6 +6,7 @@
 #include <cmsys/Configure.hxx>
 #include <cmsys/Status.hxx>
 
+#include <ctime>
 #include <iosfwd>
 #include <map>
 #include <string>
@@ -42,8 +43,17 @@ typedef cmsys_VA_LIST::hack_va_list va_list;
 
 namespace cmsys {
 
+#ifdef _WIN32
 class SystemToolsStatic;
+#endif
 
+#if defined(__VMS) || defined(_WIN32)
+#  define cmsys_NEED_SYSTEM_TOOLS_MANAGER 1
+#else
+#  define cmsys_NEED_SYSTEM_TOOLS_MANAGER 0
+#endif
+
+#if cmsys_NEED_SYSTEM_TOOLS_MANAGER
 /** \class SystemToolsManager
  * \brief Use to make sure SystemTools is initialized before it is used
  * and is the last static object destroyed
@@ -62,6 +72,7 @@ public:
 // SystemTools. It will make sure SystemTools is initialized
 // before it is used and is the last static object destroyed.
 static SystemToolsManager SystemToolsManagerInstance;
+#endif
 
 // Flags for use with TestFileAccess.  Use a typedef in case any operating
 // system in the future needs a special type.  These are flags that may be
@@ -132,15 +143,11 @@ public:
    */
   static std::string UnCapitalizedWords(std::string const&);
 
-  /**
-   * Return a lower case string
-   */
-  static std::string LowerCase(std::string const&);
+  /** Return a lower-case string.  */
+  static std::string LowerCase(std::string);
 
-  /**
-   * Return a lower case string
-   */
-  static std::string UpperCase(std::string const&);
+  /** Return an upper-case string.  */
+  static std::string UpperCase(std::string);
 
   /**
    * Count char in string
@@ -342,7 +349,7 @@ public:
   /**
    * Return file length
    */
-  static unsigned long FileLength(std::string const& filename);
+  static unsigned long long FileLength(std::string const& filename);
 
   /**
      Change the modification time or create a file
@@ -363,15 +370,6 @@ public:
    *  on the current platform ("" for unix, ".exe" for Windows).
    */
   static char const* GetExecutableExtension();
-
-  /**
-   * Given a path on a Windows machine, return the actual case of
-   * the path as it exists on disk.  Path components that do not
-   * exist on disk are returned unchanged.  Relative paths are always
-   * returned unchanged.  Drive letters are always made upper case.
-   * This does nothing on non-Windows systems but return the path.
-   */
-  static std::string GetActualCaseForPath(std::string const& path);
 
   /**
    * Given the path to a program executable, get the directory part of
@@ -578,6 +576,13 @@ public:
                                         std::string const& destination);
 
   /**
+   * Copy the source file to the destination file only
+   * if the source file is newer than the destination file.
+   */
+  static CopyStatus CopyFileIfNewer(std::string const& source,
+                                    std::string const& destination);
+
+  /**
    * Compare the contents of two files.  Return true if different
    */
   static bool FilesDiffer(std::string const& source,
@@ -658,24 +663,34 @@ public:
   static CopyStatus CopyFileAlways(std::string const& source,
                                    std::string const& destination);
 
+  enum class CopyWhen
+  {
+    Unconditional,
+    OnlyIfDifferent,
+    OnlyIfNewer,
+  };
+
   /**
-   * Copy a file.  If the "always" argument is true the file is always
-   * copied.  If it is false, the file is copied only if it is new or
-   * has changed.
+   * Copy a file with specified copy behavior.
    */
   static CopyStatus CopyAFile(std::string const& source,
                               std::string const& destination,
-                              bool always = true);
+                              CopyWhen when = CopyWhen::Unconditional);
+  static CopyStatus CopyAFile(std::string const& source,
+                              std::string const& destination, bool always);
 
   /**
    * Copy content directory to another directory with all files and
-   * subdirectories.  If the "always" argument is true all files are
-   * always copied.  If it is false, only files that have changed or
-   * are new are copied.
+   * subdirectories.  The "when" argument controls when files are copied:
+   * Unconditional: all files are always copied.
+   * OnlyIfDifferent: only files that have changed are copied.
+   * OnlyIfNewer: only files that are newer than the destination are copied.
    */
   static Status CopyADirectory(std::string const& source,
                                std::string const& destination,
-                               bool always = true);
+                               CopyWhen when = CopyWhen::Unconditional);
+  static Status CopyADirectory(std::string const& source,
+                               std::string const& destination, bool always);
 
   /**
    * Remove a file
@@ -772,13 +787,6 @@ public:
                                                   double percent_bin = 0.05);
 
   /**
-   * Create a symbolic link if the platform supports it.  Returns whether
-   * creation succeeded.
-   */
-  static Status CreateSymlink(std::string const& origName,
-                              std::string const& newName);
-
-  /**
    * Read the contents of a symbolic link.  Returns whether reading
    * succeeded.
    */
@@ -843,6 +851,12 @@ public:
    *               Time Manipulation Routines
    *  -----------------------------------------------------------------
    */
+
+  /** Get time as local time (thread-safe).  */
+  static std::tm LocalTime(std::time_t timep);
+
+  /** Get time as UTC time (thread-safe).  */
+  static std::tm GMTime(std::time_t timep);
 
   /** Get current time in seconds since Posix Epoch (Jan 1, 1970).  */
   static double GetTime();
@@ -1004,6 +1018,7 @@ public:
   static std::string DecodeURL(std::string const& url);
 
 private:
+#if cmsys_NEED_SYSTEM_TOOLS_MANAGER
   static void ClassInitialize();
   static void ClassFinalize();
 
@@ -1014,9 +1029,25 @@ private:
   {
     return &SystemToolsManagerInstance;
   }
+#endif
 
+  static void ReplaceStringImpl(std::string& source, char const* replace,
+                                size_t replaceSize, std::string const& with);
+  /**
+   * Find a filename (file or directory) in the system PATH, with
+   * optional extra paths.
+   */
+  static std::string FindNameImpl(
+    std::string const& name,
+    std::vector<std::string> const& userPaths = std::vector<std::string>(),
+    bool no_system_path = false);
+
+#ifdef _WIN32
   friend class SystemToolsStatic;
+#endif
+#if cmsys_NEED_SYSTEM_TOOLS_MANAGER
   friend class SystemToolsManager;
+#endif
 };
 
 } // namespace cmsys

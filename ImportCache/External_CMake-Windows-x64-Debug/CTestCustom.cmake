@@ -12,8 +12,8 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "warning: \\(Long double usage is reported only once for each file"
   "warning: To disable this warning use"
   "could not be inlined"
-  "libcm(curl|expat).*has no symbols"
-  "cm(curl|expat).build/[^ ]*.o has no symbols"
+  "libcm(curl|expat|zstd).*has no symbols"
+  "cm(curl|expat|zstd).build/[^ ]*.o has no symbols"
   "not sorted slower link editing will result"
   "stl_deque.h:479"
   "Utilities.cmzlib."
@@ -51,6 +51,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "Warning: Function .* can throw only the exceptions thrown by the function .* it overrides\\."
   "WarningMessagesDialog\\.cxx"
   "warning.*directory name.*CMake-Xcode.*/bin/.*does not exist.*"
+  "stl_algo(base)?\\.h:[0-9:]* warning: loop not unrolled"
   "stl_deque.h:1051"
   "Tests/CMakeLib/testCTestResourceSpec.cxx:.*warning: missing initializer for member.*cmCTestResourceSpec::.*" # GCC 4.8 disagrees with later compilers on C++11 initializer list conversion
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
@@ -99,6 +100,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "liblzma/simple/x86.c:[0-9]+:[0-9]+: warning: The result of the '<<' expression is undefined"
   "librhash/librhash/.*:[0-9]+:[0-9]+: warning: The left operand of '[^']+' is a garbage value"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: 1st function call argument is an uninitialized value"
+  "libuv/src/.*:[0-9]+:[0-9]+: warning: Address of stack memory associated with local variable '[^']+' is still"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: The left operand of '[^']+' is a garbage value"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: Value of '[^']+' was not checked and may be overwritten by function '[^']+'"
@@ -126,8 +128,12 @@ list(APPEND CTEST_CUSTOM_COVERAGE_EXCLUDE
 
   # Exclude Qt source files from coverage results:
   "[A-Za-z]./[Qq]t/qt-.+-opensource-src"
+
+  # Exclude coverage results from coverage test directories.
+  "/Testing/.*Coverage/"
   )
 
 list(APPEND CTEST_CUSTOM_MEMCHECK_IGNORE
   kwsys.testProcess-10 # See Source/kwsys/CTestCustom.cmake.in
+  RunCMake.InstrumentationInterruptReal # interrupts cmake with a real signal
   )

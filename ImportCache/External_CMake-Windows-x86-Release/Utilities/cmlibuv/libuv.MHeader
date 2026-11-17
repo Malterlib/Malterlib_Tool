@@ -75,10 +75,6 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 			{
 				Compile.Disabled true
 			}
-			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/thread-common.c`
-			{
-				Compile.Type "C"
-			}
 			%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/threadpool.c`
 			{
 				Compile.Type "C"
@@ -108,10 +104,6 @@ Property.CMakeOutputPath_libuv: string = `@('../..'->MakeAbsolute())`->MakeAbsol
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/async.c`
 				{
 					Compile.Type "C"
-				}
-				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/atomicops-inl.h`
-				{
-					Compile.Disabled true
 				}
 				%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmlibuv/src/win/core.c`
 				{

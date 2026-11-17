@@ -31,8 +31,8 @@
 #define CMAKE_USE_WMAKE
 /* #undef CMake_DEFAULT_RECURSION_LIMIT */
 #define CMAKE_BIN_DIR "/bin"
-#define CMAKE_DATA_DIR "/share/cmake-4.1"
-#define CMAKE_DOC_DIR "/doc/cmake-4.1"
+#define CMAKE_DATA_DIR "/share/cmake-4.5"
+#define CMAKE_DOC_DIR "/doc/cmake-4.5"
 
 #define CM_FALLTHROUGH cmsys_FALLTHROUGH
 

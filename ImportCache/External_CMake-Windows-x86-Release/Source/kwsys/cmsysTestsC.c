@@ -12,6 +12,7 @@
 
 /* Forward declare test functions. */
 extern int testEncode(int, char*[]);
+extern int testString(int, char*[]);
 
 
 #ifdef __cplusplus
@@ -47,6 +48,10 @@ CM_LOCAL const functionMapEntry cmakeGeneratedFunctionMapEntries[] = {
     {
     "testEncode",
     testEncode
+  },
+  {
+    "testString",
+    testString
   },
 
   { CM_NULL, CM_NULL } /* NOLINT */

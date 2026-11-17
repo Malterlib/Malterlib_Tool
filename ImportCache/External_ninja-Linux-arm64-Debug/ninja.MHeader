@@ -103,6 +103,10 @@ Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 		{
 			Compile.Type "C++"
 		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/explanations.cc`
+		{
+			Compile.Type "C++"
+		}
 		%File `@('../../../../External/ninja'->MakeAbsolute())/src/graph.cc`
 		{
 			Compile.Type "C++"
@@ -112,6 +116,10 @@ Property.CMakeOutputPath_ninja: string = `@('.'->MakeAbsolute())`->MakeAbsolute(
 			Compile.Type "C++"
 		}
 		%File `@('../../../../External/ninja'->MakeAbsolute())/src/jobserver.cc`
+		{
+			Compile.Type "C++"
+		}
+		%File `@('../../../../External/ninja'->MakeAbsolute())/src/jobserver_pool.cc`
 		{
 			Compile.Type "C++"
 		}

@@ -16,3 +16,7 @@
 /* #undef CMAKE_USE_SYSTEM_LIBRHASH */
 /* #undef CMAKE_USE_SYSTEM_LIBUV */
 /* #undef CMAKE_USE_SYSTEM_ZSTD */
+#define CMAKE_USE_SYSTEM_NGHTTP2
+
+/* Whether CMake is using OpenSSL library.  */
+/* #undef CMAKE_USE_OPENSSL */

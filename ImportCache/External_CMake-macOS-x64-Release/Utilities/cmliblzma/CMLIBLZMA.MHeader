@@ -331,6 +331,10 @@ Property.CMakeOutputPath_CMLIBLZMA: string = `@('../..'->MakeAbsolute())`->MakeA
 					{
 						Compile.Type "C"
 					}
+					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/arm64.c`
+					{
+						Compile.Type "C"
+					}
 					%File `@('../../../../../../External/CMake'->MakeAbsolute())/Utilities/cmliblzma/liblzma/simple/armthumb.c`
 					{
 						Compile.Type "C"
