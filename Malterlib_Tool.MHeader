@@ -46,13 +46,15 @@ Property
 		MalterlibWindowsVersion "NTDDI_WIN8"
 	}
 
+	// Defined so that libarchive doesn't probe for OpenSSL digests. They must be off: CMake's libarchive only
+	// checks them outside of macOS, so on macOS the values reach config.h unchecked.
 	Import.CMake_Variables =+ [
-		"ARCHIVE_CRYPTO_MD5_OPENSSL=1"
+		"ARCHIVE_CRYPTO_MD5_OPENSSL=0"
 		, "ARCHIVE_CRYPTO_RMD160_OPENSSL=0"
-		, "ARCHIVE_CRYPTO_SHA1_OPENSSL=1"
-		, "ARCHIVE_CRYPTO_SHA256_OPENSSL=1"
-		, "ARCHIVE_CRYPTO_SHA384_OPENSSL=1"
-		, "ARCHIVE_CRYPTO_SHA512_OPENSSL=1"
+		, "ARCHIVE_CRYPTO_SHA1_OPENSSL=0"
+		, "ARCHIVE_CRYPTO_SHA256_OPENSSL=0"
+		, "ARCHIVE_CRYPTO_SHA384_OPENSSL=0"
+		, "ARCHIVE_CRYPTO_SHA512_OPENSSL=0"
 	]
 
 	Import.CMake_Variables =+ [
@@ -204,6 +206,7 @@ Property
 		Compile
 		{
 			!!CompileDialect "C"
+			Warnings "Minimal" // Upstream mixes char and unsigned char pointers, and iconv's const char ** with char **
 			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
 			Warnings_SingleBitBitfieldConstantConversion false
 			{
@@ -215,6 +218,16 @@ Property
 			!DocumentationEnabled true
 			Dependency.Indirect true
 		}
+		%Dependency "iconv" // CMake builds libarchive with iconv outside of Windows, and macOS has it in libiconv rather than libc
+		{
+			!!PlatformFamily "macOS"
+
+			Dependency
+			{
+				Type "Library"
+				Indirect true
+			}
+		}
 	}
 
 	%Target "Lib_bzip2_cmbzip2"
@@ -223,6 +236,15 @@ Property
 		{
 			!!CompileDialect "C"
 			PreprocessorDefines Compile.PreprocessorDefines->f_RemoveElements("_XOPEN_SOURCE=600")
+		}
+	}
+
+	%Target "Lib_CMake_cmllpkgc"
+	{
+		Compile
+		{
+			!!CompileDialect "C"
+			Warnings "Minimal" // The llparse generated parsers pass char spans to their unsigned char callbacks
 		}
 	}
 
@@ -474,6 +496,7 @@ Repository
 				, { Source: "../../External/CMake/Utilities/cmliblzma/COPYING"->MakeAbsolute(), Name: "XZ Utils (bundled in CMake, https://tukaani.org/xz/)" }
 				, { Source: "../../External/CMake/Utilities/cmlibrhash/COPYING"->MakeAbsolute(), Name: "LibRHash (bundled in CMake, https://github.com/rhash/RHash)" }
 				, { Source: "../../External/CMake/Utilities/cmlibuv/LICENSE"->MakeAbsolute(), Name: "libuv (bundled in CMake, https://github.com/libuv/libuv)" }
+				, { Source: "../../External/CMake/Utilities/cmllpkgc/LICENSE.rst"->MakeAbsolute(), Name: "llpkgc (bundled in CMake, https://gitlab.kitware.com/utils/llpkgc)" }
 				, { Source: "ThirdPartyLicenses/lmdb/LICENSE"->MakeAbsolute(), Name: "lmdb (https://github.com/LMDB/lmdb.git)" }
 			]
 		}
