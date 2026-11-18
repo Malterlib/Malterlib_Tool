@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include "Malterlib_Tool_App_MTool_Main.h"
+#include "Malterlib_Tool_App_MTool_BuildServerHelpers.h"
 #include <Mib/Cryptography/UUID>
 
 namespace
@@ -273,7 +274,13 @@ aint CTool_BuildServerTool::f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr
 	{
 		CStr ProtectDirsStr = _Params["ProtectedDirs"];
 		while (!ProtectDirsStr.f_IsEmpty())
-			ProtectDirs.f_Insert(CFile::fs_GetMalterlibPath(fg_GetStrSep(ProtectDirsStr, ";")));
+		{
+			CStr ProtectDir = CFile::fs_GetMalterlibPath(fg_GetStrSep(ProtectDirsStr, ";"));
+			if (NMib::NTool::fg_IsMalformedExtendedLengthPath(ProtectDir))
+				DError(CStr::CFormat("ProtectedDirs entry '{}' has an extended-length prefix that is not followed by a drive root or a UNC server name") << ProtectDir);
+
+			ProtectDirs.f_Insert(fg_Move(ProtectDir));
+		}
 	}
 	if (_Params.f_FindEqual("ExtraUploads"))
 	{
@@ -324,19 +331,12 @@ aint CTool_BuildServerTool::f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr
 				if (NFile::CFile::fs_FileExists(OriginalParam, EFileAttrib_Directory))
 				{
 					bDirectory = true;
-					bool bProtected = false;
-					for (auto iProtected = ProtectDirs.f_GetIterator(); iProtected; ++iProtected)
-					{
-						if (OriginalParam.f_StartsWithNoCase(*iProtected))
-						{
-							bProtected = true;
-							break;
-						}
-					}
-					if (bProtected)
+					if (NMib::NTool::fg_IsInProtectedDirectory(Param, ProtectDirs))
 					{
 						//DConOut("Protected Param: {}" DNewLine, Param);
-						Params.f_Insert(Param);
+						// Forward the argument as the client expands it, also when it is absolute: expansion resolves ".." by name as the protected
+						// directory check does, while a tool that opens the argument as given can follow a link before a ".." and reach another directory
+						Params.f_Insert(NMib::NTool::fg_ProtectedDirectoryForwardPath(Param));
 
 						continue;
 					}
