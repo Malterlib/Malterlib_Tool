@@ -71,6 +71,10 @@ namespace
 		while (CFile::fs_FileExists(TempFile))
 			ChangeSemaphore.f_WaitTimeout(1.0);
 
+		// The runner moves a complete reply into place before deleting the sync file; when it cannot write one it still tries to delete the sync file.
+		if (!CFile::fs_FileExists(OutputFile, EFileAttrib_File))
+			DError(CStr::CFormat("The build server answered {} without a reply; see the build runner's log for '{}'") << _Command << TempFile);
+
 		CStr Output = CFile::fs_ReadStringFromFile(CStr(OutputFile));
 		CFile::fs_DeleteFile(OutputFile);
 
