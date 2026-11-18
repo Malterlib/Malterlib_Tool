@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include "Malterlib_Tool_App_MTool_Main.h"
+#include "Malterlib_Tool_App_MTool_BuildServerHelpers.h"
 #include <Mib/Cryptography/UUID>
 
 namespace
@@ -324,19 +325,12 @@ aint CTool_BuildServerTool::f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr
 				if (NFile::CFile::fs_FileExists(OriginalParam, EFileAttrib_Directory))
 				{
 					bDirectory = true;
-					bool bProtected = false;
-					for (auto iProtected = ProtectDirs.f_GetIterator(); iProtected; ++iProtected)
-					{
-						if (OriginalParam.f_StartsWithNoCase(*iProtected))
-						{
-							bProtected = true;
-							break;
-						}
-					}
-					if (bProtected)
+					if (NMib::NTool::fg_IsInProtectedDirectory(Param, ProtectDirs))
 					{
 						//DConOut("Protected Param: {}" DNewLine, Param);
-						Params.f_Insert(Param);
+						// The server gets the expanded path that was found protected, also for an absolute argument: expansion resolves ".." by
+						// name, and the argument as given, with ".." after a link, can resolve to a directory outside the protected ones
+						Params.f_Insert(NMib::NTool::fg_ProtectedDirectoryForwardPath(Param));
 
 						continue;
 					}
