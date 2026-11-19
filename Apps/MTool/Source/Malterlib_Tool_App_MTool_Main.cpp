@@ -7,26 +7,35 @@
 
 DMibRuntimeClass(NMib::NConcurrency::CDistributedTool, CTool);
 
+namespace
+{
+	// Without case, as the file systems of macOS and Windows open a link to MTool by its name in any case
+	bool fg_IsRunAs(NStr::CStr const &_Name)
+	{
+		return CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()).f_CmpNoCase(_Name) == 0;
+	}
+}
+
 bool fg_IsCMake()
 {
-	static bool s_bIsCMake = CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "MToolCMake";
+	static bool s_bIsCMake = fg_IsRunAs("MToolCMake");
 	return s_bIsCMake;
 }
 
 bool fg_IsCTest()
 {
-	static bool s_bIsCTest = CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "MToolCTest";
+	static bool s_bIsCTest = fg_IsRunAs("MToolCTest");
 	return s_bIsCTest;
 }
 
 bool fg_IsLibTool()
 {
-	return CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "libtool";
+	return fg_IsRunAs("libtool");
 }
 
 bool fg_IsMalterlib()
 {
-	static bool s_bIsMalterlib = fg_GetSys()->f_GetProtectedEnvironmentVariable("MToolIsMalterlib", "false") == "true" || CFile::fs_GetFileNoExt(CFile::fs_GetOriginalProgramPath()) == "mib";
+	static bool s_bIsMalterlib = fg_GetSys()->f_GetProtectedEnvironmentVariable("MToolIsMalterlib", "false") == "true" || fg_IsRunAs("mib");
 	return s_bIsMalterlib;
 }
 
