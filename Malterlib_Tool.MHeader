@@ -502,6 +502,18 @@ Repository
 		}
 	}
 
+	// The LICENSE of libuv no longer has the notices of the code from joyent/libuv, tree.h and inet.c, which ask for them in a
+	// binary distribution
+	License #<LicenseFiles.LICENSE> =+ {
+		Source: "ThirdPartyLicenses/libuv/LICENSE-joyent"->MakeAbsolute()
+		, Name: "libuv code from joyent/libuv (bundled in CMake, https://github.com/joyent/libuv)"
+	}
+	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/libuv/LICENSE-tree"->MakeAbsolute(), Name: "tree.h in libuv (bundled in CMake, from FreeBSD)" }
+	License #<LicenseFiles.LICENSE> =+ {
+		Source: "ThirdPartyLicenses/libuv/LICENSE-inet"->MakeAbsolute()
+		, Name: "inet_pton and inet_ntop in libuv (bundled in CMake, from the Internet Systems Consortium)"
+	}
+
 	License #<LicenseFiles.LICENSE> =+ { Source: "ThirdPartyLicenses/nasm/LICENSE"->MakeAbsolute(), Name: "nasm (https://github.com/netwide-assembler/nasm.git)" }
 	{
 		!!MalterlibRepoName->StartsWith("MalterlibBinaries_Windows_") true
