@@ -893,9 +893,13 @@ aint CTool_PerforceMerge::f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> 
 
 						DestinationChangelist = pClient->f_CreateChangelist(FullCommentList, Jobs, Files);
 
-						pClient->f_ResolveAutomatic(CStr(), DestinationChangelist);
+						CStr Unresolved = fg_PerforceResolveSafe(*pClient, CStr(), DestinationChangelist);
 
-						if (!_bNoSubmit)
+						if (_bNoSubmit)
+							DConOut("{}", Unresolved);
+						else if (!Unresolved.f_IsEmpty())
+							DError("Changelist {} was not submitted.\n{}"_f << DestinationChangelist << Unresolved);
+						else
 						{
 							uint32 FinalChangelist = pClient->f_SubmitChangelist(DestinationChangelist, false);
 

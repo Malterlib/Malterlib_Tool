@@ -289,7 +289,7 @@ aint CTool_PerforceUnshelveRelatedStream::f_Run(TCVector<CStr> const &_Files, TC
 
 	pClient->f_UnshelveWithBranch(ChangeListNumber, MappingName, DestinationChangelist);
 
-	pClient->f_ResolveAutomatic(CStr(), DestinationChangelist);
+	DConOut("{}", fg_PerforceResolveSafe(*pClient, CStr(), DestinationChangelist));
 
 	return 0;
 }

@@ -94,6 +94,56 @@ CStr fg_AskUser(CBlockingStdInReader &_StdIn, CStr const &_Text)
 	return _StdIn.f_ReadLine().f_Trim(ToTrim);
 }
 
+// Resolves the files of _File, of changelist _Changelist too when it isn't 0, without merging: a file changed on both sides is left
+// unresolved, also when its changes don't conflict, as an automatic merge can merge them wrongly. Returns the report of the files
+// left and how to merge them, or nothing when all are resolved.
+CStr fg_PerforceResolveSafe(CPerforceClientThrow &_Client, CStr const &_File, uint32 _Changelist)
+{
+	_Client.f_ResolveSafe(_File, _Changelist);
+
+	auto Unresolved = _Client.f_GetUnresolvedFiles(_File, _Changelist);
+	if (Unresolved.f_IsEmpty())
+		return {};
+
+	// The connection's settings can differ from those of the shell the commands are run in. The host is always given, as a shell's
+	// P4HOST or P4CONFIG can name another one, and a workspace can be restricted to one host.
+	CStr Server = _Client.f_GetActiveServer();
+	CStr User = _Client.f_GetActiveUser();
+	CStr Host = _Client.f_GetActiveHost();
+	CStr Workspace = _Client.f_GetActiveClient();
+
+	// The commands are for Bash on every platform, as no quoting suits both cmd and PowerShell. A value Bash would read otherwise is
+	// single-quoted, which keeps every other character literal, also $, ` and !.
+	auto fValue = [](CStr const &_Value) -> CStr
+		{
+			return _Value.f_IsEmpty() || fg_StrEscapeBashQuotesNeeded(_Value) ? fg_StrEscapeBashSingleQuotes(_Value) : _Value;
+		}
+	;
+	auto fCommand = [&](CStr const &_Command) -> CStr
+		{
+			CStr Command = "p4 -p {} -u {} -H {} -c {} {}"_f << fValue(Server) << fValue(User) << fValue(Host) << fValue(Workspace) << _Command;
+			if (_Changelist != 0)
+				Command += " -c {}"_f << _Changelist;
+			if (!_File.f_IsEmpty())
+				Command += " " + fValue(_File);
+
+			return Command;
+		}
+	;
+
+	CStr Report = "These files in workspace {} were changed on both sides, which the safe resolve leaves for you to merge:\n"_f << Workspace;
+	for (auto const &File : Unresolved)
+		Report += "\t{} ({} from {}#{})\n"_f << File.m_ClientFile << File.m_ResolveType << File.m_FromFile << File.m_EndFromRev;
+
+	Report += "Merge each file, check the result and mark it resolved, for example with: {}\n"_f << fCommand("resolve");
+	if (_Changelist != 0)
+		Report += "Then submit with: {}\n"_f << fCommand("submit");
+	else
+		Report += "Then submit it.\n";
+
+	return Report;
+}
+
 struct CTool_CreatePerforceClient : public CTool2
 {
 	virtual aint f_Run(TCVector<CStr> const &_Files, TCMap<CStr, CStr> const &_Params) override;

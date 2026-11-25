@@ -5,3 +5,4 @@
 
 bool fg_Confirm(CStr const &_Text);
 CStr fg_AskUser(CBlockingStdInReader &_StdIn, CStr const &_Text);
+CStr fg_PerforceResolveSafe(CPerforceClientThrow &_Client, CStr const &_File, uint32 _Changelist);

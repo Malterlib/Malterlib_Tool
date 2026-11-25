@@ -675,7 +675,11 @@ aint CTool_PerforceSetBuildServer::f_Run(TCVector<CStr> const &_Files, TCMap<CSt
 			if (!IntegrateResult.f_IsEmpty())
 			{
 				if (IntegrateResult[0].m_Action == CPerforceClient::EAction_Integrate)
-					pClient->f_ResolveAutomatic(DestinationFile);
+				{
+					CStr Unresolved = fg_PerforceResolveSafe(*pClient, DestinationFile, 0);
+					if (!Unresolved.f_IsEmpty())
+						DError("{} was not submitted.\n{}"_f << DestinationFile << Unresolved);
+				}
 
 				if (!IntegrateResult.f_IsEmpty())
 					pClient->f_Submit(DestinationFile, "[BuildSystem]\nFixed: Added to build server", fg_GetSys()->f_GetEnvironmentVariable("MTool_P4SubmitJob"));
