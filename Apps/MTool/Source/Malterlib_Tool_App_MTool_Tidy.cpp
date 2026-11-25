@@ -1028,7 +1028,7 @@ namespace NMib::NTool::NTidy
 	// The files of the root opened in the workspace, in any pending changelist, or with _Base, a changelist with or without its
 	// '@', those submitted after it. The workspace is the one of the root's settings, and a file of a repository in the root is
 	// that repository's.
-	TCFuture<TCVector<CStr>> fg_GetTidyPerforceChangedFiles(CStr _Root, CStr _Base, TCSharedPointer<NPerforce::CPerforceRootFiles> _pRootFiles)
+	TCFuture<TCVector<CStr>> fg_GetTidyPerforceChangedFiles(CStr _Root, CStr _Base, TCSharedPointer<NPerforce::CPerforceRootFiles> _pRootFiles, TCMap<CStr, CStr> _Environment)
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % ("Finding the changed files of '{}'"_f << _Root));
 
@@ -1047,14 +1047,10 @@ namespace NMib::NTool::NTidy
 
 		co_return co_await
 			(
-				g_Dispatch(fg_BlockingActor()) / [_Root, Arguments, _pRootFiles]() -> TCVector<CStr>
+				g_Dispatch(fg_BlockingActor()) / [_Root, Arguments, _pRootFiles, _Environment]() -> TCVector<CStr>
 				{
-					// As p4 run in the root, whatever the current directory, with its P4CONFIG and enviro file.
-					auto const &Settings = _pRootFiles->f_GetSettings();
-					auto ConnectionInfo = NPerforce::CPerforceClient::fs_GetConnectionInfo(_Root);
-					ConnectionInfo.m_ConfigName = Settings.f_GetText(Settings.m_ConfigName);
-					ConnectionInfo.m_EnviroFile = Settings.m_EnviroFile;
-					NPerforce::CPerforceClientThrow Client(ConnectionInfo);
+					// As p4 run in the root, whatever the current directory, with its .p4config and enviro file.
+					NPerforce::CPerforceClientThrow Client(NPerforce::CPerforceClient::fs_GetConnectionInfo(_Root, _pRootFiles->f_GetSettings(), _Environment));
 					Client.f_Login(CStr(), _Root);
 
 					// Spelled as the compile commands are.
@@ -1810,10 +1806,11 @@ namespace NMib::NTool::NTidy
 
 			_Options.m_pPerforceRootFiles = co_await
 				(
-					g_Dispatch(fg_BlockingActor()) / [Root = _Options.m_PerforceRoot, OtherRepositories = fg_Move(OtherRepositories), Environment = _Options.m_PerforceEnvironment]
+					g_Dispatch(fg_BlockingActor())
+					/ [Root = _Options.m_PerforceRoot, OtherRepositories = fg_Move(OtherRepositories), Environment = _Options.m_PerforceEnvironment, Registry = _Options.m_PerforceRegistry]
 					() -> TCSharedPointer<NPerforce::CPerforceRootFiles>
 					{
-						return fg_Construct(Root, OtherRepositories, NPerforce::CPerforceIgnore::fs_GetSettings(Root, Environment));
+						return fg_Construct(Root, OtherRepositories, NPerforce::CPerforceIgnore::fs_GetSettings(Root, Environment, Registry));
 					}
 				)
 			;
@@ -1888,7 +1885,17 @@ namespace NMib::NTool::NTidy
 			for (auto &Repository : _Options.m_CheckedRepositories)
 			{
 				if (Repository == _Options.m_PerforceRoot)
-					fg_GetTidyPerforceChangedFiles(Repository, _Options.m_PerforceBase ? _Options.m_PerforceBase : _Options.m_Base, _Options.m_pPerforceRootFiles) > Pending;
+				{
+					fg_GetTidyPerforceChangedFiles
+						(
+							Repository
+							, _Options.m_PerforceBase ? _Options.m_PerforceBase : _Options.m_Base
+							, _Options.m_pPerforceRootFiles
+							, _Options.m_PerforceEnvironment
+						)
+						> Pending
+					;
+				}
 				else
 					fg_GetTidyChangedFiles(Repository, _Options.m_Base) > Pending;
 			}

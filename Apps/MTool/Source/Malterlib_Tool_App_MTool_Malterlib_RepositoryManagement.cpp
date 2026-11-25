@@ -597,7 +597,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								auto &Selection = Selections.f_Insert();
 								if (Location == PerforceRoot)
 								{
-									Selection.m_pPerforceIgnore = fg_Construct(NPerforce::CPerforceIgnore::fs_GetSettings(Location, _pBuildSystem->f_GetPerforceEnvironment()));
+									auto Settings = NPerforce::CPerforceIgnore::fs_GetSettings(Location, _pBuildSystem->f_GetPerforceEnvironment(), _pBuildSystem->f_GetPerforceRegistry());
+									Selection.m_pPerforceIgnore = fg_Construct(Settings);
 
 									// The repositories in the root are trees of their own, also before they are cloned.
 									for (auto &Other : AllLocations)
@@ -1048,7 +1049,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return Retry;
 							}
 
-							RunOptions.m_PerforceEnvironment = _pBuildSystem->f_GetPerforceEnvironment();
+							RunOptions.m_PerforceEnvironment = _pBuildSystem->f_GetGenerationEnvironment();
+							RunOptions.m_PerforceRegistry = _pBuildSystem->f_GetPerforceRegistry();
 
 							for (auto iFiles = TidyFiles.f_GetIterator(); iFiles; ++iFiles)
 							{

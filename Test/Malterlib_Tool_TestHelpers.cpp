@@ -4,6 +4,11 @@
 #include "Malterlib_Tool_TestHelpers.h"
 
 #include <Mib/Concurrency/AsyncDestroy>
+#include <Mib/Cryptography/UUID>
+
+#ifdef DPlatformFamily_Windows
+#	include <Mib/Core/PlatformSpecific/WindowsRegistry>
+#endif
 
 namespace NMib::NTool::NTestHelpers
 {
@@ -47,6 +52,25 @@ namespace NMib::NTool::NTestHelpers
 		;
 
 		m_ToolDirectory = CFile::fs_GetProgramDirectory() / "TestApps/MTool";
+	}
+
+	CRepositoryFixture::~CRepositoryFixture()
+	{
+#ifdef DPlatformFamily_Windows
+		if (!m_PerforceRegistryKey)
+			return;
+
+		// A destructor can't throw, and a key left behind is the fixture's own.
+		try
+		{
+			NMib::NPlatform::CWin32_Registry UserRegistry(NMib::NPlatform::CWin32_Registry::ERegRoot_CurrentUser);
+			if (UserRegistry.f_KeyExists(m_PerforceRegistryKey))
+				UserRegistry.f_DeleteKey(m_PerforceRegistryKey);
+		}
+		catch (NException::CException const &)
+		{
+		}
+#endif
 	}
 
 	TCFuture<void> CRepositoryFixture::f_Init()
@@ -436,28 +460,53 @@ namespace NMib::NTool::NTestHelpers
 		co_return co_await f_GitIn(_Directory, {"rev-parse", "HEAD"});
 	}
 
-	// Removes the git repository and writes a P4CONFIG file with _Config.
 	void CRepositoryFixture::f_MakePerforceRoot(CStr const &_Config)
 	{
 		if (CFile::fs_FileExists(m_Path / ".git"))
 			CFile::fs_DeleteDirectoryRecursive(m_Path / ".git");
 
 		f_SetPerforceEnvironment();
-		f_Write("MToolFixture.p4config", _Config);
+		f_Write(".p4config", _Config);
 	}
 
-	// The tools the fixture runs ignore the user's P4 settings and enviro file. P4CONFIG is a name of the fixture's, so no P4CONFIG
-	// file above the fixture, like a user's .p4config, gives settings.
+	// The tools the fixture runs ignore the user's P4 settings, enviro file and, on Windows, registry, whose keys p4 takes from the
+	// fixture's scratch key, which needn't exist. P4CONFIG is .p4config, the files MTool reads, so a p4 the tests run reads the
+	// same ones.
 	void CRepositoryFixture::f_SetPerforceEnvironment()
 	{
 		for (auto pName : {"P4PORT", "P4USER", "P4CLIENT", "P4PASSWD", "P4HOST", "P4CHARSET"})
 			m_Environment.f_Remove(pName);
 
-		m_Environment["P4CONFIG"] = "MToolFixture.p4config";
+		m_Environment["P4CONFIG"] = ".p4config";
 		m_Environment["P4IGNORE"] = ".p4ignore";
 		m_Environment["P4ENVIRO"] = m_Root / "p4enviro";
 		m_Environment["P4TICKETS"] = m_Root / "p4tickets";
+#ifdef DPlatformFamily_Windows
+		if (!m_PerforceRegistryKey)
+		{
+			m_PerforceRegistryKey
+				= "Software\\MalterlibTestPerforce-{}"_f
+				<< NCryptography::CUniversallyUniqueIdentifier(NCryptography::EUniversallyUniqueIdentifierGenerate_Random)
+				.f_GetAsString(NCryptography::EUniversallyUniqueIdentifierFormat_AlphaNum)
+			;
+		}
+		m_Environment["P4TEST_REGISTRY_PATH_T4_TEST"] = m_PerforceRegistryKey;
+#endif
 	}
+
+#ifdef DPlatformFamily_Windows
+	// Sets a value of text in the fixture's registry key (f_SetPerforceEnvironment), or removes it when empty, as p4 set does.
+	void CRepositoryFixture::f_SetPerforceRegistryValue(CStr const &_Name, CStr const &_Value) const
+	{
+		DMibRequire(!m_PerforceRegistryKey.f_IsEmpty());
+
+		NMib::NPlatform::CWin32_Registry UserRegistry(NMib::NPlatform::CWin32_Registry::ERegRoot_CurrentUser);
+		if (!_Value.f_IsEmpty())
+			UserRegistry.f_Write(m_PerforceRegistryKey, _Name, _Value);
+		else if (UserRegistry.f_ValueExists(m_PerforceRegistryKey, _Name))
+			UserRegistry.f_DeleteValue(m_PerforceRegistryKey, _Name);
+	}
+#endif
 
 	bool CRepositoryFixture::f_HasTemporaryAttributes() const
 	{

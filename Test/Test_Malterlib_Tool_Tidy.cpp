@@ -888,7 +888,7 @@ namespace NMib::NTool
 										{
 											"Enabled"_= true
 											, "IncludeFiles"_= _[]
-											, "ExcludeFiles"_= _["Generated/*", "B.gen.h", "Ignored/*", "MToolFixture.p4config", "Sub/C.gen.h", "Unknown/*"]
+											, "ExcludeFiles"_= _["Generated/*", ".p4config", "B.gen.h", "Ignored/*", "Sub/C.gen.h", "Unknown/*"]
 										}
 									}
 								]
@@ -967,74 +967,56 @@ namespace NMib::NTool
 				}
 
 				{
-					// P4CONFIG names a path, which p4 looks for from the root as it does a name.
-					DMibTestPath("PathConfigChangeGeneratesAgain");
-					Repo.f_Write("Config/p4config", "P4CLIENT=Offline\n");
-					Repo.m_Environment["P4CONFIG"] = "Config/p4config";
-					auto Excluded = co_await fBuildExcluded();
-					DMibExpectTrue(Excluded.f_FindEqual("A.cpp"));
-
-					{
-						DMibTestPath("Changed");
-						Repo.f_Write("Config/p4config", "P4CLIENT=Offline\nP4IGNORE=.p4ignore\n");
-						auto Changed = co_await fBuildExcluded();
-						DMibExpectFalse(Changed.f_FindEqual("A.cpp"));
-						DMibExpectTrue(Changed.f_FindEqual("Sub/*"));
-					}
-				}
-
-				{
-					// A P4CONFIG file created later makes the checkout a Perforce root.
-					DMibTestPath("ConfigCreatedGeneratesAgain");
-					Repo.m_Environment["P4CONFIG"] = "Later.p4config";
-					auto Generated = co_await fGenerate(TidyRoot, false, true);
-					DMibExpect(CEJsonSorted::fs_FromString(Generated.m_Rules), ==, CEJsonSorted(_[]));
-
-					{
-						DMibTestPath("Created");
-						Repo.f_Write("Later.p4config", "P4CLIENT=Offline\n");
-						auto Created = co_await fGenerate(TidyRoot, false, true);
-						DMibExpect(Created.m_Output.f_Find("No changes found"), <, 0);
-						DMibExpect(CEJsonSorted::fs_FromString(Created.m_Rules).f_Array().f_GetLen(), ==, 1u);
-					}
-				}
-
-#ifndef DPlatformFamily_Windows
-				{
-					// A P4CONFIG through a symbolic link and .. is the file p4 opens in the link's target, which makes the checkout a
-					// Perforce root, though the name lexically resolved names no file.
-					DMibTestPath("LinkedConfigMakesRoot");
-					CFile::fs_CreateDirectory(Repo.m_Root / "Shared/Sub");
-					CFile::fs_WriteStringToFile(Repo.m_Root / "Shared/Linked.p4config", "P4CLIENT=Offline\n", false);
-					CFile::fs_CreateSymbolicLink(Repo.m_Root / "Shared/Sub", Repo.m_Path / "Link", EFileAttrib_Directory, ESymbolicLinkFlag_None);
-					Repo.m_Environment["P4CONFIG"] = "Link/../Linked.p4config";
-					auto Generated = co_await fGenerate(TidyRoot, false, true);
-					DMibExpect(CEJsonSorted::fs_FromString(Generated.m_Rules).f_Array().f_GetLen(), ==, 1u);
-
-					CFile::fs_DeleteFile(Repo.m_Path / "Link");
-					Repo.m_Environment["P4CONFIG"] = "Later.p4config";
-				}
-
-#endif
-				{
 					// Without P4CHARSET the charset p4 learned for the root's port is among its settings, so a change of it generates
 					// again too.
 					DMibTestPath("LearnedCharsetChangeGeneratesAgain");
 					Repo.m_Environment["P4PORT"] = "127.0.0.1:1";
 					Repo.m_Environment["P4_127.0.0.1:1_CHARSET"] = "none";
 					auto Excluded = co_await fBuildExcluded();
-					DMibExpectTrue(Excluded.f_FindEqual("Later.p4config"));
+					DMibExpectTrue(Excluded.f_FindEqual(".p4config"));
 
 					{
 						DMibTestPath("Changed");
 						Repo.m_Environment["P4_127.0.0.1:1_CHARSET"] = "utf8";
 						auto Changed = co_await fBuildExcluded();
-						DMibExpectTrue(Changed.f_FindEqual("Later.p4config"));
+						DMibExpectTrue(Changed.f_FindEqual(".p4config"));
 					}
 
 					Repo.m_Environment.f_Remove("P4_127.0.0.1:1_CHARSET");
 					Repo.m_Environment.f_Remove("P4PORT");
 				}
+
+				{
+					// The root's .p4config makes the checkout a Perforce root, whatever P4CONFIG names, so creating one generates again.
+					DMibTestPath("ConfigCreatedGeneratesAgain");
+					CStr Config = CFile::fs_ReadStringFromFile(Repo.m_Path / ".p4config", true);
+					CFile::fs_DeleteFile(Repo.m_Path / ".p4config");
+					Repo.f_Write("Other.p4config", Config);
+					Repo.m_Environment["P4CONFIG"] = "Other.p4config";
+					auto Generated = co_await fGenerate(TidyRoot, false, true);
+					DMibExpect(CEJsonSorted::fs_FromString(Generated.m_Rules), ==, CEJsonSorted(_[]));
+
+					{
+						DMibTestPath("Created");
+						Repo.f_Write(".p4config", Config);
+						auto Excluded = co_await fBuildExcluded();
+						DMibExpectTrue(Excluded.f_FindEqual(".p4config"));
+					}
+
+					CFile::fs_DeleteFile(Repo.m_Path / "Other.p4config");
+					Repo.m_Environment["P4CONFIG"] = ".p4config";
+				}
+
+#ifdef DPlatformFamily_Windows
+				{
+					// The registry's P4CONFIG, here in the fixture's scratch key, chooses no other file.
+					DMibTestPath("RegistryConfigChoosesNothing");
+					Repo.f_SetPerforceRegistryValue("P4CONFIG", "Missing.p4config");
+					auto Generated = co_await fGenerate(TidyRoot, false, true);
+					DMibExpect(CEJsonSorted::fs_FromString(Generated.m_Rules).f_Array().f_GetLen(), ==, 1u);
+					Repo.f_SetPerforceRegistryValue("P4CONFIG", "");
+				}
+#endif
 
 				{
 					DMibTestPath("NoTidy");
@@ -1057,6 +1039,101 @@ namespace NMib::NTool
 						)
 					;
 				}
+
+				co_return {};
+			};
+
+			// The root's .p4config, which makes the checkout a Perforce root, gives list-commits its connection too, also without P4CONFIG.
+			DMibTestCategory("PerforceRootDefaultConfigConnects") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "PerforceRootDefaultConfigConnects");
+
+				if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+				{
+					DMibConOut("{}\n", "Skipping the test of the connection of a Perforce root by its .p4config: p4d was not found in PATH");
+					co_return {};
+				}
+
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+
+				TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+				co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+				auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+				CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+				co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+				co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+				using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+				co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"A.cpp", ""}}, CStr("Add A"));
+				co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+				auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+
+				Repo.f_MakePerforceRoot("");
+				Repo.m_Environment.f_Remove("P4CONFIG");
+				Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+				Repo.f_Write(".p4config", "P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+				Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+				auto Result = co_await Repo.f_Run
+					(
+						Repo.m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension)
+						,
+						{
+							"list-commits"
+							, "--skip-update"
+							, "--no-color"
+							, "--build-system"
+							, Repo.m_Path / "Test.MBuildSystem"
+							, "--output-directory"
+							, Repo.m_Root / "output"
+							, "--no-use-user-settings"
+							, "--no-use-cached-environment"
+						}
+						, Repo.m_Root
+						, true
+					)
+				;
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Failed to connect to Perforce"), <, 0);
+				DMibExpect(Result.m_ExitCode, ==, 0u);
+
+				co_return {};
+			};
+
+			// list-commits lists the Perforce root only where -n selects it, as '.', and asks no server for a selection that needs none.
+			DMibTestCategory("PerforceRootNotSelected") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "PerforceRootNotSelected");
+
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+
+				// No server listens on the port.
+				Repo.f_MakePerforceRoot("P4PORT=localhost:1\nP4USER=tester\nP4CLIENT=TestWork\n");
+				Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+				auto Result = co_await Repo.f_Run
+					(
+						Repo.m_ToolDirectory / ("MTool" + CFile::mc_ExecutableExtension)
+						,
+						{
+							"list-commits"
+							, "-n"
+							, "Repos/A,Repos/B"
+							, "--skip-update"
+							, "--no-color"
+							, "--build-system"
+							, Repo.m_Path / "Test.MBuildSystem"
+							, "--output-directory"
+							, Repo.m_Root / "output"
+							, "--no-use-user-settings"
+							, "--no-use-cached-environment"
+						}
+						, Repo.m_Root
+						, true
+					)
+				;
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Perforce"), <, 0);
+				DMibExpect(Result.m_ExitCode, ==, 0u);
 
 				co_return {};
 			};
@@ -1111,11 +1188,11 @@ namespace NMib::NTool
 					)
 				;
 
-				// The user and workspace come from the root's P4CONFIG file, not from the one of the directory mib runs in.
+				// The user and workspace come from the root's .p4config file, not from the one of the directory mib runs in.
 				Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
 				Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
 				CFile::fs_CreateDirectory(Repo.m_Root / "Elsewhere");
-				CFile::fs_WriteStringToFile(Repo.m_Root / "Elsewhere/MToolFixture.p4config", "P4USER=elsewhere\nP4CLIENT=Elsewhere\n", false);
+				CFile::fs_WriteStringToFile(Repo.m_Root / "Elsewhere/.p4config", "P4USER=elsewhere\nP4CLIENT=Elsewhere\n", false);
 
 				Repo.f_Write("Lib/C.cpp", "");
 				auto fGitInLib = [&](TCVector<CStr> _Params) -> TCUnsafeFuture<CStr>

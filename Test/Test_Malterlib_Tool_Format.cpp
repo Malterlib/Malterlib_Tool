@@ -1616,7 +1616,7 @@ namespace NMib::NTool
 			co_await Repo.f_Init();
 			Repo.f_SetPerforceEnvironment();
 			Repo.f_Write(".gitignore", "/Project/\n");
-			Repo.f_Write("Project/MToolFixture.p4config", "P4CLIENT=Offline\n");
+			Repo.f_Write("Project/.p4config", "P4CLIENT=Offline\n");
 			Repo.f_Write("Project/.editorconfig", g_FormatConfiguration);
 			Repo.f_Write("Project/.p4ignore", "/Ignored/\n");
 			Repo.f_Write("Project/Source.cpp", gc_Unformatted);

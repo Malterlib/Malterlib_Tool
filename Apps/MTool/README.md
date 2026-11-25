@@ -315,21 +315,26 @@ does. The plugin reads the rules of every repository from a generated file, so
 a compile checks the same files as `mib tidy`, and runs again when the rules
 change.
 
-A Perforce project's root, a base directory without git that has a P4CONFIG
-file, has no `%Repository`: `PerforceRoot` in the build system gives it the
-`Format`, `Tidy`, `CheckLicense` and `License` settings of one, and its files
+A Perforce project's root, a base directory without git that has a
+`.p4config` file, has no `%Repository`: `PerforceRoot`
+in the build system gives it the `Format`, `Tidy`, `CheckLicense` and `License`
+settings of one, and its files
 are those P4IGNORE doesn't exclude, outside the repositories in it. There
 `--staged` takes the files opened in its workspace, and a base, `@1234`, the
 files submitted after that changelist; a run over git repositories too gives
 it with `--perforce-base` and theirs with `--base`.
-mib reads P4CONFIG, P4IGNORE and P4ENVIRO as p4 does from the P4CONFIG
-files, the environment generation uses and the enviro file it selects, but not
-from the Windows registry or the environment of a run with a cached one.
+mib reads the p4 settings, such as P4PORT, P4CLIENT, P4IGNORE and P4ENVIRO, as
+p4 does from the `.p4config` files, the environment generation uses, the enviro
+file it selects and the Windows registry, where `p4 set` stores them, but not
+from the environment of a run with a cached one. Its config files are the
+files named `.p4config`, whatever P4CONFIG is, which p4 itself reads only with
+P4CONFIG=.p4config set.
 The plugin knows no P4IGNORE, so generating lists what it excludes in the
 root's rules. A build generates again when one of the root's ignore,
-P4CONFIG or enviro files changes or is created, or when P4CONFIG, P4IGNORE,
-P4ENVIRO or the home directory changes. A file created after the last generate that a file-level ignore rule
-covers is checked by the plugin until the next generate, and an excluded name
+`.p4config` or enviro files changes or is created, or when P4IGNORE,
+P4ENVIRO or the home directory changes, in the environment or the registry.
+A file created after the last generate that a file-level ignore rule covers is
+checked by the plugin until the next generate, and an excluded name
 with a `*` or `?` stays checked, as the rules' wildcards have no escape.
 
 # Source formatting

@@ -24,6 +24,7 @@ namespace NMib::NTool::NTestHelpers
 	struct CRepositoryFixture : CAllowUnsafeThis
 	{
 		CRepositoryFixture();
+		~CRepositoryFixture();
 
 		TCFuture<void> f_Init();
 		void f_Write(CStr const &_Name, CStr const &_Contents) const;
@@ -42,12 +43,16 @@ namespace NMib::NTool::NTestHelpers
 		TCFuture<CStr> f_Validate(CStr _Case, uint32 _Expected = 0, bool _bStaged = true, CStr _Base = {});
 		void f_MakePerforceRoot(CStr const &_Config);
 		void f_SetPerforceEnvironment();
+#ifdef DPlatformFamily_Windows
+		void f_SetPerforceRegistryValue(CStr const &_Name, CStr const &_Value) const;
+#endif
 
 		CStr m_Root;
 		CStr m_Path;
 		CStr m_ToolDirectory;
-		CStr m_Shell; // The POSIX shell, Git for Windows' on Windows, that runs the shell scripts of the tests
+		CStr m_Shell;               // The POSIX shell, Git for Windows' on Windows, that runs the shell scripts of the tests
 		CSystemEnvironment m_Environment;
+		CStr m_PerforceRegistryKey; // On Windows the scratch key of HKEY_CURRENT_USER p4 reads its registry settings from, deleted with the fixture
 	};
 
 	// A checkout whose root and sub-repositories, in Repos/<Name>, push to bare repositories of their own in remotes/<Name>.git.
