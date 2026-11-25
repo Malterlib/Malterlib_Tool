@@ -146,6 +146,22 @@ CEJsonOrdered::CKeyValue CTool_Malterlib::fs_CachedEnvironmentOption(bool _bDefa
 	;
 }
 
+CEJsonOrdered::CKeyValue CTool_Malterlib::fs_RepoNameFilterOption()
+{
+	return "RepoName?"_o=
+		{
+			"Names"_o= _o["--repo-name", "-n"]
+			, "Type"_o= ""
+			, "Default"_o= "*"
+			, "Description"_o= "Only run command on repositories that have a name that matches one of the specified wildcards.\n"
+			"The name is the repository's path relative to the root, and '.' for the root itself.\n"
+			"Takes a wildcard, or several separated by commas, for example: -n 'SharedPackages/*,.'. A comma of a wildcard is written '\\,'.\n"
+			"A JSON array of wildcards works too.\n"
+			"When the option is repeated, the last one is used. An empty filter, or an empty wildcard among several, is an error.\n"
+		}
+	;
+}
+
 // Runs the command on the build system, which runs to completion
 auto CTool_Malterlib::f_RunBuildSystem
 	(

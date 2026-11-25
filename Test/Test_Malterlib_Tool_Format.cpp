@@ -1568,6 +1568,16 @@ namespace NMib::NTool
 			}
 
 			{
+				// The Perforce root is '.' to the name filter, also among several wildcards.
+				DMibTestPath("NameFilterList");
+				auto Result = co_await fFormat({"--check", "-n", "[\"Lib\", \".\"]"});
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find(" 1 unchanged, 1 would change"), >=, 0);
+				DMibExpect(Output.f_Find("Lib"), <, 0);
+			}
+
+			{
 				DMibTestPath("Diff");
 				auto Result = co_await fFormat({"--diff"});
 				CStr Output = Result.f_GetCombinedOut();

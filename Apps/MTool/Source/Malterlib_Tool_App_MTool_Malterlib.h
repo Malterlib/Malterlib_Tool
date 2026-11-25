@@ -16,6 +16,7 @@ struct CTool_Malterlib : public CDistributedTool, public CAllowUnsafeThis
 	static CStr fs_DefaultVisualStudioVersion(CStr const &_RootPath);
 	static CGenerateOptions fs_ParseSharedOptions(CEJsonSorted const &_Params);
 	static CEJsonOrdered::CKeyValue fs_CachedEnvironmentOption(bool _bDefault);
+	static CEJsonOrdered::CKeyValue fs_RepoNameFilterOption();
 
 	DMibRunsToCompletionEntry static TCFuture<void> fs_InstallBinaries(NStorage::TCSharedPointer<CCommandLineControl> _pCommandLine);
 

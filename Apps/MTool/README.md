@@ -204,12 +204,18 @@ build-system entry sets `Repository.Format` in one run: the repositories are
 validated at once on one pool of formatting workers, each repository's
 diagnostics are written in repository order, and one summary covers them all.
 It takes `--staged`, `--base`, and the repository filters, and exits like
-`MTool Validate` does.
+`MTool Validate` does. The name filter, `-n` (`--repo-name`), takes a
+wildcard, or several separated by commas (or as a JSON array), and selects the
+repositories whose path relative to the root, `.` for the root itself, matches
+any of them. A comma of a wildcard is written `\,`, and another backslash is
+itself. An empty filter, or an empty wildcard among several, is an error rather
+than no filter.
 
 ```bash
 ./mib validate
 ./mib validate --staged
 ./mib validate --base origin/master -n "Malterlib/S*"
+./mib validate -n 'Malterlib/S*,.'
 ```
 
 `repo-run` still launches the single-repository tool per repository, with the

@@ -120,6 +120,32 @@ namespace NMib::NTool
 			DMibExpect(RootOnly, ==, (TCVector<CStr>{"."}));
 			auto WithoutRoot = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "--repo-name", "Repos/*"}));
 			DMibExpect(WithoutRoot, ==, (TCVector<CStr>{"Repos/A", "Repos/B", "Repos/C"}));
+			auto OneCharacter = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "-n", "Repos/?"}));
+			DMibExpect(OneCharacter, ==, (TCVector<CStr>{"Repos/A", "Repos/B", "Repos/C"}));
+
+			auto Several = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "-n", "[\"Repos/A\", \"Repos/C\"]"}));
+			DMibExpect(Several, ==, (TCVector<CStr>{"Repos/A", "Repos/C"}));
+			auto WithRoot = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "--repo-name", "[\"Repos/B\", \".\"]"}));
+			DMibExpect(WithRoot, ==, (TCVector<CStr>{".", "Repos/B"}));
+			auto Overlapping = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "-n", "[\"Repos/*\", \"Repos/A\"]"}));
+			DMibExpect(Overlapping, ==, (TCVector<CStr>{"Repos/A", "Repos/B", "Repos/C"}));
+			auto None = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "-n", "[\"Repos/D\", \"Other/*\"]"}));
+			DMibExpect(None, ==, (TCVector<CStr>{}));
+
+			// One wildcard that starts with a '[' but is no JSON array is a wildcard, as is one of several
+			auto Bracketed = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "-n", "[Legacy]*"}));
+			DMibExpect(Bracketed, ==, (TCVector<CStr>{}));
+			auto BracketedAmongSeveral = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "-n", "[Legacy]*,Repos/B"}));
+			DMibExpect(BracketedAmongSeveral, ==, (TCVector<CStr>{"Repos/B"}));
+
+			// Of several wildcards only '\,' is an escape, a comma of a wildcard, and another backslash stays, so '\*' matches no
+			// repository instead of every one
+			auto Escaped = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "-n", "\\*"}));
+			DMibExpect(Escaped, ==, (TCVector<CStr>{}));
+			auto EscapedAmongSeveral = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "-n", "Repos/\\*,Repos/B"}));
+			DMibExpect(EscapedAmongSeveral, ==, (TCVector<CStr>{"Repos/B"}));
+			auto EscapedComma = fListPaths(co_await Checkout.f_MibSucceeds({"list-repos", "--json", "-n", "Repos/A\\,Repos/C"}));
+			DMibExpect(EscapedComma, ==, (TCVector<CStr>{}));
 
 			// A repository that isn't cloned yet is listed with its pin
 			CFile::fs_RenameFile(Checkout.f_Repository("B"), Repo.m_Root / "MovedB");
@@ -129,6 +155,35 @@ namespace NMib::NTool
 			CFile::fs_RenameFile(Repo.m_Root / "MovedB", Checkout.f_Repository("B"));
 			DMibExpect(NotCloned, ==, (TCVector<CStr>{".", "Repos/A", "Repos/B", "Repos/C"}));
 			DMibExpect(OnBranch, ==, (TCVector<CStr>{".", "Repos/A", "Repos/C"}));
+
+			// A JSON array with an entry that is no string is refused, rather than read as wildcards separated by commas, which would hold
+			// a '*' here
+			{
+				DMibTestPath("NonStringEntry");
+				auto Result = co_await Checkout.f_Mib({"list-repos", "--json", "-n", "[\"Repos/A,*,Repos/B\", 1]"});
+				DMibExpect(Result.m_ExitCode, !=, 0);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("no string"), >=, 0);
+				DMibExpect(fListPaths(Result.f_GetStdOut()), ==, (TCVector<CStr>{}));
+			}
+
+			// An empty name filter, as a script passes when it selected nothing, is refused instead of selecting every repository
+			for (auto &Filter : TCVector<CStr>{"[]", "", "[\"Repos/A\", \"\"]"})
+			{
+				DMibTestPath("EmptyFilter '{}'"_f << Filter);
+				auto Result = co_await Checkout.f_Mib({"list-repos", "--json", "-n", Filter});
+				DMibExpect(Result.m_ExitCode, !=, 0);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("--repo-name"), >=, 0);
+				DMibExpect(fListPaths(Result.f_GetStdOut()), ==, (TCVector<CStr>{}));
+			}
+
+			auto Branched = co_await Checkout.f_Mib({"branch", "--force", "Filtered", "-n", "[]"});
+			DMibExpect(Branched.m_ExitCode, !=, 0);
+			for (auto &Name : TCVector<CStr>{".", "Repos/A", "Repos/B", "Repos/C"})
+			{
+				DMibTestPath("NotBranched '{}'"_f << Name);
+				CStr Branch = co_await Checkout.f_GitIn(Name == "." ? Repo.m_Path : Repo.m_Path / Name, {"branch", "--show-current"});
+				DMibExpect(Branch, ==, "main");
+			}
 
 			co_return {};
 		};

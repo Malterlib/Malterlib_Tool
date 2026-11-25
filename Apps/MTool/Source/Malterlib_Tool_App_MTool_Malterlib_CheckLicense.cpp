@@ -8,13 +8,7 @@
 
 void CTool_Malterlib::f_Register_CheckLicense(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
 {
-	auto Filter_Name = "RepoName?"_o=
-		{
-			"Names"_o= _o["--repo-name", "-n"]
-			, "Default"_o= "*"
-			, "Description"_o= "Only run command on repositories that have a name that match the specified wildcard."
-		}
-	;
+	auto Filter_Name = fs_RepoNameFilterOption();
 
 	auto Filter_Branch = "RepoBranch?"_o=
 		{

@@ -97,13 +97,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 		)
 	;
 
-	auto Filter_Name = "RepoName?"_o=
-		{
-			"Names"_o= _o["--repo-name", "-n"]
-			, "Default"_o= "*"
-			, "Description"_o= "Only run command on repositories that have a name that match the specified wildcard."
-		}
-	;
+	auto Filter_Name = fs_RepoNameFilterOption();
 
 	auto Option_BaseBranch = "BaseBranch?"_o=
 		{
