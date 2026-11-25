@@ -1028,7 +1028,8 @@ namespace NMib::NTool::NTidy
 	// The files of the root opened in the workspace, in any pending changelist, or with _Base, a changelist with or without its
 	// '@', those submitted after it. The workspace is the one of the root's settings, and a file of a repository in the root is
 	// that repository's.
-	TCFuture<TCVector<CStr>> fg_GetTidyPerforceChangedFiles(CStr _Root, CStr _Base, TCSharedPointer<NPerforce::CPerforceRootFiles> _pRootFiles, TCMap<CStr, CStr> _Environment)
+	auto fg_GetTidyPerforceChangedFiles(CStr _Root, CStr _Base, TCSharedPointer<NPerforce::CPerforceRootFiles> _pRootFiles, TCMap<CStr, CStr> _Environment)
+		-> TCFuture<NFormat::CPerforceListedFiles>
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % ("Finding the changed files of '{}'"_f << _Root));
 
@@ -1043,26 +1044,30 @@ namespace NMib::NTool::NTidy
 
 			Arguments = {"-c", CStr::fs_ToStr(Number + 1)};
 		}
-		Arguments.f_Insert(NPerforce::CPerforceClient::fs_EscapeFileName(_Root) / "...");
 
 		co_return co_await
 			(
-				g_Dispatch(fg_BlockingActor()) / [_Root, Arguments, _pRootFiles, _Environment]() -> TCVector<CStr>
+				g_Dispatch(fg_BlockingActor()) / [_Root, Arguments, _pRootFiles, _Environment]() -> NFormat::CPerforceListedFiles
 				{
 					// As p4 run in the root, whatever the current directory, with its .p4config and enviro file.
 					NPerforce::CPerforceClientThrow Client(NPerforce::CPerforceClient::fs_GetConnectionInfo(_Root, _pRootFiles->f_GetSettings(), _Environment));
 					Client.f_Login(CStr(), _Root);
 
-					// Spelled as the compile commands are.
-					TCVector<CStr> Files;
-					for (auto &File : Client.f_GetFileStatFilesUnder(_Root, Arguments))
+					// p4 takes the paths as the workspace's root spells them, which a root reached through a symbolic link spells
+					// otherwise, as validate does.
+					auto Spelling = NFormat::CPerforceRootSpelling::fs_Find(_Root, Client.f_GetClientRoot());
+					auto Found = NFormat::fg_ListPerforceFiles(Client, Spelling, Arguments, false);
+					NFormat::CPerforceListedFiles Changed;
+					Changed.m_Unreadable = fg_Move(Found.m_Unreadable);
+					for (auto &Listed : Found.m_Paths)
 					{
-						CStr Path = CFile::fs_CondensePath(File);
+						// Spelled as the compile commands are.
+						CStr Path = CFile::fs_CondensePath(Listed);
 						if (_pRootFiles->f_Contains(Path))
-							Files.f_Insert(Path);
+							Changed.m_Paths.f_Insert(Path);
 					}
 
-					return Files;
+					return Changed;
 				}
 			)
 		;
@@ -1879,9 +1884,11 @@ namespace NMib::NTool::NTidy
 		}
 
 		TCOptional<TCSet<CStr>> Changed;
+		TCVector<CStr> UncheckedChanged;
 		if (_Options.m_bStaged || _Options.m_Base || _Options.m_PerforceBase)
 		{
 			TCFutureVector<TCVector<CStr>> Pending;
+			TCFutureVector<NFormat::CPerforceListedFiles> PendingPerforce;
 			for (auto &Repository : _Options.m_CheckedRepositories)
 			{
 				if (Repository == _Options.m_PerforceRoot)
@@ -1893,16 +1900,23 @@ namespace NMib::NTool::NTidy
 							, _Options.m_pPerforceRootFiles
 							, _Options.m_PerforceEnvironment
 						)
-						> Pending
+						> PendingPerforce
 					;
 				}
 				else
 					fg_GetTidyChangedFiles(Repository, _Options.m_Base) > Pending;
 			}
 
+			auto AllFiles = co_await fg_AllDone(Pending);
+			for (auto &Perforce : co_await fg_AllDone(PendingPerforce))
+			{
+				AllFiles.f_Insert(fg_Move(Perforce.m_Paths));
+				UncheckedChanged.f_Insert(fg_Move(Perforce.m_Unreadable));
+			}
+
 			Changed = TCSet<CStr>();
 			auto &ChangedFiles = *Changed;
-			for (auto &Files : co_await fg_AllDone(Pending))
+			for (auto &Files : AllFiles)
 			{
 				for (auto &File : Files)
 				{
@@ -2035,6 +2049,11 @@ namespace NMib::NTool::NTidy
 		pState->m_Fixes.f_SetLen(pState->m_Commands.f_GetLen());
 		pState->m_Changed = Changed;
 		pState->m_fProgress = fg_Move(_Sink.m_fReport);
+		for (auto const &File : UncheckedChanged)
+		{
+			++pState->m_Summary.m_nFailed;
+			pState->m_Failures += "{}: not checked: its name holds a backslash, which the file functions read as a separator\n"_f << File;
+		}
 
 		CUniversallyUniqueIdentifier RunID(EUniversallyUniqueIdentifierGenerate_Random);
 		pState->m_RunDirectory = fg_GetToolRootDirectory() / "Tidy" / RunID.f_GetAsString(EUniversallyUniqueIdentifierFormat_AlphaNum);

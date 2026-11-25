@@ -34,10 +34,29 @@ namespace NMib::NTool::NValidate
 		-> NConcurrency::TCFuture<CValidationResult>
 	;
 
+	auto fg_ValidatePerforceChanges
+		(
+			NStr::CStr _Root
+			, NStr::CStr _Base
+			, NStorage::TCSharedPointer<NPerforce::CPerforceRootFiles> _pRootFiles
+			, NContainer::TCMap<NStr::CStr, NStr::CStr> _Environment
+			, NConcurrency::TCActor<NFormat::CFormatWorkerPool> _Workers
+			, NFormat::CFormatSink _Sink
+		)
+		-> NConcurrency::TCFuture<CValidationResult>
+	;
+
 	// Audits the working trees holding the directories in one Format run: every text file
 	// git does not ignore is checked against max_line_length, and the files that opt in
-	// are analyzed by the engine. Diagnostics come in path order.
-	auto fg_ValidateRepositories(NContainer::TCVector<NStr::CStr> _Directories, NFormat::CFormatSink _Sink, NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> _pCancelled = {})
+	// are analyzed by the engine. Diagnostics come in path order. The other selections are
+	// audited in the same run as they are given, such as a Perforce root's with its P4IGNORE.
+	auto fg_ValidateRepositories
+		(
+			NContainer::TCVector<NStr::CStr> _Directories
+			, NFormat::CFormatSink _Sink
+			, NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> _pCancelled = {}
+			, NContainer::TCVector<NFormat::CFormatSelection> _OtherSelections = {}
+		)
 		-> NConcurrency::TCFuture<CValidationResult>
 	;
 

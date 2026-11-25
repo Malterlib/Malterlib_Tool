@@ -169,6 +169,21 @@ namespace NMib::NTool
 					DMibExpect(Staged.f_Find("unmatched.sh:1:"), >=, 0);
 					DMibExpect(Staged.f_Find("stray.sh:2:"), >=, 0);
 				}
+				{
+					// A directive on a line the change keeps turns the check off for the changed lines, and isn't reported, nor its
+					// missing match: only changed lines are checked.
+					CRepositoryFixture Repo;
+					co_await Repo.f_Init();
+					Repo.f_Write(".editorconfig", "root = true\n[*]\nmax_line_length = 190\n");
+					Repo.f_Write("kept.sh", "# malterlib-format off\nshort\n");
+					co_await Repo.f_Commit();
+					Repo.f_Write("kept.sh", "# malterlib-format off\nshort\n" + Long + "\n");
+					co_await Repo.f_Stage();
+
+					auto Staged = co_await Repo.f_Validate("KeptOff", 0);
+
+					DMibExpect(Staged.f_Find("kept.sh"), <, 0);
+				}
 
 				co_return {};
 			};
@@ -721,6 +736,32 @@ namespace NMib::NTool
 					DMibExpect(Output.f_Find("marker.cpp:2: line length 191"), >=, 0);
 					DMibExpect(Output.f_Find("malformed.cpp:1: line length 192"), >=, 0);
 				}
+
+				co_return {};
+			};
+
+			// A staged snapshot that can't be analyzed is reported before its style is read, so a style it can't use doesn't stop the run,
+			// and the other files are validated.
+			DMibTestCategory("UnanalyzableSnapshotBeforeStyle") -> TCFuture<void>
+			{
+				auto Capture = co_await (g_CaptureExceptions % "Testing a snapshot that can't be analyzed beside a broken style");
+				CRepositoryFixture Repo;
+				co_await Repo.f_Init();
+				Repo.f_Write(".editorconfig", "root = true\n\n[*]\nmax_line_length = 190\n\n[*.cpp]\nmalterlib_format = malterlib\nindent_style = tab\n");
+				Repo.f_Write(".gitattributes", "*.cpp diff\n");
+				Repo.f_Write("NulByte/.malterlib-format", "Version: 100\n");
+				Repo.f_Write("NulByte/file.cpp", "int a;\n");
+				auto Data = CFile::fs_ReadFile(Repo.m_Path / "NulByte/file.cpp");
+				Data[3] = 0;
+				CFile::fs_WriteFile(Repo.m_Path / "NulByte/file.cpp", Data);
+				Repo.f_Write("Spacing/file.cpp", "int  a;\n");
+				co_await Repo.f_Stage();
+
+				auto Result = co_await Repo.f_Tool({"Validate", "-C", Repo.m_Path, "--staged", "--no-color"});
+				DMibExpect(Result.m_ExitCode, !=, 0u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("NulByte/file.cpp: the changed snapshot could not be reassembled"), >=, 0);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Spacing/file.cpp:1"), >=, 0);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Version"), <, 0);
 
 				co_return {};
 			};

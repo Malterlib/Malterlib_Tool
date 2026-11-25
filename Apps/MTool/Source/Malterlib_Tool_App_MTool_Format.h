@@ -31,6 +31,18 @@ namespace NMib::NTool::NFormat
 		, mc_Failed
 	};
 
+	// A project's root as the project spells it and as the root of the Perforce workspace that maps it does.
+	struct CPerforceRootSpelling
+	{
+		static CPerforceRootSpelling fs_Find(NStr::CStr const &_ProjectRoot, NStr::CStr const &_WorkspaceRoot);
+
+		NStr::CStr f_ServerPath(NStr::CStr const &_ProjectPath) const;
+		NStr::CStr f_ProjectPath(NStr::CStr const &_ServerPath) const;
+
+		NStr::CStr m_ProjectRoot;
+		NStr::CStr m_ServerRoot; // m_ProjectRoot as the workspace's root spells it
+	};
+
 	struct CFormatJob
 	{
 		bool f_IsCancelled() const;
@@ -42,8 +54,11 @@ namespace NMib::NTool::NFormat
 		bool m_bResolveSettings = false;                                                   // The worker resolves the settings and display path within m_Root.
 		bool m_bValidateLineLength = false;                                                // Also check max_line_length, on a file the engine does not format too.
 		NGit::EGitTextAttribute m_TextAttribute = NGit::EGitTextAttribute::mc_Unspecified; // Decides text or binary before git's heuristic.
+		bool m_bDecodedIsText = false;                                                     // Without a text attribute, text decoded from UTF-16 or UTF-32 is text.
 		NStr::CStr m_Source;                                                               // Snapshot contents; empty means read m_Path.
 		bool m_bHasSource = false;
+		NContainer::CByteVector m_SourceBytes;                                             // Without m_bHasSource, the bytes read as m_Path's would be
+		bool m_bHasSourceBytes = false;
 		NStorage::TCSharedPointer<NDevelop::CCodeFormattingStyle const> m_pStyle;          // The snapshot's style; the worker resolves one unless m_bHasStyle.
 		bool m_bHasStyle = false;
 		NContainer::TCVector<umint> m_ReportedLines;                                       // Sorted one-based lines to report; empty reports every line.
@@ -299,6 +314,7 @@ namespace NMib::NTool::NFormat
 		bool m_bOwnRepository = false;                                           // A recursive walk enters no repository below the one it starts in, ignored or not.
 		NStorage::TCSharedPointer<NPerforce::CPerforceIgnore> m_pPerforceIgnore; // Of the working directory when it is a Perforce root, whose P4IGNORE a walk follows
 		NContainer::TCSet<NStr::CStr> m_ExcludedDirectories;                     // A recursive walk enters none of them.
+		bool m_bDecodedIsText = false;                                             // Given to its jobs (CFormatJob::m_bDecodedIsText).
 	};
 
 	// One run over every selection: the trees are walked in parallel, a selection's files
@@ -308,6 +324,17 @@ namespace NMib::NTool::NFormat
 	NConcurrency::TCFuture<CFormatRunResult> fg_RunFormat(NContainer::TCVector<CFormatSelection> _Selections, CFormatOptions _Options, CFormatSink _Sink);
 	NStr::CStr fg_DescribeFormatSummary(CFormatSummary const &_Summary, EFormatMode _Mode, fp64 _Seconds);
 	void fg_AddFormatResult(CFormatJobResult const &_Result, CFormatSummary &o_Summary);
+
+	struct CPerforceListedFiles
+	{
+		NContainer::TCVector<NStr::CStr> m_Paths;                             // By their paths in the project, each once.
+		NContainer::TCVector<NPerforce::CPerforceClient::CFileStats> m_Stats; // With fg_ListPerforceFiles' _bStats, per path in m_Paths, the fields fstat gives the file
+		NContainer::TCVector<NStr::CStr> m_Unreadable;                        // Named with a backslash, which the file functions read as a separator.
+	};
+
+	auto fg_ListPerforceFiles(NPerforce::CPerforceClientThrow &_Client, CPerforceRootSpelling const &_Spelling, NContainer::TCVector<NStr::CStr> const &_Arguments, bool _bStats)
+		-> CPerforceListedFiles
+	;
 
 	// Formats a snapshot as the file at a path would be, with that path's configuration, and gives the result back:
 	// an editor's unsaved buffer. The file at the path is never read or written and need not exist.
@@ -373,12 +400,17 @@ namespace NMib::NTool::NFormat
 
 	struct CPlainFormatDirectives
 	{
-		bool f_IsDisabled(NStr::CStr const &_Line, NStr::CStr const &_AbsolutePath, umint _LineNumber, NStr::CStr &o_Report, umint &o_nErrors);
+		bool f_IsDisabled(NStr::CStr const &_Line, NStr::CStr const &_AbsolutePath, umint _LineNumber, bool _bReported, NStr::CStr &o_Report, umint &o_nErrors);
 		void f_Finish(NStr::CStr const &_AbsolutePath, NStr::CStr &o_Report, umint &o_nErrors);
 
-		umint m_iOffLine = 0; // The line that turned the check off, or zero while it is on
+		umint m_iOffLine = 0;            // The line that turned the check off, or zero while it is on
+		bool m_bOffLineReported = false; // Whether the line that turned the check off is reported, and so its missing match
 	};
 
+	bool fg_ParsePerforceBaseChangelist(NStr::CStr const &_Base, int64 &o_Changelist);
+	bool fg_GetPerforceChangesArguments(NStr::CStr const &_Root, NStr::CStr const &_Base, NContainer::TCVector<NStr::CStr> &o_Arguments, int64 &o_BaseChangelist, NStr::CStr &o_Error);
 	void fg_NormalizeValidationNuls(NStr::CStr &_Text);
 	NStr::CStr fg_StrFromBytes(void const *_pData, umint _nBytes);
+	bool fg_HasWideTextSignature(NContainer::CByteVector const &_Data);
+	NStr::CStr fg_DecodeWideValidationText(NContainer::CByteVector &&_Data);
 }

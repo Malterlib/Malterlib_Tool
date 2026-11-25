@@ -20,6 +20,10 @@ namespace NMib::NPerforce
 #include <Mib/Perforce/TestServer>
 #include <Mib/Perforce/Wrapper>
 
+#ifndef DPlatformFamily_Windows
+#	include <unistd.h>
+#endif
+
 namespace NMib::NTool
 {
 	using namespace NTestHelpers;
@@ -1287,6 +1291,78 @@ namespace NMib::NTool
 					DMibExpect(Result.f_GetCombinedOut().f_Find("cannot be the base of both the git repositories and the Perforce root"), >=, 0);
 					DMibExpect(Tidy.f_Checked(), ==, TCVector<CStr>{});
 				}
+
+				{
+					// A workspace whose root spells the project's root otherwise, through a symbolic link to it, is given the paths
+					// as it spells them, and the files found are the project's.
+					DMibTestPath("AliasedWorkspace");
+					CStr Alias = Repo.m_Root / "Alias";
+					CFile::fs_CreateSymbolicLink(Repo.m_Path, Alias, EFileAttrib_Directory, ESymbolicLinkFlag_None);
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor())
+							/ [Connection, Password, Alias]()
+							{
+								NPerforce::CPerforceClientThrow Admin(Connection);
+								Admin.f_Login(Password);
+								NPerforce::CPerforceClient::CClient Spec;
+								Spec.m_Root = Alias;
+								Spec.m_Description = "A workspace whose root is a symbolic link to the project.";
+								Spec.m_Options = {"allwrite", "clobber", "nocompress", "unlocked", "nomodtime", "normdir"};
+								Spec.m_Stream = "//Streams/Main";
+								Admin.f_SetClient("TestAlias", Spec);
+
+								auto AliasConnection = Connection;
+								AliasConnection.m_Client = "TestAlias";
+								NPerforce::CPerforceClientThrow Client(AliasConnection);
+								Client.f_Login(Password);
+								Client.f_Sync(Alias / "A.cpp");
+								Client.f_Sync(Alias / "B.cpp");
+								Client.f_OpenForEdit(Alias / "B.cpp");
+							}
+							% "Failed to set up the aliased workspace"
+						)
+					;
+					Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestAlias\n"_f << Port);
+					Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+					Tidy.f_ConfigurePerforceRoot("{Enabled: true}");
+					auto Result = co_await Tidy.f_Run({"--staged"});
+					DMibExpect(Result.m_ExitCode, ==, 1u);
+					DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"B.cpp"}));
+				}
+
+#ifndef DPlatformFamily_Windows
+				{
+					// A file whose name holds a backslash, which Malterlib's file functions read as a separator, is reported as not
+					// checked, and the file its name would be read as isn't checked in its place.
+					DMibTestPath("BackslashName");
+					CStr Backslashed = Repo.m_Path + "/Back\\slash.cpp";
+					DMibAssertTrue(fg_WriteNativeFile(Backslashed, ""));
+					auto RemoveBackslashed = g_OnScopeExit / [&]
+						{
+							unlink(Backslashed.f_GetStr());
+						}
+					;
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor())
+							/ [Connection, Password, InWorkspace = Repo.m_Root + "/Alias/Back\\slash.cpp"]()
+							{
+								auto AliasConnection = Connection;
+								AliasConnection.m_Client = "TestAlias";
+								NPerforce::CPerforceClientThrow Client(AliasConnection);
+								Client.f_Login(Password);
+								Client.f_Add(InWorkspace);
+							}
+							% "Failed to add the file with a backslash in its name"
+						)
+					;
+					auto Result = co_await Tidy.f_Run({"--staged"});
+					DMibExpect(Result.m_ExitCode, ==, 1u);
+					DMibExpect(Result.f_GetCombinedOut().f_Find("Back\\slash.cpp: not checked"), >=, 0);
+					DMibExpect(Tidy.f_Checked(), ==, (TCVector<CStr>{"B.cpp"}));
+				}
+#endif
 
 				co_return {};
 			};

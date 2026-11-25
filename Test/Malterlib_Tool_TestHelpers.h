@@ -19,6 +19,10 @@ namespace NMib::NTool::NTestHelpers
 	using namespace NEncoding;
 
 	CStr fg_Repeat(CStr const &_Text, umint _Count);
+	CByteVector fg_EncodeUTF16(CStr const &_Text, EEndian _Endian);
+#ifndef DPlatformFamily_Windows
+	bool fg_WriteNativeFile(CStr const &_Path, CStr const &_Contents);
+#endif
 
 	// Each fixture outlives all its awaited operations within the owning test category.
 	struct CRepositoryFixture : CAllowUnsafeThis
@@ -28,6 +32,7 @@ namespace NMib::NTool::NTestHelpers
 
 		TCFuture<void> f_Init();
 		void f_Write(CStr const &_Name, CStr const &_Contents) const;
+		void f_WriteWorkspaceText(CStr const &_Name, CStr const &_Contents) const;
 		void f_WriteBinary(CStr const &_Name) const;
 		TCFuture<void> f_Stage();
 		TCFuture<void> f_Commit();

@@ -204,7 +204,30 @@ build-system entry sets `Repository.Format` in one run: the repositories are
 validated at once on one pool of formatting workers, each repository's
 diagnostics are written in repository order, and one summary covers them all.
 It takes `--staged`, `--base`, and the repository filters, and exits like
-`MTool Validate` does. The name filter, `-n` (`--repo-name`), takes a
+`MTool Validate` does. A Perforce root that sets `PerforceRoot.Format` is
+validated with them (see the Perforce root under Semantic checks): its audit skips what
+its P4IGNORE files exclude and the repositories in it, `--staged` takes the lines
+of the files opened in its workspace that `p4 diff` finds changed from the revisions
+they were opened from, the one a resolve that a sync scheduled is based on included, and
+a move's source for its destination, all lines of a file opened for add, and none of a file
+opened for delete, and a base, `@1234`, the lines `p4 diff2` finds the revisions the
+workspace has changed from the ones at that changelist, of a workspace whose revisions are
+from a later one, and all lines of one that wasn't there or wasn't text at it. Each file is
+read and analyzed whole, exactly as the audit reads and analyzes it: with `--staged` the
+workspace's file, and with a base the revision the workspace has. With `--staged`
+the file is read after `p4 diff` compares it, and one whose size or modification time
+changed meanwhile is reported as `<path>: not validated: it changed during
+validation`, an error, rather than validated against lines it no longer has. p4 decides only which
+lines' diagnostics are reported, comparing the files as it reads them, in the charset
+P4CHARSET selects and with their types and keywords, with a lone CR ending a line as it
+does where the formatter numbers lines; a line whose keywords alone differ, as a workspace
+synced with `p4 sync -K` has them, is changed. A file in UTF-16 or UTF-32 that p4
+compares as its bytes, as one typed `text` is compared, whose LF bytes can be bytes
+of other characters, has all of its lines changed. The `.editorconfig` and
+`.malterlib-format` files are the workspace's. A file of a binary type, or one no validator
+applies to, is not compared. A run over
+git repositories too gives the root's changelist with `--perforce-base` and
+their reference with `--base`. The name filter, `-n` (`--repo-name`), takes a
 wildcard, or several separated by commas (or as a JSON array), and selects the
 repositories whose path relative to the root, `.` for the root itself, matches
 any of them. A comma of a wildcard is written `\,`, and another backslash is
@@ -216,6 +239,7 @@ than no filter.
 ./mib validate --staged
 ./mib validate --base origin/master -n "Malterlib/S*"
 ./mib validate -n 'Malterlib/S*,.'
+./mib validate --base origin/master --perforce-base @1234
 ```
 
 `repo-run` still launches the single-repository tool per repository, with the

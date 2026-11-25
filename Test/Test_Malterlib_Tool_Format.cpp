@@ -3,7 +3,27 @@
 
 #include "Malterlib_Tool_TestHelpers.h"
 
+#include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/String/Appender>
+
+// The Perforce headers use Malterlib's types without their namespaces.
+namespace NMib::NPerforce
+{
+	using namespace NMib::NStr;
+	using namespace NMib::NContainer;
+	using namespace NMib::NStorage;
+	using namespace NMib::NFunction;
+	using namespace NMib::NConcurrency;
+	using namespace NMib::NEncoding;
+}
+
+#include <Mib/Perforce/TestServer>
+#include <Mib/Perforce/Wrapper>
+
+#ifndef DPlatformFamily_Windows
+#	include <sys/stat.h>
+#	include <unistd.h>
+#endif
 
 namespace NMib::NTool
 {
@@ -60,6 +80,26 @@ namespace NMib::NTool
 				auto Result = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "src/*.cpp"});
 				DMibExpect(Result.m_ExitCode, ==, 2u);
 				DMibExpect(Result.f_GetCombinedOut().f_Find("No files matched"), >=, 0);
+
+#ifndef DPlatformFamily_Windows
+				{
+					// A match whose name holds a backslash, which the file functions read as a separator, is reported unchecked also
+					// where it is the only one.
+					DMibTestPath("BackslashOnly");
+					CFile::fs_CreateDirectory(Repo.m_Path / "src");
+					CStr Backslashed = Repo.m_Path + "/src/Back\\slash.cpp";
+					DMibAssertTrue(fg_WriteNativeFile(Backslashed, ""));
+					auto RemoveBackslashed = g_OnScopeExit / [&]
+						{
+							unlink(Backslashed.f_GetStr());
+						}
+					;
+
+					auto Only = co_await Repo.f_Tool({"Format", "--no-color", "-C", Repo.m_Path, "--pattern", "src/*.cpp"});
+					DMibExpect(Only.m_ExitCode, ==, 2u);
+					DMibExpect(Only.f_GetCombinedOut().f_Find("Back\\slash.cpp: not checked"), >=, 0);
+				}
+#endif
 
 				co_return {};
 			};
@@ -1587,6 +1627,41 @@ namespace NMib::NTool
 				DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Source.cpp", true), ==, gc_Unformatted);
 			}
 
+#ifndef DPlatformFamily_Windows
+			// A FIFO, which the listing gives as a file, isn't read: reading it would wait for a writer.
+			DMibAssert(mkfifo((Repo.m_Path / "Pipe.cpp").f_GetStr(), 0600), ==, 0);
+#endif
+
+			{
+				// mib validate audits the root as mib format checks it, without what its P4IGNORE files and its repositories hold.
+				DMibTestPath("Validate");
+				auto Result = co_await Repo.f_Tool
+					(
+						{
+							"validate"
+							, "--skip-update"
+							, "--no-color"
+							, "--build-system"
+							, Repo.m_Path / "Test.MBuildSystem"
+							, "--output-directory"
+							, Repo.m_Root / "output"
+							, "--no-use-user-settings"
+							, "--no-use-cached-environment"
+						}
+						, true
+					)
+				;
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("No repository sets Repository.Format"), <, 0);
+				DMibExpect(Output.f_Find("Source.cpp:"), >=, 0);
+				DMibExpect(Output.f_Find("in 2 formatted file(s)"), >=, 0);
+				DMibExpect(Output.f_Find("generated"), <, 0);
+				DMibExpect(Output.f_Find("Ignored"), <, 0);
+				DMibExpect(Output.f_Find("Lib"), <, 0);
+				DMibExpect(Output.f_Find("Unknown"), <, 0);
+			}
+
 			{
 				DMibTestPath("Format");
 				auto Result = co_await fFormat({});
@@ -1612,6 +1687,242 @@ namespace NMib::NTool
 				auto Result = co_await fFormat({"--check"});
 				DMibExpect(Result.m_ExitCode, ==, 0u);
 				DMibExpect(Result.f_GetCombinedOut().f_Find("No repository sets Repository.Format"), >=, 0);
+			}
+
+			{
+				// A Perforce base without a Perforce root to validate is an error, also where no repository is validated at all.
+				DMibTestPath("PerforceBaseWithoutRoot");
+				auto Result = co_await Repo.f_Tool
+					(
+						{
+							"validate"
+							, "--perforce-base"
+							, "@1"
+							, "--skip-update"
+							, "--no-color"
+							, "--build-system"
+							, Repo.m_Path / "Test.MBuildSystem"
+							, "--output-directory"
+							, Repo.m_Root / "output"
+							, "--no-use-user-settings"
+							, "--no-use-cached-environment"
+						}
+						, true
+					)
+				;
+				DMibExpect(Result.m_ExitCode, ==, 2u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("--perforce-base gives the base of a Perforce root, and none is validated"), >=, 0);
+			}
+
+			co_return {};
+		};
+
+		// A Perforce root's workspace on a server: mib validate's changed lines are those of the files opened in it, or submitted
+		// after a changelist.
+		DMibTestSuite("PerforceRootWorkspace") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing mib format and validate in the workspace of a Perforce root");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root's workspace: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			TCVector<CPerforceFile> FirstFiles{{"Opened.cpp", gc_Formatted}, {"Changed.cpp", gc_Formatted}, {"Unopened.cpp", gc_Formatted}};
+			TCVector<CPerforceFile> SecondFiles{{"Changed.cpp", gc_Formatted + "\nint  g_Changed;\n"}};
+			TCVector<CStr> OpenedFiles{"Opened.cpp"};
+
+			// Opened with a UTF-8 signature, as the revision has it, and with CRLF, which p4 diff reads as a change of each line where
+			// the client's lines end in LF, as they do outside Windows.
+			FirstFiles.f_Insert({"Signed.cpp", "\xEF\xBB\xBFint  g_Old;\n"});
+			FirstFiles.f_Insert({"Crlf.cpp", "int  g_Old;\n"});
+			OpenedFiles.f_Insert({"Signed.cpp", "Crlf.cpp"});
+
+			// A file the configuration selects no validator for, which is never read.
+			FirstFiles.f_Insert({"Excluded/Large.dat", "old\n"});
+			SecondFiles.f_Insert({"Excluded/Large.dat", "new\n"});
+			OpenedFiles.f_Insert("Excluded/Large.dat");
+
+			// A blank line of context, which the diff's hunk ranges count.
+			FirstFiles.f_Insert({"Blank.cpp", "int g_A;\n\nint g_B;\n"});
+			OpenedFiles.f_Insert("Blank.cpp");
+
+			int64 FirstChangelist = co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), FirstFiles, CStr("Add the sources"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), SecondFiles, CStr("Change the sources"));
+
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, Workspace = Repo.m_Path, OpenedFiles]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+						for (auto const &File : OpenedFiles)
+							Client.f_OpenForEdit(NPerforce::CPerforceClient::fs_EscapeFileName(Workspace / File));
+					}
+					% "Failed to set up the test workspace"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration + "\n[Excluded/**]\nmax_line_length = off\n");
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+			Repo.f_WriteWorkspaceText("Opened.cpp", gc_Formatted + "\nint  g_Opened;\n");
+			Repo.f_WriteWorkspaceText("Signed.cpp", "\xEF\xBB\xBFint  g_Old;\nint  g_New;\n");
+			Repo.f_Write("Crlf.cpp", "int  g_Old;\r\nint  g_New;\r\n");
+			Repo.f_WriteWorkspaceText("Excluded/Large.dat", "changed\n");
+			Repo.f_WriteWorkspaceText("Blank.cpp", "int g_A;\n\nint g_B;\nint  g_C;\n");
+
+			// Changed in the workspace without being opened, and read-only as a file the workspace has not opened is.
+			Repo.f_Write("Unopened.cpp", gc_Unformatted);
+			for (auto pName : {"Changed.cpp", "Unopened.cpp"})
+			{
+				auto Path = Repo.m_Path / pName;
+#ifdef DPlatformFamily_Windows
+				CFile::fs_SetAttributes(Path, CFile::fs_GetAttributes(Path) | EFileAttrib_ReadOnly);
+#else
+				CFile::fs_SetAttributes(Path, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_GroupRead | EFileAttrib_EveryoneRead);
+#endif
+			}
+
+			// A command trigger refusing the p4 commands whose arguments hold a text, which shows what a run asks the server. The
+			// shell runs the script, which Windows can't launch by itself.
+			auto fRefuse = [&](CStr _Command, CStr _Text) -> TCUnsafeFuture<void>
+				{
+					CStr Script = Repo.m_Root / ("Refuse-{}.sh"_f << _Command);
+					CFile::fs_WriteStringToFile(Script, "#!/bin/sh\ncase \"$*\" in\n*{}*) echo \"Refused {}\"; exit 1;;\nesac\nexit 0\n"_f << _Text << _Command, false);
+					CFile::fs_SetAttributes(Script, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_UserWrite | EFileAttrib_UserExecute);
+
+					CStr Triggers = "Triggers:\n";
+					if (_Text)
+						Triggers += "\tRefuse command pre-user-{} \"%quote%{}%quote% %quote%{}%quote% %args%\"\n"_f << _Command << Repo.m_Shell << Script;
+
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor())
+							/ [Connection, Triggers]()
+							{
+								NPerforce::CPerforceClientThrow Client(Connection);
+								Client.f_Login(CStr());
+								Client.f_SetTriggers(Triggers);
+							}
+							% "Failed to set the triggers"
+						)
+					;
+
+					co_return {};
+				}
+			;
+
+			auto fRun = [&](TCVector<CStr> _Params)
+				{
+					_Params.f_Insert
+						(
+							{
+								"--skip-update"
+								, "--no-color"
+								, "--build-system"
+								, Repo.m_Path / "Test.MBuildSystem"
+								, "--output-directory"
+								, Repo.m_Root / "output"
+								, "--no-use-user-settings"
+								, "--no-use-cached-environment"
+							}
+						)
+					;
+
+					return Repo.f_Tool(fg_Move(_Params), true);
+				}
+			;
+
+			{
+				// Only the lines the opened file changes are reported: not the file changed without being opened, nor the lines of
+				// the changelist submitted before.
+				DMibTestPath("ValidateStaged");
+				auto Result = co_await fRun({"validate", "--staged"});
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("Opened.cpp:8:"), >=, 0);
+				DMibExpect(Output.f_Find("Changed.cpp"), <, 0);
+				DMibExpect(Output.f_Find("Unopened.cpp"), <, 0);
+				DMibExpect(Output.f_Find("Signed.cpp:2:"), >=, 0);
+				DMibExpect(Output.f_Find("Signed.cpp:1:"), <, 0);
+				DMibExpect(Output.f_Find("Crlf.cpp:2:"), >=, 0);
+#ifdef DPlatformFamily_Windows
+				DMibExpect(Output.f_Find("Crlf.cpp:1:"), <, 0);
+#else
+				DMibExpect(Output.f_Find("Crlf.cpp:1:"), >=, 0);
+#endif
+			}
+
+			{
+				// The lines submitted after the changelist, of the revisions the workspace has.
+				DMibTestPath("ValidateBase");
+				auto Result = co_await fRun({"validate", "--base", CStr("@{}"_f << FirstChangelist)});
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("Changed.cpp:8:"), >=, 0);
+				DMibExpect(Output.f_Find("Opened.cpp"), <, 0);
+				DMibExpect(Output.f_Find("Unopened.cpp"), <, 0);
+			}
+
+			{
+				// A file no validator applies to is not compared: comparing it fails here.
+				DMibTestPath("ValidateExcludedNotRead");
+				co_await fRefuse("diff", "Excluded");
+				auto Staged = co_await fRun({"validate", "--staged"});
+				co_await fRefuse("diff2", "Excluded");
+				auto Committed = co_await fRun({"validate", "--base", CStr("@{}"_f << FirstChangelist)});
+				co_await fRefuse("diff2", "");
+				DMibExpect(Staged.m_ExitCode, ==, 1u);
+				DMibExpect(Staged.f_GetCombinedOut().f_Find("Refused"), <, 0);
+				DMibExpect(Committed.m_ExitCode, ==, 1u);
+				DMibExpect(Committed.f_GetCombinedOut().f_Find("Refused"), <, 0);
+			}
+
+			{
+				// A revision at the changelist that the server fails to look up is an error, not a file new since.
+				DMibTestPath("ValidateBaseLookupFails");
+				co_await fRefuse("diff2", "@");
+				auto Result = co_await fRun({"validate", "--base", CStr("@{}"_f << FirstChangelist)});
+				co_await fRefuse("diff2", "");
+				DMibExpect(Result.m_ExitCode, ==, 2u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Refused diff2"), >=, 0);
+			}
+
+			{
+				DMibTestPath("ValidateBaseNotAChangelist");
+				auto Result = co_await fRun({"validate", "--base", "main"});
+				DMibExpect(Result.m_ExitCode, ==, 2u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("whose base is a changelist"), >=, 0);
+			}
+
+			{
+				// Beyond 64 bits, of more digits than the largest or as many, is no changelist either.
+				DMibTestPath("ValidateBaseBeyond64Bits");
+				for (CStr Base : {"@99999999999999999999", "@9223372036854775808"})
+				{
+					DMibTestPath(Base.f_GetLen() > 20 ? "MoreDigits" : "AsManyDigits");
+					auto Result = co_await fRun({"validate", "--base", Base});
+					DMibExpect(Result.m_ExitCode, ==, 2u);
+					DMibExpect(Result.f_GetCombinedOut().f_Find(CStr("which '{}' is not"_f << Base)), >=, 0);
+				}
 			}
 
 			co_return {};
@@ -1655,6 +1966,2215 @@ namespace NMib::NTool
 			DMibExpect(Output.f_Find("Source.cpp"), >=, 0);
 			DMibExpect(Output.f_Find("Ignored"), <, 0);
 			DMibExpect(Output.f_Find("0 unchanged, 1 would change"), >=, 0);
+
+			co_return {};
+		};
+
+		// The revisions a Perforce root's validation compares: an opened file's with the revision it was opened from, each read
+		// as its own type says and the workspace's in the text its encoding spells.
+		DMibTestSuite("PerforceRootRevisions") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing the revisions mib validate compares in a Perforce root");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of the revisions of a Perforce root: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			CStr LongLine = fg_Repeat("x", 200);
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			TCVector<CPerforceFile> FirstFiles;
+
+			// Changed in the workspace as UTF-16.
+			FirstFiles.f_Insert({"Wide.txt", "a\n"});
+
+			// Retyped to binary after the revision the workspace has.
+			FirstFiles.f_Insert({"Retyped.cpp", "int  g_Retyped;\n"});
+
+			FirstFiles.f_Insert({"Blank.cpp", "int g_A;\n\nint g_B;\n"});
+
+			// Opened from its first revision, while the workspace is synced to its second.
+			FirstFiles.f_Insert({"Synced.cpp", "int  g_Old;\n"});
+
+			// Opened for delete, with a copy left in the workspace.
+			FirstFiles.f_Insert({"Deleted.cpp", "int g_Deleted;\n"});
+
+			// A formatted file and one whose line lengths alone are checked, in that order.
+			FirstFiles.f_Insert({"Ordered.cpp", "int g_A;\n"});
+			FirstFiles.f_Insert({"Ordered.txt", "a\n"});
+
+			// UTF-8 without a signature, in the workspace as in the depot.
+			FirstFiles.f_Insert({"Accented.cpp", "int  g_A; // caf\u00e9\n"});
+
+			// Moved to another path in the workspace.
+			FirstFiles.f_Insert({"Renamed.cpp", "int  g_Old;\n"});
+
+			// Its keywords expanded, which differ between its revisions.
+			FirstFiles.f_Insert({"Keyword.cpp", "int  g_Id; // $Revision$\n"});
+
+			// Its keywords not expanded in the workspace, as 'p4 sync -K' leaves them.
+			FirstFiles.f_Insert({"Unexpanded.cpp", "int  g_Id; // $Revision$\n"});
+
+			// Changed at and after the base, while the workspace has the revision before it.
+			FirstFiles.f_Insert({"Behind.cpp", "int  g_Old;\n"});
+
+			// Lines that end in a lone CR, which p4 numbers by their LFs alone: opened, and changed after the base.
+			FirstFiles.f_Insert({"MacLines.cpp", "int g_A;\rint g_B;\r"});
+			FirstFiles.f_Insert({"MacBase.cpp", "int g_A;\r"});
+
+			// Its lone CRs turned into LFs, a change of each line to p4.
+			FirstFiles.f_Insert({"CrToLf.cpp", "int  g_A;\rint g_B;\r"});
+
+			// Its last line, too long already, loses its final newline.
+			FirstFiles.f_Insert({"NoNewline.txt", "a\n" + LongLine + "\n"});
+
+			// Changed after the base, and changed in the workspace without being opened, which the base doesn't validate.
+			FirstFiles.f_Insert({"LocalChange.cpp", "int g_A;\n"});
+
+			// Its keywords not expanded, and after the base text with what reads as an expanded one.
+			FirstFiles.f_Insert({"Rekeyed.cpp", "int g_A; // $Id$\n"});
+			TCVector<CStr> TypeMap =
+				{
+					"text+k //Streams/Main/Keyword.cpp"
+					, "text+k //Streams/Main/Unexpanded.cpp"
+					, "utf16 //Streams/Main/WideType.txt"
+				}
+			;
+			auto AdminConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr());
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [AdminConnection, TypeMap]()
+					{
+						NPerforce::CPerforceClientThrow Client(AdminConnection);
+						Client.f_Login(CStr());
+						auto FirstTypeMap = TypeMap;
+						FirstTypeMap.f_Insert("text+k //Streams/Main/Rekeyed.cpp");
+						Client.f_SetTypeMap(FirstTypeMap);
+					}
+					% "Failed to set the type map"
+				)
+			;
+
+			co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), FirstFiles, CStr("Add the sources"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"Behind.cpp", "int g_Old;\n"}}, CStr("Fix a line"));
+
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+
+			NContainer::CByteVector BinaryContents;
+			for (uint8 Byte : {uint8(0), uint8(1), uint8(2), uint8(0)})
+				BinaryContents.f_Insert(Byte);
+
+			int64 BinaryChangelist = co_await
+				(
+					g_Dispatch(fg_BlockingActor()) / [Connection, Workspace = Repo.m_Path, BinaryContents, TypeMap, LongLine]() -> int64
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+						int64 BinaryChangelist = 0;
+
+						// Binary at a changelist and text after it, and text where the workspace stays while binary after it.
+						{
+							CFile::fs_WriteFile(Workspace / "Became.cpp", BinaryContents);
+							Client.f_Add(Workspace / "Became.cpp");
+							Client.f_Submit(Workspace / "Became.cpp", "Add a binary file");
+							BinaryChangelist = Client.f_GetHeadChangelist(Workspace / "...");
+							Client.f_Delete(Workspace / "Became.cpp");
+							Client.f_Submit(Workspace / "Became.cpp", "Delete the binary file");
+							CFile::fs_WriteStringToFile(Workspace / "Became.cpp", "int  g_Became;\n", false);
+							Client.f_Add(Workspace / "Became.cpp");
+							Client.f_Submit(Workspace / "Became.cpp", "Add a text file in its place");
+
+							Client.f_Delete(Workspace / "Retyped.cpp");
+							Client.f_Submit(Workspace / "Retyped.cpp", "Delete the text file");
+							CFile::fs_WriteFile(Workspace / "Retyped.cpp", BinaryContents);
+							Client.f_Add(Workspace / "Retyped.cpp");
+							Client.f_Submit(Workspace / "Retyped.cpp", "Add a binary file in its place");
+
+							CFile::fs_WriteFile(Workspace / "Added.bin", BinaryContents);
+							Client.f_Add(Workspace / "Added.bin");
+						}
+
+						// Typed 'utf16', which p4 reads as UTF-16 in the platform's byte order without a signature.
+						{
+							CFile::fs_WriteFile(Workspace / "WideType.txt", fg_EncodeUTF16("\uFEFF" + LongLine + "\n", EEndian_Little));
+							Client.f_Add(Workspace / "WideType.txt");
+							Client.f_Submit(Workspace / "WideType.txt", "Add a UTF-16 file");
+						}
+
+						// Typed 'text' after the base, which doesn't expand keywords.
+						{
+							Client.f_Delete(Workspace / "Rekeyed.cpp");
+							Client.f_Submit(Workspace / "Rekeyed.cpp", "Delete the file with keywords");
+							Client.f_SetTypeMap(TypeMap);
+
+							CStr Long = fg_Repeat("x", 200);
+
+							CFile::fs_WriteStringToFile(Workspace / "Rekeyed.cpp", "int g_A; // $Id: " + Long + " $\n", false);
+							Client.f_Add(Workspace / "Rekeyed.cpp");
+							Client.f_Submit(Workspace / "Rekeyed.cpp", "Add it again as text");
+						}
+
+						Client.f_OpenForEdit(Workspace / "Wide.txt");
+						Client.f_OpenForEdit(Workspace / "Blank.cpp");
+						Client.f_OpenForEdit(Workspace / "Synced.cpp");
+						Client.f_Delete(Workspace / "Deleted.cpp");
+						Client.f_OpenForEdit(Workspace / "Ordered.cpp");
+						Client.f_OpenForEdit(Workspace / "Ordered.txt");
+						Client.f_OpenForEdit(Workspace / "Accented.cpp");
+						Client.f_OpenForEdit(Workspace / "Renamed.cpp");
+						Client.f_Move(Workspace / "Renamed.cpp", Workspace / "RenamedTo.cpp");
+
+						return BinaryChangelist;
+					}
+					% "Failed to set up the test workspace"
+				)
+			;
+
+			// Submitted while the workspace has the file opened from its first revision: a sync schedules a resolve, and the
+			// workspace has the second.
+			co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"Synced.cpp", "int g_Old;\n"}}, CStr("Fix a line"));
+
+			// Added after the changelist the binary revision is at, with no revision at it.
+			co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"Later.cpp", "int  g_Later;\n"}}, CStr("Add a file"));
+
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"Keyword.cpp", "int  g_Id; // $Revision$\nint g_B;\n"}}
+					, CStr("Change a file with keywords")
+				)
+			;
+
+			co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"Behind.cpp", "int g_Old;\nint g_New;\n"}}, CStr("Add a line"));
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"MacBase.cpp", "int g_A;\rint  g_B;\r"}, {"LocalChange.cpp", "int g_A;\nint  g_B;\n"}}
+					, CStr("Add lines")
+				)
+			;
+
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, Workspace = Repo.m_Path]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+						Client.f_Sync(Workspace / "Retyped.cpp#1");
+						Client.f_OpenForEdit(Workspace / "Keyword.cpp");
+						Client.f_OpenForEdit(Workspace / "Unexpanded.cpp");
+						Client.f_OpenForEdit(Workspace / "WideType.txt");
+						Client.f_OpenForEdit(Workspace / "MacLines.cpp");
+						Client.f_OpenForEdit(Workspace / "CrToLf.cpp");
+						Client.f_OpenForEdit(Workspace / "NoNewline.txt");
+						Client.f_Sync(Workspace / "Behind.cpp#1");
+					}
+					% "Failed to sync the test workspace"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write("MacLines.cpp", "int g_A;\rint g_B;\rint  g_C;\r");
+			Repo.f_Write("CrToLf.cpp", "int  g_A;\nint g_B;\n");
+			Repo.f_Write("NoNewline.txt", "a\n" + LongLine);
+
+			// A line in front of the revision's, in the workspace's file only.
+			CFile::fs_DeleteFile(Repo.m_Path / "LocalChange.cpp");
+			Repo.f_WriteWorkspaceText("LocalChange.cpp", "int  g_X;\nint g_A;\nint  g_B;\n");
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+			Repo.f_WriteWorkspaceText("Synced.cpp", "int  g_Old;\nint  g_New;\n");
+			Repo.f_WriteWorkspaceText("Accented.cpp", "int  g_A; // caf\u00e9\nint  g_B;\n");
+			Repo.f_WriteWorkspaceText("RenamedTo.cpp", "int  g_Old;\nint  g_New;\n");
+			Repo.f_WriteWorkspaceText("Keyword.cpp", "int  g_Id; // $Revision: #2 $\nint g_B;\nint  g_C;\n");
+			Repo.f_WriteWorkspaceText("Unexpanded.cpp", "int  g_Id; // $Revision$\nint  g_C;\n");
+
+			{
+				// UTF-16 without a signature, little endian as the platforms are, after a line too long already.
+				CFile::fs_WriteFile(Repo.m_Path / "WideType.txt", fg_EncodeUTF16(LongLine + "\n" + LongLine + "\n", EEndian_Little));
+			}
+
+			{
+				// UTF-16 with its signature, little endian.
+				CFile::fs_WriteFile(Repo.m_Path / "Wide.txt", fg_EncodeUTF16("\uFEFFa\n" + LongLine + "\n", EEndian_Little));
+			}
+
+			// Unreadable, which shows that it is not read.
+			CFile::fs_SetAttributes(Repo.m_Path / "Added.bin", EFileAttrib_UnixAttributesValid);
+
+			Repo.f_WriteWorkspaceText("Blank.cpp", "int g_A;\n\nint g_B;\nint  g_C;\n");
+			Repo.f_WriteWorkspaceText("Deleted.cpp", "int g_Deleted;\nint  g_Extra;\n");
+			Repo.f_WriteWorkspaceText("Ordered.cpp", "int g_A;\nint  g_B;\n");
+
+			{
+				CStr Long = fg_Repeat("x", 200);
+
+				Repo.f_WriteWorkspaceText("Ordered.txt", "a\n" + Long + "\n");
+			}
+
+			auto fRun = [&](TCVector<CStr> _Params)
+				{
+					_Params.f_Insert
+						(
+							{
+								"--skip-update"
+								, "--no-color"
+								, "--build-system"
+								, Repo.m_Path / "Test.MBuildSystem"
+								, "--output-directory"
+								, Repo.m_Root / "output"
+								, "--no-use-user-settings"
+								, "--no-use-cached-environment"
+							}
+						)
+					;
+
+					return Repo.f_Tool(fg_Move(_Params), true);
+				}
+			;
+
+			// Sets the server's triggers, whose scripts see what a run asks of the server. The shell runs a script, which Windows can't
+			// launch by itself.
+			auto fSetTriggers = [&](CStr _Triggers) -> TCUnsafeFuture<void>
+				{
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor())
+							/ [Connection, _Triggers]()
+							{
+								NPerforce::CPerforceClientThrow Client(Connection);
+								Client.f_Login(CStr());
+								Client.f_SetTriggers(_Triggers);
+							}
+							% "Failed to set the triggers"
+						)
+					;
+
+					co_return {};
+				}
+			;
+
+			auto fWriteScript = [&](CStr const &_Name, CStr const &_Script)
+				{
+					CStr Path = Repo.m_Root / _Name;
+					CFile::fs_WriteStringToFile(Path, "#!/bin/sh\n" + _Script, false);
+					CFile::fs_SetAttributes(Path, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_UserWrite | EFileAttrib_UserExecute);
+
+					return Path;
+				}
+			;
+
+			auto fTrigger = [&](CStr const &_Name, CStr const &_Command, CStr const &_Script) -> CStr
+				{
+					return "\t{} command pre-user-{} \"%quote%{}%quote% %quote%{}%quote% %args%\"\n"_f << _Name << _Command << Repo.m_Shell << _Script;
+				}
+			;
+
+			{
+				DMibTestPath("Staged");
+				auto Result = co_await fRun({"validate", "--staged"});
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("could not be validated"), <, 0);
+
+				// Text in UTF-16 with its signature, typed text, is read decoded, for all its NULs, and has all of its lines changed, as p4
+				// compares it as its bytes. A file not opened isn't validated.
+				DMibExpect(Output.f_Find("Wide.txt:2:"), >=, 0);
+				DMibExpect(Output.f_Find("WideType.txt:"), <, 0);
+
+				// The lines of a file whose lines end in a lone CR are numbered as the formatter numbers them.
+				DMibExpect(Output.f_Find("MacLines.cpp:3:"), >=, 0);
+				DMibExpect(Output.f_Find("CrToLf.cpp:1:"), >=, 0);
+
+				// A line that loses its final newline is changed.
+				DMibExpect(Output.f_Find("NoNewline.txt:2:"), >=, 0);
+
+				// Compared with the revision the file was opened from, which the workspace no longer has.
+				DMibExpect(Output.f_Find("Synced.cpp:2:"), >=, 0);
+				DMibExpect(Output.f_Find("Synced.cpp:1:"), <, 0);
+
+				DMibExpect(Output.f_Find("Deleted.cpp"), <, 0);
+
+				// In the files' order, though only the formatted one's is analyzed.
+				auto iFormatted = Output.f_Find("Ordered.cpp:2:");
+				auto iLineLength = Output.f_Find("Ordered.txt:2");
+				DMibExpect(iFormatted, >=, 0);
+				DMibExpect(iLineLength, >, iFormatted);
+
+				// The depot's UTF-8 is the workspace's, in no code page.
+				DMibExpect(Output.f_Find("Accented.cpp:2:"), >=, 0);
+				DMibExpect(Output.f_Find("Accented.cpp:1:"), <, 0);
+
+				// A move's destination is compared with its source, and the source has no lines.
+				DMibExpect(Output.f_Find("RenamedTo.cpp:2:"), >=, 0);
+				DMibExpect(Output.f_Find("RenamedTo.cpp:1:"), <, 0);
+				DMibExpect(Output.f_Find("Renamed.cpp:"), <, 0);
+
+				// The workspace's file has the keywords of the revision it was opened from expanded, which p4 diff compares
+				// with them expanded, or not, as 'p4 sync -K' leaves them, where p4 diff finds the line changed.
+				DMibExpect(Output.f_Find("Keyword.cpp:3:"), >=, 0);
+				DMibExpect(Output.f_Find("Keyword.cpp:1:"), <, 0);
+				DMibExpect(Output.f_Find("Unexpanded.cpp:1:"), >=, 0);
+			}
+
+			{
+				// A file p4 diff finds unchanged that changes before the diff returns, as a trigger after it changes it, isn't validated.
+				DMibTestPath("ChangedAfterDiff");
+				co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"Unchanged.cpp", "int g_A;\n"}}, CStr("Add a file"));
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Path = Repo.m_Path / "Unchanged.cpp"]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Sync(Path);
+							Client.f_OpenForEdit(Path);
+						}
+						% "Failed to open the file"
+					)
+				;
+				CStr Script = fWriteScript("ChangeAfterDiff.sh", "printf 'int g_B;\\n' >> '{}'\nexit 0\n"_f << (Repo.m_Path / "Unchanged.cpp"));
+				co_await fSetTriggers("Triggers:\n\tChangeAfterDiff command post-user-diff \"%quote%{}%quote% %quote%{}%quote%\"\n"_f << Repo.m_Shell << Script);
+				auto Result = co_await fRun({"validate", "--staged"});
+				co_await fSetTriggers("Triggers:\n");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Path = Repo.m_Path / "Unchanged.cpp"]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Revert(Path);
+						}
+						% "Failed to revert the file"
+					)
+				;
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Unchanged.cpp: not validated: it changed during validation"), >=, 0);
+			}
+
+			{
+				// A file opened for add is read as the files compared are, so one that changes before the diff returns isn't validated.
+				DMibTestPath("AddedChangedAfterDiff");
+				CStr Path = Repo.m_Path / "AddedLater.cpp";
+				Repo.f_Write("AddedLater.cpp", "int g_A;\n");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Path]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Add(Path);
+						}
+						% "Failed to add the file"
+					)
+				;
+				CStr Script = fWriteScript("ChangeAddedAfterDiff.sh", "printf 'int  g_B;\\n' >> '{}'\nexit 0\n"_f << Path);
+				co_await fSetTriggers("Triggers:\n\tChangeAddedAfterDiff command post-user-diff \"%quote%{}%quote% %quote%{}%quote%\"\n"_f << Repo.m_Shell << Script);
+				auto Result = co_await fRun({"validate", "--staged"});
+				co_await fSetTriggers("Triggers:\n");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Path]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Revert(Path);
+						}
+						% "Failed to revert the file"
+					)
+				;
+				CFile::fs_DeleteFile(Path);
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("AddedLater.cpp: not validated: it changed during validation"), >=, 0);
+				DMibExpect(Output.f_Find("AddedLater.cpp:2:"), <, 0);
+			}
+
+			{
+				// A file opened for edit that the workspace no longer has isn't validated, and fails the run, where one opened for
+				// delete has no lines.
+				DMibTestPath("MissingOpened");
+				// A binary file opened and missing too isn't validated at all.
+				co_await Server
+					(
+						&NPerforce::CPerforceTestServer::f_SubmitFiles
+						, CStr("//Streams/Main")
+						, TCVector<CPerforceFile>{{"Missing.cpp", "int g_A;\n"}, {"MissingBinary.cpp", "int g_B;\n"}}
+						, CStr("Add the files")
+					)
+				;
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Path = Repo.m_Path / "Missing.cpp", BinaryPath = Repo.m_Path / "MissingBinary.cpp"]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Sync(Path);
+							Client.f_Sync(BinaryPath);
+							Client.f_OpenForEdit(Path);
+							Client.f_OpenForEdit(BinaryPath, "binary");
+							CFile::fs_DeleteFile(Path);
+							CFile::fs_DeleteFile(BinaryPath);
+						}
+						% "Failed to open the files"
+					)
+				;
+				auto Result = co_await fRun({"validate", "--staged"});
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Path = Repo.m_Path / "Missing.cpp", BinaryPath = Repo.m_Path / "MissingBinary.cpp"]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Revert(Path);
+							Client.f_Revert(BinaryPath);
+						}
+						% "Failed to revert the files"
+					)
+				;
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Missing.cpp: not validated: it is opened but missing from the workspace"), >=, 0);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("MissingBinary.cpp: not validated"), <, 0);
+			}
+
+			{
+				// The revision the workspace has is text, whatever the head's type is.
+				DMibTestPath("BaseRetyped");
+				auto Result = co_await fRun({"validate", "--base", "@0"});
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Retyped.cpp:1:"), >=, 0);
+			}
+
+			{
+				// A binary revision at the changelist is neither printed, which a trigger refuses, nor compared with: the text after
+				// it is new.
+				DMibTestPath("BaseBinaryAtBase");
+				CStr Script = fWriteScript("RefusePrint.sh", "case \"$*\" in\n*Became.cpp@*) echo \"Refused\"; exit 1;;\nesac\nexit 0\n");
+				co_await fSetTriggers("Triggers:\n" + fTrigger("RefusePrint", "print", Script));
+				auto Result = co_await fRun({"validate", "--base", CStr("@{}"_f << BinaryChangelist)});
+				co_await fSetTriggers("Triggers:\n");
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("Refused"), <, 0);
+				DMibExpect(Output.f_Find("Became.cpp:1:"), >=, 0);
+				DMibExpect(Output.f_Find("Later.cpp:1:"), >=, 0);
+
+				// A file is validated once, however many of its revisions are after the base.
+				DMibExpect(Output.f_Find("Became.cpp:1:"), ==, Output.f_FindReverse("Became.cpp:1:"));
+
+				// The revision the workspace has is validated, not the workspace's file, which holds another line in front.
+				DMibExpect(Output.f_Find("LocalChange.cpp:2:"), >=, 0);
+				DMibExpect(Output.f_Find("LocalChange.cpp:1:"), <, 0);
+
+				// p4 diff2 numbers the lines by their LFs: the one whose lone CRs end the formatter's lines holds them all.
+				DMibExpect(Output.f_Find("MacBase.cpp:2:"), >=, 0);
+			}
+
+			{
+				// A workspace whose revision is from before the base has no change after it, whatever the depot has after it.
+				DMibTestPath("BaseHaveBeforeBase");
+				auto Result = co_await fRun({"validate", "--base", CStr("@{}"_f << BinaryChangelist)});
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Behind.cpp"), <, 0);
+			}
+
+			{
+				// A revision collapses the keywords its own type expands: the later one is text, whose '$Id: ...' is its own.
+				DMibTestPath("BaseRekeyed");
+				auto Result = co_await fRun({"validate", "--base", CStr("@{}"_f << BinaryChangelist)});
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Rekeyed.cpp:1:"), >=, 0);
+			}
+
+			{
+				// The depot's revisions are compared without their keywords expanded, which differ between the two.
+				DMibTestPath("BaseKeywords");
+				auto Result = co_await fRun({"validate", "--base", CStr("@{}"_f << BinaryChangelist)});
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Keyword.cpp:1:"), <, 0);
+			}
+
+#ifndef DPlatformFamily_Windows
+			{
+				// The revision the workspace has is validated, whatever the workspace's file has become since: a symbolic link here.
+				DMibTestPath("BaseLinkedInWorkspace");
+				CStr Path = Repo.m_Path / "Later.cpp";
+				CFile::fs_WriteStringToFile(Repo.m_Root / "LinkTarget.cpp", "int g_Target;\n", false);
+				CFile::fs_MakeFileWritable(Path);
+				CFile::fs_DeleteFile(Path);
+				CFile::fs_CreateSymbolicLink(Repo.m_Root / "LinkTarget.cpp", Path, EFileAttrib_File, ESymbolicLinkFlag_None);
+				auto Result = co_await fRun({"validate", "--base", CStr("@{}"_f << BinaryChangelist)});
+				CFile::fs_DeleteFile(Path);
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Later.cpp:1:"), >=, 0);
+			}
+#endif
+
+			{
+				// A file changed after the base that the workspace has no revision of, synced to #none with a file of its own in its
+				// place, has no change in it, which the other files' don't depend on.
+				DMibTestPath("BaseUnsynced");
+				CStr Path = Repo.m_Path / "Later.cpp";
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Path]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Sync(Path + "#none");
+						}
+						% "Failed to sync the file to #none"
+					)
+				;
+				Repo.f_Write("Later.cpp", "int  g_Local;\n");
+				auto Result = co_await fRun({"validate", "--base", CStr("@{}"_f << BinaryChangelist)});
+				CFile::fs_DeleteFile(Path);
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("Later.cpp:"), <, 0);
+				DMibExpect(Output.f_Find("Became.cpp:1:"), >=, 0);
+			}
+
+			{
+				// With nothing else opened, a file opened but missing from the workspace leaves no file for the formatter, and the
+				// summary still counts the file it couldn't validate.
+				DMibTestPath("MissingOpenedAlone");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Workspace = Repo.m_Path]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Revert(Workspace / "...");
+							Client.f_OpenForEdit(Workspace / "Blank.cpp");
+							CFile::fs_DeleteFile(Workspace / "Blank.cpp");
+						}
+						% "Failed to open only a missing file"
+					)
+				;
+				auto Result = co_await fRun({"validate", "--staged", "--summary"});
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Path = Repo.m_Path / "Blank.cpp"]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Revert(Path);
+						}
+						% "Failed to revert the file"
+					)
+				;
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("Blank.cpp: not validated: it is opened but missing from the workspace"), >=, 0);
+				DMibExpect(Output.f_Find(" line length violation(s), 1 unanalyzable."), >=, 0);
+			}
+
+			co_return {};
+		};
+
+		// A Unicode server's 'unicode' files, which p4 writes in the workspace in the charset its settings select, and prints in
+		// UTF-8.
+		DMibTestSuite("PerforceRootCharsets") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing the charsets of a Perforce root's workspace in mib validate");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of the charsets of a Perforce root: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_StartUnicode, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			auto AdminConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr());
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [AdminConnection]()
+					{
+						NPerforce::CPerforceClientThrow Client(AdminConnection);
+						Client.f_Login(CStr());
+						Client.f_SetTypeMap({"unicode //Streams/Main/Latin.txt", "unicode //Streams/Main/Wide.txt", "unicode //Streams/Main/NulChar.txt"});
+					}
+					% "Failed to set the type map"
+				)
+			;
+
+			// A line too long already, accented, and another added after it.
+			CStr LongLine = fg_Repeat("x", 200);
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			CStr Text = LongLine + " caf\u00e9\n";
+
+			// A first line of U+0101, whose UTF-16 has no NUL byte where the audit looks for one, before a line that becomes a U+0000.
+			CStr NulFirstLine = fg_Repeat("\u0101", 3999);
+
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"Latin.txt", Text}, {"Wide.txt", Text}, {"NulChar.txt", NulFirstLine + "\na\n b\n"}}
+					, CStr("Add the sources")
+				)
+			;
+
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+
+			// Each file synced and opened in its own charset.
+			struct CFileCharset
+			{
+				CStr m_File;
+				CStr m_Charset;
+			};
+
+			for (auto const &FileCharset : TCVector<CFileCharset>{{"Latin.txt", "iso8859-1"}, {"Wide.txt", "utf16le"}})
+			{
+				auto FileConnection = Connection;
+				FileConnection.m_Charset = FileCharset.m_Charset;
+				FileConnection.m_CommandCharset = CStr("utf8");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [FileConnection, Path = Repo.m_Path / FileCharset.m_File]()
+						{
+							NPerforce::CPerforceClientThrow Client(FileConnection);
+							Client.f_Login(CStr());
+							Client.f_Sync(Path);
+							Client.f_OpenForEdit(Path);
+						}
+						% "Failed to sync the test workspace"
+					)
+				;
+			}
+
+			CUStr Changed = CStr(Text + LongLine + "\n");
+			{
+				NContainer::CByteVector Latin;
+				for (umint iChar = 0; iChar < Changed.f_GetLen(); ++iChar)
+					Latin.f_Insert(uint8(Changed[iChar]));
+
+				CFile::fs_WriteFile(Repo.m_Path / "Latin.txt", Latin);
+				CFile::fs_WriteFile(Repo.m_Path / "Wide.txt", fg_EncodeUTF16(Text + LongLine + "\n", EEndian_Little));
+			}
+
+			CStr Settings = "P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port;
+			Repo.f_MakePerforceRoot(Settings + "P4CHARSET=iso8859-1\n");
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			auto fRun = [&](TCVector<CStr> _Params)
+				{
+					_Params.f_Insert
+						(
+							{
+								"--skip-update"
+								, "--no-color"
+								, "--build-system"
+								, Repo.m_Path / "Test.MBuildSystem"
+								, "--output-directory"
+								, Repo.m_Root / "output"
+								, "--no-use-user-settings"
+								, "--no-use-cached-environment"
+							}
+						)
+					;
+
+					return Repo.f_Tool(fg_Move(_Params), true);
+				}
+			;
+
+			{
+				// The workspace's file is in ISO 8859-1, which the unchanged line is the same text in.
+				DMibTestPath("Latin1");
+				auto Result = co_await fRun({"validate", "--staged"});
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("Latin.txt:2:"), >=, 0);
+				DMibExpect(Output.f_Find("Latin.txt:1:"), <, 0);
+			}
+
+			{
+				// The workspace's file is in UTF-16 without a signature. The one in ISO 8859-1 is reverted, which p4 can't read in
+				// that charset.
+				DMibTestPath("UTF16LE");
+				auto RevertConnection = Connection;
+				RevertConnection.m_Charset = "iso8859-1";
+				RevertConnection.m_CommandCharset = CStr("utf8");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [RevertConnection, Path = Repo.m_Path / "Latin.txt"]()
+						{
+							NPerforce::CPerforceClientThrow Client(RevertConnection);
+							Client.f_Login(CStr());
+							Client.f_Revert(Path);
+						}
+						% "Failed to revert the file in ISO 8859-1"
+					)
+				;
+
+				Repo.f_Write(".p4config", Settings + "P4CHARSET=utf16le\nP4COMMANDCHARSET=utf8\n");
+				auto Result = co_await fRun({"validate", "--staged"});
+				CStr Output = Result.f_GetCombinedOut();
+				// Read as the audit reads it, which takes UTF-16 without a signature, whose NULs a plain read sees, for binary.
+				DMibExpect(Output.f_Find("could not be validated"), <, 0);
+				DMibExpect(Output.f_Find("Wide.txt:"), <, 0);
+			}
+
+			{
+				// The workspace's file is in UTF-16 big endian with its signature, which p4 compares converted to UTF-8: its lines are
+				// those of its text as the audit reads it, its U+0000 a space, which doesn't end the text. The file in UTF-16 without a
+				// signature is reverted, which p4 can't read in that charset.
+				DMibTestPath("UTF16BEWithNul");
+				auto RevertConnection = Connection;
+				RevertConnection.m_Charset = "utf16le";
+				RevertConnection.m_CommandCharset = CStr("utf8");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [RevertConnection, Path = Repo.m_Path / "Wide.txt"]()
+						{
+							NPerforce::CPerforceClientThrow Client(RevertConnection);
+							Client.f_Login(CStr());
+							Client.f_Revert(Path);
+						}
+						% "Failed to revert the file in UTF-16 without a signature"
+					)
+				;
+
+				auto NulConnection = Connection;
+				NulConnection.m_Charset = "utf16be-bom";
+				NulConnection.m_CommandCharset = CStr("utf8");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [NulConnection, Path = Repo.m_Path / "NulChar.txt"]()
+						{
+							NPerforce::CPerforceClientThrow Client(NulConnection);
+							Client.f_Login(CStr());
+							Client.f_Sync(Path);
+							Client.f_OpenForEdit(Path);
+						}
+						% "Failed to open the file in UTF-16 big endian"
+					)
+				;
+
+				// Changed in the workspace: its third line a U+0000 and a b, and a line added after it.
+				auto Wide = fg_EncodeUTF16("\uFEFF" + NulFirstLine + "\na\n", EEndian_Big);
+				Wide.f_Insert(uint8(0));
+				Wide.f_Insert(uint8(0));
+				Wide.f_Insert(fg_EncodeUTF16("b\n" + LongLine + "\n", EEndian_Big));
+
+				CFile::fs_WriteFile(Repo.m_Path / "NulChar.txt", Wide);
+
+				Repo.f_Write(".p4config", Settings + "P4CHARSET=utf16be-bom\nP4COMMANDCHARSET=utf8\n");
+				auto Result = co_await fRun({"validate", "--staged"});
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("could not be validated"), <, 0);
+				DMibExpect(Output.f_Find("NulChar.txt:4:"), >=, 0);
+			}
+
+			co_return {};
+		};
+
+		// A changelist beyond 32 bits, which a server allows with sys.types.allow64, after a base below them.
+		DMibTestSuite("PerforceRoot64BitChangelists") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing 64-bit changelists in mib validate");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of 64-bit changelists: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			co_await Server(&NPerforce::CPerforceTestServer::f_SetConfigurable, CStr("sys.types.allow64"), CStr("1"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_SetCounter, CStr("change"), CStr("100"));
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			int64 BaseChangelist = co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"Big.cpp", "int g_A;\n"}}
+					, CStr("Add a file")
+				)
+			;
+
+			// The next changelist is a few below the base in its low 32 bits.
+			co_await Server(&NPerforce::CPerforceTestServer::f_SetCounter, CStr("change"), CStr::fs_ToStr((int64(1) << 32) + BaseChangelist - 10));
+			int64 Changelist = co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"Big.cpp", "int g_A;\nint  g_B;\n"}}
+					, CStr("Add a line")
+				)
+			;
+
+			DMibAssert(Changelist, >, int64(1) << 32);
+
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, Workspace = Repo.m_Path]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+					}
+					% "Failed to sync the test workspace"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			TCVector<CStr> Params =
+				{
+					"validate"
+					, "--base"
+					, "@{}"_f << BaseChangelist
+					, "--skip-update"
+					, "--no-color"
+					, "--build-system"
+					, Repo.m_Path / "Test.MBuildSystem"
+					, "--output-directory"
+					, Repo.m_Root / "output"
+					, "--no-use-user-settings"
+					, "--no-use-cached-environment"
+				}
+			;
+
+			auto Result = co_await Repo.f_Tool(fg_Move(Params), true);
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Result.f_GetCombinedOut().f_Find("Big.cpp:2:"), >=, 0);
+
+			co_return {};
+		};
+
+		// A workspace whose root p4 spells otherwise than the root is spelled, in another case on a volume that ignores case: p4
+		// diff names the files as the workspace spells them.
+		DMibTestSuite("PerforceRootSpelling") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a Perforce root spelled otherwise than its workspace");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root's spelling: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			// Only a volume that ignores case has the workspace's spelling of the root.
+			CStr WorkspaceRoot = CFile::fs_GetPath(Repo.m_Path) / CFile::fs_GetFile(Repo.m_Path).f_UpperCase();
+			if (!CFile::fs_FileExists(WorkspaceRoot, EFileAttrib_Directory))
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root's spelling: the volume distinguishes case");
+				co_return {};
+			}
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"Edited.cpp", "int g_A;\n"}}, CStr("Add a file"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), WorkspaceRoot);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, WorkspaceRoot]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(WorkspaceRoot / "...");
+						Client.f_OpenForEdit(WorkspaceRoot / "Edited.cpp");
+					}
+					% "Failed to open the file"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+			Repo.f_Write("Edited.cpp", "int g_A;\nint  g_B;\n");
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--staged"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Result.f_GetCombinedOut().f_Find("Edited.cpp:2:"), >=, 0);
+
+			co_return {};
+		};
+
+		// Two opened files that are hard links of one another share their identity, so each diff p4 gives is matched by its path, also
+		// where the workspace's root is spelled otherwise than the project's on a volume that ignores case.
+		DMibTestSuite("PerforceRootHardLinks") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing opened files of a Perforce root that are hard links");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root's hard links: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			// Only a volume that ignores case has the workspace's spelling of the root.
+			CStr WorkspaceRoot = CFile::fs_GetPath(Repo.m_Path) / CFile::fs_GetFile(Repo.m_Path).f_UpperCase();
+			if (!CFile::fs_FileExists(WorkspaceRoot, EFileAttrib_Directory))
+				WorkspaceRoot = Repo.m_Path;
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"First.cpp", "int g_A;\n"}, {"Second.cpp", "int g_A;\n"}}
+					, CStr("Add the files")
+				)
+			;
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), WorkspaceRoot);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, WorkspaceRoot]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(WorkspaceRoot / "...");
+						Client.f_OpenForEdit(WorkspaceRoot / "First.cpp");
+						Client.f_OpenForEdit(WorkspaceRoot / "Second.cpp");
+					}
+					% "Failed to open the files"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+			Repo.f_Write("First.cpp", "int g_A;\nint  g_B;\n");
+			CFile::fs_DeleteFile(Repo.m_Path / "Second.cpp");
+			CFile::fs_CreateHardLink(Repo.m_Path / "First.cpp", Repo.m_Path / "Second.cpp");
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--staged"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Output.f_Find("First.cpp:2:"), >=, 0);
+			DMibExpect(Output.f_Find("Second.cpp:2:"), >=, 0);
+
+			co_return {};
+		};
+
+		// --base compares the revisions of two text types, as text and utf8, as text, and a file added since has all of its lines,
+		// without comparing again.
+		DMibTestSuite("PerforceRootTextTypes") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing the revisions of two text types in a Perforce root");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root's text types: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			int64 FirstChangelist = co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"Retyped.cpp", "int g_A;\nint g_B;\n"}}
+					, CStr("Add the file")
+				)
+			;
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			auto AdminConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr());
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, AdminConnection, Workspace = Repo.m_Path]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+						Client.f_Delete(Workspace / "Retyped.cpp");
+						Client.f_Submit(Workspace / "Retyped.cpp", "Delete the text file");
+
+						NPerforce::CPerforceClientThrow Admin(AdminConnection);
+						Admin.f_Login(CStr());
+						Admin.f_SetTypeMap({"utf8 //Streams/Main/Retyped.cpp"});
+
+						CFile::fs_WriteStringToFile(Workspace / "Retyped.cpp", "int g_A;\nint  g_B;\n", false);
+						Client.f_Add(Workspace / "Retyped.cpp");
+						Client.f_Submit(Workspace / "Retyped.cpp", "Add it as utf8");
+						CFile::fs_WriteStringToFile(Workspace / "Added.cpp", "int  g_C;\n", false);
+						Client.f_Add(Workspace / "Added.cpp");
+						Client.f_Submit(Workspace / "Added.cpp", "Add a file");
+					}
+					% "Failed to set up the test workspace"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			CStr ServerLog = Repo.m_Root / "Perforce/p4d/log";
+			umint nLogged = CFile::fs_ReadStringFromFile(ServerLog, true).f_GetLen();
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--base"
+						, CStr("@{}"_f << FirstChangelist)
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Output.f_Find("Retyped.cpp:2:"), >=, 0);
+			DMibExpect(Output.f_Find("Retyped.cpp:1:"), <, 0);
+			DMibExpect(Output.f_Find("Added.cpp:1:"), >=, 0);
+
+			// Only the retyped file is compared again as text.
+			CStr Logged = CFile::fs_ReadStringFromFile(ServerLog, true).f_Extract(nLogged);
+			umint nTextDiffs = 0;
+			for (aint iFound = Logged.f_Find("'user-diff2 -t "); iFound >= 0; iFound = Logged.f_Find(iFound + 1, "'user-diff2 -t "))
+				++nTextDiffs;
+			DMibExpect(nTextDiffs, ==, 1u);
+
+			co_return {};
+		};
+
+		// A binary file opened for edit as text, which p4 diff compares with its binary revision as text, has all of its lines
+		// changed for --staged, as it has for --base once submitted: one at its head revision, one at an older revision, and one
+		// moved, which p4 diff compares with the revision of the file it is moved from.
+		DMibTestSuite("PerforceRootRetypedToText") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a binary file of a Perforce root opened for edit as text");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a binary file opened for edit as text: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("OtherWork"), CStr("//Streams/Main"), Repo.m_Root / "Other");
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			auto OtherConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("OtherWork"));
+			auto AdminConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr());
+
+			CStr LongLine = fg_Repeat("x", 200);
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, OtherConnection, AdminConnection, Workspace = Repo.m_Path, OtherWorkspace = Repo.m_Root / "Other", LongLine]()
+					{
+						NPerforce::CPerforceClientThrow Admin(AdminConnection);
+						Admin.f_Login(CStr());
+						Admin.f_SetTypeMap({"binary //Streams/Main/Retyped.txt", "binary //Streams/Main/Older.txt", "binary //Streams/Main/Moved.txt"});
+
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						for (auto pName : {"Retyped.txt", "Older.txt", "Moved.txt"})
+						{
+							CFile::fs_WriteStringToFile(Workspace / pName, "a\n" + LongLine + "\n", false);
+							Client.f_Add(Workspace / pName);
+							Client.f_Submit(Workspace / pName, "Add the file as binary");
+						}
+
+						Client.f_OpenForEdit(Workspace / "Older.txt");
+						CFile::fs_WriteStringToFile(Workspace / "Older.txt", "c\n" + LongLine + "\n", false);
+						Client.f_Submit(Workspace / "Older.txt", "Change the file");
+						Client.f_Sync(Workspace / "Older.txt#1");
+
+						for (auto pName : {"Retyped.txt", "Older.txt", "Moved.txt"})
+							Client.f_OpenForEdit(Workspace / pName, "text");
+
+						Client.f_Move(Workspace / "Moved.txt", Workspace / "MovedTo.txt");
+						for (auto pName : {"Retyped.txt", "Older.txt", "MovedTo.txt"})
+							CFile::fs_WriteStringToFile(Workspace / pName, NPerforce::CPerforceTestServer::fs_WorkspaceText("b\n" + LongLine + "\n"), false);
+
+						// A text file moved, whose source another workspace makes binary, which a sync of the source alone gives the
+						// workspace: p4 diff still compares the moved file with the text revision it was moved from, whose changed lines
+						// alone are checked, not with the binary one the workspace now has of the source.
+						CFile::fs_WriteStringToFile(Workspace / "Synced.txt", NPerforce::CPerforceTestServer::fs_WorkspaceText("a\n" + LongLine + "\n"), false);
+						Client.f_Add(Workspace / "Synced.txt");
+						Client.f_Submit(Workspace / "Synced.txt", "Add the file as text");
+						Client.f_OpenForEdit(Workspace / "Synced.txt");
+						Client.f_Move(Workspace / "Synced.txt", Workspace / "SyncedTo.txt");
+						CFile::fs_WriteStringToFile(Workspace / "SyncedTo.txt", NPerforce::CPerforceTestServer::fs_WorkspaceText("b\n" + LongLine + "\n"), false);
+
+						NPerforce::CPerforceClientThrow Other(OtherConnection);
+						Other.f_Login(CStr());
+						Other.f_Sync(OtherWorkspace / "...");
+						Other.f_OpenForEdit(OtherWorkspace / "Synced.txt", "binary");
+						Other.f_Submit(OtherWorkspace / "Synced.txt", "Make the file binary");
+						Client.f_NoThrow().f_Sync("//Streams/Main/Synced.txt");
+					}
+					% "Failed to set up the test workspace"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--staged"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Output.f_Find("Retyped.txt:2:"), >=, 0);
+			DMibExpect(Output.f_Find("Older.txt:2:"), >=, 0);
+			DMibExpect(Output.f_Find("MovedTo.txt:2:"), >=, 0);
+			DMibExpect(Output.f_Find("SyncedTo.txt:2:"), <, 0);
+
+			co_return {};
+		};
+
+		// A file whose resolve, which a sync scheduled, is done has the lines of its changes from the revision the workspace has,
+		// which p4 diff compares with, not those that the resolve merged in from it.
+		DMibTestSuite("PerforceRootResolvedAfterSync") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a file of a Perforce root resolved after a sync");
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a file resolved after a sync: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"Merged.txt", "a\nb\nc\nd\n"}}, CStr("Add a file"));
+
+			CStr LongLine = fg_Repeat("x", 200);
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, Workspace = Repo.m_Path, LongLine]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+						Client.f_OpenForEdit(Workspace / "Merged.txt");
+						CFile::fs_WriteStringToFile(Workspace / "Merged.txt", NPerforce::CPerforceTestServer::fs_WorkspaceText("a\n" + LongLine + "\nb\nc\nd\n"), false);
+					}
+					% "Failed to set up the test workspace"
+				)
+			;
+
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"Merged.txt", "a\nb\nc\nd\n" + LongLine + "\n"}}
+					, CStr("Add a line")
+				)
+			;
+
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, Workspace = Repo.m_Path]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+						Client.f_ResolveAutomatic(Workspace / "Merged.txt", 0, true);
+					}
+					% "Failed to resolve the file"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--staged"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Output.f_Find("Merged.txt:2:"), >=, 0);
+			DMibExpect(Output.f_Find("Merged.txt:6:"), <, 0);
+
+			co_return {};
+		};
+
+		// Files whose names differ only in their whitespace are other files, each validated with its own diff.
+		DMibTestSuite("PerforceRootWhitespaceNames") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing files of a Perforce root whose names differ in whitespace");
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of names that differ in whitespace: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"Spaced.txt", "a\nb\n"}, {" Spaced.txt", "a\nb\n"}}
+					, CStr("Add the files")
+				)
+			;
+
+			CStr LongLine = fg_Repeat("x", 200);
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, Workspace = Repo.m_Path, LongLine]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+						Client.f_OpenForEdit(Workspace / "Spaced.txt");
+						Client.f_OpenForEdit(Workspace / " Spaced.txt");
+						CFile::fs_WriteStringToFile(Workspace / "Spaced.txt", NPerforce::CPerforceTestServer::fs_WorkspaceText(LongLine + "\nb\n"), false);
+						CFile::fs_WriteStringToFile(Workspace / " Spaced.txt", NPerforce::CPerforceTestServer::fs_WorkspaceText("a\n" + LongLine + "\n"), false);
+					}
+					% "Failed to set up the test workspace"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--staged"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Output.f_Find("/Spaced.txt:1:"), >=, 0);
+			DMibExpect(Output.f_Find("/ Spaced.txt:2:"), >=, 0);
+			DMibExpect(Output.f_Find("/Spaced.txt:2:"), <, 0);
+			DMibExpect(Output.f_Find("/ Spaced.txt:1:"), <, 0);
+
+			co_return {};
+		};
+
+		// A project that reaches its workspace's root through another spelling, as /tmp and /private/tmp spell one directory on macOS,
+		// is validated with the paths as the workspace spells them, which p4 tells the workspace's paths by, and reports them as the
+		// project spells them. The workspace's root is spelled with a separator at its end.
+		DMibTestSuite("PerforceRootAliasedWorkspace") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a Perforce root reached through another spelling of its workspace's root");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root under another spelling of its workspace's root: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			// The workspace's root is a symbolic link to the project, which spells the same directory otherwise.
+			CStr Alias = Repo.m_Root / "Alias";
+			CFile::fs_CreateSymbolicLink(Repo.m_Path, Alias, EFileAttrib_Directory, ESymbolicLinkFlag_None);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Alias + "/");
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<NPerforce::CPerforceTestServer::CFile>{{"Long.txt", "a\n"}}
+					, CStr("Add the files")
+				)
+			;
+
+			CStr LongLine = fg_Repeat("x", 200);
+
+			// UTF-16 little endian with its signature, whose NULs a plain read sees, typed text, which p4 compares as its bytes.
+			auto fWideText = [&](CStr const &_Text)
+				{
+					return fg_EncodeUTF16("\uFEFF" + _Text, EEndian_Little);
+				}
+			;
+
+			// Each U+0A15 of the first line holds an LF byte.
+			auto fRawText = [&](CStr const &_Lines)
+				{
+					return fWideText(fg_Repeat("\u0A15", 3999) + "\n" + _Lines);
+				}
+			;
+
+			// A line added, a line deleted, and a U+0A15 deleted from a line that stays, which p4 sees as a line of its deleted.
+			struct CWideFile
+			{
+				CStr m_Name;
+				NContainer::CByteVector m_Depot;
+				NContainer::CByteVector m_Workspace;
+			};
+
+			TCVector<CWideFile> WideFiles =
+				{
+					{"Widened.txt", fWideText("a\n"), fWideText("a\n" + LongLine + "\n")}
+					, {"Shrunk.txt", fWideText("a\n" + LongLine + "\nb\n"), fWideText("a\n" + LongLine + "\n")}
+					, {"Merged.txt", fWideText("a\n" + LongLine + "\u0A15\u0A15\n"), fWideText("a\n" + LongLine + "\u0A15\n")}
+				}
+			;
+
+			auto AdminConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr());
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			int64 BaseChangelist = co_await
+				(
+					g_Dispatch(fg_BlockingActor()) / [AdminConnection, Connection, Alias, Raw = fRawText("a\n"), Changed = fRawText("a\n" + LongLine + "\n"), WideFiles]() -> int64
+					{
+						{
+							NPerforce::CPerforceClientThrow Admin(AdminConnection);
+							Admin.f_Login(CStr());
+							TCVector<CStr> TypeMap = {"text //Streams/Main/Raw.txt", "text //Streams/Main/RawBase.txt"};
+							for (auto const &WideFile : WideFiles)
+								TypeMap.f_Insert("text //Streams/Main/" + WideFile.m_Name);
+							Admin.f_SetTypeMap(TypeMap);
+						}
+
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Alias / "...");
+						Client.f_OpenForEdit(Alias / "Long.txt");
+
+						CFile::fs_WriteFile(Raw, Alias / "Raw.txt");
+						Client.f_Add(Alias / "Raw.txt");
+						Client.f_Submit(Alias / "Raw.txt", "Add a UTF-16 file typed text");
+						Client.f_OpenForEdit(Alias / "Raw.txt");
+
+						for (auto const &WideFile : WideFiles)
+						{
+							CFile::fs_WriteFile(WideFile.m_Depot, Alias / WideFile.m_Name);
+							Client.f_Add(Alias / WideFile.m_Name);
+							Client.f_Submit(Alias / WideFile.m_Name, "Add a UTF-16 file typed text");
+							Client.f_OpenForEdit(Alias / WideFile.m_Name);
+						}
+
+						// Changed after the base.
+						CFile::fs_WriteFile(Raw, Alias / "RawBase.txt");
+						Client.f_Add(Alias / "RawBase.txt");
+						Client.f_Submit(Alias / "RawBase.txt", "Add another UTF-16 file typed text");
+						int64 BaseChangelist = Client.f_GetHeadChangelist(Alias / "...");
+						Client.f_OpenForEdit(Alias / "RawBase.txt");
+						CFile::fs_WriteFile(Changed, Alias / "RawBase.txt");
+						Client.f_Submit(Alias / "RawBase.txt", "Change the UTF-16 file");
+
+						return BaseChangelist;
+					}
+					% "Failed to set up the workspace"
+				)
+			;
+
+#ifndef DPlatformFamily_Windows
+			// A name with a backslash, opened for add, which Malterlib's file functions take for a separator, beside the file they
+			// would read in its place, which Perforce doesn't have.
+			CStr Backslashed = Repo.m_Path + "/literal\\thing.txt";
+			DMibAssertTrue(fg_WriteNativeFile(Backslashed, "a\n" + LongLine + "\n"));
+			auto RemoveBackslashed = g_OnScopeExit / [&]
+				{
+					unlink(Backslashed.f_GetStr());
+				}
+			;
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, InWorkspace = Alias + "/literal\\thing.txt"]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Add(InWorkspace);
+					}
+					% "Failed to add the file with a backslash in its name"
+				)
+			;
+			Repo.f_Write("literal/thing.txt", LongLine + "\n");
+#endif
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+			CFile::fs_MakeFileWritable(Repo.m_Path / "Long.txt");
+			Repo.f_Write("Long.txt", "a\n" + LongLine + "\n");
+			CFile::fs_MakeFileWritable(Repo.m_Path / "Raw.txt");
+			CFile::fs_WriteFile(fRawText("a\n" + LongLine + "\n"), Repo.m_Path / "Raw.txt");
+			for (auto const &WideFile : WideFiles)
+			{
+				CFile::fs_MakeFileWritable(Repo.m_Path / WideFile.m_Name);
+				CFile::fs_WriteFile(WideFile.m_Workspace, Repo.m_Path / WideFile.m_Name);
+			}
+
+			auto fRun = [&](CStr const &_Command, TCVector<CStr> _Params)
+				{
+					TCVector<CStr> Params = {_Command};
+					Params.f_Insert(fg_Move(_Params));
+					Params.f_Insert
+						(
+							{
+								"--skip-update"
+								, "--no-color"
+								, "--build-system"
+								, Repo.m_Path / "Test.MBuildSystem"
+								, "--output-directory"
+								, Repo.m_Root / "output"
+								, "--no-use-user-settings"
+								, "--no-use-cached-environment"
+							}
+						)
+					;
+
+					return Repo.f_Tool(fg_Move(Params), true);
+				}
+			;
+
+			{
+				DMibTestPath("Validate");
+				auto Result = co_await fRun("validate", {"--staged"});
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Output.f_Find("not under"), <, 0);
+				DMibExpect(Output.f_Find("Long.txt:2:"), >=, 0);
+				DMibExpect(Output.f_Find("/Alias/"), <, 0);
+
+				// Text in UTF-16 that p4 compares as its bytes has all of its lines changed, the first too, whose U+0A15 hold LF bytes.
+				DMibExpect(Output.f_Find("Raw.txt:3:"), >=, 0);
+				DMibExpect(Output.f_Find("Raw.txt:1:"), >=, 0);
+
+				// Text in UTF-16 with its signature is text, which the audit reads decoded, for all its NULs, and all of its lines are
+				// changed also where p4 sees lines deleted only.
+				DMibExpect(Output.f_Find("Widened.txt:2:"), >=, 0);
+				DMibExpect(Output.f_Find("Shrunk.txt:2:"), >=, 0);
+				DMibExpect(Output.f_Find("Merged.txt:2:"), >=, 0);
+
+#ifndef DPlatformFamily_Windows
+				// The file with a backslash in its name is reported unvalidated, and the one its name would be read as isn't read.
+				DMibExpect(Output.f_Find("literal\\thing.txt: not validated"), >=, 0);
+				DMibExpect(Output.f_Find("thing.txt:1:"), <, 0);
+#endif
+			}
+
+#ifndef DPlatformFamily_Windows
+			{
+				// The audit walks past the file with a backslash in its name and reports it unchecked.
+				DMibTestPath("Audit");
+				auto Result = co_await fRun("validate", {});
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Output.f_Find("literal\\thing.txt: not checked"), >=, 0);
+			}
+#endif
+
+			{
+				// The audit reads text in UTF-16 with its signature decoded, as --staged does, for all its NULs, also a file the
+				// configuration formats.
+				DMibTestPath("AuditWideText");
+				CFile::fs_WriteFile(fWideText("int  g_Wide;\n"), Repo.m_Path / "WideFormatted.cpp");
+				auto Result = co_await fRun("validate", {});
+				CFile::fs_DeleteFile(Repo.m_Path / "WideFormatted.cpp");
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Output.f_Find("Widened.txt:2:"), >=, 0);
+				DMibExpect(Output.f_Find("WideFormatted.cpp:1:"), >=, 0);
+			}
+
+			{
+				// Text in UTF-16 that p4 compares as its bytes has all of its lines changed after a base too.
+				DMibTestPath("ValidateBase");
+				auto Result = co_await fRun("validate", {"--base", CStr("@{}"_f << BaseChangelist)});
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				DMibExpect(Output.f_Find("RawBase.txt:1:"), >=, 0);
+				DMibExpect(Output.f_Find("RawBase.txt:3:"), >=, 0);
+			}
+
+			co_return {};
+		};
+
+		// An overlay mapping, '+//Overlay/...', added to the view of a workspace with a file opened maps a second depot file to its path,
+		// which fstat lists ahead of the one opened: --staged validates the file opened, as its action has it, whatever the other is.
+		DMibTestSuite("PerforceRootOverlayMapping") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a Perforce root whose workspace has an overlay mapping");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root with an overlay mapping: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			auto AdminConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr());
+			auto SetupConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestSetup"));
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+
+			// The file is opened for add in the primary depot, and submitted after in the overlay, which sorts first.
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [AdminConnection, SetupConnection, Connection, SetupRoot = Repo.m_Root / "Setup", Workspace = Repo.m_Path]()
+					{
+						NPerforce::CPerforceClientThrow Admin(AdminConnection);
+						Admin.f_Login(CStr());
+						Admin.f_CreateDepot("Primary", "local");
+						Admin.f_CreateDepot("Overlay", "local");
+
+						NPerforce::CPerforceClient::CClient SetupSpec;
+						SetupSpec.m_Root = SetupRoot;
+						SetupSpec.m_Description = "Submits the files.";
+						SetupSpec.m_View = {{"//Overlay/...", "//TestSetup/..."}};
+						Admin.f_SetClient("TestSetup", SetupSpec);
+
+						NPerforce::CPerforceClient::CClient WorkSpec;
+						WorkSpec.m_Root = Workspace;
+						WorkSpec.m_Description = "Overlays one depot on another.";
+						WorkSpec.m_View = {{"//Primary/...", "//TestWork/..."}};
+						Admin.f_SetClient("TestWork", WorkSpec);
+
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						CFile::fs_WriteStringToFile(Workspace / "File.cpp", "int g_A;\n", false);
+						Client.f_Add(Workspace / "File.cpp");
+
+						WorkSpec.m_View.f_Insert({"+//Overlay/...", "//TestWork/..."});
+						Admin.f_SetClient("TestWork", WorkSpec);
+
+						NPerforce::CPerforceClientThrow Setup(SetupConnection);
+						Setup.f_Login(CStr());
+						CStr Path = SetupRoot / "File.cpp";
+						CFile::fs_CreateDirectory(SetupRoot);
+						CFile::fs_WriteStringToFile(Path, "int g_A;\n", false);
+						Setup.f_Add(Path);
+						Setup.f_Submit(Path, "Add the file");
+					}
+					% "Failed to set up the workspace"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+			Repo.f_Write("File.cpp", "int g_A;\nint  g_B;\n");
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--staged"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Output.f_Find("File.cpp:2:"), >=, 0);
+			DMibExpect(Output.f_Find("File.cpp:1:"), <, 0);
+
+			co_return {};
+		};
+
+		// A project reached through a symbolic link to a directory below its workspace's root, which p4 would take for a directory of
+		// the link's name, is validated as the workspace spells the directory. Windows resolves no link of the project's path.
+		DMibTestSuite("PerforceRootLinkedProject") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a Perforce root reached through a link to a directory of its workspace");
+#ifdef DPlatformFamily_Windows
+			constexpr bool c_bResolvesLinks = false;
+#else
+			constexpr bool c_bResolvesLinks = true;
+#endif
+			if (!c_bResolvesLinks || NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root reached through a link: links aren't resolved, or p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			// The workspace's root is the project's, which the project is run through a link to from outside the workspace. The link
+			// leads through a .. after another link, which the kernel resolves after that link, as Away/Sub/.. is Away.
+			CStr Link = Repo.m_Root / "Link";
+			CFile::fs_CreateDirectory(Repo.m_Root / "Away/Sub");
+			CFile::fs_CreateSymbolicLink(Repo.m_Root / "Away/Sub", Repo.m_Root / "Inner", EFileAttrib_Directory, ESymbolicLinkFlag_None);
+			CFile::fs_CreateSymbolicLink("Inner/../../" + CFile::fs_GetFile(Repo.m_Path), Link, EFileAttrib_Directory, ESymbolicLinkFlag_Relative);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<NPerforce::CPerforceTestServer::CFile>{{"Long.txt", "a\n"}}
+					, CStr("Add the file")
+				)
+			;
+
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, Path = Repo.m_Path]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Path / "...");
+						Client.f_OpenForEdit(Path / "Long.txt");
+					}
+					% "Failed to open the file"
+				)
+			;
+
+			CStr LongLine = fg_Repeat("x", 200);
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+			CFile::fs_MakeFileWritable(Repo.m_Path / "Long.txt");
+			Repo.f_Write("Long.txt", "a\n" + LongLine + "\n");
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--staged"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Link / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Output.f_Find("Long.txt:2:"), >=, 0);
+
+			// The audit walks the root the link names, which bounds the walk.
+			auto Audit = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Link / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			CStr AuditOutput = Audit.f_GetCombinedOut();
+			DMibExpect(Audit.m_ExitCode, ==, 1u);
+			DMibExpect(AuditOutput.f_Find("Long.txt:2:"), >=, 0);
+			DMibExpect(AuditOutput.f_Find("Refusing"), <, 0);
+
+			co_return {};
+		};
+
+		// A project reached through a symbolic link below its workspace's root, whose view maps the link's name and not the directory it
+		// leads to, is validated as the project spells it. Windows resolves no link of the project's path.
+		DMibTestSuite("PerforceRootLinkMappedByName") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a Perforce root reached through a link its workspace's view maps");
+#ifdef DPlatformFamily_Windows
+			constexpr bool c_bResolvesLinks = false;
+#else
+			constexpr bool c_bResolvesLinks = true;
+#endif
+			if (!c_bResolvesLinks || NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root reached through a mapped link: links aren't resolved, or p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			auto AdminConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr());
+			auto SetupConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestSetup"));
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+
+			// The workspace's root holds the project and a link to it, Linked, which is all the view maps.
+			CStr Link = Repo.m_Root / "Linked";
+			CFile::fs_CreateSymbolicLink(CFile::fs_GetFile(Repo.m_Path), Link, EFileAttrib_Directory, ESymbolicLinkFlag_Relative);
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [AdminConnection, SetupConnection, Connection, SetupRoot = Repo.m_Root / "Setup", Root = Repo.m_Root, Link]()
+					{
+						NPerforce::CPerforceClientThrow Admin(AdminConnection);
+						Admin.f_Login(CStr());
+						Admin.f_CreateDepot("Depot", "local");
+
+						NPerforce::CPerforceClient::CClient SetupSpec;
+						SetupSpec.m_Root = SetupRoot;
+						SetupSpec.m_Description = "Submits the files.";
+						SetupSpec.m_View = {{"//Depot/...", "//TestSetup/..."}};
+						Admin.f_SetClient("TestSetup", SetupSpec);
+
+						NPerforce::CPerforceClient::CClient WorkSpec;
+						WorkSpec.m_Root = Root;
+						WorkSpec.m_Description = "Maps the project by the name of a link to it.";
+						WorkSpec.m_View = {{"//Depot/...", "//TestWork/Linked/..."}};
+						Admin.f_SetClient("TestWork", WorkSpec);
+
+						NPerforce::CPerforceClientThrow Setup(SetupConnection);
+						Setup.f_Login(CStr());
+						CFile::fs_CreateDirectory(SetupRoot);
+						CFile::fs_WriteStringToFile(SetupRoot / "Long.txt", "a\n", false);
+						Setup.f_Add(SetupRoot / "Long.txt");
+						Setup.f_Submit(SetupRoot / "Long.txt", "Add the file");
+
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Link / "...");
+						Client.f_OpenForEdit(Link / "Long.txt");
+					}
+					% "Failed to set up the workspace"
+				)
+			;
+
+			CStr LongLine = fg_Repeat("x", 200);
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+			CFile::fs_MakeFileWritable(Repo.m_Path / "Long.txt");
+			Repo.f_Write("Long.txt", "a\n" + LongLine + "\n");
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"validate"
+						, "--staged"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Link / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, ==, 1u);
+			DMibExpect(Output.f_Find("Long.txt:2:"), >=, 0);
+
+			co_return {};
+		};
+
+		// p4 diff compares a unicode file as p4's read of it in UTF-8, which converts its charset, leaves its signature out and turns
+		// the line ends of a workspace whose LineEnd is mac, lone CRs, into LFs: the formatter ends its lines at the CRs, and the
+		// lines p4 changes are mapped to them by their count.
+		DMibTestSuite("PerforceRootMacLineEnds") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a unicode file of a Perforce root whose workspace ends lines in CR");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root's CR line ends: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_StartUnicode, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			auto AdminConnection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr());
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [AdminConnection, Workspace = Repo.m_Path]()
+					{
+						NPerforce::CPerforceClientThrow Client(AdminConnection);
+						Client.f_Login(CStr());
+						Client.f_SetTypeMap({"unicode //Streams/Main/Mac.txt", "unicode //Streams/Main/Bom.txt", "unicode //Streams/Main/Mixed.txt"});
+
+						NPerforce::CPerforceClient::CClient Spec;
+						Spec.m_Root = Workspace;
+						Spec.m_Description = "A workspace whose lines end in CR.";
+						Spec.m_LineEndings = "mac";
+						Spec.m_Stream = "//Streams/Main";
+						Client.f_SetClient("TestWork", Spec);
+					}
+					% "Failed to set up the server"
+				)
+			;
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"Mac.txt", "caf\u00e9\nb\n"}, {"Bom.txt", "caf\u00e9\nb\n"}, {"Mixed.txt", "caf\u00e9\n\nb\n"}}
+					, CStr("Add the files")
+				)
+			;
+
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			auto fOpen = [&](CStr const &_Charset, CStr const &_File) -> TCUnsafeFuture<void>
+				{
+					auto FileConnection = Connection;
+					FileConnection.m_Charset = _Charset;
+					FileConnection.m_CommandCharset = CStr("utf8");
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor())
+							/ [FileConnection, Path = Repo.m_Path / _File]()
+							{
+								NPerforce::CPerforceClientThrow Client(FileConnection);
+								Client.f_Login(CStr());
+								Client.f_Sync(Path);
+								Client.f_OpenForEdit(Path);
+							}
+							% "Failed to open the file"
+						)
+					;
+
+					co_return {};
+				}
+			;
+
+			// Longer than a line may be, on the third line.
+			CStr LongLine = fg_Repeat("x", 200);
+
+			CStr Settings = "P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port;
+			Repo.f_MakePerforceRoot(Settings + "P4CHARSET=iso8859-1\n");
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			auto fWriteBytes = [&](CStr const &_File, CAnsiStr const &_Bytes)
+				{
+					NContainer::CByteVector Data;
+					Data.f_Insert((uint8 const *)_Bytes.f_GetStr(), _Bytes.f_GetLen());
+					CFile::fs_WriteFile(Data, Repo.m_Path / _File);
+				}
+			;
+
+			auto fValidate = [&]() -> TCUnsafeFuture<CStr>
+				{
+					auto Result = co_await Repo.f_Tool
+						(
+							{
+								"validate"
+								, "--staged"
+								, "--skip-update"
+								, "--no-color"
+								, "--build-system"
+								, Repo.m_Path / "Test.MBuildSystem"
+								, "--output-directory"
+								, Repo.m_Root / "output"
+								, "--no-use-user-settings"
+								, "--no-use-cached-environment"
+							}
+							, true
+						)
+					;
+					DMibExpect(Result.m_ExitCode, ==, 1u);
+
+					co_return Result.f_GetCombinedOut();
+				}
+			;
+
+			{
+				// In ISO 8859-1, which p4 converts to UTF-8, a non-ASCII character spelled otherwise there.
+				DMibTestPath("Latin1");
+				co_await fOpen("iso8859-1", "Mac.txt");
+				fWriteBytes("Mac.txt", CAnsiStr("caf\xE9\rb\r") + CAnsiStr(LongLine.f_GetStr()) + "\r");
+				CStr Output = co_await fValidate();
+				DMibExpect(Output.f_Find("Mac.txt:3:"), >=, 0);
+				DMibExpect(Output.f_Find("Mac.txt:1:"), <, 0);
+			}
+
+			{
+				// In UTF-8 with a signature, which p4 leaves out of the text it compares. The file in ISO 8859-1 is reverted, which p4
+				// can't read in that charset.
+				DMibTestPath("UTF8BOM");
+				auto RevertConnection = Connection;
+				RevertConnection.m_Charset = "iso8859-1";
+				RevertConnection.m_CommandCharset = CStr("utf8");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [RevertConnection, Path = Repo.m_Path / "Mac.txt"]()
+						{
+							NPerforce::CPerforceClientThrow Client(RevertConnection);
+							Client.f_Login(CStr());
+							Client.f_Revert(Path);
+						}
+						% "Failed to revert the file in ISO 8859-1"
+					)
+				;
+				co_await fOpen("utf8-bom", "Bom.txt");
+				Repo.f_Write(".p4config", Settings + "P4CHARSET=utf8-bom\n");
+				fWriteBytes("Bom.txt", CAnsiStr("\xEF\xBB\xBF" "caf\xC3\xA9\rb\r") + CAnsiStr(LongLine.f_GetStr()) + "\r");
+				CStr Output = co_await fValidate();
+				DMibExpect(Output.f_Find("Bom.txt:3:"), >=, 0);
+				DMibExpect(Output.f_Find("Bom.txt:1:"), <, 0);
+			}
+
+			{
+				// A CRLF among the CRs, which p4's read makes two LFs, so p4 numbers a line more in front of the changed one than
+				// the formatter does, which ends one line at the CRLF.
+				DMibTestPath("MixedLineEnds");
+				co_await fOpen("utf8-bom", "Mixed.txt");
+				fWriteBytes("Mixed.txt", CAnsiStr("\xEF\xBB\xBF" "caf\xC3\xA9\r\nb\r") + CAnsiStr(LongLine.f_GetStr()) + "\r");
+				CStr Output = co_await fValidate();
+				DMibExpect(Output.f_Find("Mixed.txt:3:"), >=, 0);
+				DMibExpect(Output.f_Find("Mixed.txt:1:"), <, 0);
+			}
 
 			co_return {};
 		};

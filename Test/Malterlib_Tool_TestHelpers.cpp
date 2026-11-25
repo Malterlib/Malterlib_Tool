@@ -5,9 +5,15 @@
 
 #include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Cryptography/UUID>
+#include <Mib/Stream/Streams/Vector>
+
+#include <Mib/Perforce/TestServer>
 
 #ifdef DPlatformFamily_Windows
 #	include <Mib/Core/PlatformSpecific/WindowsRegistry>
+#else
+#	include <fcntl.h>
+#	include <unistd.h>
 #endif
 
 namespace NMib::NTool::NTestHelpers
@@ -20,6 +26,34 @@ namespace NMib::NTool::NTestHelpers
 
 		return Result;
 	}
+
+	// The text's UTF-16 code units in the byte order given, with no signature but one the text starts with: "\uFEFF".
+	CByteVector fg_EncodeUTF16(CStr const &_Text, EEndian _Endian)
+	{
+		CWStr Units = _Text;
+		NStream::TCBinaryStreamMemory<> Stream;
+		NStream::fg_FeedEndianArrayToStream(Stream, Units.f_GetStr(), Units.f_GetLen(), _Endian);
+
+		return Stream.f_MoveVector();
+	}
+
+#ifndef DPlatformFamily_Windows
+	// Writes a file by the system's own calls, for a name the file functions would read another file by: one holding a backslash.
+	bool fg_WriteNativeFile(CStr const &_Path, CStr const &_Contents)
+	{
+		int File = open(_Path.f_GetStr(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (File < 0)
+			return false;
+
+		auto CloseFile = g_OnScopeExit / [&]
+			{
+				close(File);
+			}
+		;
+
+		return write(File, _Contents.f_GetStr(), _Contents.f_GetLen()) == ssize_t(_Contents.f_GetLen());
+	}
+#endif
 
 	CRepositoryFixture::CRepositoryFixture()
 		: m_Root(CFile::fs_GetProgramDirectory() / "MToolTests" / fg_TestGetCurrentPath().f_RemovePrefix("Malterlib/Tool/"))
@@ -132,6 +166,13 @@ namespace NMib::NTool::NTestHelpers
 		CStr Path = m_Path / _Name;
 		CFile::fs_CreateDirectoryForFile(Path);
 		CFile::fs_WriteStringToFile(Path, _Contents, false);
+	}
+
+	// Text with LF line ends, written with the line ends a Perforce workspace whose LineEnd is local has, where LF would make p4 diff
+	// find every line changed on Windows.
+	void CRepositoryFixture::f_WriteWorkspaceText(CStr const &_Name, CStr const &_Contents) const
+	{
+		f_Write(_Name, NPerforce::CPerforceTestServer::fs_WorkspaceText(_Contents));
 	}
 
 	void CRepositoryFixture::f_WriteBinary(CStr const &_Name) const

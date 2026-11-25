@@ -7,6 +7,8 @@
 #include <Mib/Develop/EditorConfig>
 #include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Cryptography/Hashes/SHA>
+#include <Mib/Perforce/FileNames>
+#include <Mib/Perforce/Wrapper>
 #include <Mib/Time/Stopwatch>
 
 namespace
@@ -153,15 +155,21 @@ namespace NMib::NTool::NValidate
 		return "Commit validation failed: {} changed line(s) violate the configured rules.\n"_f << nErrors;
 	}
 
-	// Line-length-only repositories keep the original summary so existing output stays compatible.
+	// Line-length-only repositories keep the original summary so existing output stays compatible, with the files that couldn't be
+	// validated where there are any: a file opened but missing, or one that no reader takes, fails the run without a formatted file.
 	CStr fg_DescribeValidationSummary(CStr const &_Kind, CValidationCounts const &_Counts, fp64 _Seconds)
 	{
 		if (!_Counts.m_nFormatFiles)
 		{
-			return "Validated {} {} file(s): {} line length violation(s). Excluded {} file(s). Time: {fe2} s.\n"_f
+			CStr Unanalyzable;
+			if (_Counts.m_nFormatFailed)
+				Unanalyzable = ", {} unanalyzable"_f << _Counts.m_nFormatFailed;
+
+			return "Validated {} {} file(s): {} line length violation(s){}. Excluded {} file(s). Time: {fe2} s.\n"_f
 				<< _Counts.m_nFiles
 				<< _Kind
 				<< _Counts.m_nLineErrors
+				<< Unanalyzable
 				<< _Counts.m_nExcluded
 				<< _Seconds
 			;
@@ -209,6 +217,148 @@ namespace NMib::NTool::NValidate
 	bool fg_UsesFormattingEngine(CCodeFormattingSettings const &_Settings)
 	{
 		return _Settings.f_IsFormattingEnabled();
+	}
+
+	struct CValidationPatch
+	{
+		CStr m_Snapshot;                // The new side of the file.
+		TCVector<umint> m_AddedLines;   // One-based lines of the snapshot that the change adds or modifies.
+		bool m_bWholeFile = true;       // The patch's one hunk covers the file, so the snapshot is the whole of it.
+		bool m_bNormalizedNuls = false; // A NUL stands in a line the snapshot keeps.
+	};
+
+	// Reads a patch with full context, as the changed-line modes have git write it: the new side as a snapshot, and the lines
+	// the change adds. In a file the engine does not format, the length of each added line is checked here.
+	CValidationPatch fg_ReadValidationPatch(CStr &&_Diff, CStr const &_AbsolutePath, CCodeFormattingSettings const &_Settings, bool _bFormat, CValidationCounts &o_Counts, CFormatSink &_Sink)
+	{
+		// Formatting analyses the exact snapshot bytes, so a file needing NUL normalization
+		// is reported as unanalyzable instead of being rewritten into something parseable.
+		CValidationPatch Patch;
+		auto Diff = fg_Move(_Diff);
+		Patch.m_bNormalizedNuls = fg_KeptRecordsHaveNul(Diff);
+		fg_NormalizeValidationNuls(Diff);
+
+		auto &Snapshot = Patch.m_Snapshot;
+		auto &AddedLines = Patch.m_AddedLines;
+		umint iLine = 0;
+		CPlainFormatDirectives Directives;
+		bool bLastRecordKept = false; // A missing final newline marker follows the record it belongs to, kept or deleted.
+
+		// Git patch records are LF-delimited; a bare CR belongs to the file content.
+		for (auto const &Line : Diff.f_Split("\n"))
+		{
+			if (Line.f_StartsWith("diff --git "))
+			{
+				iLine = 0;
+				Snapshot.f_Clear();
+				AddedLines.f_Clear();
+				Directives = {};
+			}
+			else if (Line.f_StartsWith("@@ "))
+			{
+				auto Range = Line.f_Extract(Line.f_Find(" +") + 2);
+				auto Number = fg_GetStrSeparators(Range, " ,");
+				iLine = Number == "0" ? 0 : fg_ParsePositive(Number, "diff line number");
+				// Maximal context produces one hunk covering the file; anything else
+				// would leave gaps that cannot be reassembled into a complete snapshot.
+				Patch.m_bWholeFile &= iLine == 1 && Snapshot.f_IsEmpty();
+			}
+			else if (Line.f_StartsWith("\\ "))
+			{
+				if (bLastRecordKept)
+					Snapshot = Snapshot.f_RemoveSuffix("\n");
+			}
+			else if (Line.f_StartsWith("-"))
+				bLastRecordKept = false;
+			else if (iLine && (Line.f_StartsWith("+") || Line.f_StartsWith(" ")))
+			{
+				bLastRecordKept = true;
+				auto Record = Line.f_Extract(1);
+				Snapshot += Record;
+				Snapshot += "\n";
+				auto SourceRecord = Record.f_RemoveSuffix("\r");
+				if (iLine == 1)
+					SourceRecord = SourceRecord.f_RemovePrefix("\xEF\xBB\xBF");
+
+				for (auto const &SourceLine : SourceRecord.f_SplitLine())
+				{
+					bool bAdded = Line.f_StartsWith("+");
+					bool bDisabled = false;
+					if (!_bFormat)
+					{
+						// Only a changed directive line is reported, as only changed lines are checked.
+						CStr DirectiveReport;
+						umint nDirectiveErrors = 0;
+						bDisabled = Directives.f_IsDisabled(SourceLine, _AbsolutePath, iLine, bAdded, DirectiveReport, nDirectiveErrors);
+						if (nDirectiveErrors)
+						{
+							_Sink.m_fReport(DirectiveReport);
+							o_Counts.m_nLineErrors += nDirectiveErrors;
+						}
+					}
+
+					if (bAdded)
+					{
+						AddedLines.f_Insert(iLine);
+						if (!_bFormat && !bDisabled)
+							o_Counts.m_nLineErrors += !fg_ValidateLine(SourceLine, _AbsolutePath, iLine, _Settings, _Sink);
+					}
+
+					++iLine;
+				}
+			}
+		}
+
+		if (!_bFormat)
+		{
+			CStr DirectiveReport;
+			umint nDirectiveErrors = 0;
+			Directives.f_Finish(_AbsolutePath, DirectiveReport, nDirectiveErrors);
+			if (nDirectiveErrors)
+			{
+				_Sink.m_fReport(DirectiveReport);
+				o_Counts.m_nLineErrors += nDirectiveErrors;
+			}
+		}
+
+		return Patch;
+	}
+
+	// Whether a file the engine formats can be analyzed as a whole snapshot, which counts it, and reports it as failed where it
+	// can't. This comes before its style is read, so that a style it would not be analyzed with doesn't stop the run.
+	bool fg_IsValidationSnapshotAnalyzable(CValidationPatch const &_Patch, CStr const &_AbsolutePath, CValidationCounts &o_Counts, CFormatSink &_Sink)
+	{
+		++o_Counts.m_nFormatFiles;
+		if (_Patch.m_bWholeFile && !_Patch.m_bNormalizedNuls)
+			return true;
+
+		++o_Counts.m_nFormatFailed;
+		_Sink.m_fReport("{}: the changed snapshot could not be reassembled for formatting analysis\n"_f << _AbsolutePath);
+
+		return false;
+	}
+
+	// A job reporting the added lines of a file the engine formats, analyzed as a whole snapshot.
+	void fg_AddValidationJob
+		(
+			CValidationPatch &&_Patch
+			, CStr const &_AbsolutePath
+			, CStr const &_DisplayPath
+			, CCodeFormattingSettings const &_Settings
+			, TCSharedPointer<CCodeFormattingStyle const> &&_pStyle
+			, TCVector<CFormatJob> &o_Jobs
+		)
+	{
+		auto &Job = o_Jobs.f_Insert();
+		Job.m_pStyle = fg_Move(_pStyle);
+		Job.m_bHasStyle = true;
+		Job.m_Path = _AbsolutePath;
+		Job.m_DisplayPath = _DisplayPath;
+		Job.m_Settings = _Settings;
+		Job.m_Source = fg_Move(_Patch.m_Snapshot);
+		Job.m_bHasSource = true;
+		Job.m_ReportedLines = fg_Move(_Patch.m_AddedLines);
+		Job.m_Mode = EFormatMode::mc_Report;
 	}
 
 	TCFuture<CStr> fg_ResolveValidationCommit(CStr _Reference, CStr _Directory)
@@ -578,126 +728,18 @@ namespace NMib::NTool::NValidate
 					}
 				)
 			;
-			// Formatting analyses the exact snapshot bytes, so a file needing NUL normalization
-			// is reported as unanalyzable instead of being rewritten into something parseable.
-			bool bNormalizedNuls = fg_KeptRecordsHaveNul(Diff);
-			fg_NormalizeValidationNuls(Diff);
-
-			CStr AbsolutePath = _Directory / Path;
-			CStr Snapshot;
-			TCVector<umint> AddedLines;
-			bool bWholeFile = true;
-			umint iLine = 0;
-			CPlainFormatDirectives Directives;
-			bool bOffLineAdded = false;
-			bool bLastRecordKept = false; // A missing final newline marker follows the record it belongs to, kept or deleted.
-			// Git patch records are LF-delimited; a bare CR belongs to the file content.
-			for (auto const &Line : Diff.f_Split("\n"))
-			{
-				if (Line.f_StartsWith("diff --git "))
-				{
-					iLine = 0;
-					Snapshot.f_Clear();
-					AddedLines.f_Clear();
-					Directives = {};
-				}
-				else if (Line.f_StartsWith("@@ "))
-				{
-					auto Range = Line.f_Extract(Line.f_Find(" +") + 2);
-					auto Number = fg_GetStrSeparators(Range, " ,");
-					iLine = Number == "0" ? 0 : fg_ParsePositive(Number, "diff line number");
-					// Maximal context produces one hunk covering the file; anything else
-					// would leave gaps that cannot be reassembled into a complete snapshot.
-					bWholeFile &= iLine == 1 && Snapshot.f_IsEmpty();
-				}
-				else if (Line.f_StartsWith("\\ "))
-				{
-					if (bLastRecordKept)
-						Snapshot = Snapshot.f_RemoveSuffix("\n");
-				}
-				else if (Line.f_StartsWith("-"))
-					bLastRecordKept = false;
-				else if (iLine && (Line.f_StartsWith("+") || Line.f_StartsWith(" ")))
-				{
-					bLastRecordKept = true;
-					auto Record = Line.f_Extract(1);
-					Snapshot += Record;
-					Snapshot += "\n";
-					auto SourceRecord = Record.f_RemoveSuffix("\r");
-					if (iLine == 1)
-						SourceRecord = SourceRecord.f_RemovePrefix("\xEF\xBB\xBF");
-
-					for (auto const &SourceLine : SourceRecord.f_SplitLine())
-					{
-						bool bAdded = Line.f_StartsWith("+");
-						bool bDisabled = false;
-						if (!bFormat)
-						{
-							// Only a changed directive line is reported, as only changed lines are checked.
-							CStr DirectiveReport;
-							umint nDirectiveErrors = 0;
-							bool bWasOff = Directives.m_iOffLine != 0;
-							bDisabled = Directives.f_IsDisabled(SourceLine, AbsolutePath, iLine, DirectiveReport, nDirectiveErrors);
-							if (!bWasOff && Directives.m_iOffLine)
-								bOffLineAdded = bAdded;
-
-							if (bAdded && nDirectiveErrors)
-							{
-								_Sink.m_fReport(DirectiveReport);
-								Counts.m_nLineErrors += nDirectiveErrors;
-							}
-						}
-
-						if (bAdded)
-						{
-							AddedLines.f_Insert(iLine);
-							if (!bFormat && !bDisabled)
-								Counts.m_nLineErrors += !fg_ValidateLine(SourceLine, AbsolutePath, iLine, Settings, _Sink);
-						}
-
-						++iLine;
-					}
-				}
-			}
-
-			if (!bFormat && bOffLineAdded)
-			{
-				CStr DirectiveReport;
-				umint nDirectiveErrors = 0;
-				Directives.f_Finish(AbsolutePath, DirectiveReport, nDirectiveErrors);
-				if (nDirectiveErrors)
-				{
-					_Sink.m_fReport(DirectiveReport);
-					Counts.m_nLineErrors += nDirectiveErrors;
-				}
-			}
+			auto Patch = fg_ReadValidationPatch(fg_Move(Diff), _Directory / Path, Settings, bFormat, Counts, _Sink);
 
 			// A change with no added or modified lines has nothing to report, which also
 			// covers deletion-only hunks and a file emptied by the change.
-			if (!bFormat || AddedLines.f_IsEmpty())
+			if (!bFormat || Patch.m_AddedLines.f_IsEmpty())
 				continue;
 
-			++Counts.m_nFormatFiles;
-			if (!bWholeFile || bNormalizedNuls)
-			{
-				++Counts.m_nFormatFailed;
-				_Sink.m_fReport("{}: the changed snapshot could not be reassembled for formatting analysis\n"_f << AbsolutePath);
-
+			if (!fg_IsValidationSnapshotAnalyzable(Patch, _Directory / Path, Counts, _Sink))
 				continue;
-			}
 
-			auto pStyle = co_await Styles(&CFormatStyleResolver::f_Resolve, CFile::fs_GetPath(CFile::fs_CondensePath(AbsolutePath)));
-
-			auto &Job = FormatJobs.f_Insert();
-			Job.m_pStyle = fg_Move(pStyle);
-			Job.m_bHasStyle = true;
-			Job.m_Path = AbsolutePath;
-			Job.m_DisplayPath = Path;
-			Job.m_Settings = Settings;
-			Job.m_Source = fg_Move(Snapshot);
-			Job.m_bHasSource = true;
-			Job.m_ReportedLines = fg_Move(AddedLines);
-			Job.m_Mode = EFormatMode::mc_Report;
+			auto pStyle = co_await Styles(&CFormatStyleResolver::f_Resolve, CFile::fs_GetPath(CFile::fs_CondensePath(_Directory / Path)));
+			fg_AddValidationJob(fg_Move(Patch), _Directory / Path, Path, Settings, fg_Move(pStyle), FormatJobs);
 		}
 
 		for (auto const &Result : co_await fg_RunFormatJobs(_Workers, fg_Move(FormatJobs)))
@@ -712,11 +754,668 @@ namespace NMib::NTool::NValidate
 		co_return CValidationResult{Kind, Counts};
 	}
 
-	TCFuture<CValidationResult> fg_ValidateRepositories(TCVector<CStr> _Directories, CFormatSink _Sink, TCSharedPointer<TCAtomic<bool>> _pCancelled)
+	// The base type of a Perforce file type, in front of its modifiers: 'text' of 'text+x'.
+	CStr fg_PerforceBaseType(CStr const &_Type)
+	{
+		CStr Rest = _Type;
+		return NStr::fg_GetStrSepNoTrim(Rest, "+");
+	}
+
+	// Whether a Perforce file type holds text, by its base type in front of its modifiers: 'text+x', 'utf8'. A file no revision
+	// has typed yet, one opened for add, is read as the audit reads a file, which tells binary content apart itself.
+	bool fg_IsPerforceTextType(CStr const &_Type)
+	{
+		if (!_Type)
+			return true;
+
+		auto BaseType = fg_PerforceBaseType(_Type);
+		for (auto pText : {"text", "unicode", "utf8", "utf16", "ctext", "cxtext", "ktext", "kxtext", "ltext", "xltext", "xtext"})
+		{
+			if (BaseType == pText)
+				return true;
+		}
+
+		return false;
+	}
+
+	// Whether p4 reads a file of the type in its charset, converting it to compare it, rather than as its bytes.
+	bool fg_IsPerforceUnicodeType(CStr const &_Type)
+	{
+		auto BaseType = fg_PerforceBaseType(_Type);
+
+		return BaseType == "unicode" || BaseType == "utf16" || BaseType == "utf8";
+	}
+
+	// The one-based lines of the second file that the chunks of differences add, which hold a line whose final newline the change
+	// adds or removes too.
+	TCVector<umint> fg_PerforceAddedLines(TCVector<NPerforce::CPerforceClient::CDiffRange> const &_Ranges)
+	{
+		TCVector<umint> AddedLines;
+		for (auto const &Range : _Ranges)
+		{
+			for (umint iLine = Range.m_iNewFirst; iLine < Range.m_iNewFirst + Range.m_nNew; ++iLine)
+				AddedLines.f_Insert(iLine);
+		}
+
+		return AddedLines;
+	}
+
+	// The lines of the text that the ascending lines p4 numbers hold. p4 numbers the lines its read gave the diff by their LFs, which
+	// the read made of the line ends _LineEnds names, and the formatter ends a line at LF, CRLF or a lone CR, so a line of either can
+	// hold several of the other's.
+	TCVector<umint> fg_MapPerforceLines(CTextLineMap const &_Lines, NPerforce::CPerforceClient::EComparedLineEnds _LineEnds, TCVector<umint> const &_PerforceLines)
+	{
+		using EComparedLineEnds = NPerforce::CPerforceClient::EComparedLineEnds;
+
+		// How many of p4's lines a line end of the text ends.
+		auto fPerforceLineEnds = [&](ETextLineEnding _Ending) -> umint
+			{
+				switch (_Ending)
+				{
+				case ETextLineEnding::mc_None: return 0;
+				case ETextLineEnding::mc_LF: return 1;
+				case ETextLineEnding::mc_CRLF: return _LineEnds == EComparedLineEnds::mc_CR ? 2 : 1;
+				case ETextLineEnding::mc_CR: return _LineEnds == EComparedLineEnds::mc_CR || _LineEnds == EComparedLineEnds::mc_LFCRLF ? 1 : 0;
+				}
+
+				return 0;
+			}
+		;
+
+		// The text lines, first and last, of each of p4's lines, whose last is the one behind its last LF.
+		struct CTextLines
+		{
+			umint m_iFirst;
+			umint m_iLast;
+		};
+
+		TCVector<CTextLines> PerforceLines;
+		umint nTextLines = _Lines.f_GetLineCount();
+		umint iFirst = 1;
+		for (umint iLine = 0; iLine < nTextLines; ++iLine)
+		{
+			umint nEnded = fPerforceLineEnds(_Lines.f_GetLine(iLine).m_Ending);
+			if (!nEnded)
+				continue;
+
+			umint iTextLine = iLine + 1;
+			PerforceLines.f_Insert(CTextLines{iFirst, iTextLine});
+			for (umint iEnded = 1; iEnded < nEnded; ++iEnded)
+				PerforceLines.f_Insert(CTextLines{iTextLine, iTextLine});
+
+			iFirst = iTextLine + 1;
+		}
+
+		PerforceLines.f_Insert(CTextLines{iFirst, nTextLines});
+
+		TCVector<umint> TextLines;
+		for (auto iLine : _PerforceLines)
+		{
+			if (!iLine || iLine > PerforceLines.f_GetLen())
+				continue;
+
+			auto const &Range = PerforceLines[iLine - 1];
+			for (umint iText = Range.m_iFirst; iText <= Range.m_iLast; ++iText)
+			{
+				if (TextLines.f_IsEmpty() || TextLines.f_GetLast() < iText)
+					TextLines.f_Insert(iText);
+			}
+		}
+
+		return TextLines;
+	}
+
+	// The text the formatter numbers the lines of in a file's bytes: text in UTF-16 or UTF-32 with its signature decoded, as the
+	// audit's read decodes it, and else the bytes.
+	CStr fg_FormatterLineText(CByteVector const &_Data)
+	{
+		if (!fg_HasWideTextSignature(_Data))
+			return fg_StrFromBytes(_Data.f_GetArray(), _Data.f_GetLen());
+
+		return fg_DecodeWideValidationText(fg_TempCopy(_Data));
+	}
+
+	// Validates the changes of a Perforce root as fg_ValidateChanges does a repository's: the files opened in its workspace against
+	// the revisions they were opened from, or with _Base, a changelist like @1234, the revision the workspace has of the files
+	// submitted after it against the one at the changelist. p4 diff and p4 diff2 decide the lines whose diagnostics are reported, and
+	// a file is analyzed as the audit analyzes it, the workspace's or the revision it has, with the workspace's configuration and
+	// styles. The files are those _pRootFiles holds, and the connection is the one p4 makes in the root with _Environment.
+	auto fg_ValidatePerforceChanges
+		(
+			CStr _Root
+			, CStr _Base
+			, TCSharedPointer<NPerforce::CPerforceRootFiles> _pRootFiles
+			, TCMap<CStr, CStr> _Environment
+			, TCActor<CFormatWorkerPool> _Workers
+			, CFormatSink _Sink
+		)
+		-> TCFuture<CValidationResult>
+	{
+		auto CaptureScope = co_await (g_CaptureExceptions % ("Validating changes in '{}'"_f << _Root));
+
+		TCVector<CStr> Arguments;
+		int64 BaseNumber = 0;
+		CStr Error;
+		if (!fg_GetPerforceChangesArguments(_Root, _Base, Arguments, BaseNumber, Error))
+			co_return DMibErrorInstance(Error);
+
+		uint64 BaseChangelist = uint64(BaseNumber);
+
+		// With --staged the listing gives each opened file's fields as the diff needs them, the resolves scheduled on it too.
+		if (!_Base)
+			Arguments.f_Insert("-Or");
+
+		CStr Kind = _Base ? "committed" : "staged";
+
+		// One connection, as p4 run in the root makes it, whatever the current directory, with its .p4config and enviro file.
+		// The paths p4 is given are spelled as the workspace's root is, as it tells the paths in the workspace by their names, and the
+		// project's paths as the project spells them, in its settings and diagnostics.
+		struct CConnection
+		{
+			TCUniquePointer<NPerforce::CPerforceClientThrow> m_pClient;
+			CPerforceRootSpelling m_Spelling;
+		};
+
+		TCSharedPointer<CConnection> pConnection = fg_Construct();
+
+		// Closing the connection blocks on the server, so it is closed on a blocking actor, also where the validation ends early.
+		auto CloseConnection = co_await fg_AsyncDestroy
+			(
+				[pConnection]() -> TCFuture<void>
+				{
+					auto pClosed = pConnection;
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor()) / [pClosed]
+							{
+								pClosed->m_pClient.f_Clear();
+							}
+						)
+					;
+
+					co_return {};
+				}
+			)
+		;
+
+		auto Listed = co_await
+			(
+				g_Dispatch(fg_BlockingActor()) / [_Root, Arguments, _pRootFiles, _Environment, pConnection, bBase = bool(_Base)]() -> CPerforceListedFiles
+				{
+					pConnection->m_pClient = fg_Construct(NPerforce::CPerforceClient::fs_GetConnectionInfo(_Root, _pRootFiles->f_GetSettings(), _Environment));
+					pConnection->m_pClient->f_Login(CStr(), _Root);
+					pConnection->m_Spelling = CPerforceRootSpelling::fs_Find(_Root, pConnection->m_pClient->f_GetClientRoot());
+					auto const &Spelling = pConnection->m_Spelling;
+
+					auto Found = fg_ListPerforceFiles(*pConnection->m_pClient, Spelling, Arguments, !bBase);
+					CPerforceListedFiles Listed;
+					Listed.m_Unreadable = fg_Move(Found.m_Unreadable);
+					for (umint iFound = 0; iFound < Found.m_Paths.f_GetLen(); ++iFound)
+					{
+						// With a base the depot revision is validated, whose type decides, whatever the workspace's file is now.
+						auto &Path = Found.m_Paths[iFound];
+						if (bBase ? _pRootFiles->f_IsOfRoot(Path) : _pRootFiles->f_Contains(Path))
+						{
+							Listed.m_Paths.f_Insert(Path);
+							if (!bBase)
+								Listed.m_Stats.f_Insert(fg_Move(Found.m_Stats[iFound]));
+						}
+					}
+
+					return Listed;
+				}
+			)
+		;
+
+		CValidationCounts Counts;
+		for (auto const &Path : Listed.m_Unreadable)
+		{
+			_Sink.m_fReport("{}: not validated: its name holds a backslash, which the file functions read as a separator\n"_f << Path);
+			++Counts.m_nFormatFailed;
+		}
+
+		auto &Paths = Listed.m_Paths;
+		if (Paths.f_IsEmpty())
+			co_return CValidationResult{Kind, Counts};
+
+		struct CValidatedFile
+		{
+			CStr m_Path;
+			CCodeFormattingSettings m_Settings;
+			NPerforce::CPerforceClient::CFileStats m_Stats; // With --staged, the file as it is opened
+		};
+
+		TCVector<CValidatedFile> Files;
+		{
+			TCSharedPointer<CSharedRoundRobinBlockingActors> pBlockingActors = fg_Construct(umint(1));
+			TCActor<NDevelop::CEditorConfigResolver> Configurations = fg_Construct(_Root, pBlockingActors);
+			auto DestroyConfigurations = co_await fg_AsyncDestroy(Configurations);
+			for (umint iPath = 0; iPath < Paths.f_GetLen(); ++iPath)
+			{
+				auto const &Path = Paths[iPath];
+				auto Properties = co_await Configurations(&NDevelop::CEditorConfigResolver::f_Resolve, Path);
+
+				CCodeFormattingSettings Settings(Properties);
+				if (!Settings.m_nMaxColumns && !fg_UsesFormattingEngine(Settings))
+				{
+					++Counts.m_nExcluded;
+					continue;
+				}
+
+				Files.f_Insert({Path, fg_Move(Settings), _Base ? NPerforce::CPerforceClient::CFileStats() : fg_Move(Listed.m_Stats[iPath])});
+			}
+		}
+
+		if (Files.f_IsEmpty())
+			co_return CValidationResult{Kind, Counts};
+
+		// What each file changes: the lines it adds, or all of them, and the bytes they are lines of: with _Base the revision's, and
+		// with --staged the workspace file's, read after p4 diff compared it.
+		struct CChange
+		{
+			TCVector<umint> m_AddedLines;
+			CByteVector m_Revision;
+			NTime::CTime m_WriteTime;         // With --staged: the workspace file's before p4 diff compared it
+			CMibFilePos m_Size = 0;           // With --staged: the workspace file's before p4 diff compared it
+			CUniqueFileIdentifier m_Identity; // With --staged: the workspace file's, which tells it from a diff that names it otherwise
+			bool m_bAllLines = false;
+			bool m_bHasRevision = false;
+			bool m_bChanged = false;
+			bool m_bBinary = false;
+			bool m_bChangedMeanwhile = false;
+			bool m_bMissing = false;
+		};
+
+		TCVector<CStr> FilePaths;
+		TCVector<NPerforce::CPerforceClient::CFileStats> FileStats;
+		for (auto &File : Files)
+		{
+			FilePaths.f_Insert(File.m_Path);
+			FileStats.f_Insert(fg_Move(File.m_Stats));
+		}
+
+		auto Changes = co_await
+			(
+				g_Dispatch(fg_BlockingActor()) / [pConnection, FilePaths, FileStats, _Base, BaseChangelist]() -> TCVector<CChange>
+				{
+					auto &Client = *pConnection->m_pClient;
+					TCVector<CChange> Changes;
+					Changes.f_SetLen(FilePaths.f_GetLen());
+
+					// Records the file's write time, size and identity, or gives false where it is gone, also where it goes while they are
+					// read.
+					auto fRecordMetadata = [](CStr const &_Path, CChange &o_Change) -> bool
+						{
+							try
+							{
+								o_Change.m_WriteTime = CFile::fs_GetWriteTime(_Path);
+								o_Change.m_Size = CFile::fs_GetFileSize(_Path);
+								o_Change.m_Identity = CFile::fs_GetUniqueIdentifier(_Path);
+							}
+							catch (NException::CException const &)
+							{
+								if (CFile::fs_FileExists(_Path, EFileAttrib_File))
+									throw;
+
+								return false;
+							}
+
+							return true;
+						}
+					;
+
+					// Whether the file's size or write time differ from those it had before p4 diff compared it, or it is gone.
+					auto fChangedMeanwhile = [&](CStr const &_Path, CChange const &_Change)
+						{
+							CChange Now;
+							return !fRecordMetadata(_Path, Now) || Now.m_WriteTime != _Change.m_WriteTime || Now.m_Size != _Change.m_Size;
+						}
+					;
+
+					// The file read after p4 diff compared it, so an edit meanwhile would move the lines reported: one whose size or write
+					// time differ from those it had before the diff isn't validated, nor one removed or cut short while it is read.
+					auto fReadChecked = [&](CStr const &_Path, CChange &o_Change, CByteVector &o_Contents) -> bool
+						{
+							try
+							{
+								o_Contents = CFile::fs_ReadFile(_Path);
+							}
+							catch (NException::CException const &)
+							{
+								if (!fChangedMeanwhile(_Path, o_Change))
+									throw;
+							}
+
+							if (!fChangedMeanwhile(_Path, o_Change))
+								return true;
+
+							o_Change.m_bChangedMeanwhile = true;
+							return false;
+						}
+					;
+
+					if (_Base)
+					{
+						for (umint iFile = 0; iFile < FilePaths.f_GetLen(); ++iFile)
+						{
+							auto &Change = Changes[iFile];
+							// The depot file the workspace has synced, where an overlay mapping, '+//Depot/...', maps several to the path,
+							// and the revision it has, named by its number, so a sync meanwhile can't mix revisions.
+							CStr Escaped = NPerforce::CPerforceClient::fs_EscapeFileName(pConnection->m_Spelling.f_ServerPath(FilePaths[iFile]));
+							auto Stats = Client.f_HaveFileStats(Escaped);
+							if (!Stats.m_HaveRev)
+								continue;
+
+							CStr HaveRevision = "#{}"_f << Stats.m_HaveRev;
+
+							auto HaveStats = Client.f_FileStats(Stats.m_DepotFile + HaveRevision);
+							if (HaveStats.m_HeadChange <= BaseChangelist)
+								continue;
+
+							if (!fg_IsPerforceTextType(HaveStats.m_HeadType))
+							{
+								Change.m_bBinary = true;
+								continue;
+							}
+
+							CStr BaseRevision = "{}@{}"_f << Stats.m_DepotFile << BaseChangelist;
+							auto Diff = Client.f_DiffRevisions(BaseRevision, Stats.m_DepotFile + HaveRevision);
+							// p4 diff2 only says that two types differ, also two text types, as text and utf8, whose lines compare. A
+							// revision that isn't there has no type.
+							bool bBothText = Diff.m_Type1 && Diff.m_Type2 && fg_IsPerforceTextType(Diff.m_Type1) && fg_IsPerforceTextType(Diff.m_Type2);
+							if (bBothText && Diff.m_Type1 != Diff.m_Type2)
+								Diff = Client.f_DiffRevisions(BaseRevision, Stats.m_DepotFile + HaveRevision, true);
+							if (Diff.m_Status == "identical")
+								continue;
+
+							// The revision itself, which the workspace's file needn't be: one opened since, or changed without being
+							// opened in a workspace that allows it, holds other lines.
+							Change.m_Revision = Client.f_GetFileContents(Stats.m_DepotFile + HaveRevision);
+							Change.m_bHasRevision = true;
+
+							// A file that wasn't there at the base, or wasn't text, adds all of its lines, as does text in UTF-16 or
+							// UTF-32 that p4 compares as its bytes, whose LF bytes can be bytes of other characters.
+							Change.m_bChanged = true;
+							if (!Diff.m_Type1 || !fg_IsPerforceTextType(Diff.m_Type1) || (fg_HasWideTextSignature(Change.m_Revision) && !fg_IsPerforceUnicodeType(Diff.m_Type2)))
+								Change.m_bAllLines = true;
+							else
+							{
+								Change.m_AddedLines = fg_MapPerforceLines
+									(
+										CTextLineMap(fg_FormatterLineText(Change.m_Revision))
+										, NPerforce::CPerforceClient::EComparedLineEnds::mc_None
+										, fg_PerforceAddedLines(Diff.m_Ranges)
+									)
+								;
+							}
+						}
+
+						return Changes;
+					}
+
+					// p4 diff compares an opened file with the revision it was opened from, or the one a scheduled resolve bases its
+					// changes on, and names it as the workspace's mapping spells it, which can differ from the listing's. The path as
+					// either spells it, with Malterlib's separators on Windows and nothing else changed, as names that differ only in their
+					// whitespace are other files, tells which file it is, or else its identity, where only one of the files compared
+					// has it, as hard links share it. A diff that names none of them fails the run.
+					TCVector<CStr> Compared;
+					TCMap<CStr, umint> ComparedPaths;
+					TCMap<CUniqueFileIdentifier, TCVector<umint>> ComparedIdentities;
+					TCVector<umint> Added;
+
+					// A resolve's base revision, where one is scheduled from the file itself, is given to p4 diff to compare with.
+					auto fCompare = [&](umint _iFile, CStr const &_Escaped, NPerforce::CPerforceClient::CFileStats const &_Stats, uint32 _ResolveBaseRev)
+						{
+							auto const &Path = FilePaths[_iFile];
+							if (_ResolveBaseRev)
+								Compared.f_Insert("{}#{}"_f << _Escaped << _ResolveBaseRev);
+							else
+								Compared.f_Insert(_Escaped);
+
+							ComparedPaths[NPerforce::fg_MalterlibPath(Path)] = _iFile;
+							ComparedPaths[NPerforce::fg_MalterlibPath(pConnection->m_Spelling.f_ServerPath(Path))] = _iFile;
+							if (_Stats.m_ClientFile)
+								ComparedPaths[NPerforce::fg_MalterlibPath(_Stats.m_ClientFile)] = _iFile;
+							ComparedIdentities[Changes[_iFile].m_Identity].f_Insert(_iFile);
+						}
+					;
+
+					// The revision p4 diff compares a file with, which it names in its record of the file. It sends none for a file it
+					// finds unchanged, which is compared with the revision of the file it is moved from that it was moved at, the moved
+					// file's own, else the one a resolve scheduled on the file bases its changes on, else the one the workspace has, of
+					// which fstat gives the head's type.
+					struct CComparedFile
+					{
+						umint m_iFile = 0;
+						CStr m_Revision; // The revision whose type one fstat gives, or empty for m_KnownType
+						CStr m_KnownType;
+						umint m_iDiff = TCLimitsInt<umint>::mc_Max;
+					};
+
+					TCVector<CComparedFile> ComparedFiles;
+					TCMap<umint, umint> ComparedFileIndices;
+					for (umint iFile = 0; iFile < FilePaths.f_GetLen(); ++iFile)
+					{
+						auto &Change = Changes[iFile];
+						auto const &Path = FilePaths[iFile];
+						CStr Escaped = NPerforce::CPerforceClient::fs_EscapeFileName(pConnection->m_Spelling.f_ServerPath(Path));
+						auto const &Stats = FileStats[iFile];
+
+						// A file opened for delete has no lines, whatever is left of it in the workspace: 'p4 delete -k'. A binary file is
+						// not validated, whether it is in the workspace or not. Any other opened file is the workspace's, which can't be
+						// validated where it is missing.
+						if (Stats.m_Action == "delete" || Stats.m_Action == "move/delete")
+							continue;
+
+						if (!fg_IsPerforceTextType(Stats.m_Type))
+						{
+							Change.m_bBinary = true;
+							continue;
+						}
+
+						if (!CFile::fs_FileExists(Path, EFileAttrib_File))
+						{
+							Change.m_bMissing = true;
+							continue;
+						}
+
+						if (!fRecordMetadata(Path, Change))
+						{
+							Change.m_bMissing = true;
+							continue;
+						}
+
+						// A file p4 has no revision of to compare with adds all of its lines, read as the files compared are.
+						if (Stats.m_Action == "add" || Stats.m_Action == "branch" || Stats.m_Action == "import")
+						{
+							Added.f_Insert(iFile);
+							continue;
+						}
+
+						bool bResolveBase = Stats.m_ResolveBaseRev && Stats.m_ResolveBaseFile == Stats.m_DepotFile;
+						uint32 ComparedRev = bResolveBase ? Stats.m_ResolveBaseRev : Stats.m_HaveRev;
+						fCompare(iFile, Escaped, Stats, bResolveBase ? Stats.m_ResolveBaseRev : 0);
+
+						auto &ComparedFile = ComparedFiles.f_Insert();
+						ComparedFile.m_iFile = iFile;
+						ComparedFileIndices[iFile] = ComparedFiles.f_GetLen() - 1;
+						if (Stats.m_Action == "move/add" && Stats.m_MovedFile)
+							ComparedFile.m_Revision = Stats.m_HaveRev ? CStr("{}#{}"_f << Stats.m_MovedFile << Stats.m_HaveRev) : Stats.m_MovedFile + "#have";
+						else if (ComparedRev && ComparedRev != Stats.m_HeadRev)
+							ComparedFile.m_Revision = "{}#{}"_f << Stats.m_DepotFile << ComparedRev;
+						else if (ComparedRev)
+							ComparedFile.m_KnownType = Stats.m_HeadType;
+					}
+
+					TCVector<NPerforce::CPerforceClient::CFileDiff> Diffs = Client.f_DiffOpenedFiles(Compared);
+					for (umint iDiff = 0; iDiff < Diffs.f_GetLen(); ++iDiff)
+					{
+						auto const &Diff = Diffs[iDiff];
+						umint const *pFile = ComparedPaths.f_FindEqual(NPerforce::fg_MalterlibPath(Diff.m_File));
+						if (!pFile)
+						{
+							auto *pFiles = ComparedIdentities.f_FindEqual(CFile::fs_GetUniqueIdentifier(Diff.m_File));
+							if (!pFiles || pFiles->f_GetLen() != 1)
+								DMibError("p4 diff compared {}, which isn't one of the files validated"_f << Diff.m_File);
+
+							pFile = &pFiles->f_GetFirst();
+						}
+
+						auto &ComparedFile = ComparedFiles[*ComparedFileIndices.f_FindEqual(*pFile)];
+						ComparedFile.m_iDiff = iDiff;
+						if (Diff.m_DepotFile && Diff.m_Revision)
+						{
+							ComparedFile.m_Revision = "{}#{}"_f << Diff.m_DepotFile << Diff.m_Revision;
+							ComparedFile.m_KnownType.f_Clear();
+						}
+					}
+
+					TCVector<CStr> Revisions;
+					for (auto const &ComparedFile : ComparedFiles)
+					{
+						if (ComparedFile.m_Revision)
+							Revisions.f_Insert(ComparedFile.m_Revision);
+					}
+
+					auto Types = Client.f_GetRevisionTypes(Revisions);
+					umint iType = 0;
+					for (auto &ComparedFile : ComparedFiles)
+					{
+						auto &Change = Changes[ComparedFile.m_iFile];
+						CStr ComparedType = ComparedFile.m_Revision ? Types[iType++] : ComparedFile.m_KnownType;
+
+						// A binary revision, which p4 diff compares as text once the file is opened as text, or a diff of binary files,
+						// leaves all of the file's lines new, as after a base.
+						bool bBinaryCompared = ComparedType && !fg_IsPerforceTextType(ComparedType);
+						if (ComparedFile.m_iDiff == TCLimitsInt<umint>::mc_Max)
+						{
+							if (bBinaryCompared)
+								Added.f_Insert(ComparedFile.m_iFile);
+							continue;
+						}
+
+						auto const &Diff = Diffs[ComparedFile.m_iDiff];
+						bool bAllLines = Diff.m_bBinary || bBinaryCompared;
+						TCVector<umint> PerforceLines;
+						if (!bAllLines)
+						{
+							PerforceLines = fg_PerforceAddedLines(Diff.m_Ranges);
+							if (Diff.m_Ranges.f_IsEmpty())
+								continue;
+						}
+
+						CByteVector Workspace;
+						if (!fReadChecked(FilePaths[ComparedFile.m_iFile], Change, Workspace))
+							continue;
+
+						// Text in UTF-16 or UTF-32 that p4 compares as its bytes, whose LF bytes can be bytes of other characters, has
+						// every line changed where p4 finds a change, also one that only deletes p4's lines.
+						if (bAllLines || (!Diff.m_bConverted && fg_HasWideTextSignature(Workspace)))
+							Change.m_bAllLines = true;
+						else if (PerforceLines.f_IsEmpty())
+							continue;
+						else
+							Change.m_AddedLines = fg_MapPerforceLines(CTextLineMap(fg_FormatterLineText(Workspace)), Diff.m_ComparedLineEnds, PerforceLines);
+
+						Change.m_bChanged = Change.m_bAllLines || !Change.m_AddedLines.f_IsEmpty();
+						Change.m_Revision = fg_Move(Workspace);
+						Change.m_bHasRevision = true;
+					}
+
+					// A file p4 diff found unchanged, which it may give no differences of, has no lines reported, which an edit before
+					// the diff returned could hide.
+					for (auto const &iFile : ComparedPaths)
+					{
+						auto &Change = Changes[iFile];
+						if (!Change.m_bHasRevision && !Change.m_bBinary && !Change.m_bChangedMeanwhile && fChangedMeanwhile(FilePaths[iFile], Change))
+							Change.m_bChangedMeanwhile = true;
+					}
+
+					for (umint iFile : Added)
+					{
+						auto &Change = Changes[iFile];
+						if (!fReadChecked(FilePaths[iFile], Change, Change.m_Revision))
+							continue;
+
+						Change.m_bChanged = true;
+						Change.m_bAllLines = true;
+						Change.m_bHasRevision = true;
+					}
+
+					return Changes;
+				}
+			)
+		;
+
+		// The files are analyzed as the audit analyzes them, reporting only the lines the changes add.
+		TCVector<CFormatJob> Jobs;
+		for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
+		{
+			auto &File = Files[iFile];
+			auto &Change = Changes[iFile];
+			if (Change.m_bBinary)
+			{
+				++Counts.m_nExcluded;
+				continue;
+			}
+
+			if (Change.m_bChangedMeanwhile || Change.m_bMissing)
+			{
+				_Sink.m_fReport
+					(
+						"{}: not validated: {}\n"_f
+						<< CFile::fs_MakePathRelative(File.m_Path, _Root)
+						<< (Change.m_bMissing ? "it is opened but missing from the workspace" : "it changed during validation")
+					)
+				;
+				++Counts.m_nFormatFailed;
+				continue;
+			}
+
+			if (!Change.m_bChanged || (!Change.m_bAllLines && Change.m_AddedLines.f_IsEmpty()))
+				continue;
+
+			auto &Job = Jobs.f_Insert();
+			Job.m_Path = File.m_Path;
+			Job.m_DisplayPath = CFile::fs_MakePathRelative(File.m_Path, _Root);
+			Job.m_Settings = fg_Move(File.m_Settings);
+			Job.m_bValidateLineLength = true;
+			Job.m_ReportedLines = fg_Move(Change.m_AddedLines);
+			Job.m_SourceBytes = fg_Move(Change.m_Revision);
+			Job.m_bHasSourceBytes = Change.m_bHasRevision;
+			// The file is of a text type of Perforce's, so text in UTF-16 or UTF-32 with its signature, which the read decodes, is text
+			// for all its NULs, while bytes with NULs that aren't stay binary, as git's heuristic has them.
+			Job.m_bDecodedIsText = true;
+			Job.m_Mode = EFormatMode::mc_Report;
+		}
+
+		for (auto const &Result : co_await fg_RunFormatJobs(_Workers, fg_Move(Jobs)))
+		{
+			if (Result.m_Outcome == EFormatOutcome::mc_Excluded)
+			{
+				++Counts.m_nExcluded;
+				continue;
+			}
+
+			if (Result.m_Report)
+				_Sink.m_fReport(Result.m_Report);
+
+			++Counts.m_nFiles;
+			Counts.m_nFormatFiles += Result.m_bFormatted;
+			Counts.m_nLineErrors += Result.m_nLineErrors;
+			Counts.m_nFormatErrors += Result.m_nReported;
+			Counts.m_nFormatFailed += Result.m_Outcome == EFormatOutcome::mc_Failed;
+		}
+
+		co_return CValidationResult{Kind, Counts};
+	}
+
+	auto fg_ValidateRepositories(TCVector<CStr> _Directories, CFormatSink _Sink, TCSharedPointer<TCAtomic<bool>> _pCancelled, TCVector<CFormatSelection> _OtherSelections)
+		-> TCFuture<CValidationResult>
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % "Auditing repositories");
 
-		TCVector<CFormatSelection> Selections;
+		TCVector<CFormatSelection> Selections = fg_Move(_OtherSelections);
 		for (auto const &Directory : _Directories)
 		{
 			auto Full = CFile::fs_GetFullPath(Directory, CFile::fs_GetCurrentDirectory());

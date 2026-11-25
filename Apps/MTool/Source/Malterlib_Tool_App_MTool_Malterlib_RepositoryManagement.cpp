@@ -668,7 +668,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 			{
 				"Names"_o= _o["validate"]
 				, "Description"_o= "Validate the text files of every repository that sets Repository.Format, as MTool Validate does for one, "
-				"in one run with one summary.\n"
+				"in one run with one summary. A Perforce root, which has no %Repository, is validated when PerforceRoot.Format is set, without "
+				"what its P4IGNORE files exclude.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
 				{
@@ -676,13 +677,23 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					{
 						"Names"_o= _o["--staged"]
 						, "Default"_o= false
-						, "Description"_o= "Only validate added or modified lines in each index, using staged .editorconfig files.\n"
+						, "Description"_o= "Only validate added or modified lines in each index, using staged .editorconfig files. In a Perforce root, the "
+						"lines of the files opened in its workspace changed from the revisions they were opened from.\n"
 					}
 					, "Base?"_o=
 					{
 						"Names"_o= _o["--base"]
 						, "Type"_o= ""
-						, "Description"_o= "Validate committed changes from the merge base with this reference to HEAD, using HEAD's .editorconfig files.\n"
+						, "Description"_o= "Validate committed changes from the merge base with this reference to HEAD, using HEAD's .editorconfig files. "
+						"In a Perforce root the reference is a changelist, like @1234, and the lines are those the revisions the workspace has "
+						"changed from the ones at it.\n"
+					}
+					, "PerforceBase?"_o=
+					{
+						"Names"_o= _o["--perforce-base"]
+						, "Type"_o= ""
+						, "Description"_o= "The changelist, like @1234, that the Perforce root's lines are changed from, when --base is the git "
+						"repositories' reference. A run over both needs it.\n"
 					}
 					, "Summary?"_o=
 					{
@@ -717,8 +728,22 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 					Base = pBase->f_String();
 				}
 
+				CStr PerforceBase;
+				if (auto pPerforceBase = _Params.f_GetMember("PerforceBase"))
+				{
+					if (bStaged || pPerforceBase->f_String().f_IsEmpty())
+					{
+						*_pCommandLine %= bStaged ? "--perforce-base and --staged cannot be combined\n" : "--perforce-base requires a nonempty changelist\n";
+
+						co_return 2;
+					}
+
+					PerforceBase = pPerforceBase->f_String();
+				}
+
 				CBuildSystem::CRepoFilter RepoFilter = CBuildSystem::CRepoFilter::fs_ParseParams(_Params);
 				RepoFilter.m_bFormat = true;
+				RepoFilter.m_bIncludePerforceRoot = true;
 
 				// The repositories are validated at once on one pool of workers. Each one's
 				// diagnostics are kept apart and written in repository order once all are
@@ -730,8 +755,26 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 						[=](NBuildSystem::CBuildSystem *_pBuildSystem) -> TCUnsafeFuture<CBuildSystem::ERetry>
 						{
 							TCVector<CStr> Locations;
-							if (auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations(GenerateOptions, RepoFilter, Locations); Retry != CBuildSystem::ERetry_None)
+							TCVector<CStr> AllLocations;
+							CStr PerforceRoot;
+							if
+							(
+								auto Retry = co_await _pBuildSystem->f_Action_Repository_GetLocations(GenerateOptions, RepoFilter, Locations, &AllLocations, nullptr, &PerforceRoot)
+								; Retry != CBuildSystem::ERetry_None
+							)
+							{
 								co_return Retry;
+							}
+
+							// A Perforce base without a Perforce root to validate is an error, also where nothing is validated.
+							bool bPerforceRoot = PerforceRoot && Locations.f_Contains(PerforceRoot) >= 0;
+							if (!bPerforceRoot && PerforceBase)
+							{
+								*_pCommandLine %= "--perforce-base gives the base of a Perforce root, and none is validated\n";
+								pOutcome->m_ExitCode = 2;
+
+								co_return CBuildSystem::ERetry_None;
+							}
 
 							if (Locations.f_IsEmpty())
 							{
@@ -740,13 +783,46 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return CBuildSystem::ERetry_None;
 							}
 
+							bool bGitRepositories = Locations.f_GetLen() > umint(bPerforceRoot);
+							if (bPerforceRoot && bGitRepositories && PerforceBase && !Base)
+							{
+								*_pCommandLine %= "--perforce-base gives the base of the Perforce root only: give the git repositories' reference with --base\n";
+								pOutcome->m_ExitCode = 2;
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							if (bPerforceRoot && bGitRepositories && Base && !PerforceBase)
+							{
+								*_pCommandLine %=
+									"--base '{}' cannot be the base of both the git repositories and the Perforce root: give the Perforce root's changelist "
+									"with --perforce-base, and the git repositories' reference with --base\n"_f
+									<< Base
+								;
+								pOutcome->m_ExitCode = 2;
+
+								co_return CBuildSystem::ERetry_None;
+							}
+
+							auto PerforceSettings
+								= bPerforceRoot
+								? NPerforce::CPerforceIgnore::fs_GetSettings(PerforceRoot, _pBuildSystem->f_GetPerforceEnvironment(), _pBuildSystem->f_GetPerforceRegistry())
+								: NPerforce::CPerforceIgnore::CSettings()
+							;
+							TCSet<CStr> OtherRepositories;
+							for (auto &Other : AllLocations)
+							{
+								if (Other != PerforceRoot)
+									OtherRepositories[Other];
+							}
+
 							// An audit needs no git and is one Format run over every repository; the
 							// changed-line modes ask git per repository, at once on one pool, and their
 							// diagnostics are written in repository order once all are done.
-							CStr Kind = Base ? "committed" : bStaged ? "staged" : "text";
+							CStr Kind = Base || PerforceBase ? "committed" : bStaged ? "staged" : "text";
 							NMib::NTool::NValidate::CValidationCounts Counts;
 							umint nFailed = 0;
-							if (!bStaged && !Base)
+							if (!bStaged && !Base && !PerforceBase)
 							{
 								NMib::NTool::NFormat::CFormatSink Sink;
 								Sink.m_fReport = [_pCommandLine](CStr const &_Text)
@@ -754,7 +830,38 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 										*_pCommandLine %= _Text;
 									}
 								;
-								auto Audited = co_await NMib::NTool::NValidate::fg_ValidateRepositories(Locations, fg_Move(Sink), _pBuildSystem->f_GetCancelledPointer()).f_Wrap();
+								TCVector<CStr> Repositories;
+								TCVector<NMib::NTool::NFormat::CFormatSelection> PerforceSelections;
+								for (auto &Location : Locations)
+								{
+									if (Location != PerforceRoot)
+									{
+										Repositories.f_Insert(Location);
+
+										continue;
+									}
+
+									auto &Selection = PerforceSelections.f_Insert();
+									Selection.m_WorkingDirectory = Location;
+									Selection.m_Patterns = {"*"};
+									Selection.m_bRecursive = true;
+									Selection.m_bOwnRepository = true;
+									Selection.m_pPerforceIgnore = fg_Construct(PerforceSettings);
+									Selection.m_ExcludedDirectories = OtherRepositories;
+									// Text in UTF-16 or UTF-32 with its signature, which the read decodes, is text, as --staged and --base
+									// take a file of a text type of Perforce's, of which a root has no attributes to tell.
+									Selection.m_bDecodedIsText = true;
+								}
+
+								auto Audited = co_await NMib::NTool::NValidate::fg_ValidateRepositories
+									(
+										fg_Move(Repositories)
+										, fg_Move(Sink)
+										, _pBuildSystem->f_GetCancelledPointer()
+										, fg_Move(PerforceSelections)
+									)
+									.f_Wrap()
+								;
 								co_await _pBuildSystem->f_CheckCancelled();
 
 								if (!Audited)
@@ -782,7 +889,30 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 											*pReport += _Text;
 										}
 									;
-									NMib::NTool::NValidate::fg_ValidateChanges(Locations[iLocation], Base, Workers, fg_Move(Sink)) > Pending;
+									if (Locations[iLocation] == PerforceRoot)
+									{
+										TCSharedPointer<NPerforce::CPerforceRootFiles> pRootFiles = co_await
+											(
+												g_Dispatch(fg_BlockingActor()) / [PerforceRoot, OtherRepositories, PerforceSettings]() -> TCSharedPointer<NPerforce::CPerforceRootFiles>
+												{
+													return fg_Construct(PerforceRoot, OtherRepositories, PerforceSettings);
+												}
+											)
+										;
+										NMib::NTool::NValidate::fg_ValidatePerforceChanges
+											(
+												PerforceRoot
+												, PerforceBase ? PerforceBase : Base
+												, fg_Move(pRootFiles)
+												, _pBuildSystem->f_GetGenerationEnvironment()
+												, Workers
+												, fg_Move(Sink)
+											)
+											> Pending
+										;
+									}
+									else
+										NMib::NTool::NValidate::fg_ValidateChanges(Locations[iLocation], Base, Workers, fg_Move(Sink)) > Pending;
 								}
 
 								auto Outcomes = co_await fg_AllDoneWrapped(Pending);

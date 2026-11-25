@@ -6,6 +6,7 @@
 
 #include <Mib/Git/Helpers/Launch>
 #include <Mib/Git/Ignore>
+#include <Mib/Perforce/FileNames>
 #include <Mib/Perforce/Ignore>
 #include <Mib/Concurrency/AsyncDestroy>
 #include <Mib/Container/Map>
@@ -310,6 +311,37 @@ namespace NMib::NTool::NFormat
 		}
 	}
 
+	// Text that starts with the signature of UTF-16 or UTF-32 (fg_HasWideTextSignature), decoded as an audit checks it: a U+0000 the
+	// text holds would end the decoded string, so it is read as a space, as a NUL in bytes read as text is.
+	CStr fg_DecodeWideValidationText(CByteVector &&_Data)
+	{
+		CByteVector Data = fg_Move(_Data);
+		auto nData = Data.f_GetLen();
+		auto Signature = fg_GetTextSignature(Data.f_GetArray(), nData);
+		bool bBigEndian = Signature == ETextSignature::mc_UTF16BigEndian || Signature == ETextSignature::mc_UTF32BigEndian;
+		bool bUtf32 = Signature == ETextSignature::mc_UTF32LittleEndian || Signature == ETextSignature::mc_UTF32BigEndian;
+		umint nUnit = bUtf32 ? 4 : 2;
+		for (umint iUnit = nUnit; iUnit + nUnit <= nData; iUnit += nUnit)
+		{
+			bool bNul = true;
+			for (umint iByte = 0; iByte < nUnit; ++iByte)
+				bNul = bNul && !Data[iUnit + iByte];
+
+			if (bNul)
+				Data[bBigEndian ? iUnit + nUnit - 1 : iUnit] = ' ';
+		}
+
+		return CFile::fs_ReadStringFromVector(Data);
+	}
+
+	// Whether the bytes start with the signature of UTF-16 or UTF-32, in either byte order, which fg_ReadTextStream decodes.
+	bool fg_HasWideTextSignature(CByteVector const &_Data)
+	{
+		auto Signature = fg_GetTextSignature(_Data.f_GetArray(), _Data.f_GetLen());
+
+		return Signature != ETextSignature::mc_None && Signature != ETextSignature::mc_UTF8;
+	}
+
 	// The bytes as they are, NULs included: appending a pointer and a length takes nothing when the first byte is a NUL.
 	CStr fg_StrFromBytes(void const *_pData, umint _nBytes)
 	{
@@ -320,6 +352,49 @@ namespace NMib::NTool::NFormat
 		Text.f_SetStrLen(_nBytes);
 
 		return Text;
+	}
+
+	// The changelist a Perforce root's base names, '@1234' or '1234', the digits of a number alone without leading zeros: 64-bit on a
+	// server that allows it, but for the largest, which has no changelist after it. The digits are checked before they are parsed,
+	// as the parse doesn't check for overflow.
+	bool fg_ParsePerforceBaseChangelist(CStr const &_Base, int64 &o_Changelist)
+	{
+		CStr Changelist = _Base.f_RemovePrefix("@");
+		CStr Largest = CStr::fs_ToStr(TCLimitsInt<int64>::mc_Max);
+		if (!Changelist.f_IsNumeric() || Changelist.f_GetLen() > Largest.f_GetLen())
+			return false;
+
+		// Of as many digits, text compares as the numbers do.
+		if (Changelist.f_GetLen() == Largest.f_GetLen() && Changelist >= Largest)
+			return false;
+
+		int64 Number = Changelist.f_ToInt(int64(-1));
+		if (Number < 0 || CStr::fs_ToStr(Number) != Changelist)
+			return false;
+
+		o_Changelist = Number;
+		return true;
+	}
+
+	// The arguments of fg_ListPerforceFiles for a Perforce root's changes: the files opened in its workspace, or with _Base, a changelist
+	// like @1234, whose number o_BaseChangelist gets, those submitted after it. False, with o_Error, where _Base names no changelist.
+	bool fg_GetPerforceChangesArguments(CStr const &_Root, CStr const &_Base, TCVector<CStr> &o_Arguments, int64 &o_BaseChangelist, CStr &o_Error)
+	{
+		o_BaseChangelist = 0;
+		if (!_Base)
+		{
+			o_Arguments = {"-Ro"};
+			return true;
+		}
+
+		if (!fg_ParsePerforceBaseChangelist(_Base, o_BaseChangelist))
+		{
+			o_Error = "'{}' is a Perforce root, whose base is a changelist, like @1234, which '{}' is not"_f << _Root << _Base;
+			return false;
+		}
+
+		o_Arguments = {"-c", CStr::fs_ToStr(o_BaseChangelist + 1)};
+		return true;
 	}
 
 	void fg_NormalizeValidationNuls(CStr &_Text)
@@ -398,32 +473,41 @@ namespace NMib::NTool::NFormat
 
 	// A file the engine does not format turns the line length check off and on with the engine's directives, written
 	// in its own comment syntax on lines of their own: '# malterlib-format off'. The directives' lines and the lines
-	// between them are not checked, and an unmatched or nested directive is a violation.
-	bool CPlainFormatDirectives::f_IsDisabled(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, CStr &o_Report, umint &o_nErrors)
+	// between them are not checked, and an unmatched or nested directive is a violation. Every directive turns the
+	// check off or on, also one on a line that isn't reported, while only a reported line's directive is a violation, as
+	// only reported lines are checked.
+	bool CPlainFormatDirectives::f_IsDisabled(CStr const &_Line, CStr const &_AbsolutePath, umint _LineNumber, bool _bReported, CStr &o_Report, umint &o_nErrors)
 	{
 		auto Directive = fg_PlainFormatDirective(_Line);
 		if (Directive == "malterlib-format off")
 		{
 			if (m_iOffLine)
 			{
-				o_Report += "{}:{}: nested 'malterlib-format off' directive\n"_f << _AbsolutePath << _LineNumber;
-				++o_nErrors;
+				if (_bReported)
+				{
+					o_Report += "{}:{}: nested 'malterlib-format off' directive\n"_f << _AbsolutePath << _LineNumber;
+					++o_nErrors;
+				}
 			}
 			else
+			{
 				m_iOffLine = _LineNumber;
+				m_bOffLineReported = _bReported;
+			}
 
 			return true;
 		}
 
 		if (Directive == "malterlib-format on")
 		{
-			if (!m_iOffLine)
+			if (!m_iOffLine && _bReported)
 			{
 				o_Report += "{}:{}: 'malterlib-format on' has no matching 'malterlib-format off'\n"_f << _AbsolutePath << _LineNumber;
 				++o_nErrors;
 			}
 
 			m_iOffLine = 0;
+			m_bOffLineReported = false;
 
 			return true;
 		}
@@ -431,15 +515,17 @@ namespace NMib::NTool::NFormat
 		return m_iOffLine != 0;
 	}
 
+	// An unmatched 'malterlib-format off' at the end, a violation where its line is reported.
 	void CPlainFormatDirectives::f_Finish(CStr const &_AbsolutePath, CStr &o_Report, umint &o_nErrors)
 	{
-		if (!m_iOffLine)
-			return;
-
-		o_Report += "{}:{}: 'malterlib-format off' has no matching 'malterlib-format on'\n"_f << _AbsolutePath << m_iOffLine;
-		++o_nErrors;
+		if (m_iOffLine && m_bOffLineReported)
+		{
+			o_Report += "{}:{}: 'malterlib-format off' has no matching 'malterlib-format on'\n"_f << _AbsolutePath << m_iOffLine;
+			++o_nErrors;
+		}
 
 		m_iOffLine = 0;
+		m_bOffLineReported = false;
 	}
 
 	struct CFormatRead
@@ -537,11 +623,14 @@ namespace NMib::NTool::NFormat
 			// lengths, reads them with NULs as spaces, which occupy one column just as they
 			// do. A file the engine formats keeps its bytes, as a plain format run reads it.
 			bool bNormalizeNuls = _Job.m_bValidateLineLength && !_Job.m_Settings.f_IsFormattingEnabled();
+			// A file whose decoded text is text, as a Perforce root's is, is decoded for the engine too, which would exclude its NULs.
+			bool bDecodeWide = bNormalizeNuls || (_Job.m_bValidateLineLength && _Job.m_bDecodedIsText);
 			auto Read = co_await
 				(
-					g_Dispatch(mp_pBlockingActors->f_Next()) / [Path = _Job.m_Path, bNormalizeNuls]() -> CFormatRead
+					g_Dispatch(mp_pBlockingActors->f_Next()) / [Path = _Job.m_Path, bNormalizeNuls, bDecodeWide, Bytes = fg_Move(_Job.m_SourceBytes), bHasBytes = _Job.m_bHasSourceBytes]
+					() mutable -> CFormatRead
 					{
-						auto Data = CFile::fs_ReadFile(Path);
+						auto Data = bHasBytes ? fg_Move(Bytes) : CFile::fs_ReadFile(Path);
 
 						CFormatRead Read;
 						Read.m_bEmpty = Data.f_IsEmpty();
@@ -551,29 +640,9 @@ namespace NMib::NTool::NFormat
 
 						// A UTF-16 or UTF-32 signature names an encoding whose NULs are halves of characters: the text is decoded
 						// at the file boundary as any read of a text file decodes it.
-						auto nData = Data.f_GetLen();
-						bool bUtf16 = nData >= 2 && ((Data[0] == 0xFF && Data[1] == 0xFE) || (Data[0] == 0xFE && Data[1] == 0xFF));
-						bool bUtf32 = nData >= 4 && Data[0] == 0x00 && Data[1] == 0x00 && Data[2] == 0xFE && Data[3] == 0xFF;
-						if (bNormalizeNuls && (bUtf16 || bUtf32))
+						if (bDecodeWide && fg_HasWideTextSignature(Data))
 						{
-							// A U+0000 the text holds would end the decoded string, so it is checked as a space, as a NUL in bytes
-							// read as text is.
-							bool bUtf32Little = nData >= 4 && Data[0] == 0xFF && Data[1] == 0xFE && Data[2] == 0x00 && Data[3] == 0x00;
-							bool bBigEndian = Data[0] == 0x00 || Data[0] == 0xFE;
-							umint nUnit = bUtf32 || bUtf32Little ? 4 : 2;
-							for (umint iUnit = nUnit; iUnit + nUnit <= nData; iUnit += nUnit)
-							{
-								bool bNul = true;
-								for (umint iByte = 0; iByte < nUnit; ++iByte)
-									bNul = bNul && !Data[iUnit + iByte];
-
-								if (bNul)
-									Data[bBigEndian ? iUnit + nUnit - 1 : iUnit] = ' ';
-							}
-
-							NStream::TCBinaryStreamMemory<> Stream;
-							Stream.f_Open(fg_Move(Data));
-							Read.m_Contents = fg_ReadTextStream(Stream);
+							Read.m_Contents = fg_DecodeWideValidationText(fg_Move(Data));
 							Read.m_bDecoded = true;
 
 							return Read;
@@ -606,7 +675,10 @@ namespace NMib::NTool::NFormat
 			// The attribute decides text or binary where it speaks and git's rule, a NUL
 			// among the first 8000 bytes, where it does not; an empty file has no line to
 			// check either way.
-			bool bBinary = _Job.m_TextAttribute == NGit::EGitTextAttribute::mc_Binary || (_Job.m_TextAttribute == NGit::EGitTextAttribute::mc_Unspecified && bNul);
+			bool bBinary
+				= _Job.m_TextAttribute == NGit::EGitTextAttribute::mc_Binary
+				|| (_Job.m_TextAttribute == NGit::EGitTextAttribute::mc_Unspecified && bNul && !(bDecoded && _Job.m_bDecodedIsText))
+			;
 			if (bBinary || bEmpty)
 			{
 				Result.m_Outcome = EFormatOutcome::mc_Excluded;
@@ -624,7 +696,9 @@ namespace NMib::NTool::NFormat
 				for (auto const &Line : (bDecoded ? Snapshot : Snapshot.f_RemovePrefix("\xEF\xBB\xBF")).f_SplitLine())
 				{
 					++iLine;
-					if (!Directives.f_IsDisabled(Line, _Job.m_Path, iLine, Result.m_Report, Result.m_nLineErrors))
+					bool bReported = fg_IsReportedLine(_Job.m_ReportedLines, iLine);
+					bool bDisabled = Directives.f_IsDisabled(Line, _Job.m_Path, iLine, bReported, Result.m_Report, Result.m_nLineErrors);
+					if (bReported && !bDisabled)
 						Result.m_nLineErrors += !fg_ValidateLineLength(Line, _Job.m_Path, iLine, _Job.m_Settings, Result.m_Report);
 				}
 
@@ -837,6 +911,84 @@ namespace NMib::NTool::NFormat
 		}
 
 		co_return Result;
+	}
+
+	// p4 tells the paths in a workspace by their names, so it takes them only as the client spec spells the root, while a project can
+	// reach that root through a symbolic link. A project spelled below the root is taken as it is spelled, as p4 run in it takes it.
+	// Otherwise the root is told by its directory's identity, among those that hold the project's root as the kernel resolves it
+	// outside Windows, where links are resolved (fs_ResolveDirectory). A project outside the workspace keeps its own spelling, which
+	// p4 then refuses.
+	CPerforceRootSpelling CPerforceRootSpelling::fs_Find(CStr const &_ProjectRoot, CStr const &_WorkspaceRoot)
+	{
+		CPerforceRootSpelling Spelling{.m_ProjectRoot = _ProjectRoot, .m_ServerRoot = _ProjectRoot};
+
+		// p4 gives its paths with Malterlib's separators, as the paths below the root are compared with.
+		CStr WorkspaceRoot = NPerforce::fg_MalterlibPath(_WorkspaceRoot);
+		if (WorkspaceRoot.f_IsEmpty() || NPerforce::fg_IsLexicallyIn(_ProjectRoot, WorkspaceRoot))
+			return Spelling;
+
+		CStr Relative;
+		CStr ResolvedRoot = NPerforce::CPerforceIgnore::fs_ResolveDirectory(_WorkspaceRoot);
+		if (!CFile::fs_FindAncestorByIdentity(NPerforce::CPerforceIgnore::fs_ResolveDirectory(_ProjectRoot), ResolvedRoot, Relative))
+			return Spelling;
+
+		Spelling.m_ServerRoot = CFile::fs_AppendPath(WorkspaceRoot, Relative);
+
+		return Spelling;
+	}
+
+	// The files p4 fstat lists for _Arguments under the root, as the workspace spells it: once for each revision in a range, and
+	// once each here, by their paths in the project. A name holding a backslash, which Malterlib's file functions take for a
+	// separator, so they would read another file than this, is listed apart outside Windows. With _bStats each path has the fields of
+	// its record too.
+	CPerforceListedFiles fg_ListPerforceFiles(NPerforce::CPerforceClientThrow &_Client, CPerforceRootSpelling const &_Spelling, TCVector<CStr> const &_Arguments, bool _bStats)
+	{
+		auto Arguments = _Arguments;
+		Arguments.f_Insert(NPerforce::CPerforceClient::fs_EscapeFileName(_Spelling.m_ServerRoot) / "...");
+
+		CPerforceListedFiles Listed;
+		TCSet<CStr> Seen;
+		TCVector<NPerforce::CPerforceClient::CFileStats> Stats;
+		auto Files = _bStats ? _Client.f_GetFileStatFilesUnder(_Spelling.m_ServerRoot, Arguments, Stats) : _Client.f_GetFileStatFilesUnder(_Spelling.m_ServerRoot, Arguments);
+		for (umint iFile = 0; iFile < Files.f_GetLen(); ++iFile)
+		{
+			CStr Path = _Spelling.f_ProjectPath(Files[iFile]);
+			if (!Seen(Path).f_WasCreated())
+				continue;
+
+#ifndef DPlatformFamily_Windows
+			if (Path.f_FindChar('\\') >= 0)
+			{
+				Listed.m_Unreadable.f_Insert(Path);
+				continue;
+			}
+#endif
+			Listed.m_Paths.f_Insert(Path);
+			if (_bStats)
+				Listed.m_Stats.f_Insert(fg_Move(Stats[iFile]));
+		}
+
+		return Listed;
+	}
+
+	// A path below the project's root, spelled as the project spells it, as the workspace's root spells it.
+	CStr CPerforceRootSpelling::f_ServerPath(CStr const &_ProjectPath) const
+	{
+		CStr Relative;
+		if (m_ServerRoot == m_ProjectRoot || !NPerforce::fg_IsLexicallyIn(_ProjectPath, m_ProjectRoot, Relative))
+			return _ProjectPath;
+
+		return CFile::fs_AppendPath(m_ServerRoot, Relative);
+	}
+
+	// A path below the project's root, spelled as the workspace's root spells it, as the project spells it.
+	CStr CPerforceRootSpelling::f_ProjectPath(CStr const &_ServerPath) const
+	{
+		CStr Relative;
+		if (m_ServerRoot == m_ProjectRoot || !NPerforce::fg_IsLexicallyIn(_ServerPath, m_ServerRoot, Relative))
+			return _ServerPath;
+
+		return CFile::fs_AppendPath(m_ProjectRoot, Relative);
 	}
 
 	umint fg_GetDefaultFormatJobs()
@@ -1332,6 +1484,7 @@ namespace NMib::NTool::NFormat
 		TCOptional<CStr> m_InfoAttributes;   // The repository's info/attributes, at its root.
 		TCOptional<CStr> m_GlobalAttributes; // The file core.attributesFile names, at a repository's root.
 		bool m_bIgnoreCase = false;          // The repository's core.ignoreCase, at its root.
+		TCVector<CStr> m_Unreadable;         // Entries whose names hold a backslash, which the file functions read as a separator
 	};
 
 	// One repository the walk has met: the ignore rules gathered on the way down, and a
@@ -1360,6 +1513,7 @@ namespace NMib::NTool::NFormat
 	{
 		TCVector<CFormatWalkFound> m_Found;
 		TCVector<CStr> m_Roots;
+		TCVector<CStr> m_Unreadable; // Files the patterns match and directories, whose names hold a backslash, which aren't checked
 	};
 
 	// Walks the tree the patterns of one directory name, once for all of them, listing directories in parallel on a
@@ -1551,6 +1705,32 @@ namespace NMib::NTool::NFormat
 						DMibError("'{}' cannot be listed"_f << Directory);
 
 					Listing.m_Entries = CFile::fs_FindFilesEx(Directory / "*", EFileAttrib_File | EFileAttrib_Directory, false, false);
+#ifndef DPlatformFamily_Windows
+					// Malterlib's file functions take a backslash for a separator, so an entry whose name holds one would be read as
+					// another path: it is left unchecked and reported, as a file the patterns match or a directory.
+					TCVector<CFile::CFoundFile> Entries;
+					for (auto &Entry : Listing.m_Entries)
+					{
+						CStr Relative;
+						if (!NPerforce::fg_IsLexicallyIn(Entry.m_Path, Directory, Relative) || Relative.f_FindChar('\\') < 0)
+						{
+							// A FIFO, socket or device, which the listing gives as a file, is no file to read, as the walk would read one
+							// the patterns match or a Git rules file: reading a FIFO waits for a writer.
+							auto Name = CFile::fs_GetFile(Entry.m_Path);
+							bool bRead = fg_MatchesFormatWildcards(Name, Wildcards, bMatchAll) || Name == ".gitignore" || Name == ".gitattributes";
+							bool bFile = (Entry.m_Attribs & EFileAttrib_File) && !(Entry.m_Attribs & EFileAttrib_Link);
+							if (bFile && bRead && NPerforce::fg_GetPathType(Entry.m_Path) == NPerforce::EPathType_Special)
+								continue;
+
+							Entries.f_Insert(fg_Move(Entry));
+							continue;
+						}
+
+						if ((Entry.m_Attribs & EFileAttrib_Directory) || fg_MatchesFormatWildcards(Relative, Wildcards, bMatchAll))
+							Listing.m_Unreadable.f_Insert(Entry.m_Path);
+					}
+					Listing.m_Entries = fg_Move(Entries);
+#endif
 					Listing.m_Sizes.f_SetLen(Listing.m_Entries.f_GetLen());
 					Listing.m_HoldsRepository.f_SetLen(Listing.m_Entries.f_GetLen());
 					Listing.m_PerforceIgnored.f_SetLen(Listing.m_Entries.f_GetLen());
@@ -1844,6 +2024,7 @@ namespace NMib::NTool::NFormat
 			}
 
 			auto iRepository = Listing.m_iRepository;
+			Result.m_Unreadable.f_Insert(fg_Move(Listing.m_Unreadable));
 
 			TCVector<CStr> Directories;
 			TCVector<bool> DirectoriesHoldRepository;
@@ -1861,8 +2042,6 @@ namespace NMib::NTool::NFormat
 				if (Listing.m_PerforceIgnored[umint(&Entry - Listing.m_Entries.f_GetArray())])
 					continue;
 
-				// A FIFO, socket or device is listed as a file and read as one, which blocks on a FIFO. Out of scope by decision:
-				// the framework reports no file type that tells them apart, and the trees formatted hold none.
 				bool bDirectory = (Entry.m_Attribs & EFileAttrib_Directory) != 0;
 				if (bDirectory && !mp_bRecursive)
 					continue;
@@ -2158,9 +2337,9 @@ namespace NMib::NTool::NFormat
 
 	private:
 		TCFuture<void> fp_Select(CFormatSelection _Selection);
-		TCFuture<CStr> fp_FindLink(CStr _Path, CStr _Boundary);
+		TCFuture<CStr> fp_FindLink(CStr _Path, CStr _Boundary, bool _bLinkedBoundary);
 		bool fp_HasRange() const;
-		void fp_Schedule(CStr const &_Path, CStr const &_Root, CStr const &_WorkingDirectory, NGit::EGitTextAttribute _TextAttribute);
+		void fp_Schedule(CStr const &_Path, CStr const &_Root, CStr const &_WorkingDirectory, NGit::EGitTextAttribute _TextAttribute, CFormatSelection const &_Selection);
 
 		CFormatOptions mp_Options;
 		TCSharedPointer<CSharedRoundRobinBlockingActors> mp_pBlockingActors;
@@ -2169,6 +2348,7 @@ namespace NMib::NTool::NFormat
 		TCSet<CStr> mp_Scheduled;                                          // A file named by more than one selection is formatted once.
 		TCFutureVector<CFormatJobResult> mp_Pending;
 		TCVector<CFormatJob> mp_Deferred;                                  // Started once the selection is complete.
+		TCVector<CFormatJobResult> mp_Unreadable;                          // The walks' entries the file functions can't name, reported unchecked
 		TCSharedPointer<TCAtomic<bool>> mp_pStopped = fg_Construct(false); // Set when a selection fails.
 	};
 
@@ -2190,12 +2370,12 @@ namespace NMib::NTool::NFormat
 
 	// The first symbolic link of the path and the directories above it, up to the boundary, or empty. The boundary itself
 	// counts too, wherever below it the path lies: a link to a repository, whose root git then spells as the link, or a
-	// directory '-C' names through one.
-	TCFuture<CStr> CFormatRun::fp_FindLink(CStr _Path, CStr _Boundary)
+	// directory '-C' names through one. With _bLinkedBoundary it doesn't.
+	TCFuture<CStr> CFormatRun::fp_FindLink(CStr _Path, CStr _Boundary, bool _bLinkedBoundary)
 	{
 		co_return co_await
 			(
-				g_Dispatch(mp_pBlockingActors->f_Next()) / [_Path, _Boundary]() -> CStr
+				g_Dispatch(mp_pBlockingActors->f_Next()) / [_Path, _Boundary, _bLinkedBoundary]() -> CStr
 				{
 					for (auto Walked = _Path; Walked.f_GetLen() > _Boundary.f_GetLen(); Walked = CFile::fs_GetPath(Walked))
 					{
@@ -2203,7 +2383,7 @@ namespace NMib::NTool::NFormat
 							return Walked;
 					}
 
-					if (_Boundary && CFile::fs_FileExists(_Boundary, EFileAttrib_Link))
+					if (_Boundary && !_bLinkedBoundary && CFile::fs_FileExists(_Boundary, EFileAttrib_Link))
 						return _Boundary;
 
 					return {};
@@ -2216,7 +2396,7 @@ namespace NMib::NTool::NFormat
 	// the configuration does not opt in as excluded. A patch names a file from its repository's root, as git does, unless
 	// the working directory holds the repository below it: then from the working directory, so that repositories side by
 	// side do not name their files alike.
-	void CFormatRun::fp_Schedule(CStr const &_Path, CStr const &_Root, CStr const &_WorkingDirectory, NGit::EGitTextAttribute _TextAttribute)
+	void CFormatRun::fp_Schedule(CStr const &_Path, CStr const &_Root, CStr const &_WorkingDirectory, NGit::EGitTextAttribute _TextAttribute, CFormatSelection const &_Selection)
 	{
 		// Out of scope by decision: a file named twice in different case on a file system that ignores case is two jobs, the
 		// second of which finds the file changed by the first and fails without writing.
@@ -2238,6 +2418,7 @@ namespace NMib::NTool::NFormat
 		Job.m_Mode = mp_Options.m_Mode;
 		Job.m_pCancelled = mp_Options.m_pCancelled;
 		Job.m_pStopped = mp_pStopped;
+		Job.m_bDecodedIsText = _Selection.m_bDecodedIsText;
 		if (mp_Options.m_PatchRoot)
 			Job.m_PatchRoot = mp_Options.m_PatchRoot;
 		else if (_Root.f_StartsWith(_WorkingDirectory + "/"))
@@ -2284,7 +2465,7 @@ namespace NMib::NTool::NFormat
 			auto Boundary = Root ? Root : fg_GetFormatBoundary(WorkingDirectory, CFile::fs_GetPath(Path));
 
 			// A file reached through a linked directory lies outside the tree whose configuration it would be formatted by.
-			if (auto Link = co_await fp_FindLink(Path, Boundary))
+			if (auto Link = co_await fp_FindLink(Path, Boundary, false))
 			{
 				if (Link == Path)
 					co_return DMibErrorInstance("Refusing to format the symbolic link '{}'"_f << Path);
@@ -2292,7 +2473,7 @@ namespace NMib::NTool::NFormat
 				co_return DMibErrorInstance("Refusing to format '{}' through the symbolic link '{}'"_f << Path << Link);
 			}
 
-			fp_Schedule(Path, Boundary, WorkingDirectory, NGit::EGitTextAttribute::mc_Unspecified);
+			fp_Schedule(Path, Boundary, WorkingDirectory, NGit::EGitTextAttribute::mc_Unspecified, _Selection);
 		}
 
 		// The patterns of one directory share its walk: '*.c,*.h' lists each directory once, not once a pattern.
@@ -2311,9 +2492,10 @@ namespace NMib::NTool::NFormat
 			if (!_Selection.m_pPerforceIgnore)
 				Root = co_await mp_RootResolver(&CFormatRootResolver::f_Resolve, Directory);
 
-			// The walk follows no symbolic link, the directories a pattern names to start in included.
+			// The walk follows no symbolic link, the directories a pattern names to start in included. A Perforce root, which no
+			// git spells, is walked as it is selected, also through a link, which bounds the walk.
 			auto Boundary = Root ? Root : fg_GetFormatBoundary(WorkingDirectory, Directory);
-			if (auto Link = co_await fp_FindLink(Directory, Boundary))
+			if (auto Link = co_await fp_FindLink(Directory, Boundary, _Selection.m_pPerforceIgnore && Boundary == WorkingDirectory))
 				co_return DMibErrorInstance("Refusing to walk the symbolic link '{}'"_f << Link);
 
 			TCActor<CFormatWalk> Walk = fg_ConstructActor<CFormatWalk>
@@ -2348,7 +2530,15 @@ namespace NMib::NTool::NFormat
 			;
 
 			for (auto &Found : Walked.m_Found)
-				fp_Schedule(Found.m_Path, Walked.m_Roots[Found.m_iRoot], WorkingDirectory, Found.m_TextAttribute);
+				fp_Schedule(Found.m_Path, Walked.m_Roots[Found.m_iRoot], WorkingDirectory, Found.m_TextAttribute, _Selection);
+
+			for (auto &Path : Walked.m_Unreadable)
+			{
+				auto &Unreadable = mp_Unreadable.f_Insert();
+				Unreadable.m_Path = Path;
+				Unreadable.m_Outcome = EFormatOutcome::mc_Excluded;
+				Unreadable.m_Report = "{}: not checked: its name holds a backslash, which the file functions read as a separator\n"_f << Path;
+			}
 		}
 
 		co_return {};
@@ -2376,7 +2566,13 @@ namespace NMib::NTool::NFormat
 		if (!pSelectionError)
 		{
 			if (mp_Scheduled.f_IsEmpty() && mp_Options.m_bRequireFiles)
+			{
+				// The files left unchecked are reported also where nothing else matched, as they are what did.
+				for (auto const &Unreadable : mp_Unreadable)
+					_Sink.m_fReport(Unreadable.m_Report);
+
 				co_return DMibErrorInstance("No files matched the requested selection");
+			}
 
 			if (fp_HasRange() && mp_Scheduled.f_GetLen() != 1)
 				co_return DMibErrorInstance("Range options require exactly one selected file; {} were selected"_f << mp_Scheduled.f_GetLen());
@@ -2402,6 +2598,7 @@ namespace NMib::NTool::NFormat
 			}
 		}
 
+		Results.f_Insert(fg_Move(mp_Unreadable));
 		Results.f_Sort
 			(
 				[](CFormatJobResult const &_Left, CFormatJobResult const &_Right)
