@@ -437,7 +437,20 @@ repository's ignore rules, as a tree of checked-out dependencies needs.
 
 Format writes in place by default. `--check` reports without writing and
 `--diff` prints the proposed unified patch to standard output without writing;
-combining them is rejected. `--jobs N` bounds how many files are formatted
+combining them is rejected. A file is replaced by renaming a new one over it,
+which its permissions don't stop: a read-only file of a Perforce workspace,
+one the workspace has not opened, is opened for edit before it is replaced, and
+reported as `<path>: opened for edit in Perforce`, so that it does not end up
+changed in no changelist, where `p4 opened` misses it and a sync overwrites it.
+`./mib format` opens the files of a Perforce root in the root's workspace, with
+the settings that found the root, and a file outside a git repository in the
+workspace of the `.p4config` file above it inside the project's root, but of none
+above it. A file that cannot be opened fails, unwritten. `MTool Format` run on
+its own has no project and opens nothing. A read-only file that no workspace
+opens is replaced as one outside Perforce is when its permissions alone make it
+read-only, while one the system marks read-only, as the immutable flag does on
+macOS, cannot be replaced and fails, unwritten. `--check` and `--diff` open
+nothing. `--jobs N` bounds how many files are formatted
 concurrently and defaults to a bounded host-capacity value; `--jobs 1` uses the
 same code path. A walk's files are processed largest first, so the small files
 are what is left when the run winds down, and results are reported in sorted

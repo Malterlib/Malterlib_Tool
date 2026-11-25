@@ -4,6 +4,7 @@
 #include "Malterlib_Tool_TestHelpers.h"
 
 #include <Mib/Concurrency/AsyncDestroy>
+#include <Mib/Core/OnScopeExitCatch>
 #include <Mib/String/Appender>
 
 // The Perforce headers use Malterlib's types without their namespaces.
@@ -1718,7 +1719,7 @@ namespace NMib::NTool
 		};
 
 		// A Perforce root's workspace on a server: mib validate's changed lines are those of the files opened in it, or submitted
-		// after a changelist.
+		// after a changelist, and mib format opens a read-only file it changes for edit.
 		DMibTestSuite("PerforceRootWorkspace") -> TCFuture<void>
 		{
 			auto Capture = co_await (g_CaptureExceptions % "Testing mib format and validate in the workspace of a Perforce root");
@@ -1743,6 +1744,9 @@ namespace NMib::NTool
 			TCVector<CPerforceFile> FirstFiles{{"Opened.cpp", gc_Formatted}, {"Changed.cpp", gc_Formatted}, {"Unopened.cpp", gc_Formatted}};
 			TCVector<CPerforceFile> SecondFiles{{"Changed.cpp", gc_Formatted + "\nint  g_Changed;\n"}};
 			TCVector<CStr> OpenedFiles{"Opened.cpp"};
+
+			// A path holding what p4 reads as a file specification's syntax.
+			FirstFiles.f_Insert({"With@At/Special%Name.cpp", gc_Formatted});
 
 			// Opened with a UTF-8 signature, as the revision has it, and with CRLF, which p4 diff reads as a change of each line where
 			// the client's lines end in LF, as they do outside Windows.
@@ -1791,7 +1795,8 @@ namespace NMib::NTool
 
 			// Changed in the workspace without being opened, and read-only as a file the workspace has not opened is.
 			Repo.f_Write("Unopened.cpp", gc_Unformatted);
-			for (auto pName : {"Changed.cpp", "Unopened.cpp"})
+			Repo.f_Write("With@At/Special%Name.cpp", gc_Unformatted);
+			for (auto pName : {"Changed.cpp", "Unopened.cpp", "With@At/Special%Name.cpp"})
 			{
 				auto Path = Repo.m_Path / pName;
 #ifdef DPlatformFamily_Windows
@@ -1848,6 +1853,25 @@ namespace NMib::NTool
 					;
 
 					return Repo.f_Tool(fg_Move(_Params), true);
+				}
+			;
+
+			auto fOpened = [&]() -> TCUnsafeFuture<TCVector<CStr>>
+				{
+					co_return co_await
+						(
+							g_Dispatch(fg_BlockingActor()) / [Connection, Workspace = Repo.m_Path]() -> TCVector<CStr>
+							{
+								NPerforce::CPerforceClientThrow Client(Connection);
+								Client.f_Login(CStr());
+								TCVector<CStr> Opened;
+								Client.f_NoThrow().f_GetOpened(Workspace / "...", CStr(), Opened);
+								Opened.f_Sort();
+
+								return Opened;
+							}
+						)
+					;
 				}
 			;
 
@@ -1922,6 +1946,38 @@ namespace NMib::NTool
 					auto Result = co_await fRun({"validate", "--base", Base});
 					DMibExpect(Result.m_ExitCode, ==, 2u);
 					DMibExpect(Result.f_GetCombinedOut().f_Find(CStr("which '{}' is not"_f << Base)), >=, 0);
+				}
+			}
+
+			{
+				DMibTestPath("Check");
+				auto Result = co_await fRun({"format", "--check"});
+				DMibExpect(Result.m_ExitCode, ==, 1u);
+				auto Opened = co_await fOpened();
+				for (auto pDepotFile : {"//Streams/Main/Changed.cpp", "//Streams/Main/Unopened.cpp", "//Streams/Main/With%40At/Special%25Name.cpp"})
+				{
+					DMibTestPath(pDepotFile);
+					DMibExpect(Opened.f_Contains(pDepotFile), <, 0);
+				}
+			}
+
+			{
+				// A read-only file is opened for edit before it is replaced; one already opened is writable and needs nothing.
+				DMibTestPath("Format");
+				auto Result = co_await fRun({"format"});
+				DMibExpect(Result.m_ExitCode, ==, 0u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("Changed.cpp: opened for edit in Perforce"), >=, 0);
+				DMibExpect(Output.f_Find("Unopened.cpp: opened for edit in Perforce"), >=, 0);
+				DMibExpect(Output.f_Find("Special%Name.cpp: opened for edit in Perforce"), >=, 0);
+				DMibExpect(Output.f_Find("/Opened.cpp: opened for edit in Perforce"), <, 0);
+				DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Unopened.cpp", true), ==, gc_Formatted);
+				DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "With@At/Special%Name.cpp", true), ==, gc_Formatted);
+				auto Opened = co_await fOpened();
+				for (auto pDepotFile : {"//Streams/Main/Changed.cpp", "//Streams/Main/Opened.cpp", "//Streams/Main/Unopened.cpp", "//Streams/Main/With%40At/Special%25Name.cpp"})
+				{
+					DMibTestPath(pDepotFile);
+					DMibExpect(Opened.f_Contains(pDepotFile), >=, 0);
 				}
 			}
 
@@ -3459,8 +3515,8 @@ namespace NMib::NTool
 		};
 
 		// A project that reaches its workspace's root through another spelling, as /tmp and /private/tmp spell one directory on macOS,
-		// is validated with the paths as the workspace spells them, which p4 tells the workspace's paths by, and reports them as the
-		// project spells them. The workspace's root is spelled with a separator at its end.
+		// is validated and formatted with the paths as the workspace spells them, which p4 tells the workspace's paths by, and reports
+		// them as the project spells them. The workspace's root is spelled with a separator at its end.
 		DMibTestSuite("PerforceRootAliasedWorkspace") -> TCFuture<void>
 		{
 			auto Capture = co_await (g_CaptureExceptions % "Testing a Perforce root reached through another spelling of its workspace's root");
@@ -3489,7 +3545,7 @@ namespace NMib::NTool
 				(
 					&NPerforce::CPerforceTestServer::f_SubmitFiles
 					, CStr("//Streams/Main")
-					, TCVector<NPerforce::CPerforceTestServer::CFile>{{"Long.txt", "a\n"}}
+					, TCVector<NPerforce::CPerforceTestServer::CFile>{{"Long.txt", "a\n"}, {"Format.cpp", gc_Formatted}}
 					, CStr("Add the files")
 				)
 			;
@@ -3613,6 +3669,16 @@ namespace NMib::NTool
 				CFile::fs_WriteFile(WideFile.m_Workspace, Repo.m_Path / WideFile.m_Name);
 			}
 
+			// Changed without being opened, and read-only as a file the workspace has not opened is.
+			CStr Unopened = Repo.m_Path / "Format.cpp";
+			CFile::fs_MakeFileWritable(Unopened);
+			Repo.f_Write("Format.cpp", gc_Unformatted);
+#ifdef DPlatformFamily_Windows
+			CFile::fs_SetAttributes(Unopened, CFile::fs_GetAttributes(Unopened) | EFileAttrib_ReadOnly);
+#else
+			CFile::fs_SetAttributes(Unopened, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_GroupRead | EFileAttrib_EveryoneRead);
+#endif
+
 			auto fRun = [&](CStr const &_Command, TCVector<CStr> _Params)
 				{
 					TCVector<CStr> Params = {_Command};
@@ -3694,6 +3760,16 @@ namespace NMib::NTool
 				DMibExpect(Result.m_ExitCode, ==, 1u);
 				DMibExpect(Output.f_Find("RawBase.txt:1:"), >=, 0);
 				DMibExpect(Output.f_Find("RawBase.txt:3:"), >=, 0);
+			}
+
+			{
+				// A read-only file is opened for edit as the workspace spells it.
+				DMibTestPath("Format");
+				auto Result = co_await fRun("format", {});
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Result.m_ExitCode, ==, 0u);
+				DMibExpect(Output.f_Find("Format.cpp: opened for edit in Perforce"), >=, 0);
+				DMibExpect(CFile::fs_ReadStringFromFile(Unopened, true), ==, gc_Formatted);
 			}
 
 			co_return {};
@@ -4175,6 +4251,282 @@ namespace NMib::NTool
 				DMibExpect(Output.f_Find("Mixed.txt:3:"), >=, 0);
 				DMibExpect(Output.f_Find("Mixed.txt:1:"), <, 0);
 			}
+
+			co_return {};
+		};
+
+#ifdef DPlatformFamily_macOS
+		// The immutable flag, the system's read-only mark on macOS, which no workspace sets, leaves a file of a Perforce root as it
+		// is, unopened, also one opened already, and no staging file behind.
+		DMibTestSuite("PerforceRootImmutable") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing immutable files of a Perforce root");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root's immutable files: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			co_await Server
+				(
+					&NPerforce::CPerforceTestServer::f_SubmitFiles
+					, CStr("//Streams/Main")
+					, TCVector<CPerforceFile>{{"Locked.cpp", gc_Unformatted}, {"Opened.cpp", gc_Unformatted}}
+					, CStr("Add the files")
+				)
+			;
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, Workspace = Repo.m_Path]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+						Client.f_OpenForEdit(Workspace / "Opened.cpp");
+					}
+					% "Failed to open the file"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			auto fSetImmutable = [&](CStr const &_Path, bool _bImmutable)
+				{
+					auto Attributes = CFile::fs_GetAttributes(_Path);
+					CFile::fs_SetAttributes(_Path, _bImmutable ? Attributes | EFileAttrib_ReadOnly : Attributes & ~EFileAttrib_ReadOnly);
+				}
+			;
+			// Armed before the flags are set, so a failure leaves no immutable file behind for the fixture to remove.
+			auto fRestore = [&]
+				{
+					for (auto pName : {"Locked.cpp", "Opened.cpp"})
+						fSetImmutable(Repo.m_Path / pName, false);
+					for (auto &File : CFile::fs_FindFiles(Repo.m_Path / "*.mtool-format-*"))
+						fSetImmutable(File, false);
+				}
+			;
+			auto Restore = g_OnScopeExitCatch / [&]
+				{
+					fRestore();
+				}
+			;
+			for (auto pName : {"Locked.cpp", "Opened.cpp"})
+				fSetImmutable(Repo.m_Path / pName, true);
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"format"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+
+			auto Staged = CFile::fs_FindFiles(Repo.m_Path / "*.mtool-format-*");
+			Restore.f_Clear();
+			fRestore();
+
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, !=, 0u);
+			DMibExpect(Output.f_Find("Locked.cpp: is read-only"), >=, 0);
+			DMibExpect(Output.f_Find("Opened.cpp: is read-only"), >=, 0);
+			DMibExpect(Staged, ==, TCVector<CStr>{});
+			DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Locked.cpp", true), ==, gc_Unformatted);
+			DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Opened.cpp", true), ==, gc_Unformatted);
+
+			auto Opened = co_await
+				(
+					g_Dispatch(fg_BlockingActor()) / [Connection, Workspace = Repo.m_Path]() -> TCVector<CStr>
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						TCVector<CStr> Opened;
+						Client.f_NoThrow().f_GetOpened(Workspace / "...", CStr(), Opened);
+
+						return Opened;
+					}
+				)
+			;
+			DMibExpect(Opened.f_GetLen(), ==, 1u);
+
+			co_return {};
+		};
+#endif
+
+#ifndef DPlatformFamily_Windows
+		// A file opened for edit stays open when the write after it fails, here in a directory nothing can be created in, so the
+		// open is reported with the failure.
+		DMibTestSuite("PerforceRootOpenedNotWritten") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a Perforce root's file opened but not written");
+
+			if (NPerforce::CPerforceTestServer::fs_FindServerExecutable().f_IsEmpty())
+			{
+				DMibConOut("{}\n", "Skipping the tests of a Perforce root's unwritten files: p4d was not found in PATH");
+				co_return {};
+			}
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			TCActor<NPerforce::CPerforceTestServer> Server = fg_Construct<NPerforce::CPerforceTestServer>();
+			co_await Server(&NPerforce::CPerforceTestServer::f_Start, Repo.m_Root / "Perforce", CStr("tester"));
+			auto ServerCleanup = co_await fg_AsyncDestroy(Server);
+			CStr Port = co_await Server(&NPerforce::CPerforceTestServer::f_GetPort);
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateStreamDepot, CStr("Streams"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateMainlineStream, CStr("//Streams/Main"));
+
+			using CPerforceFile = NPerforce::CPerforceTestServer::CFile;
+			co_await Server(&NPerforce::CPerforceTestServer::f_SubmitFiles, CStr("//Streams/Main"), TCVector<CPerforceFile>{{"Locked/Source.cpp", gc_Unformatted}}, CStr("Add the file"));
+			co_await Server(&NPerforce::CPerforceTestServer::f_CreateClient, CStr("TestWork"), CStr("//Streams/Main"), Repo.m_Path);
+			auto Connection = co_await Server(&NPerforce::CPerforceTestServer::f_GetConnectionInfo, CStr("TestWork"));
+			co_await
+				(
+					g_Dispatch(fg_BlockingActor())
+					/ [Connection, Workspace = Repo.m_Path]()
+					{
+						NPerforce::CPerforceClientThrow Client(Connection);
+						Client.f_Login(CStr());
+						Client.f_Sync(Workspace / "...");
+					}
+					% "Failed to sync the workspace"
+				)
+			;
+
+			Repo.f_MakePerforceRoot("P4PORT={}\nP4USER=tester\nP4CLIENT=TestWork\n"_f << Port);
+			Repo.m_Environment["P4TICKETS"] = Connection.m_TicketFile;
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			// Read-only, as a file the workspace has not opened is, so it is opened for edit before the write fails.
+			CStr Locked = Repo.m_Path / "Locked";
+			auto FileAttributes = CFile::fs_GetAttributes(Locked / "Source.cpp");
+			CFile::fs_SetAttributes
+				(
+					Locked / "Source.cpp"
+					, (FileAttributes & ~(EFileAttrib_UserWrite | EFileAttrib_GroupWrite | EFileAttrib_EveryoneWrite)) | EFileAttrib_UnixAttributesValid
+				)
+			;
+			auto DirectoryAttributes = CFile::fs_GetAttributes(Locked);
+			auto Unlock = g_OnScopeExitCatch / [&]
+				{
+					CFile::fs_SetAttributes(Locked, DirectoryAttributes | EFileAttrib_UnixAttributesValid);
+				}
+			;
+			CFile::fs_SetAttributes(Locked, (DirectoryAttributes & ~(EFileAttrib_UserWrite | EFileAttrib_GroupWrite | EFileAttrib_EveryoneWrite)) | EFileAttrib_UnixAttributesValid);
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"format"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+					}
+					, true
+				)
+			;
+			Unlock.f_Clear();
+			CFile::fs_SetAttributes(Locked, DirectoryAttributes | EFileAttrib_UnixAttributesValid);
+
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Result.m_ExitCode, !=, 0u);
+			DMibExpect(Output.f_Find("Locked/Source.cpp: opened for edit in Perforce"), >=, 0);
+			DMibExpect(CFile::fs_ReadStringFromFile(Locked / "Source.cpp", true), ==, gc_Unformatted);
+
+			co_return {};
+		};
+#endif
+
+		// MTool Format run on its own has no project, so no .p4config file, which any directory can hold, opens a read-only file for
+		// edit, and nothing the settings name runs: a file without write permission is replaced as a file outside Perforce is, and
+		// one the system marks read-only, which the replacement can't take the place of, is left as it is.
+		DMibTestSuite("FormatStandaloneReadsNoP4Config") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing MTool Format with a .p4config file beside a read-only file");
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+			Repo.f_SetPerforceEnvironment();
+
+			CStr Directory = Repo.m_Root / "Standalone";
+			CStr Marker = Repo.m_Root / "Ran";
+			CStr Script = Directory / "Port.sh";
+			CStr Source = Directory / "Source.cpp";
+			CFile::fs_CreateDirectory(Directory);
+			CFile::fs_WriteStringToFile(Script, "#!/bin/sh\ntouch \"{}\"\nexit 1\n"_f << Marker, false);
+			CFile::fs_WriteStringToFile(Directory / ".p4config", "P4PORT=rsh:{} {}\nP4CLIENT=Untrusted\n"_f << Repo.m_Shell << Script, false);
+			CFile::fs_WriteStringToFile(Directory / ".editorconfig", g_FormatConfiguration, false);
+
+			auto fFormat = [&](EFileAttrib _ReadOnly) -> TCUnsafeFuture<CProcessLaunchActor::CSimpleLaunchResult>
+				{
+					CFile::fs_WriteStringToFile(Source, gc_Unformatted, false);
+					auto Attributes = CFile::fs_GetAttributes(Source);
+					auto Restore = g_OnScopeExitCatch / [&]
+						{
+							CFile::fs_SetAttributes(Source, (CFile::fs_GetAttributes(Source) & ~EFileAttrib_ReadOnly) | (Attributes & EFileAttrib_UserWrite));
+						}
+					;
+					CFile::fs_SetAttributes(Source, (Attributes | (_ReadOnly & EFileAttrib_ReadOnly)) & ~(_ReadOnly & EFileAttrib_UserWrite));
+
+					co_return co_await Repo.f_Tool({"Format", "--no-color", "-C", Directory, "-f", "Source.cpp"});
+				}
+			;
+
+			if (CFile::fs_GetSupportedAttributes() & EFileAttrib_UserWrite)
+			{
+				DMibTestPath("NoWritePermission");
+				auto Result = co_await fFormat(EFileAttrib_UserWrite | EFileAttrib_UnixAttributesValid);
+				DMibExpect(Result.m_ExitCode, ==, 0u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("opened for edit"), <, 0);
+				DMibExpect(CFile::fs_ReadStringFromFile(Source, true), ==, gc_Formatted);
+			}
+
+#if defined(DPlatformFamily_macOS) || defined(DPlatformFamily_Windows)
+			// Where the read-only mark is the macOS immutable flag or the read-only attribute of Windows, not the missing write
+			// permission as on Linux.
+			{
+				DMibTestPath("MarkedReadOnly");
+				auto Result = co_await fFormat(EFileAttrib_ReadOnly);
+				DMibExpect(Result.m_ExitCode, !=, 0u);
+				DMibExpect(Result.f_GetCombinedOut().f_Find("Source.cpp: is read-only"), >=, 0);
+				DMibExpect(CFile::fs_ReadStringFromFile(Source, true), ==, gc_Unformatted);
+				DMibExpect(CFile::fs_FindFiles(Directory / "Source.cpp.mtool-format-*"), ==, TCVector<CStr>{});
+			}
+#endif
+
+			DMibExpectFalse(CFile::fs_FileExists(Marker));
 
 			co_return {};
 		};

@@ -828,12 +828,25 @@ namespace NMib::NTool::NFormat
 		{
 			CStr m_Error;
 			bool m_bCancelled = false;
+			bool m_bOpenedForEdit = false;
 		};
 
 		auto Formatted = fg_ApplyCodeFormattingEdits(Snapshot, Analysis.m_Edits);
 		auto Written = co_await
 			(
-				g_Dispatch(mp_pBlockingActors->f_Next()) / [Path = _Job.m_Path, Snapshot, Formatted, pCancelled = _Job.m_pCancelled, pStopped = _Job.m_pStopped]() -> CWritten
+				g_Dispatch(mp_pBlockingActors->f_Next()) /
+				[
+					Path = _Job.m_Path
+					, Root = _Job.m_Root
+					, Snapshot
+					, Formatted
+					, pCancelled = _Job.m_pCancelled
+					, pStopped = _Job.m_pStopped
+					, pWorkspace = _Job.m_pPerforceWorkspace
+					, ProjectRoot = _Job.m_ProjectRoot
+					, pPerforceEnvironment = _Job.m_pPerforceEnvironment
+				]
+				() -> CWritten
 				{
 					auto fCancelled = [&]
 						{
@@ -865,43 +878,121 @@ namespace NMib::NTool::NFormat
 
 					auto Attributes = CFile::fs_GetAttributes(Path);
 
-					// The staging file is this run's own: a fresh name, created only where none exists, so nothing a user keeps
-					// beside the file is overwritten or removed.
-					CStr Temporary = "{}.mtool-format-{}"_f << Path << NCryptography::fg_FastRandomID(12);
-					bool bCreated = false;
-
-					auto Cleanup = g_OnScopeExitCatch / [&Temporary, &bCreated]
+					// A read-only file of a Perforce workspace can be one the workspace has not opened, which the rename below,
+					// needing only a writable directory, would change in no changelist, so it is opened for edit first. A file of a
+					// git repository is git's. The macOS immutable flag and the read-only attribute of Windows stop the rename, where
+					// the missing write permission, the read-only mark elsewhere, doesn't.
+#if defined(DPlatformFamily_macOS) || defined(DPlatformFamily_Windows)
+					constexpr bool c_bReadOnlyStopsReplace = true;
+#else
+					constexpr bool c_bReadOnlyStopsReplace = false;
+#endif
+					bool bOpenedForEdit = false;
+					bool bReadOnly = !CFile::fs_IsFileWritable(Attributes);
+#ifdef DPlatformFamily_macOS
+					// The immutable flag, which no workspace sets, and which p4 edit can clear: the file is left as it is, unopened.
+					if (Attributes & EFileAttrib_ReadOnly)
+						return {.m_Error = "is read-only"};
+#endif
+					if (bReadOnly)
+					{
+						try
 						{
-							if (bCreated && CFile::fs_FileExists(Temporary, EFileAttrib_File))
-								CFile::fs_DeleteFile(Temporary);
+							if (pWorkspace)
+							{
+								pWorkspace->f_OpenForEdit(Path);
+								bOpenedForEdit = true;
+							}
+							else if (ProjectRoot && pPerforceEnvironment && !CFile::fs_FileExists(Root / ".git"))
+							{
+								// Only a .p4config file in the project gives the settings, as trusted as its build files are, as its
+								// port can name a command, read with the environment and registry generation reads them with. Without
+								// one, as MTool Format run alone has none, the file is replaced as one outside Perforce is.
+								auto const &Settings = *pPerforceEnvironment;
+								if (auto pClient = NPerforce::CPerforceClientThrow::fs_GetFromP4Config(Path, Settings.m_Environment, Settings.m_Registry, ProjectRoot))
+								{
+									auto Spelling = CPerforceRootSpelling::fs_Find(CFile::fs_GetPath(Path), pClient->f_GetClientRoot());
+									pClient->f_OpenForEdit(NPerforce::CPerforceClient::fs_EscapeFileName(Spelling.f_ServerPath(Path)));
+									bOpenedForEdit = true;
+								}
+							}
+						}
+						catch (NException::CException const &_Exception)
+						{
+							return {.m_Error = "is read-only and could not be opened for edit in Perforce: {}"_f << _Exception.f_GetErrorStr()};
+						}
+					}
+
+					// A file opened for edit stays open whatever happens to the write, so the open is reported with any outcome.
+					auto fReplace = [&]() -> CWritten
+						{
+							if (bOpenedForEdit)
+								Attributes = CFile::fs_GetAttributes(Path);
+
+							// A read-only mark that stops the rename, which an open for edit left or no workspace cleared, fails the
+							// file before the staging file, which would keep the mark.
+							if (c_bReadOnlyStopsReplace && (Attributes & EFileAttrib_ReadOnly))
+								return {.m_Error = "is read-only"};
+
+							// The staging file is this run's own: a fresh name, created only where none exists, so nothing a user keeps
+							// beside the file is overwritten or removed.
+							CStr Temporary = "{}.mtool-format-{}"_f << Path << NCryptography::fg_FastRandomID(12);
+							bool bCreated = false;
+
+							auto Cleanup = g_OnScopeExitCatch / [&Temporary, &bCreated]
+								{
+									if (bCreated && CFile::fs_FileExists(Temporary, EFileAttrib_File))
+										CFile::fs_DeleteFile(Temporary);
+								}
+							;
+
+							{
+								CFile File;
+								// Where files have permission bits, readable by its owner alone until it takes the file's, which can be as
+								// private.
+								File.f_Open(Temporary, EFileOpen_Write | EFileOpen_DontOpenExisting, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_UserWrite);
+								bCreated = true;
+								File.f_Write(Formatted.f_GetStr(), Formatted.f_GetLen());
+								File.f_Close();
+							}
+
+							// The permission bits only apply when marked valid. An access control list, extended attributes and the owner
+							// aren't carried over to the replacement.
+							CFile::fs_SetAttributes(Temporary, Attributes | EFileAttrib_UnixAttributesValid);
+							if (auto Changed = fChanged())
+								return {.m_Error = Changed};
+
+							if (fCancelled())
+								return {.m_bCancelled = true};
+
+							CFile::fs_RenameFile(Temporary, Path);
+							bCreated = false;
+
+							return {};
 						}
 					;
 
+					CWritten Written;
+					try
 					{
-						CFile File;
-						// Readable by its owner alone until it takes the file's permissions, which can be as private.
-						File.f_Open(Temporary, EFileOpen_Write | EFileOpen_DontOpenExisting, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_UserWrite);
-						bCreated = true;
-						File.f_Write(Formatted.f_GetStr(), Formatted.f_GetLen());
-						File.f_Close();
+						Written = fReplace();
 					}
+					catch (NException::CException const &_Exception)
+					{
+						if (!bOpenedForEdit)
+							throw;
 
-					// The permission bits only apply when marked valid. Out of scope by decision: an access control list, extended
-					// attributes and the owner are not carried over to the replacement, which git keeps none of in a checkout.
-					CFile::fs_SetAttributes(Temporary, Attributes | EFileAttrib_UnixAttributesValid);
-					if (auto Changed = fChanged())
-						return {.m_Error = Changed};
+						Written.m_Error = _Exception.f_GetErrorStr();
+					}
+					Written.m_bOpenedForEdit = bOpenedForEdit;
 
-					if (fCancelled())
-						return {.m_bCancelled = true};
-
-					CFile::fs_RenameFile(Temporary, Path);
-					bCreated = false;
-
-					return {};
+					return Written;
 				}
 			)
 		;
+		if (Written.m_bOpenedForEdit)
+			Result.m_Report += "{}: opened for edit in Perforce\n"_f << _Job.m_Path;
+
 		if (Written.m_bCancelled)
 			Result.m_Outcome = EFormatOutcome::mc_Unchanged;
 		else if (Written.m_Error)
@@ -911,6 +1002,44 @@ namespace NMib::NTool::NFormat
 		}
 
 		co_return Result;
+	}
+
+	CFormatPerforceWorkspace::CFormatPerforceWorkspace(CStr const &_Root, NPerforce::CPerforceIgnore::CSettings const &_Settings, TCMap<CStr, CStr> const &_Environment)
+		: mp_Root(_Root)
+		, mp_Settings(_Settings)
+		, mp_Environment(_Environment)
+	{
+	}
+
+	// The client is closed by f_Close, as the last reference can be released on an actor that must not block.
+	CFormatPerforceWorkspace::~CFormatPerforceWorkspace()
+	{
+		DMibCheck(!mp_pClient);
+	}
+
+	// Blocks on the server, and throws where the file can't be opened.
+	void CFormatPerforceWorkspace::f_OpenForEdit(CStr const &_Path)
+	{
+		DMibLock(mp_Lock);
+
+		// As p4 run in the root, whatever the current directory, with its .p4config and enviro file.
+		if (!mp_pClient)
+		{
+			TCUniquePointer<NPerforce::CPerforceClientThrow> pClient = fg_Construct(NPerforce::CPerforceClient::fs_GetConnectionInfo(mp_Root, mp_Settings, mp_Environment));
+			pClient->f_Login(CStr(), mp_Root);
+			mp_Spelling = CPerforceRootSpelling::fs_Find(mp_Root, pClient->f_GetClientRoot());
+			mp_pClient = fg_Move(pClient);
+		}
+
+		// A path is a file specification to p4, where '@', '#', '%' and '*' have meanings of their own.
+		mp_pClient->f_OpenForEdit(NPerforce::CPerforceClient::fs_EscapeFileName(mp_Spelling.f_ServerPath(_Path)));
+	}
+
+	// Blocks on the server: run on a blocking actor once nothing opens files for edit any more.
+	void CFormatPerforceWorkspace::f_Close()
+	{
+		DMibLock(mp_Lock);
+		mp_pClient.f_Clear();
 	}
 
 	// p4 tells the paths in a workspace by their names, so it takes them only as the client spec spells the root, while a project can
@@ -2418,7 +2547,10 @@ namespace NMib::NTool::NFormat
 		Job.m_Mode = mp_Options.m_Mode;
 		Job.m_pCancelled = mp_Options.m_pCancelled;
 		Job.m_pStopped = mp_pStopped;
+		Job.m_pPerforceWorkspace = _Selection.m_pPerforceWorkspace;
 		Job.m_bDecodedIsText = _Selection.m_bDecodedIsText;
+		Job.m_ProjectRoot = mp_Options.m_ProjectRoot;
+		Job.m_pPerforceEnvironment = mp_Options.m_pPerforceEnvironment;
 		if (mp_Options.m_PatchRoot)
 			Job.m_PatchRoot = mp_Options.m_PatchRoot;
 		else if (_Root.f_StartsWith(_WorkingDirectory + "/"))
@@ -3166,8 +3298,36 @@ namespace NMib::NTool::NFormat
 
 	TCFuture<CFormatRunResult> fg_RunFormat(TCVector<CFormatSelection> _Selections, CFormatOptions _Options, CFormatSink _Sink)
 	{
+		TCVector<TCSharedPointer<CFormatPerforceWorkspace>> Workspaces;
+		for (auto const &Selection : _Selections)
+		{
+			if (Selection.m_pPerforceWorkspace)
+				Workspaces.f_Insert(Selection.m_pPerforceWorkspace);
+		}
+
+		// The workspaces are closed once the run is destroyed, after its last job, also where the run ends early.
 		TCActor<CFormatRun> Run = fg_ConstructActor<CFormatRun>(fg_Move(_Options));
-		auto DestroyRun = co_await fg_AsyncDestroy(Run);
+		auto DestroyRun = co_await fg_AsyncDestroy
+			(
+				[Run, Workspaces]() -> TCFuture<void>
+				{
+					auto Destroyed = Run;
+					auto Closed = Workspaces;
+					auto Result = co_await fg_Move(Destroyed).f_Destroy().f_Wrap();
+					co_await
+						(
+							g_Dispatch(fg_BlockingActor()) / [Closed]
+							{
+								for (auto const &pWorkspace : Closed)
+									pWorkspace->f_Close();
+							}
+						)
+					;
+
+					co_return fg_Move(Result);
+				}
+			)
+		;
 
 		co_return co_await Run(&CFormatRun::f_Run, fg_Move(_Selections), fg_Move(_Sink));
 	}

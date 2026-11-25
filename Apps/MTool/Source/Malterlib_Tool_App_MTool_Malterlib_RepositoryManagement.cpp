@@ -17,6 +17,17 @@ namespace NMib::NTool
 	{
 		uint32 m_ExitCode = 0;
 	};
+
+	// The registry's Perforce settings, which the build system reads once, read on a blocking actor. The build system outlives the
+	// command.
+	TCFuture<NPerforce::CPerforceIgnore::CRegistrySettings> fg_GetPerforceRegistry(CBuildSystem const &_BuildSystem)
+	{
+		return g_Dispatch(fg_BlockingActor()) / [pBuildSystem = &_BuildSystem]()
+			{
+				return pBuildSystem->f_GetPerforceRegistry();
+			}
+		;
+	}
 }
 
 void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
@@ -484,7 +495,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 				"Names"_o= _o["format"]
 				, "Description"_o= "Format the sources of every repository that sets Repository.Format, as MTool Format does for one: "
 				"the files that opt in with malterlib_format = malterlib, malterlib-c or malterlib-buildsystem in .editorconfig, found under the repository root. "
-				"A Perforce root, which has no %Repository, is formatted when PerforceRoot.Format is set, without what its P4IGNORE files exclude.\n"
+				"A Perforce root, which has no %Repository, is formatted when PerforceRoot.Format is set, without what its P4IGNORE files exclude, and "
+				"a read-only file it changes there is opened for edit in the root's workspace first.\n"
 				, "Category"_o= "Repository management"
 				, "Options"_o=
 				{
@@ -594,6 +606,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 									auto Settings = NPerforce::CPerforceIgnore::fs_GetSettings(Location, _pBuildSystem->f_GetPerforceEnvironment(), _pBuildSystem->f_GetPerforceRegistry());
 									Selection.m_pPerforceIgnore = fg_Construct(Settings);
 
+									// A read-only file it changes is opened for edit in the root's workspace, connected as the settings
+									// that found the root say.
+									Selection.m_pPerforceWorkspace = fg_Construct(Location, Settings, _pBuildSystem->f_GetGenerationEnvironment());
+
 									// The repositories in the root are trees of their own, also before they are cloned.
 									for (auto &Other : AllLocations)
 									{
@@ -625,6 +641,13 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							auto RunOptions = Options;
 							RunOptions.m_pCancelled = _pBuildSystem->f_GetCancelledPointer();
 							RunOptions.m_PatchRoot = _pBuildSystem->f_GetBaseDir();
+							RunOptions.m_ProjectRoot = _pBuildSystem->f_GetBaseDir();
+							auto PerforceRegistry = co_await NMib::NTool::fg_GetPerforceRegistry(*_pBuildSystem);
+							RunOptions.m_pPerforceEnvironment = fg_Construct
+								(
+									NMib::NTool::NFormat::CFormatPerforceEnvironment{.m_Environment = _pBuildSystem->f_GetGenerationEnvironment(), .m_Registry = fg_Move(PerforceRegistry)}
+								)
+							;
 							auto Ran = co_await NMib::NTool::NFormat::fg_RunFormat(fg_Move(Selections), fg_Move(RunOptions), fg_Move(Sink)).f_Wrap();
 							co_await _pBuildSystem->f_CheckCancelled();
 

@@ -11,6 +11,7 @@
 #include <Mib/Function/Function>
 #include <Mib/Git/Ignore>
 #include <Mib/Perforce/Ignore>
+#include <Mib/Perforce/Wrapper>
 
 namespace NMib::NTool::NFormat
 {
@@ -43,6 +44,32 @@ namespace NMib::NTool::NFormat
 		NStr::CStr m_ServerRoot; // m_ProjectRoot as the workspace's root spells it
 	};
 
+	// The environment and registry a project's .p4config is read with, as generation reads them, which a run's jobs share.
+	struct CFormatPerforceEnvironment
+	{
+		NContainer::TCMap<NStr::CStr, NStr::CStr> m_Environment;
+		NPerforce::CPerforceIgnore::CRegistrySettings m_Registry;
+	};
+
+	// The workspace of the Perforce root a run formats, which opens a read-only file for edit before it is replaced, so that the
+	// change is in a changelist. Connected with the root's settings on first use, and shared by the jobs of the root.
+	struct CFormatPerforceWorkspace
+	{
+		CFormatPerforceWorkspace(NStr::CStr const &_Root, NPerforce::CPerforceIgnore::CSettings const &_Settings, NContainer::TCMap<NStr::CStr, NStr::CStr> const &_Environment);
+		~CFormatPerforceWorkspace();
+
+		void f_OpenForEdit(NStr::CStr const &_Path);
+		void f_Close();
+
+	private:
+		NThread::CMutual mp_Lock;          // Guards the client, which one thread uses at a time.
+		NStr::CStr mp_Root;
+		NPerforce::CPerforceIgnore::CSettings mp_Settings;
+		NContainer::TCMap<NStr::CStr, NStr::CStr> mp_Environment;
+		NStorage::TCUniquePointer<NPerforce::CPerforceClientThrow> mp_pClient;
+		CPerforceRootSpelling mp_Spelling; // Of mp_Root in the client's workspace
+	};
+
 	struct CFormatJob
 	{
 		bool f_IsCancelled() const;
@@ -70,6 +97,10 @@ namespace NMib::NTool::NFormat
 		NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> m_pCancelled;                   // Once set, the file is left unwritten.
 		NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> m_pStopped;                     // The run's own m_pCancelled, set when its selection fails.
 		NStr::CStr m_PatchRoot;                                                            // With m_bResolveSettings, what patch paths are relative to, when not m_Root.
+		NStorage::TCSharedPointer<CFormatPerforceWorkspace> m_pPerforceWorkspace;          // Opens a read-only file for edit; else, outside git, a .p4config in m_ProjectRoot.
+		NStr::CStr m_ProjectRoot;                                                          // The build system's base directory, or empty for none
+		// With m_ProjectRoot, what its .p4config is read with
+		NStorage::TCSharedPointer<CFormatPerforceEnvironment const> m_pPerforceEnvironment;
 	};
 
 	struct CFormatJobResult
@@ -273,6 +304,9 @@ namespace NMib::NTool::NFormat
 		umint m_nSlowest = 0;                                            // How many of the files that took the longest the run reports.
 		NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> m_pCancelled; // Once set, no further file is scheduled or written.
 		NStr::CStr m_PatchRoot;                                          // Patch paths are relative to it; empty: the file's repository, or the working directory holding it.
+		NStr::CStr m_ProjectRoot;                                        // The build system's base directory, above which no .p4config file opens a file for edit; empty for none
+		// With m_ProjectRoot, what its .p4config is read with
+		NStorage::TCSharedPointer<CFormatPerforceEnvironment const> m_pPerforceEnvironment;
 	};
 
 	struct CFormatSummary
@@ -310,11 +344,12 @@ namespace NMib::NTool::NFormat
 		NContainer::TCVector<NStr::CStr> m_Files;
 		NContainer::TCVector<NStr::CStr> m_Patterns;
 		bool m_bRecursive = false;
-		bool m_bNestedRepositories = false;                                      // A recursive walk also enters the repositories checked out where the one around them ignores them.
-		bool m_bOwnRepository = false;                                           // A recursive walk enters no repository below the one it starts in, ignored or not.
-		NStorage::TCSharedPointer<NPerforce::CPerforceIgnore> m_pPerforceIgnore; // Of the working directory when it is a Perforce root, whose P4IGNORE a walk follows
-		NContainer::TCSet<NStr::CStr> m_ExcludedDirectories;                     // A recursive walk enters none of them.
-		bool m_bDecodedIsText = false;                                             // Given to its jobs (CFormatJob::m_bDecodedIsText).
+		bool m_bNestedRepositories = false;                                       // A recursive walk also enters the repositories checked out where the one around them ignores them.
+		bool m_bOwnRepository = false;                                            // A recursive walk enters no repository below the one it starts in, ignored or not.
+		NStorage::TCSharedPointer<NPerforce::CPerforceIgnore> m_pPerforceIgnore;  // Of the working directory when it is a Perforce root, whose P4IGNORE a walk follows
+		NContainer::TCSet<NStr::CStr> m_ExcludedDirectories;                      // A recursive walk enters none of them.
+		NStorage::TCSharedPointer<CFormatPerforceWorkspace> m_pPerforceWorkspace; // Of the working directory when it is a Perforce root, given to its jobs
+		bool m_bDecodedIsText = false;                                            // Given to its jobs (CFormatJob::m_bDecodedIsText).
 	};
 
 	// One run over every selection: the trees are walked in parallel, a selection's files
