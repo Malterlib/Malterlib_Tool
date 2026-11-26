@@ -4530,6 +4530,44 @@ namespace NMib::NTool
 
 			co_return {};
 		};
+
+		// A .p4config file above the project's root, the build system's base directory, doesn't make it a Perforce root.
+		DMibTestSuite("PerforceRootConfigAboveProject") -> TCFuture<void>
+		{
+			auto Capture = co_await (g_CaptureExceptions % "Testing a .p4config file above the project's root");
+
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+			Repo.f_SetPerforceEnvironment();
+			CFile::fs_DeleteDirectoryRecursive(Repo.m_Path / ".git");
+			CFile::fs_WriteStringToFile(Repo.m_Root / ".p4config", "P4CLIENT=Above\n", false);
+			Repo.f_Write(".editorconfig", g_FormatConfiguration);
+			Repo.f_Write("Source.cpp", gc_Unformatted);
+			Repo.f_Write("Test.MBuildSystem", "Property\n{\n\tPerforceRoot {Format: true}\n}\n");
+
+			auto Result = co_await Repo.f_Tool
+				(
+					{
+						"format"
+						, "--skip-update"
+						, "--no-color"
+						, "--build-system"
+						, Repo.m_Path / "Test.MBuildSystem"
+						, "--output-directory"
+						, Repo.m_Root / "output"
+						, "--no-use-user-settings"
+						, "--no-use-cached-environment"
+						, "--check"
+					}
+					, true
+				)
+			;
+			CStr Output = Result.f_GetCombinedOut();
+			DMibExpect(Output.f_Find("Source.cpp"), <, 0);
+			DMibExpect(Output.f_Find("No repository sets Repository.Format"), >=, 0);
+
+			co_return {};
+		};
 	}
 
 	DMibTestRegister(CFormat_Tests, Malterlib::Tool);

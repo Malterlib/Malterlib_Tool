@@ -358,7 +358,11 @@ p4 does from the `.p4config` files, the environment generation uses, the enviro
 file it selects and the Windows registry, where `p4 set` stores them, but not
 from the environment of a run with a cached one. Its config files are the
 files named `.p4config`, whatever P4CONFIG is, which p4 itself reads only with
-P4CONFIG=.p4config set.
+P4CONFIG=.p4config set. Unlike p4, which reads them in every directory up to
+the file system's root, mib reads none above the project's root, the build
+system's base directory: such a `.p4config` doesn't make the project a
+Perforce root or give it settings, also in the connections mib makes. One that
+is a symbolic link is read as any other file.
 The plugin knows no P4IGNORE, so generating lists what it excludes in the
 root's rules. A build generates again when one of the root's ignore,
 `.p4config` or enviro files changes or is created, or when P4IGNORE,

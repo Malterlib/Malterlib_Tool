@@ -46,7 +46,7 @@ namespace NMib::NTool::NTidy
 		NContainer::TCMap<NStr::CStr, CTidyRepositoryFiles> m_RepositoryFiles; // By location: the files checked repositories check.
 		NStr::CStr m_PerforceRoot;                                             // The checked Perforce root, or empty
 		NContainer::TCMap<NStr::CStr, NStr::CStr> m_PerforceEnvironment;       // The environment generation uses, which the Perforce root's settings and API read
-		NPerforce::CPerforceIgnore::CRegistrySettings m_PerforceRegistry;      // The registry's Perforce settings, which the root's are read with too
+		NPerforce::CPerforceIgnore::CSettings m_PerforceRootSettings;          // With m_PerforceRoot, its settings, read as generation reads them
 		NStorage::TCSharedPointer<NAtomic::TCAtomic<bool>> m_pCancelled;       // Set when the user aborts: no command starts and the running ones stop.
 		bool m_bSorted = false;                                                // Report the diagnostics in path order once all are done, not as they come.
 		bool m_bShowProgress = false;                                          // Report how many commands are left as they run.

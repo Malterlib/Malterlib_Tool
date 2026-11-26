@@ -28,6 +28,16 @@ namespace NMib::NTool
 			}
 		;
 	}
+
+	// The settings of a Perforce root, as generation reads them, from its .p4config and enviro file on a blocking actor.
+	TCFuture<NPerforce::CPerforceIgnore::CSettings> fg_GetPerforceRootSettings(CBuildSystem const &_BuildSystem, CStr const &_Root)
+	{
+		return g_Dispatch(fg_BlockingActor()) / [pBuildSystem = &_BuildSystem, _Root, Environment = _BuildSystem.f_GetPerforceEnvironment(), BaseDir = _BuildSystem.f_GetBaseDir()]()
+			{
+				return NPerforce::CPerforceIgnore::fs_GetSettings(_Root, Environment, pBuildSystem->f_GetPerforceRegistry(), BaseDir);
+			}
+		;
+	}
 }
 
 void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection)
@@ -603,7 +613,7 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								auto &Selection = Selections.f_Insert();
 								if (Location == PerforceRoot)
 								{
-									auto Settings = NPerforce::CPerforceIgnore::fs_GetSettings(Location, _pBuildSystem->f_GetPerforceEnvironment(), _pBuildSystem->f_GetPerforceRegistry());
+									auto Settings = co_await NMib::NTool::fg_GetPerforceRootSettings(*_pBuildSystem, Location);
 									Selection.m_pPerforceIgnore = fg_Construct(Settings);
 
 									// A read-only file it changes is opened for edit in the root's workspace, connected as the settings
@@ -827,11 +837,10 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 								co_return CBuildSystem::ERetry_None;
 							}
 
-							auto PerforceSettings
-								= bPerforceRoot
-								? NPerforce::CPerforceIgnore::fs_GetSettings(PerforceRoot, _pBuildSystem->f_GetPerforceEnvironment(), _pBuildSystem->f_GetPerforceRegistry())
-								: NPerforce::CPerforceIgnore::CSettings()
-							;
+							NPerforce::CPerforceIgnore::CSettings PerforceSettings;
+							if (bPerforceRoot)
+								PerforceSettings = co_await NMib::NTool::fg_GetPerforceRootSettings(*_pBuildSystem, PerforceRoot);
+
 							TCSet<CStr> OtherRepositories;
 							for (auto &Other : AllLocations)
 							{
@@ -1197,7 +1206,8 @@ void CTool_Malterlib::f_Register_RepositoryManagement(CDistributedAppCommandLine
 							}
 
 							RunOptions.m_PerforceEnvironment = _pBuildSystem->f_GetGenerationEnvironment();
-							RunOptions.m_PerforceRegistry = _pBuildSystem->f_GetPerforceRegistry();
+							if (RunOptions.m_PerforceRoot)
+								RunOptions.m_PerforceRootSettings = co_await NMib::NTool::fg_GetPerforceRootSettings(*_pBuildSystem, RunOptions.m_PerforceRoot);
 
 							for (auto iFiles = TidyFiles.f_GetIterator(); iFiles; ++iFiles)
 							{

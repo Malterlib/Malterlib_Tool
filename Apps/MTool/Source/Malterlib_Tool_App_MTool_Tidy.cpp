@@ -1811,11 +1811,10 @@ namespace NMib::NTool::NTidy
 
 			_Options.m_pPerforceRootFiles = co_await
 				(
-					g_Dispatch(fg_BlockingActor())
-					/ [Root = _Options.m_PerforceRoot, OtherRepositories = fg_Move(OtherRepositories), Environment = _Options.m_PerforceEnvironment, Registry = _Options.m_PerforceRegistry]
+					g_Dispatch(fg_BlockingActor()) / [Root = _Options.m_PerforceRoot, OtherRepositories = fg_Move(OtherRepositories), Settings = _Options.m_PerforceRootSettings]
 					() -> TCSharedPointer<NPerforce::CPerforceRootFiles>
 					{
-						return fg_Construct(Root, OtherRepositories, NPerforce::CPerforceIgnore::fs_GetSettings(Root, Environment, Registry));
+						return fg_Construct(Root, OtherRepositories, Settings);
 					}
 				)
 			;
