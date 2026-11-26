@@ -605,3 +605,33 @@ includes. Within a line, code-form mentions are collected before bare mentions.
 Each file is expanded once; duplicates, cycles, and missing includes receive
 HTML comment markers. A missing input file fails without replacing the output.
 Generated files use UTF-8 without a BOM and LF line endings.
+
+## P4V custom tools
+
+`./mib install-p4v-tools` installs the P4V custom tools that run MTool's
+Perforce helpers on the stream, changelist, file or workspace selected in P4V:
+running a script, submitting in another stream, switching and initializing
+stream workspaces, and the Merge, Streams and Changelist folders of stream,
+merge and changelist helpers.
+
+```bash
+./mib install-p4v-tools
+./mib install-p4v-tools --file /path/to/customtools.xml --mtool /path/to/MTool
+```
+
+The tools are merged into P4V's custom tools file, by default
+`~/Library/Preferences/com.perforce.p4v/customtools.xml` on macOS and
+`~/.p4qt/customtools.xml` on Windows and Linux. The directory and file are
+created when missing. A tool belongs to the install when its command is an
+MTool and it has the arguments of one of the tools the command installs: those
+are replaced, and the folders they leave empty removed, while the user's own
+tools, also other MTool tools, stay where they are. The new tools go at the end,
+after a separator, and a Merge, Streams or Changelist folder kept for the user's
+tools in it gets them too. The previous file is kept beside it as
+`customtools.xml.bak`. A file that already has these tools is left as it is.
+
+The tools run the checkout's `Binaries/Malterlib/<Platform>/<Architecture>/MTool`
+that runs the command, also when mib runs its safe copy on Windows, unless
+`--mtool` names another, which has to be called `MTool` or `MTool_<Name>` so
+that a later install recognises its tools. Restart P4V, or reopen Tools > Manage
+Custom Tools, to see the change.

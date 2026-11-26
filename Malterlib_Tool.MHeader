@@ -731,6 +731,8 @@ Property
 	]
 	// The Perforce root tests run a p4d
 	MalterlibTestDependencies_Malterlib_Tool =+ ["Lib_Malterlib_Perforce"]
+	// The P4V tools tests read the custom tools file
+	MalterlibTestDependencies_Malterlib_Tool =+ ["Lib_Malterlib_XML"]
 	MalterlibTestDependencies_Malterlib_Tool =+ [
 		{
 			Name: "Com_TestShellShim"

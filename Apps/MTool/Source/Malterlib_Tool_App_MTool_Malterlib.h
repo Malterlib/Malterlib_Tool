@@ -36,6 +36,7 @@ struct CTool_Malterlib : public CDistributedTool, public CAllowUnsafeThis
 	void f_Register_LfsReleaseStore(CDistributedAppCommandLineSpecification &o_CommandLine);
 	void f_Register_CheckLicense(CDistributedAppCommandLineSpecification::CSection &o_ToolsSection);
 	void f_Register_UpdateAgents(CDistributedAppCommandLineSpecification::CSection &o_UtilitiesSection);
+	void f_Register_InstallP4VTools(CDistributedAppCommandLineSpecification::CSection &o_UtilitiesSection);
 
 	void f_Register
 		(
