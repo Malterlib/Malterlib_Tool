@@ -1262,6 +1262,11 @@ namespace NMib::NTool
 					auto Largest = co_await Tidy.f_Run({"--base", "@9223372036854775807"});
 					DMibExpect(Largest.m_ExitCode, !=, 0u);
 					DMibExpect(Largest.f_GetCombinedOut().f_Find("which '@9223372036854775807' is not"), >=, 0);
+
+					// Digits past what 64 bits hold, which a parse would wrap, name no changelist either.
+					auto Overflowing = co_await Tidy.f_Run({"--base", "@18446744073709551617"});
+					DMibExpect(Overflowing.m_ExitCode, !=, 0u);
+					DMibExpect(Overflowing.f_GetCombinedOut().f_Find("which '@18446744073709551617' is not"), >=, 0);
 				}
 
 				Tidy.f_ConfigurePerforceRoot("{Enabled: true}", "{Enabled: true}");

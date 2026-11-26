@@ -1033,17 +1033,11 @@ namespace NMib::NTool::NTidy
 	{
 		auto CaptureScope = co_await (g_CaptureExceptions % ("Finding the changed files of '{}'"_f << _Root));
 
-		TCVector<CStr> Arguments = {"-Ro"};
-		if (_Base)
-		{
-			// 64-bit on a server that allows it. The largest has no changelist after it.
-			CStr Changelist = _Base.f_StartsWith("@") ? _Base.f_Extract(1) : _Base;
-			int64 Number = Changelist.f_ToInt(int64(-1));
-			if (Changelist.f_IsEmpty() || Number < 0 || Number == TCLimitsInt<int64>::mc_Max || CStr::fs_ToStr(Number) != Changelist)
-				co_return DMibErrorInstance("'{}' is a Perforce root, whose base is a changelist, like @1234, which '{}' is not"_f << _Root << _Base);
-
-			Arguments = {"-c", CStr::fs_ToStr(Number + 1)};
-		}
+		TCVector<CStr> Arguments;
+		int64 BaseChangelist = 0;
+		CStr Error;
+		if (!NFormat::fg_GetPerforceChangesArguments(_Root, _Base, Arguments, BaseChangelist, Error))
+			co_return DMibErrorInstance(Error);
 
 		co_return co_await
 			(

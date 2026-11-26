@@ -82,7 +82,7 @@ namespace NMib::NTool::NFormat
 		bool m_bValidateLineLength = false;                                                // Also check max_line_length, on a file the engine does not format too.
 		NGit::EGitTextAttribute m_TextAttribute = NGit::EGitTextAttribute::mc_Unspecified; // Decides text or binary before git's heuristic.
 		bool m_bDecodedIsText = false;                                                     // Without a text attribute, text decoded from UTF-16 or UTF-32 is text.
-		NStr::CStr m_Source;                                                               // Snapshot contents; empty means read m_Path.
+		NStr::CStr m_Source;                                                               // The snapshot's text with m_bHasSource, also an empty one; else m_SourceBytes or m_Path is read.
 		bool m_bHasSource = false;
 		NContainer::CByteVector m_SourceBytes;                                             // Without m_bHasSource, the bytes read as m_Path's would be
 		bool m_bHasSourceBytes = false;
