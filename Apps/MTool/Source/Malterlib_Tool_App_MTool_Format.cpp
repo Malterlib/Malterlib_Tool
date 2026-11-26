@@ -345,13 +345,7 @@ namespace NMib::NTool::NFormat
 	// The bytes as they are, NULs included: appending a pointer and a length takes nothing when the first byte is a NUL.
 	CStr fg_StrFromBytes(void const *_pData, umint _nBytes)
 	{
-		CStr Text;
-		auto pText = Text.f_GetStr(_nBytes + 1);
-		NMemory::fg_MemCopy(pText, _pData, _nBytes);
-		pText[_nBytes] = 0;
-		Text.f_SetStrLen(_nBytes);
-
-		return Text;
+		return CStr(CAllowNUL(), (ch8 const *)_pData, _nBytes);
 	}
 
 	// The changelist a Perforce root's base names, '@1234' or '1234', the digits of a number alone without leading zeros: 64-bit on a
