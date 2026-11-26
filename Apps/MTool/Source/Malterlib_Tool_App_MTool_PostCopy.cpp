@@ -5,7 +5,6 @@
 
 #include <Mib/BuildSystem/BuildSystemPreprocessor>
 #include <Mib/BuildSystem/BuildSystem>
-#include <Mib/Perforce/Wrapper>
 #include <Mib/Cryptography/MD5Cache>
 #include <Mib/Container/Convert>
 #include <Mib/Encoding/JsonShortcuts>
@@ -303,9 +302,6 @@ aint CTool_PostCopy::f_Run(NContainer::CRegistry &_Params)
 					return;
 				}
 
-				EFileAttrib SupportedAttributes = CFile::fs_GetSupportedAttributes();
-				EFileAttrib ValidAttributes = CFile::fs_GetValidAttributes();
-				CStr LastReportedError;
 				if
 				(
 					CFile::fs_DiffCopyFileOrDirectory
@@ -314,50 +310,6 @@ aint CTool_PostCopy::f_Run(NContainer::CRegistry &_Params)
 						, CFile::fs_GetExpandedPath(FullDestination)
 						, [&](CFile::EDiffCopyChange _Change, CStr const &_Source, CStr const &_Destination, CStr const &_Link)
 						{
-							switch (_Change)
-							{
-							case CFile::EDiffCopyChange_FileDeleted:
-								{
-									EFileAttrib Attributes = CFile::fs_GetAttributes(_Destination);
-									if ((Attributes & EFileAttrib_ReadOnly) || (!(Attributes & EFileAttrib_UserWrite) && (SupportedAttributes & EFileAttrib_UserWrite)))
-										CFile::fs_SetAttributes(_Destination, (Attributes & ~EFileAttrib_ReadOnly) | (SupportedAttributes & EFileAttrib_UserWrite) | ValidAttributes);
-								}
-								break;
-							case CFile::EDiffCopyChange_FileChanged:
-								{
-									EFileAttrib Attributes = CFile::fs_GetAttributes(_Destination);
-
-									if ((Attributes & EFileAttrib_ReadOnly) || (!(Attributes & EFileAttrib_UserWrite) && (SupportedAttributes & EFileAttrib_UserWrite)))
-									{
-										bool bSuccess = false;
-
-										try
-										{
-											CPerforceClientThrow Client;
-											if (CPerforceClientThrow::fs_GetFromP4Config(_Destination, Client))
-											{
-												Client.f_OpenForEdit(_Destination);
-												DConOut("Opened file for edit in perforce: {}{\n}", _Destination);
-												bSuccess = true;
-											}
-										}
-										catch (NException::CException const &_Error)
-										{
-											CStr Error = _Error.f_GetErrorStr();
-											if (Error != LastReportedError)
-											{
-												LastReportedError = Error;
-												DConErrOut("Failed to checkout via perforce:{\n}{}{\n}", Error);
-											}
-										}
-
-										if (!bSuccess)
-											CFile::fs_SetAttributes(_Destination, (Attributes & ~EFileAttrib_ReadOnly) | (SupportedAttributes & EFileAttrib_UserWrite) | ValidAttributes);
-									}
-								}
-								break;
-							default: break;
-							}
 							if (bHash)
 							{
 								switch (_Change)

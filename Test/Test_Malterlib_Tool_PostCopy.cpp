@@ -68,6 +68,37 @@ namespace NMib::NTool
 
 			co_return {};
 		};
+
+		// A read-only destination is replaced or removed as a writable one is, also a file that a directory replaces.
+		DMibTestSuite("ReadOnlyDestination") -> TCFuture<void>
+		{
+			CRepositoryFixture Repo;
+			co_await Repo.f_Init();
+
+			CStr Deploy = Repo.m_Root / "deploy";
+			Repo.f_Write("PostCopy.MConfig", "Projects\n{\n\tTests\n\t{\n\t\tDestination \"" + Deploy + "\"\n\t}\n}\n");
+
+			CStr Source = Repo.m_Root / "Source/Tree";
+			CFile::fs_CreateDirectory(Source / "Replaced");
+			CFile::fs_WriteStringToFile(Source / "Changed.txt", "new\n", false);
+			CFile::fs_WriteStringToFile(Source / "Replaced/Inner.txt", "inner\n", false);
+
+			CFile::fs_CreateDirectory(Deploy / "Tree");
+			for (CStr const &Name : TCVector<CStr>{"Changed.txt", "Removed.txt", "Replaced"})
+			{
+				CFile::fs_WriteStringToFile(Deploy / "Tree" / Name, "old\n", false);
+				CFile::fs_MakeFileWritable(Deploy / "Tree" / Name, false);
+			}
+
+			auto Result = co_await Repo.f_Tool({"PostCopy", Source, "Config=" + (Repo.m_Path / "PostCopy.MConfig"), "Project=Tests"});
+
+			DMibExpect(Result.m_ExitCode, ==, 0);
+			DMibExpect(CFile::fs_ReadStringFromFile(Deploy / "Tree/Changed.txt"), ==, "new\n");
+			DMibExpectFalse(CFile::fs_FileExists(Deploy / "Tree/Removed.txt"));
+			DMibExpectTrue(CFile::fs_FileExists(Deploy / "Tree/Replaced/Inner.txt", EFileAttrib_File));
+
+			co_return {};
+		};
 	}
 
 	DMibTestRegister(CPostCopy_Tests, Malterlib::Tool);
