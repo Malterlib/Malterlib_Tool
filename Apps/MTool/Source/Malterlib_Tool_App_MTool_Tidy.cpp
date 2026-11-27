@@ -881,17 +881,18 @@ namespace NMib::NTool::NTidy
 	}
 
 	// The dependencies Ninja keeps of each output it built, from `ninja -t deps`. Ninja reads the dependency
-	// files of the compiles into its log and deletes them.
+	// files of the compiles into its log and deletes them. It writes each dependency after four spaces, and the
+	// path after them as it is spelled, whitespace included.
 	void fg_ParseTidyNinjaDependencies(CStr const &_Output, CStr const &_BuildDirectory, TCMap<CStr, TCVector<CStr>> &o_Dependencies)
 	{
 		TCVector<CStr> *pCurrent = nullptr;
 
 		for (auto &Line : _Output.f_SplitLine<true>())
 		{
-			if (Line.f_StartsWith(" ") || Line.f_StartsWith("\t"))
+			if (Line.f_StartsWith("    "))
 			{
 				if (pCurrent)
-					pCurrent->f_Insert(CFile::fs_CondensePath(CFile::fs_GetFullPath(Line.f_Trim(), _BuildDirectory)));
+					pCurrent->f_Insert(CFile::fs_CondensePath(CFile::fs_GetFullPath(Line.f_RemovePrefix("    "), _BuildDirectory)));
 				continue;
 			}
 
