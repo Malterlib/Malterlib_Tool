@@ -47,6 +47,7 @@ namespace NMib::NTool::NTestHelpers
 		bool f_HasTemporaryAttributes() const;
 		TCFuture<CStr> f_Validate(CStr _Case, uint32 _Expected = 0, bool _bStaged = true, CStr _Base = {});
 		void f_MakePerforceRoot(CStr const &_Config);
+		void f_MakeReadOnly(CStr const &_Name) const;
 		void f_SetPerforceEnvironment();
 #ifdef DPlatformFamily_Windows
 		void f_SetPerforceRegistryValue(CStr const &_Name, CStr const &_Value) const;

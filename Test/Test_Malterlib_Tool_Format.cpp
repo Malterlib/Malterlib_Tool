@@ -7,19 +7,9 @@
 #include <Mib/Core/OnScopeExitCatch>
 #include <Mib/String/Appender>
 
-// The Perforce headers use Malterlib's types without their namespaces.
-namespace NMib::NPerforce
-{
-	using namespace NMib::NStr;
-	using namespace NMib::NContainer;
-	using namespace NMib::NStorage;
-	using namespace NMib::NFunction;
-	using namespace NMib::NConcurrency;
-	using namespace NMib::NEncoding;
-}
+#include "Malterlib_Tool_TestPerforceHelpers.h"
 
 #include <Mib/Perforce/TestServer>
-#include <Mib/Perforce/Wrapper>
 
 #ifndef DPlatformFamily_Windows
 #	include <sys/stat.h>
@@ -1837,45 +1827,14 @@ namespace NMib::NTool
 			// Changed in the workspace without being opened, and read-only as a file the workspace has not opened is.
 			Repo.f_Write("Unopened.cpp", gc_Unformatted);
 			Repo.f_Write("With@At/Special%Name.cpp", gc_Unformatted);
-			auto fMakeReadOnly = [&](CStr const &_Name)
-				{
-					auto Path = Repo.m_Path / _Name;
-#ifdef DPlatformFamily_Windows
-					CFile::fs_SetAttributes(Path, CFile::fs_GetAttributes(Path) | EFileAttrib_ReadOnly);
-#else
-					CFile::fs_SetAttributes(Path, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_GroupRead | EFileAttrib_EveryoneRead);
-#endif
-				}
-			;
 			for (auto pName : {"Changed.cpp", "Unopened.cpp", "With@At/Special%Name.cpp"})
-				fMakeReadOnly(pName);
+				Repo.f_MakeReadOnly(pName);
 
-			// A command trigger refusing the p4 commands whose arguments hold a text, which shows what a run asks the server. The
-			// shell runs the script, which Windows can't launch by itself.
-			auto fRefuse = [&](CStr _Command, CStr _Text) -> TCUnsafeFuture<void>
+			// A command trigger refusing the p4 commands whose arguments hold a text, which shows what a run asks the server. No text
+			// refuses nothing.
+			auto fRefuse = [&](CStr _Command, CStr _Text) -> TCFuture<void>
 				{
-					CStr Script = Repo.m_Root / ("Refuse-{}.sh"_f << _Command);
-					CFile::fs_WriteStringToFile(Script, "#!/bin/sh\ncase \"$*\" in\n*{}*) echo \"Refused {}\"; exit 1;;\nesac\nexit 0\n"_f << _Text << _Command, false);
-					CFile::fs_SetAttributes(Script, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_UserWrite | EFileAttrib_UserExecute);
-
-					CStr Triggers = "Triggers:\n";
-					if (_Text)
-						Triggers += "\tRefuse command pre-user-{} \"%quote%{}%quote% %quote%{}%quote% %args%\"\n"_f << _Command << Repo.m_Shell << Script;
-
-					co_await
-						(
-							g_Dispatch(fg_BlockingActor())
-							/ [Connection, Triggers]()
-							{
-								NPerforce::CPerforceClientThrow Client(Connection);
-								Client.f_Login(CStr());
-								Client.f_SetTriggers(Triggers);
-							}
-							% "Failed to set the triggers"
-						)
-					;
-
-					co_return {};
+					return fg_SetPerforceTriggers(Connection, "Triggers:\n" + (_Text ? fg_RefusingTrigger(Repo, _Command, _Text) : CStr()));
 				}
 			;
 
@@ -2043,8 +2002,8 @@ namespace NMib::NTool
 				;
 				Repo.f_Write("Deleted.cpp", gc_Unformatted);
 				Repo.f_Write("Sample...cpp", gc_Unformatted);
-				fMakeReadOnly("Deleted.cpp");
-				fMakeReadOnly("Sample...cpp");
+				Repo.f_MakeReadOnly("Deleted.cpp");
+				Repo.f_MakeReadOnly("Sample...cpp");
 
 				auto Result = co_await fRun({"format"});
 				DMibExpect(Result.m_ExitCode, !=, 0u);
@@ -2386,27 +2345,6 @@ namespace NMib::NTool
 				}
 			;
 
-			// Sets the server's triggers, whose scripts see what a run asks of the server. The shell runs a script, which Windows can't
-			// launch by itself.
-			auto fSetTriggers = [&](CStr _Triggers) -> TCUnsafeFuture<void>
-				{
-					co_await
-						(
-							g_Dispatch(fg_BlockingActor())
-							/ [Connection, _Triggers]()
-							{
-								NPerforce::CPerforceClientThrow Client(Connection);
-								Client.f_Login(CStr());
-								Client.f_SetTriggers(_Triggers);
-							}
-							% "Failed to set the triggers"
-						)
-					;
-
-					co_return {};
-				}
-			;
-
 			auto fWriteScript = [&](CStr const &_Name, CStr const &_Script)
 				{
 					CStr Path = Repo.m_Root / _Name;
@@ -2414,12 +2352,6 @@ namespace NMib::NTool
 					CFile::fs_SetAttributes(Path, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_UserWrite | EFileAttrib_UserExecute);
 
 					return Path;
-				}
-			;
-
-			auto fTrigger = [&](CStr const &_Name, CStr const &_Command, CStr const &_Script) -> CStr
-				{
-					return "\t{} command pre-user-{} \"%quote%{}%quote% %quote%{}%quote% %args%\"\n"_f << _Name << _Command << Repo.m_Shell << _Script;
 				}
 			;
 
@@ -2488,9 +2420,9 @@ namespace NMib::NTool
 					)
 				;
 				CStr Script = fWriteScript("ChangeAfterDiff.sh", "printf 'int g_B;\\n' >> '{}'\nexit 0\n"_f << (Repo.m_Path / "Unchanged.cpp"));
-				co_await fSetTriggers("Triggers:\n\tChangeAfterDiff command post-user-diff \"%quote%{}%quote% %quote%{}%quote%\"\n"_f << Repo.m_Shell << Script);
+				co_await fg_SetPerforceTriggers(Connection, "Triggers:\n\tChangeAfterDiff command post-user-diff \"%quote%{}%quote% %quote%{}%quote%\"\n"_f << Repo.m_Shell << Script);
 				auto Result = co_await fRun({"validate", "--staged"});
-				co_await fSetTriggers("Triggers:\n");
+				co_await fg_SetPerforceTriggers(Connection, "Triggers:\n");
 				co_await
 					(
 						g_Dispatch(fg_BlockingActor())
@@ -2525,9 +2457,9 @@ namespace NMib::NTool
 					)
 				;
 				CStr Script = fWriteScript("ChangeAddedAfterDiff.sh", "printf 'int  g_B;\\n' >> '{}'\nexit 0\n"_f << Path);
-				co_await fSetTriggers("Triggers:\n\tChangeAddedAfterDiff command post-user-diff \"%quote%{}%quote% %quote%{}%quote%\"\n"_f << Repo.m_Shell << Script);
+				co_await fg_SetPerforceTriggers(Connection, "Triggers:\n\tChangeAddedAfterDiff command post-user-diff \"%quote%{}%quote% %quote%{}%quote%\"\n"_f << Repo.m_Shell << Script);
 				auto Result = co_await fRun({"validate", "--staged"});
-				co_await fSetTriggers("Triggers:\n");
+				co_await fg_SetPerforceTriggers(Connection, "Triggers:\n");
 				co_await
 					(
 						g_Dispatch(fg_BlockingActor())
@@ -2608,10 +2540,9 @@ namespace NMib::NTool
 				// A binary revision at the changelist is neither printed, which a trigger refuses, nor compared with: the text after
 				// it is new.
 				DMibTestPath("BaseBinaryAtBase");
-				CStr Script = fWriteScript("RefusePrint.sh", "case \"$*\" in\n*Became.cpp@*) echo \"Refused\"; exit 1;;\nesac\nexit 0\n");
-				co_await fSetTriggers("Triggers:\n" + fTrigger("RefusePrint", "print", Script));
+				co_await fg_SetPerforceTriggers(Connection, "Triggers:\n" + fg_RefusingTrigger(Repo, "print", "Became.cpp@"));
 				auto Result = co_await fRun({"validate", "--base", CStr("@{}"_f << BinaryChangelist)});
-				co_await fSetTriggers("Triggers:\n");
+				co_await fg_SetPerforceTriggers(Connection, "Triggers:\n");
 				DMibExpect(Result.m_ExitCode, ==, 1u);
 				CStr Output = Result.f_GetCombinedOut();
 				DMibExpect(Output.f_Find("Refused"), <, 0);
@@ -3750,11 +3681,7 @@ namespace NMib::NTool
 			CStr Unopened = Repo.m_Path / "Format.cpp";
 			CFile::fs_MakeFileWritable(Unopened);
 			Repo.f_Write("Format.cpp", gc_Unformatted);
-#ifdef DPlatformFamily_Windows
-			CFile::fs_SetAttributes(Unopened, CFile::fs_GetAttributes(Unopened) | EFileAttrib_ReadOnly);
-#else
-			CFile::fs_SetAttributes(Unopened, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_GroupRead | EFileAttrib_EveryoneRead);
-#endif
+			Repo.f_MakeReadOnly("Format.cpp");
 
 			auto fRun = [&](CStr const &_Command, TCVector<CStr> _Params)
 				{

@@ -510,6 +510,17 @@ namespace NMib::NTool::NTestHelpers
 		f_Write(".p4config", _Config);
 	}
 
+	// Makes the file read-only, as a Perforce workspace leaves a file it has not opened.
+	void CRepositoryFixture::f_MakeReadOnly(CStr const &_Name) const
+	{
+		CStr Path = m_Path / _Name;
+#ifdef DPlatformFamily_Windows
+		CFile::fs_SetAttributes(Path, CFile::fs_GetAttributes(Path) | EFileAttrib_ReadOnly);
+#else
+		CFile::fs_SetAttributes(Path, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_GroupRead | EFileAttrib_EveryoneRead);
+#endif
+	}
+
 	// The tools the fixture runs ignore the user's P4 settings, enviro file and, on Windows, registry, whose keys p4 takes from the
 	// fixture's scratch key, which needn't exist. P4CONFIG is .p4config, the files MTool reads, so a p4 the tests run reads the
 	// same ones.
