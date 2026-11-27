@@ -1292,6 +1292,42 @@ namespace NMib::NTool
 				auto Named = co_await Repo.f_Validate("Named", 1);
 				DMibExpect(Named.f_Find("Source.cpp:1:"), >=, 0);
 
+				// The snapshot's document is read however a path in the root is spelled: through a doubled separator, and outside
+				// Windows climbing above the file system's root, which stays at the root, with a leading // and with a name that
+				// only Windows takes for a drive.
+				struct CSpelling
+				{
+					CStr m_Name;
+					CStr m_File;
+					CStr m_Extends;
+				};
+
+				TCVector<CSpelling> Spellings = {{"DoubledSeparator", "Deep.yaml", "Styles//../Deep.yaml"}};
+#ifndef DPlatformFamily_Windows
+				// The absolute spellings start from the root as Git spells it, which validation takes the snapshot's root from: the
+				// fixture's path can reach it through a symbolic link, as /tmp is to /private/tmp on macOS.
+				CStr GitRoot = (co_await Repo.f_Git({"rev-parse", "--show-toplevel"})).f_RemoveSuffix("\n");
+				CStr Climb;
+				for (umint iComponent = 0; iComponent < GitRoot.f_Split<true>("/").f_GetLen() + 2; ++iComponent)
+					Climb += "../";
+				Spellings.f_Insert({"Climbing", "Deep.yaml", Climb + GitRoot.f_Extract(1) + "/Deep.yaml"});
+				Spellings.f_Insert({"LeadingSlashes", "Deep.yaml", "/" + GitRoot + "/Deep.yaml"});
+				Spellings.f_Insert({"DriveLike", "v:Deep.yaml", "v:Deep.yaml"});
+#endif
+				Repo.f_Write("Styles/Placeholder", "");
+				for (auto const &Spelling : Spellings)
+				{
+					DMibTestPath(Spelling.m_Name);
+					Repo.f_Write(Spelling.m_File, Style);
+					Repo.f_Write(".malterlib-format", "Version: 1\nExtends: {}\n"_f << Spelling.m_Extends);
+					co_await Repo.f_Git({"--git-dir", ".git", "add", "-f", Spelling.m_File, ".malterlib-format"});
+					Repo.f_Write(Spelling.m_File, "Version: 1\nFunctionName: ['f_.*']\n");
+
+					auto Spelled = co_await Repo.f_Validate(Spelling.m_Name, 1);
+					DMibExpect(Spelled.f_Find("Unknown key"), ==, -1);
+					DMibExpect(Spelled.f_Find("Source.cpp:1:"), >=, 0);
+				}
+
 				// A path below a file the root tracks is none of the snapshot, whatever is checked out in the file's place.
 				Repo.f_Write("Owned", "A file\n");
 				Repo.f_Write(".malterlib-format", "Version: 1\nExtends: Owned/Style.yaml\n");
