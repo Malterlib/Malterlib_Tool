@@ -10,6 +10,7 @@
 #include <Mib/Develop/EditorConfig>
 #include <Mib/Function/Function>
 #include <Mib/Git/Ignore>
+#include <Mib/Perforce/FileNames>
 #include <Mib/Perforce/Ignore>
 #include <Mib/Perforce/Wrapper>
 
@@ -32,18 +33,6 @@ namespace NMib::NTool::NFormat
 		, mc_Failed
 	};
 
-	// A project's root as the project spells it and as the root of the Perforce workspace that maps it does.
-	struct CPerforceRootSpelling
-	{
-		static CPerforceRootSpelling fs_Find(NStr::CStr const &_ProjectRoot, NStr::CStr const &_WorkspaceRoot);
-
-		NStr::CStr f_ServerPath(NStr::CStr const &_ProjectPath) const;
-		NStr::CStr f_ProjectPath(NStr::CStr const &_ServerPath) const;
-
-		NStr::CStr m_ProjectRoot;
-		NStr::CStr m_ServerRoot; // m_ProjectRoot as the workspace's root spells it
-	};
-
 	// The environment and registry a project's .p4config is read with, as generation reads them, which a run's jobs share.
 	struct CFormatPerforceEnvironment
 	{
@@ -62,12 +51,12 @@ namespace NMib::NTool::NFormat
 		void f_Close();
 
 	private:
-		NThread::CMutual mp_Lock;          // Guards the client, which one thread uses at a time.
+		NThread::CMutual mp_Lock;                     // Guards the client, which one thread uses at a time.
 		NStr::CStr mp_Root;
 		NPerforce::CPerforceIgnore::CSettings mp_Settings;
 		NContainer::TCMap<NStr::CStr, NStr::CStr> mp_Environment;
 		NStorage::TCUniquePointer<NPerforce::CPerforceClientThrow> mp_pClient;
-		CPerforceRootSpelling mp_Spelling; // Of mp_Root in the client's workspace
+		NPerforce::CPerforceRootSpelling mp_Spelling; // Of mp_Root in the client's workspace
 	};
 
 	struct CFormatJob
@@ -367,7 +356,7 @@ namespace NMib::NTool::NFormat
 		NContainer::TCVector<NStr::CStr> m_Unreadable;                        // Named with a backslash, which the file functions read as a separator.
 	};
 
-	auto fg_ListPerforceFiles(NPerforce::CPerforceClientThrow &_Client, CPerforceRootSpelling const &_Spelling, NContainer::TCVector<NStr::CStr> const &_Arguments, bool _bStats)
+	auto fg_ListPerforceFiles(NPerforce::CPerforceClientThrow &_Client, NPerforce::CPerforceRootSpelling const &_Spelling, NContainer::TCVector<NStr::CStr> const &_Arguments, bool _bStats)
 		-> CPerforceListedFiles
 	;
 

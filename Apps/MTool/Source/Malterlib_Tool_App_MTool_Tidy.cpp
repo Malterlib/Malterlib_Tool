@@ -1050,7 +1050,7 @@ namespace NMib::NTool::NTidy
 
 					// p4 takes the paths as the workspace's root spells them, which a root reached through a symbolic link spells
 					// otherwise, as validate does.
-					auto Spelling = NFormat::CPerforceRootSpelling::fs_Find(_Root, Client.f_GetClientRoot());
+					auto Spelling = NPerforce::CPerforceRootSpelling::fs_Find(_Root, Client.f_GetClientRoot());
 					auto Found = NFormat::fg_ListPerforceFiles(Client, Spelling, Arguments, false);
 					NFormat::CPerforceListedFiles Changed;
 					Changed.m_Unreadable = fg_Move(Found.m_Unreadable);

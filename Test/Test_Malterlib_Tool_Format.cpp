@@ -1795,6 +1795,11 @@ namespace NMib::NTool
 			SecondFiles.f_Insert({"Excluded/Large.dat", "new\n"});
 			OpenedFiles.f_Insert("Excluded/Large.dat");
 
+			// Files that a name holding '...' matches as a wildcard, and one to open for delete.
+			FirstFiles.f_Insert({"Sample-One.cpp", gc_Formatted});
+			FirstFiles.f_Insert({"Sample-Two.cpp", gc_Formatted});
+			FirstFiles.f_Insert({"Deleted.cpp", gc_Formatted});
+
 			// A blank line of context, which the diff's hunk ranges count.
 			FirstFiles.f_Insert({"Blank.cpp", "int g_A;\n\nint g_B;\n"});
 			OpenedFiles.f_Insert("Blank.cpp");
@@ -1832,15 +1837,18 @@ namespace NMib::NTool
 			// Changed in the workspace without being opened, and read-only as a file the workspace has not opened is.
 			Repo.f_Write("Unopened.cpp", gc_Unformatted);
 			Repo.f_Write("With@At/Special%Name.cpp", gc_Unformatted);
-			for (auto pName : {"Changed.cpp", "Unopened.cpp", "With@At/Special%Name.cpp"})
-			{
-				auto Path = Repo.m_Path / pName;
+			auto fMakeReadOnly = [&](CStr const &_Name)
+				{
+					auto Path = Repo.m_Path / _Name;
 #ifdef DPlatformFamily_Windows
-				CFile::fs_SetAttributes(Path, CFile::fs_GetAttributes(Path) | EFileAttrib_ReadOnly);
+					CFile::fs_SetAttributes(Path, CFile::fs_GetAttributes(Path) | EFileAttrib_ReadOnly);
 #else
-				CFile::fs_SetAttributes(Path, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_GroupRead | EFileAttrib_EveryoneRead);
+					CFile::fs_SetAttributes(Path, EFileAttrib_UnixAttributesValid | EFileAttrib_UserRead | EFileAttrib_GroupRead | EFileAttrib_EveryoneRead);
 #endif
-			}
+				}
+			;
+			for (auto pName : {"Changed.cpp", "Unopened.cpp", "With@At/Special%Name.cpp"})
+				fMakeReadOnly(pName);
 
 			// A command trigger refusing the p4 commands whose arguments hold a text, which shows what a run asks the server. The
 			// shell runs the script, which Windows can't launch by itself.
@@ -2015,6 +2023,39 @@ namespace NMib::NTool
 					DMibTestPath(pDepotFile);
 					DMibExpect(Opened.f_Contains(pDepotFile), >=, 0);
 				}
+			}
+
+			{
+				// A read-only file that can't be opened for edit isn't written: a name holding '...', which p4 can't escape and would
+				// read as a wildcard of other files, and a file opened for delete, which p4 edit only tells it leaves as it is.
+				DMibTestPath("FormatNotOpenable");
+				co_await
+					(
+						g_Dispatch(fg_BlockingActor())
+						/ [Connection, Workspace = Repo.m_Path]()
+						{
+							NPerforce::CPerforceClientThrow Client(Connection);
+							Client.f_Login(CStr());
+							Client.f_Delete(Workspace / "Deleted.cpp");
+						}
+						% "Failed to open the file for delete"
+					)
+				;
+				Repo.f_Write("Deleted.cpp", gc_Unformatted);
+				Repo.f_Write("Sample...cpp", gc_Unformatted);
+				fMakeReadOnly("Deleted.cpp");
+				fMakeReadOnly("Sample...cpp");
+
+				auto Result = co_await fRun({"format"});
+				DMibExpect(Result.m_ExitCode, !=, 0u);
+				CStr Output = Result.f_GetCombinedOut();
+				DMibExpect(Output.f_Find("Sample...cpp: is read-only and could not be opened for edit in Perforce"), >=, 0);
+				DMibExpect(Output.f_Find("Deleted.cpp: is read-only and could not be opened for edit in Perforce"), >=, 0);
+				DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Sample...cpp", true), ==, gc_Unformatted);
+				DMibExpect(CFile::fs_ReadStringFromFile(Repo.m_Path / "Deleted.cpp", true), ==, gc_Unformatted);
+				auto Opened = co_await fOpened();
+				DMibExpect(Opened.f_Contains("//Streams/Main/Sample-One.cpp"), <, 0);
+				DMibExpect(Opened.f_Contains("//Streams/Main/Sample-Two.cpp"), <, 0);
 			}
 
 			co_return {};

@@ -903,10 +903,10 @@ namespace NMib::NTool::NFormat
 								// port can name a command, read with the environment and registry generation reads them with. Without
 								// one, as MTool Format run alone has none, the file is replaced as one outside Perforce is.
 								auto const &Settings = *pPerforceEnvironment;
-								if (auto pClient = NPerforce::CPerforceClientThrow::fs_GetFromP4Config(Path, Settings.m_Environment, Settings.m_Registry, ProjectRoot))
+								CStr FileName;
+								if (auto pClient = NPerforce::CPerforceClientThrow::fs_GetFromP4ConfigForFile(Path, Settings.m_Environment, Settings.m_Registry, ProjectRoot, FileName))
 								{
-									auto Spelling = CPerforceRootSpelling::fs_Find(CFile::fs_GetPath(Path), pClient->f_GetClientRoot());
-									pClient->f_OpenForEdit(NPerforce::CPerforceClient::fs_EscapeFileName(Spelling.f_ServerPath(Path)));
+									pClient->f_OpenForWrite(FileName);
 									bOpenedForEdit = true;
 								}
 							}
@@ -1021,12 +1021,13 @@ namespace NMib::NTool::NFormat
 		{
 			TCUniquePointer<NPerforce::CPerforceClientThrow> pClient = fg_Construct(NPerforce::CPerforceClient::fs_GetConnectionInfo(mp_Root, mp_Settings, mp_Environment));
 			pClient->f_Login(CStr(), mp_Root);
-			mp_Spelling = CPerforceRootSpelling::fs_Find(mp_Root, pClient->f_GetClientRoot());
+			mp_Spelling = NPerforce::CPerforceRootSpelling::fs_Find(mp_Root, pClient->f_GetClientRoot());
 			mp_pClient = fg_Move(pClient);
 		}
 
-		// A path is a file specification to p4, where '@', '#', '%' and '*' have meanings of their own.
-		mp_pClient->f_OpenForEdit(NPerforce::CPerforceClient::fs_EscapeFileName(mp_Spelling.f_ServerPath(_Path)));
+		// A path is a file specification to p4, where '@', '#', '%' and '*' have meanings of their own, and a path holding '...' names
+		// no single file.
+		mp_pClient->f_OpenForWrite(mp_Spelling.f_ServerFileName(_Path));
 	}
 
 	// Blocks on the server: run on a blocking actor once nothing opens files for edit any more.
@@ -1036,35 +1037,11 @@ namespace NMib::NTool::NFormat
 		mp_pClient.f_Clear();
 	}
 
-	// p4 tells the paths in a workspace by their names, so it takes them only as the client spec spells the root, while a project can
-	// reach that root through a symbolic link. A project spelled below the root is taken as it is spelled, as p4 run in it takes it.
-	// Otherwise the root is told by its directory's identity, among those that hold the project's root as the kernel resolves it
-	// outside Windows, where links are resolved (fs_ResolveDirectory). A project outside the workspace keeps its own spelling, which
-	// p4 then refuses.
-	CPerforceRootSpelling CPerforceRootSpelling::fs_Find(CStr const &_ProjectRoot, CStr const &_WorkspaceRoot)
-	{
-		CPerforceRootSpelling Spelling{.m_ProjectRoot = _ProjectRoot, .m_ServerRoot = _ProjectRoot};
-
-		// p4 gives its paths with Malterlib's separators, as the paths below the root are compared with.
-		CStr WorkspaceRoot = NPerforce::fg_MalterlibPath(_WorkspaceRoot);
-		if (WorkspaceRoot.f_IsEmpty() || NPerforce::fg_IsLexicallyIn(_ProjectRoot, WorkspaceRoot))
-			return Spelling;
-
-		CStr Relative;
-		CStr ResolvedRoot = NPerforce::CPerforceIgnore::fs_ResolveDirectory(_WorkspaceRoot);
-		if (!CFile::fs_FindAncestorByIdentity(NPerforce::CPerforceIgnore::fs_ResolveDirectory(_ProjectRoot), ResolvedRoot, Relative))
-			return Spelling;
-
-		Spelling.m_ServerRoot = CFile::fs_AppendPath(WorkspaceRoot, Relative);
-
-		return Spelling;
-	}
-
 	// The files p4 fstat lists for _Arguments under the root, as the workspace spells it: once for each revision in a range, and
 	// once each here, by their paths in the project. A name holding a backslash, which Malterlib's file functions take for a
 	// separator, so they would read another file than this, is listed apart outside Windows. With _bStats each path has the fields of
 	// its record too.
-	CPerforceListedFiles fg_ListPerforceFiles(NPerforce::CPerforceClientThrow &_Client, CPerforceRootSpelling const &_Spelling, TCVector<CStr> const &_Arguments, bool _bStats)
+	CPerforceListedFiles fg_ListPerforceFiles(NPerforce::CPerforceClientThrow &_Client, NPerforce::CPerforceRootSpelling const &_Spelling, TCVector<CStr> const &_Arguments, bool _bStats)
 	{
 		auto Arguments = _Arguments;
 		Arguments.f_Insert(NPerforce::CPerforceClient::fs_EscapeFileName(_Spelling.m_ServerRoot) / "...");
@@ -1092,26 +1069,6 @@ namespace NMib::NTool::NFormat
 		}
 
 		return Listed;
-	}
-
-	// A path below the project's root, spelled as the project spells it, as the workspace's root spells it.
-	CStr CPerforceRootSpelling::f_ServerPath(CStr const &_ProjectPath) const
-	{
-		CStr Relative;
-		if (m_ServerRoot == m_ProjectRoot || !NPerforce::fg_IsLexicallyIn(_ProjectPath, m_ProjectRoot, Relative))
-			return _ProjectPath;
-
-		return CFile::fs_AppendPath(m_ServerRoot, Relative);
-	}
-
-	// A path below the project's root, spelled as the workspace's root spells it, as the project spells it.
-	CStr CPerforceRootSpelling::f_ProjectPath(CStr const &_ServerPath) const
-	{
-		CStr Relative;
-		if (m_ServerRoot == m_ProjectRoot || !NPerforce::fg_IsLexicallyIn(_ServerPath, m_ServerRoot, Relative))
-			return _ServerPath;
-
-		return CFile::fs_AppendPath(m_ProjectRoot, Relative);
 	}
 
 	umint fg_GetDefaultFormatJobs()

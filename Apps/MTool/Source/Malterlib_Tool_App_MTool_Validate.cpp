@@ -913,7 +913,7 @@ namespace NMib::NTool::NValidate
 		struct CConnection
 		{
 			TCUniquePointer<NPerforce::CPerforceClientThrow> m_pClient;
-			CPerforceRootSpelling m_Spelling;
+			NPerforce::CPerforceRootSpelling m_Spelling;
 		};
 
 		TCSharedPointer<CConnection> pConnection = fg_Construct();
@@ -944,7 +944,7 @@ namespace NMib::NTool::NValidate
 				{
 					pConnection->m_pClient = fg_Construct(NPerforce::CPerforceClient::fs_GetConnectionInfo(_Root, _pRootFiles->f_GetSettings(), _Environment));
 					pConnection->m_pClient->f_Login(CStr(), _Root);
-					pConnection->m_Spelling = CPerforceRootSpelling::fs_Find(_Root, pConnection->m_pClient->f_GetClientRoot());
+					pConnection->m_Spelling = NPerforce::CPerforceRootSpelling::fs_Find(_Root, pConnection->m_pClient->f_GetClientRoot());
 					auto const &Spelling = pConnection->m_Spelling;
 
 					auto Found = fg_ListPerforceFiles(*pConnection->m_pClient, Spelling, Arguments, !bBase);
@@ -1101,7 +1101,7 @@ namespace NMib::NTool::NValidate
 							auto &Change = Changes[iFile];
 							// The depot file the workspace has synced, where an overlay mapping, '+//Depot/...', maps several to the path,
 							// and the revision it has, named by its number, so a sync meanwhile can't mix revisions.
-							CStr Escaped = NPerforce::CPerforceClient::fs_EscapeFileName(pConnection->m_Spelling.f_ServerPath(FilePaths[iFile]));
+							CStr Escaped = pConnection->m_Spelling.f_ServerFileName(FilePaths[iFile]);
 							auto Stats = Client.f_HaveFileStats(Escaped);
 							if (!Stats.m_HaveRev)
 								continue;
@@ -1198,7 +1198,7 @@ namespace NMib::NTool::NValidate
 					{
 						auto &Change = Changes[iFile];
 						auto const &Path = FilePaths[iFile];
-						CStr Escaped = NPerforce::CPerforceClient::fs_EscapeFileName(pConnection->m_Spelling.f_ServerPath(Path));
+						CStr Escaped = pConnection->m_Spelling.f_ServerFileName(Path);
 						auto const &Stats = FileStats[iFile];
 
 						// A file opened for delete has no lines, whatever is left of it in the workspace: 'p4 delete -k'. A binary file is
