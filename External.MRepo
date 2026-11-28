@@ -1,20 +1,20 @@
 {
 	"../../External/CMake": {
-		"Hash": "59b0ccfd461dcb97fa0f3256dfae49fae4781682"
+		"Hash": "8fdcaea54e44af47de327582d7fb623b232665fe"
 	},
 	"../../External/PDCursesMod": {
-		"Hash": "4c8676bf89fe983ea9051017e780893cba3a5279"
+		"Hash": "edd3eae4611ca925f1a38ce3fd82b818992c6335"
 	},
 	"../../External/libedit": {
 		"Hash": "156e25a4379192551f57ee99a3cc5dbf62cc29d9"
 	},
 	"../../External/libxml2": {
-		"Hash": "13a3df99ffe2521a903f270abb33aa7092b34147"
+		"Hash": "21c8223ac091b81d5914c52eb20b1b063e29cb92"
 	},
 	"../../External/lua": {
-		"Hash": "a5522f06d2679b8f18534fd6a9968f7eb539dc31"
+		"Hash": "7579fc9d7ed90240487251dfb69168f8e64e9294"
 	},
 	"../../External/ninja": {
-		"Hash": "0316242ab6a813fd5cf82ea8666237f11b3f2d72"
+		"Hash": "cf5e6b67a7562d9d46917fe5bfad96ec0554fa15"
 	}
 }
